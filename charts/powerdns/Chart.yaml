@@ -1,14 +1,19 @@
 apiVersion: v2
 name: powerdns
-description: PowerDNS all in one (powerdns + powerdns-admin + mariadb + phpmyadmin) helm chart. 
+description: PowerDNS all in one (powerdns + powerdns-admin + mariadb + phpmyadmin) helm chart. Base on docker image pschiffe/pdns-mysql
 keywords:
   - powerdns
+  - powerdns-mysql
   - pdns
   - dns
 maintainers:
   - name: Windom WU
-home: https://github.com/fsdrw08/sololab
+home: https://github.com/fsdrw08/helm-charts
 
+sources:
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/powerdns
+  - https://hub.docker.com/r/pschiffe/pdns-mysql
+  - https://github.com/pschiffe/docker-pdns
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives

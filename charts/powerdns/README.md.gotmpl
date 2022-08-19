@@ -1,0 +1,107 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+## Pre-request:
+Before deploy this helm chart, please ensure below component is ready on your k8s cluster
+- LoadBalancer  
+  To expose TCP/UDP port 53 (for DNS), HTTP/S port (for web api, 80/443 -> 8081)  
+  e.g. 
+  - LoadBalancer from cloud provider
+  - [k3s klipper](https://github.com/k3s-io/klipper-lb) (k3s come with)
+  - [kube-vip-cloud-provider](https://github.com/kube-vip/kube-vip-cloud-provider)
+  - [PureLB](https://gitlab.com/purelb)
+  - [openelb](https://github.com/openelb/openelb)
+  - [metalLB](https://github.com/metallb/metallb)
+- Ingress  
+  It's required for powerdns api server, powerdns-admin and phpmyadmin  
+  e.g.
+  - [Traefik](https://doc.traefik.io/traefik/providers/kubernetes-ingress/) (k3s come with)
+  - [Nginx](https://kubernetes.github.io/ingress-nginx/)
+  - [and more](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)
+- CSI driver (Storage Class)  
+  For powerdns's backend database persistent  
+  e.g.
+  - [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) (k3s come with)
+  - [LongHorn](https://github.com/longhorn/longhorn)
+  - [OpenEBS](https://github.com/openebs/openebs)
+  - [and more](https://kubernetes-csi.github.io/docs/drivers.html)
+
+## Installing the Chart
+Before install, please read through the values config
+```
+helm repo add fsdrw08 https://fsdrw08.github.io/helm-charts/
+helm install fsdrw08/powerdns
+```
+
+{{ define "chart.valueDefaultColumnRender" }}
+{{- $defaultValue := (default .Default .AutoDefault)  -}}
+{{- $notationType := .NotationType }}
+{{- if (and (hasPrefix "`" $defaultValue) (hasSuffix "`" $defaultValue) ) -}}
+{{- $defaultValue = (toPrettyJson (fromJson (trimAll "`" (default .Default .AutoDefault) ) ) ) -}}
+{{- $notationType = "json" }}
+{{- end -}}
+{{- if (eq $notationType "tpl" ) }}
+<pre lang="{{ $notationType }}">
+{{ .Key }}: |
+{{- $defaultValue | nindent 2 }}
+</pre>
+{{- else if (eq $notationType "email") }}
+<a href="mailto:{{ $defaultValue }}" style="color: green;">"{{ $defaultValue }}"</a>
+{{- else }}
+<pre lang="{{ $notationType }}">
+{{ $defaultValue }}
+</pre>
+{{- end }}
+{{ end }}
+
+{{ define "chart.typeColumnRender" }}
+{{- if (eq .Type "string/email") }}
+<a href="#stringemail" title="{{- template "chart.valuetypes.email" -}}">{{.Type}}</a>
+{{- else if (eq .Type "k8s/storage/persistent-volume/access-modes" )}}
+<a target="_blank" 
+   href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes"
+   >{{- .Type }}</a>
+{{- else }}
+{{ .Type }}
+{{- end }}
+{{ end }}
+
+{{ define "chart.valuesTableHtml" }}
+<table height="400px" >
+	<thead>
+		<th>Key</th>
+		<th>Type</th>
+		<th>Default</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+	{{- range .Values }}
+		<tr>
+			<td id="{{ .Key | replace "." "--" }}"><a href="./values.yaml#L{{ .LineNumber }}">{{ .Key }}</a></td>
+			<td>{{- template "chart.typeColumnRender" . -}}</td>
+			<td>
+				<div style="max-width: 300px;">{{ template "chart.valueDefaultColumnRender" . }}</div>
+			</td>
+			<td>{{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }}</td>
+		</tr>
+	{{- end }}
+	</tbody>
+</table>
+{{ end }}
+
+{{ template "chart.valuesSectionHtml" . }}
+
+{{ template "helm-docs.versionFooter" . }}

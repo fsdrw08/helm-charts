@@ -1,0 +1,836 @@
+# powerdns
+
+
+
+
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 4.5.3](https://img.shields.io/badge/AppVersion-4.5.3-informational?style=flat-square) 
+
+PowerDNS all in one (powerdns + powerdns-admin + mariadb + phpmyadmin) helm chart. Base on docker image pschiffe/pdns-mysql
+
+**Homepage:** <https://github.com/fsdrw08/helm-charts>
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Windom WU |  |  |
+
+## Source Code
+
+* <https://github.com/fsdrw08/helm-charts/tree/main/charts/powerdns>
+* <https://hub.docker.com/r/pschiffe/pdns-mysql>
+* <https://github.com/pschiffe/docker-pdns>
+
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://charts.bitnami.com/bitnami | mariadb | 11 |
+| https://charts.bitnami.com/bitnami | phpmyadmin | 10 |
+| https://k8s-at-home.com/charts/ | powerdns-admin | 1 |
+
+## Pre-request:
+Before deploy this helm chart, please ensure below component is ready on your k8s cluster
+- LoadBalancer  
+  To expose TCP/UDP port 53 (for DNS), HTTP/S port (for web api, 80/443 -> 8081)  
+  e.g. 
+  - LoadBalancer from cloud provider
+  - [k3s klipper](https://github.com/k3s-io/klipper-lb) (k3s come with)
+  - [kube-vip-cloud-provider](https://github.com/kube-vip/kube-vip-cloud-provider)
+  - [PureLB](https://gitlab.com/purelb)
+  - [openelb](https://github.com/openelb/openelb)
+  - [metalLB](https://github.com/metallb/metallb)
+- Ingress  
+  It's required for powerdns api server, powerdns-admin and phpmyadmin  
+  e.g.
+  - [Traefik](https://doc.traefik.io/traefik/providers/kubernetes-ingress/) (k3s come with)
+  - [Nginx](https://kubernetes.github.io/ingress-nginx/)
+  - [and more](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/)
+- CSI driver (Storage Class)  
+  For powerdns's backend database persistent  
+  e.g.
+  - [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) (k3s come with)
+  - [LongHorn](https://github.com/longhorn/longhorn)
+  - [OpenEBS](https://github.com/openebs/openebs)
+  - [and more](https://kubernetes-csi.github.io/docs/drivers.html)
+
+## Installing the Chart
+Before install, please read through the values config
+```
+helm repo add fsdrw08 https://fsdrw08.github.io/helm-charts/
+helm install fsdrw08/powerdns
+```
+
+
+
+
+
+
+
+
+## Values
+
+<table height="400px" >
+	<thead>
+		<th>Key</th>
+		<th>Type</th>
+		<th>Default</th>
+		<th>Description</th>
+	</thead>
+	<tbody>
+		<tr>
+			<td id="env"><a href="./values.yaml#L27">env</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{
+  "PDNS_dnsupdate": "yes"
+}
+</pre>
+</div>
+			</td>
+			<td>Additional environment variables passed directly to containers. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details.</td>
+		</tr>
+		<tr>
+			<td id="env--PDNS_dnsupdate"><a href="./values.yaml#L31">env.PDNS_dnsupdate</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"yes"
+</pre>
+</div>
+			</td>
+			<td>PowerDNS server is configurable via env vars. Every variable starting with PDNS_ will be inserted into /etc/pdns/pdns.conf conf file in the following way: prefix PDNS_ will be stripped and every _ will be replaced with -.  ref: https://github.com/pschiffe/docker-pdns#pdns-mysql https://doc.powerdns.com/authoritative/dnsupdate.html#dnsupdate</td>
+		</tr>
+		<tr>
+			<td id="envFrom"><a href="./values.yaml#L23">envFrom</a></td>
+			<td>
+list
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+[]
+</pre>
+</div>
+			</td>
+			<td>Additional environment variables mounted from [secrets](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables) or [config maps](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables). See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details.</td>
+		</tr>
+		<tr>
+			<td id="envVars"><a href="./values.yaml#L35">envVars</a></td>
+			<td>
+list
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+[]
+</pre>
+</div>
+			</td>
+			<td>Similar to env but with support for all possible configurations. See the [API reference](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#environment-variables) for details.</td>
+		</tr>
+		<tr>
+			<td id="ingress"><a href="./values.yaml#L80">ingress</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{
+  "annotations": {},
+  "className": "",
+  "enabled": false,
+  "hosts": [
+    {
+      "host": "chart-example.local",
+      "paths": [
+        {
+          "path": "/sub-powerdns/",
+          "pathType": "ImplementationSpecific"
+        }
+      ]
+    }
+  ],
+  "tls": []
+}
+</pre>
+</div>
+			</td>
+			<td>ingress for powerdns web api</td>
+		</tr>
+		<tr>
+			<td id="mariadb--auth--database"><a href="./values.yaml#L160">mariadb.auth.database</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"powerdns"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="mariadb--auth--password"><a href="./values.yaml#L162">mariadb.auth.password</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"powerdns"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="mariadb--auth--rootPassword"><a href="./values.yaml#L159">mariadb.auth.rootPassword</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"root"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="mariadb--auth--username"><a href="./values.yaml#L161">mariadb.auth.username</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"powerdns"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="mariadb--enabled"><a href="./values.yaml#L156">mariadb.enabled</a></td>
+			<td>
+bool
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+true
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="mariadb--initdbScripts--"initPDA--sql""><a href="./values.yaml#L166">mariadb.initdbScripts."initPDA.sql"</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"CREATE DATABASE pda;\nCREATE USER 'pda' IDENTIFIED BY 'pda';\nGRANT ALL PRIVILEGES ON pda.* TO 'pda';\nFLUSH PRIVILEGES;\n"
+</pre>
+</div>
+			</td>
+			<td>sql script to create DB for powerdns-admin</td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--db--chartName"><a href="./values.yaml#L201">phpmyadmin.db.chartName</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"mariadb"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--enabled"><a href="./values.yaml#L175">phpmyadmin.enabled</a></td>
+			<td>
+bool
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+true
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--extraEnvVars"><a href="./values.yaml#L184">phpmyadmin.extraEnvVars</a></td>
+			<td>
+list
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+[]
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--ingress--annotations"><a href="./values.yaml#L191">phpmyadmin.ingress.annotations</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{}
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--ingress--enabled"><a href="./values.yaml#L189">phpmyadmin.ingress.enabled</a></td>
+			<td>
+bool
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+false
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--ingress--hostname"><a href="./values.yaml#L195">phpmyadmin.ingress.hostname</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"chart-example.local"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--ingress--ingressClassName"><a href="./values.yaml#L190">phpmyadmin.ingress.ingressClassName</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+""
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--ingress--path"><a href="./values.yaml#L196">phpmyadmin.ingress.path</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"/sub-phpmyadmin/"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--ingress--pathType"><a href="./values.yaml#L197">phpmyadmin.ingress.pathType</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"ImplementationSpecific"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="phpmyadmin--ingress--tls"><a href="./values.yaml#L198">phpmyadmin.ingress.tls</a></td>
+			<td>
+bool
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+true
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="podAnnotations"><a href="./values.yaml#L59">podAnnotations</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{}
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="podSecurityContext"><a href="./values.yaml#L61">podSecurityContext</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{}
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--enabled"><a href="./values.yaml#L207">powerdns-admin.enabled</a></td>
+			<td>
+bool
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+true
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--env"><a href="./values.yaml#L215">powerdns-admin.env</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="">
+See below (only deviations from the default settings are specified)
+</pre>
+</div>
+			</td>
+			<td>environment variables. See [undocumented configs](https://github.com/PowerDNS-Admin/PowerDNS-Admin/blob/master/configs/docker_config.py) and [application docs](# https://github.com/PowerDNS-Admin/PowerDNS-Admin/blob/master/configs/development.py) for more details.</td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--env--SECRET_KEY"><a href="./values.yaml#L219">powerdns-admin.env.SECRET_KEY</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"PowerDNSAPI"
+</pre>
+</div>
+			</td>
+			<td>Unique app Key</td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--env--SQLALCHEMY_DATABASE_URI"><a href="./values.yaml#L221">powerdns-admin.env.SQLALCHEMY_DATABASE_URI</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"mysql://pda:pda@{{ .Release.Name }}-mariadb/pda"
+</pre>
+</div>
+			</td>
+			<td>Database connection string - if not set uses internal sqlite db</td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--env--TZ"><a href="./values.yaml#L217">powerdns-admin.env.TZ</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"Asia/Shanghai"
+</pre>
+</div>
+			</td>
+			<td>Application Timezone</td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--image--tag"><a href="./values.yaml#L210">powerdns-admin.image.tag</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"latest"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--ingress--main--annotations"><a href="./values.yaml#L226">powerdns-admin.ingress.main.annotations</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{}
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--ingress--main--enabled"><a href="./values.yaml#L225">powerdns-admin.ingress.main.enabled</a></td>
+			<td>
+bool
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+false
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--ingress--main--hosts[0]--host"><a href="./values.yaml#L232">powerdns-admin.ingress.main.hosts[0].host</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"pdns-admin.chart-example.local"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--ingress--main--hosts[0]--paths[0]"><a href="./values.yaml#L236">powerdns-admin.ingress.main.hosts[0].paths[0]</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{
+  "path": "/"
+}
+</pre>
+</div>
+			</td>
+			<td>Path.  Helm template can be passed.</td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--ingress--main--ingressClassName"><a href="./values.yaml#L230">powerdns-admin.ingress.main.ingressClassName</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+null
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--ingress--main--tls[0]--hosts[0]"><a href="./values.yaml#L242">powerdns-admin.ingress.main.tls[0].hosts[0]</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"pdns-admin.chart-example.local"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns-admin--ingress--main--tls[0]--secretName"><a href="./values.yaml#L240">powerdns-admin.ingress.main.tls[0].secretName</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"pdns-admin"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="powerdns--api"><a href="./values.yaml#L137">powerdns.api</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"yes"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/settings.html#api</td>
+		</tr>
+		<tr>
+			<td id="powerdns--api-key"><a href="./values.yaml#L139">powerdns.api-key</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"PowerDNSAPI"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/settings.html#api-key</td>
+		</tr>
+		<tr>
+			<td id="powerdns--gmysql-dbname"><a href="./values.yaml#L144">powerdns.gmysql-dbname</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"powerdns"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/backends/generic-mysql.html#gmysql-dbname</td>
+		</tr>
+		<tr>
+			<td id="powerdns--gmysql-host"><a href="./values.yaml#L142">powerdns.gmysql-host</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"{{ .Release.Name }}-mariadb"
+</pre>
+</div>
+			</td>
+			<td>no need to change this var if mariabld.enabled set to true</td>
+		</tr>
+		<tr>
+			<td id="powerdns--gmysql-password"><a href="./values.yaml#L148">powerdns.gmysql-password</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"powerdns"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/backends/generic-mysql.html#gmysql-password</td>
+		</tr>
+		<tr>
+			<td id="powerdns--gmysql-user"><a href="./values.yaml#L146">powerdns.gmysql-user</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"powerdns"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/backends/generic-mysql.html#gmysql-user</td>
+		</tr>
+		<tr>
+			<td id="powerdns--primary"><a href="./values.yaml#L129">powerdns.primary</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"yes"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/settings.html#primary</td>
+		</tr>
+		<tr>
+			<td id="powerdns--rootPassword"><a href="./values.yaml#L151">powerdns.rootPassword</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"root"
+</pre>
+</div>
+			</td>
+			<td>ref: https://github.com/pschiffe/docker-pdns/blob/master/pdns/docker-entrypoint.sh#L10</td>
+		</tr>
+		<tr>
+			<td id="powerdns--webserver"><a href="./values.yaml#L131">powerdns.webserver</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"yes"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/settings.html#webserver</td>
+		</tr>
+		<tr>
+			<td id="powerdns--webserver-address"><a href="./values.yaml#L133">powerdns.webserver-address</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"0.0.0.0"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/settings.html#webserver-address</td>
+		</tr>
+		<tr>
+			<td id="powerdns--webserver-allow-from"><a href="./values.yaml#L135">powerdns.webserver-allow-from</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"0.0.0.0/0"
+</pre>
+</div>
+			</td>
+			<td>ref: https://doc.powerdns.com/authoritative/settings.html#webserver-allow-from</td>
+		</tr>
+		<tr>
+			<td id="replicaCount"><a href="./values.yaml#L5">replicaCount</a></td>
+			<td>
+int
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+1
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="securityContext"><a href="./values.yaml#L64">securityContext</a></td>
+			<td>
+object
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+{}
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="service--api--port"><a href="./values.yaml#L77">service.api.port</a></td>
+			<td>
+int
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+8081
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="service--api--type"><a href="./values.yaml#L76">service.api.type</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"ClusterIP"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td id="service--dns--type"><a href="./values.yaml#L74">service.dns.type</a></td>
+			<td>
+string
+</td>
+			<td>
+				<div style="max-width: 300px;">
+<pre lang="json">
+"LoadBalancer"
+</pre>
+</div>
+			</td>
+			<td></td>
+		</tr>
+	</tbody>
+</table>
+
+
+
+
+----------------------------------------------
+Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)
