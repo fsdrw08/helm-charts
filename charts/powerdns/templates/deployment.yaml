@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "powerdns.fullname" . }}
+  labels:
+    {{- include "powerdns.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "powerdns.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "powerdns.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "powerdns.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PDNS_primary
+              value: {{ .Values.powerdns.primary | quote }}
+            - name: PDNS_webserver
+              value: {{ .Values.powerdns.webserver | quote }}
+            - name: PDNS_webserver_address
+              # https://stackoverflow.com/questions/63853679/helm-templating-doesnt-let-me-use-dash-in-names
+              value: {{ index .Values.powerdns "webserver-address" | quote }}
+            - name: PDNS_webserver_allow_from
+              value: {{ index .Values.powerdns "webserver-allow-from" | quote }}
+            - name: PDNS_api
+              value: {{ .Values.powerdns.api | quote }}
+            - name: PDNS_api_key
+              valueFrom: 
+                secretKeyRef:
+                  name: {{ template "powerdns.fullname" . }}
+                  key: PDNS_api_key
+            - name: MYSQL_ENV_MYSQL_HOST
+              # https://github.com/helm/helm/issues/3558
+              value: {{ tpl ( index .Values.powerdns "gmysql-host" ) . }}
+            - name: MYSQL_ENV_MYSQL_DATABASE
+              value: {{ index .Values.powerdns "gmysql-dbname" | quote }}
+            - name: MYSQL_ENV_MYSQL_USER
+              value: {{ index .Values.powerdns "gmysql-user" | quote }}
+            - name: MYSQL_ENV_MYSQL_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: {{ template "powerdns.fullname" . }}
+                  key: MYSQL_ENV_MYSQL_PASSWORD
+            - name: MYSQL_ENV_MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "powerdns.fullname" . }}
+                  key: MYSQL_ENV_MYSQL_ROOT_PASSWORD
+            {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- with .Values.envVars }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: api
+              containerPort: 8081
+              protocol: TCP
+            - name: dns-tcp
+              containerPort: 53
+              protocol: TCP
+            - name: dns-udp
+              containerPort: 53
+              protocol: UDP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: api
+          readinessProbe:
+            httpGet:
+              path: /
+              port: api
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

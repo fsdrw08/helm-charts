@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "powerdns.fullname" . }}-dns-udp
+  labels:
+    {{- include "powerdns.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.dns.type }}
+  ports:
+    - port: 53
+      targetPort: dns-udp
+      protocol: UDP
+      name: dns-tcp
+  selector:
+    {{- include "powerdns.selectorLabels" . | nindent 4 }}

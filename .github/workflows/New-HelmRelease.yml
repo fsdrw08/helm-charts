@@ -1,0 +1,44 @@
+name: Release Charts
+
+on:
+  push:
+    # https://github.com/askcloudarchitech/go-rest-api-kubernetes-example/blob/main/.github/workflows/release.yml
+    # https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases
+    tags:
+      - "*"
+
+jobs:
+  # https://github.com/helm/chart-releaser-action
+  # https://www.youtube.com/watch?v=fX2TWxl64yQ
+  helmRelease:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.8.1
+
+      # https://hoetker.engineer/post/helm-github-workflow-dependency/
+      - name: Add Helm dependency repos
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add bitnami https://k8s-at-home.com/charts/
+          helm repo update
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.4.0
+        with:
+          charts_dir: kubernetes/helm
+
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
