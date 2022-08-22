@@ -37,7 +37,7 @@ jobs:
       - name: Add Helm dependency repos
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add bitnami https://k8s-at-home.com/charts/
+          helm repo add k8s-at-home https://k8s-at-home.com/charts/
           helm repo update
 
       - name: Run chart-releaser
