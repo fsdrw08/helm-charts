@@ -4,8 +4,13 @@ on:
   push:
     # https://github.com/askcloudarchitech/go-rest-api-kubernetes-example/blob/main/.github/workflows/release.yml
     # https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases
-    tags:
-      - "*"
+    branches:
+      - "main"
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-including-and-excluding-paths
+    paths:
+      - 'charts/**'
+      - '!charts/**/README.md'
+
 
 jobs:
   # https://github.com/helm/chart-releaser-action

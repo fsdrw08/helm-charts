@@ -6,10 +6,9 @@ replicaCount: 1
 
 # @ignored
 image:
-  # https://github.com/pschiffe/docker-pdns
   repository: pschiffe/pdns-mysql
   pullPolicy: IfNotPresent
-  # -- Overrides the image tag whose default is the chart appVersion.
+  # Overrides the image tag whose default is the chart appVersion.
   tag: "alpine"
 
 # @ignored
@@ -73,28 +72,26 @@ securityContext: {}
 service:
   dns:
     type: LoadBalancer
-    annotations: {}
   api:
     type: ClusterIP
     port: 8081
 
 # -- ingress for powerdns web api
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: traefik
-    # traefik.ingress.kubernetes.io/router.middlewares: traefik-subpath-stripprefixregex@kubernetescrd
-    # cert-manager.io/cluster-issuer: ca-issuer
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: ca-issuer
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-subpath-stripprefixregex@kubernetescrd
   hosts:
-    - host: chart-example.local
+    - host: infra.sololab
       paths:
         - path: /sub-powerdns/
           pathType: ImplementationSpecific
-  tls: []
-    # - secretName: sololab
-    #   hosts:
-    #    - chart-example.local
+  tls:
+    - secretName: sololab
+      hosts:
+       - infra.sololab
 
 # @ignored
 resources: {}
@@ -186,21 +183,19 @@ phpmyadmin:
   extraEnvVars: []
   #  - name: TZ
   #    value: Asia/Shanghai
-
   ingress: 
-    enabled: false
-    ingressClassName: ""
-    annotations: {}
-      # kubernetes.io/ingress.class: traefik
-      # traefik.ingress.kubernetes.io/router.middlewares: traefik-subpath-stripprefixregex@kubernetescrd
-      # cert-manager.io/cluster-issuer: ca-issuer
-    hostname: chart-example.local
+    enabled: true
+    ingressClassName: "traefik"
+    annotations:
+      cert-manager.io/cluster-issuer: ca-issuer
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-subpath-stripprefixregex@kubernetescrd
+    hostname: infra.sololab
     path: /sub-phpmyadmin/
     pathType: ImplementationSpecific
     tls: true
 
-  db:
-    chartName: mariadb
+    db:
+      chartName: mariadb
 
 
 # https://github.com/k8s-at-home/charts/blob/master/charts/stable/powerdns-admin/values.yaml
@@ -224,14 +219,13 @@ powerdns-admin:
 
   ingress: 
     main:
-      enabled: false
-      annotations: {}
-        # kubernetes.io/ingress.class: traefik
-        # traefik.ingress.kubernetes.io/router.middlewares: traefik-subpath-stripprefixregex@kubernetescrd
-        # cert-manager.io/cluster-issuer: ca-issuer
-      ingressClassName: # "traefik"
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: ca-issuer
+        traefik.ingress.kubernetes.io/router.middlewares: traefik-subpath-stripprefixregex@kubernetescrd
+      ingressClassName: "traefik"
       hosts:
-        - host: pdns-admin.chart-example.local
+        - host: pdns-admin.infra.sololab
           ## Configure the paths for the host
           paths:
             # -- Path.  Helm template can be passed.
@@ -241,5 +235,4 @@ powerdns-admin:
       tls:
         - secretName: pdns-admin
           hosts:
-          - pdns-admin.chart-example.local
-  
+          - pdns-admin.infra.sololab
