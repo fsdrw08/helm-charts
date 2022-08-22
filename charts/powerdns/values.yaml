@@ -6,6 +6,7 @@ replicaCount: 1
 
 # @ignored
 image:
+  # https://github.com/pschiffe/docker-pdns
   repository: pschiffe/pdns-mysql
   pullPolicy: IfNotPresent
   # -- Overrides the image tag whose default is the chart appVersion.
@@ -72,6 +73,7 @@ securityContext: {}
 service:
   dns:
     type: LoadBalancer
+    annotations: {}
   api:
     type: ClusterIP
     port: 8081
