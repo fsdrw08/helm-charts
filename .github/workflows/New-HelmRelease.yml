@@ -8,6 +8,7 @@ on:
       - "main"
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-including-and-excluding-paths
     paths:
+      - '.github/workflows/**'
       - 'charts/**'
       - '!charts/**/README.md'
 
