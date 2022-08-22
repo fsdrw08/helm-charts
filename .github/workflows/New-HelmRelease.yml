@@ -41,10 +41,8 @@ jobs:
           helm repo add k8s-at-home https://k8s-at-home.com/charts/
           helm repo update
 
+      # https://github.com/helm/chart-releaser-action
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.0
-        with:
-          charts_dir: kubernetes/helm
-
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
