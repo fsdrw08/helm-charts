@@ -26,16 +26,19 @@ Windom's helm charts
 There are 4 most popular powerdns (auth) docker image, 
 - psitrax/powerdns  
   - related dockerfile: https://github.com/psi-4ward/docker-powerdns/blob/master/Dockerfile
+  - image entrypoint: https://github.com/psi-4ward/docker-powerdns/blob/master/entrypoint.sh
   - docker hub: https://hub.docker.com/r/psitrax/powerdns  
   - related helm chart: https://github.com/puckpuck/helm-charts/tree/main/charts/powerdns
 
 - interlegis/powerdns
   - related dockerfile: https://github.com/interlegis/docker-powerdns/blob/master/pdns/Dockerfile
+  - image entrypoint: https://github.com/interlegis/docker-powerdns/blob/master/pdns/start.sh
   - docker hub: https://hub.docker.com/r/interlegis/powerdns
   - related helm chart: null
 
 - pschiffe/pdns-mysql
   - related dockerfile: https://github.com/pschiffe/docker-pdns/blob/master/pdns/Dockerfile
+  - image entrypoint: https://github.com/pschiffe/docker-pdns/blob/master/pdns/docker-entrypoint.sh
   - docker hub: https://hub.docker.com/r/pschiffe/pdns-mysql
   - related helm chart: 
     - https://github.com/elauriault/helm-charts/tree/main/charts/powerdns
@@ -45,6 +48,7 @@ There are 4 most popular powerdns (auth) docker image,
 
 - powerdns/pdns-auth-`<version>`
   - related dockerfile: https://github.com/PowerDNS/pdns/blob/master/Dockerfile-auth
+  - image entrypoint: https://github.com/PowerDNS/pdns/blob/master/dockerdata/startup.py
   - docker hub: https://hub.docker.com/r/powerdns/pdns-auth-46
   - related helm chart: null
 

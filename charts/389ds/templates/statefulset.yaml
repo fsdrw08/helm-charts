@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "389ds.fullname" . }}
+  labels:
+    {{- include "389ds.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "389ds.fullname" . }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "389ds.selectorLabels" . | nindent 6 }}
+  template: 
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "389ds.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "389ds.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        # Init container is required to change the permissions after a persistent volume is mounted.
+        # Otherwise dscontainer will be denied to create subdirectories and will fail to start.
+        - name: {{ .Chart.Name }}-init-container
+          image: busybox
+          command: ["sh", "-c", "chown -R 389:389 /data"]
+          volumeMounts:
+          - name: {{ .Release.Name }}-data
+            mountPath: /data
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          env:
+          ## Set `cn=Directory Manager`'s password
+          {{- if .Values.389ds.DS_DM_PASSWORD }}
+          - name: DS_DM_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "389ds.fullname" . }}
+                key: DS_DM_PASSWORD
+          {{- end }}
+          ## DS_ERRORLOG_LEVEL - set the log level for `ns-slapd`, default is 266354688
+          {{- if .Values.389ds.DS_ERRORLOG_LEVEL }}
+          - name: DS_ERRORLOG_LEVEL
+            value: "{{ .Values.389ds.DS_ERRORLOG_LEVEL }}"
+          {{- end }}
+          ## DS_MEMORY_PERCENTAGE - set LDBM autotune percentage (`nsslapd-cache-autosize`), default is 25
+          {{- if .Values.389ds.DS_MEMORY_PERCENTAGE }}
+          - name: DS_MEMORY_PERCENTAGE
+           value: "{{ .Values.389ds.DS_MEMORY_PERCENTAGE }}"
+          {{- end }}
+          ## DS_REINDEX` - run database reindex task (`db2index`)
+          {{- if .Values.389ds.DS_REINDEX }}
+          - name: DS_REINDEX
+            value: "True"
+          {{- end }}
+          ## DS_STARTUP_TIMEOUT - set container startup timeout in seconds, default is 60 seconds.
+          {{- if .Values.389ds.DS_STARTUP_TIMEOUT }}
+          - name: DS_STARTUP_TIMEOUT
+            value: "120"
+          {{- end }}
+          ## DS_SUFFIX_NAME - Use suffix as a basedn in `dsrc` file
+          {{- if .Values.389ds.DS_SUFFIX_NAME }}
+          - name: DS_SUFFIX_NAME
+            value: "{{ .Values.389ds.DS_SUFFIX_NAME }}"
+          {{- end }}
+          ports:
+            - containerPort: 3389
+              protocol: TCP
+              port: 389
+            - containerPort: 3636
+              protocol: TCP
+              port: 636
+          securityContext:
+            runAsUser: 389
+            fsGroup: 389
+          volumeMounts:
+          - name: dirsrv-data
+            mountPath: "/data"
+          - name: dirsrv-tls
+            mountPath: '/data/tls/'
+            readOnly: true
+          - name: dirsrv-tls-ca
+            mountPath: '/data/tls/ca'
+            readOnly: true
+      volumes:
+        - name: dirsrv-tls
+          secret:
+            secretName: dirsrv-tls-secret
+            items:
+            - key: tls.key
+              path: server.key
+            - key: tls.crt
+              path: server.crt
+        - name: dirsrv-tls-ca
+          secret:
+            secretName: dirsrv-tls-ca
+            items:
+            - key: ca1.crt
+              path: ca1.crt
+            - key: ca2.crt
+              path: ca2.crt
+  volumeClaimTemplates:
+  - metadata:
+      name: dirsrv-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
