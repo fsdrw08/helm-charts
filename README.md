@@ -60,6 +60,7 @@ In order to use powerdns offical docker image, we need to set up initContainer t
 There are 3 offical docker image for 389ds
 - 389ds/dirsrv - based on opensuse
   - related dockerfile: https://build.opensuse.org/package/view_file/home:firstyear/389-ds-container/Dockerfile?expand=1
+  - image entrypoint: https://github.com/389ds/389-ds-base/blob/main/src/lib389/cli/dscontainer
   - docker hub: https://hub.docker.com/r/389ds/dirsrv#!
   - related helm chart: https://github.com/johanneskastl/389server-helm-chart/tree/main/charts/389server
 

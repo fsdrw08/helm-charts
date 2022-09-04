@@ -14,47 +14,41 @@ spec:
       {{- include "389ds.selectorLabels" . | nindent 6 }}
   template: 
     metadata:
-      {{- with .Values.podAnnotations }}
+      {{- with .Values.389ds.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "389ds.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- with .Values.389ds.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "389ds.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- toYaml .Values.389ds.podSecurityContext | nindent 8 }}
+      {{- if .Values.389ds.initContainerImage.enabled }}
       initContainers:
         # Init container is required to change the permissions after a persistent volume is mounted.
         # Otherwise dscontainer will be denied to create subdirectories and will fail to start.
+        # really?
         - name: {{ .Chart.Name }}-init-container
-          image: busybox
-          command: ["sh", "-c", "chown -R 389:389 /data"]
+          image: "{{ .Values.389ds.initContainerImage.repository }}:{{ .Values.389ds.initContainerImage.tag | default stable }}"
+          command: {{ .Values.389ds.initContainerImage.command }}
           volumeMounts:
           - name: {{ .Release.Name }}-data
             mountPath: /data
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          securityContext:
+            {{- toYaml .Values.389ds.securityContext | nindent 12 }}
+          image: "{{ .Values.389ds.image.repository }}:{{ .Values.389ds.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.389ds.image.pullPolicy }}
           env:
           ## Set `cn=Directory Manager`'s password
-          {{- if .Values.389ds.DS_DM_PASSWORD }}
+          {{- if .Values.389ds.env.DS_DM_PASSWORD }}
           - name: DS_DM_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -62,66 +56,121 @@ spec:
                 key: DS_DM_PASSWORD
           {{- end }}
           ## DS_ERRORLOG_LEVEL - set the log level for `ns-slapd`, default is 266354688
-          {{- if .Values.389ds.DS_ERRORLOG_LEVEL }}
+          {{- if .Values.389ds.env.DS_ERRORLOG_LEVEL }}
           - name: DS_ERRORLOG_LEVEL
-            value: "{{ .Values.389ds.DS_ERRORLOG_LEVEL }}"
+            value: "{{ .Values.389ds.env.DS_ERRORLOG_LEVEL }}"
           {{- end }}
           ## DS_MEMORY_PERCENTAGE - set LDBM autotune percentage (`nsslapd-cache-autosize`), default is 25
-          {{- if .Values.389ds.DS_MEMORY_PERCENTAGE }}
+          {{- if .Values.389ds.env.DS_MEMORY_PERCENTAGE }}
           - name: DS_MEMORY_PERCENTAGE
-           value: "{{ .Values.389ds.DS_MEMORY_PERCENTAGE }}"
+           value: "{{ .Values.389ds.env.DS_MEMORY_PERCENTAGE }}"
           {{- end }}
           ## DS_REINDEX` - run database reindex task (`db2index`)
-          {{- if .Values.389ds.DS_REINDEX }}
+          {{- if .Values.389ds.env.DS_REINDEX }}
           - name: DS_REINDEX
-            value: "True"
+            value: "{{ .Values.389ds.env.DS_REINDEX }}"
           {{- end }}
           ## DS_STARTUP_TIMEOUT - set container startup timeout in seconds, default is 60 seconds.
-          {{- if .Values.389ds.DS_STARTUP_TIMEOUT }}
+          {{- if .Values.389ds.env.DS_STARTUP_TIMEOUT }}
           - name: DS_STARTUP_TIMEOUT
             value: "120"
           {{- end }}
           ## DS_SUFFIX_NAME - Use suffix as a basedn in `dsrc` file
-          {{- if .Values.389ds.DS_SUFFIX_NAME }}
+          {{- if .Values.389ds.env.DS_SUFFIX_NAME }}
           - name: DS_SUFFIX_NAME
-            value: "{{ .Values.389ds.DS_SUFFIX_NAME }}"
+            value: "{{ .Values.389ds.env.DS_SUFFIX_NAME }}"
           {{- end }}
           ports:
-            - containerPort: 3389
+            - name: ldap-tcp
+              containerPort: 3389
               protocol: TCP
-              port: 389
-            - containerPort: 3636
+              # port: 389
+            - name: ldaps-tcp
+              containerPort: 3636
               protocol: TCP
-              port: 636
-          securityContext:
-            runAsUser: 389
-            fsGroup: 389
+              # port: 636
           volumeMounts:
-          - name: dirsrv-data
-            mountPath: "/data"
-          - name: dirsrv-tls
-            mountPath: '/data/tls/'
-            readOnly: true
-          - name: dirsrv-tls-ca
-            mountPath: '/data/tls/ca'
-            readOnly: true
+            - name: {{ .Release.Name }}-data
+              mountPath: "/data"
+            - name: {{ .Release.Name }}-tls
+              mountPath: '/data/tls/'
+              readOnly: true
+            - name: {{ .Release.Name }}-tls-ca
+              mountPath: '/data/tls/ca'
+              readOnly: true
+          livenessProbe:
+            exec:
+              command:
+                - "/usr/lib/dirsrv/dscontainer"
+                - "-H"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            exec:
+              command:
+                - "/usr/lib/dirsrv/dscontainer"
+                - "-H"
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          startupProbe:
+            exec:
+              command:
+                - "/usr/lib/dirsrv/dscontainer"
+                - "-H"
+            failureThreshold: 30
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.389ds.resources | nindent 12 }}
       volumes:
-        - name: dirsrv-tls
+        - name: {{ .Release.Name }}-data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-data
+        {{- if .Values.BYOC.enabled }}
+        {{- if and ( .Values.BYOC.fromCertMan.enabled) (not .Values.BYOC.fromExistSecret) }}
+        - name: {{ .Release.Name }}-tls
           secret:
-            secretName: dirsrv-tls-secret
+            secretName: {{ .Values.BYOC.fromCertMan.certificate.secretName }}
             items:
             - key: tls.key
               path: server.key
             - key: tls.crt
               path: server.crt
-        - name: dirsrv-tls-ca
+        - name: {{ .Release.Name }}-tls-ca
           secret:
-            secretName: dirsrv-tls-ca
+            secretName: {{ .Values.BYOC.fromCertMan.certificate.secretName }}
             items:
-            - key: ca1.crt
-              path: ca1.crt
-            - key: ca2.crt
-              path: ca2.crt
+            - key: ca.crt
+              path: ca.crt
+        {{- end }}
+        {{- if and (not .Values.BYOC.fromCertMan.enabled) ( .Values.BYOC.fromExistSecret) }}
+        - name: {{ .Release.Name }}-tls
+          secret:
+            secretName: {{ .Values.BYOC.fromExistSecret.existSecret }}
+            items:
+            - key: tls.key
+              path: server.key
+            - key: tls.crt
+              path: server.crt
+        - name: {{ .Release.Name }}-tls-ca
+          secret:
+            secretName: {{ .Values.BYOC.fromExistSecret.existSecret }}
+            items:
+            - key: ca.crt
+              path: ca.crt
+        {{- end }}
+        {{- end }}
+      {{- with .Values.389ds.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.389ds.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.389ds.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: dirsrv-data
