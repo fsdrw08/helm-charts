@@ -7,7 +7,13 @@ Windom's helm charts
   cd "$(git rev-parse --show-toplevel)/charts/"
   helm create $chartName
   ```
-
+- To debug (locally render) template
+  ```powershell
+  $releaseName="xxx"
+  $chartDir="/path/to/helm/chart/dir"
+  $customValue="/path/to/customValue/values.yaml"
+  helm template $releaseName $chartDir -f $customValue
+  ```
 - to install local helm chart
   ```powershell
   $chartName="xxx"
