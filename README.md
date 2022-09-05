@@ -16,16 +16,16 @@ Windom's helm charts
   ```
 - to install local helm chart
   ```powershell
-  $chartName="xxx"
-  $chartDir="/path/to/helm/chart/dir"
-  $nameSpace="xxx"
-  $customValue="/path/to/customValue/values.yaml"
+  $releaseName="389ds"
+  $chartDir="C:\Users\drw_0\source\repos\SoloLab\HelmWorkShop\helm-charts\charts\389ds"
+  $nameSpace="389ds"
+  $customValue="C:\Users\drw_0\source\repos\SoloLab\HelmWorkShop\helm-charts\charts\389ds\values-sololab.yaml"
   # if there are some dependencies in the chart, build those dependencies first
   helm dependency build
   # then install the local helm chart
-  helm install $chartName $chartDir --namespace $nameSpace --create-namespace -f $customValue
+  helm install $releaseName $chartDir --namespace $nameSpace --create-namespace -f $customValue
   # to upgrade local helm chart
-  helm upgrade $chartName $chartDir --namespace $nameSpace -f $customValue
+  helm upgrade $releaseName $chartDir --namespace $nameSpace -f $customValue
   ```
 ---
 # PowerDNS

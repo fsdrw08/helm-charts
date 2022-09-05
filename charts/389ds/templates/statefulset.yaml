@@ -6,7 +6,7 @@ metadata:
     {{- include "389ds.labels" . | nindent 4 }}
 spec:
   serviceName: {{ include "389ds.fullname" . }}
-  {{- if not .Values.autoscaling.enabled }}
+  {{- if not .Values.directoryServer.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
@@ -14,28 +14,28 @@ spec:
       {{- include "389ds.selectorLabels" . | nindent 6 }}
   template: 
     metadata:
-      {{- with .Values.389ds.podAnnotations }}
+      {{- with .Values.directoryServer.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "389ds.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.389ds.imagePullSecrets }}
+      {{- with .Values.directoryServer.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "389ds.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.389ds.podSecurityContext | nindent 8 }}
-      {{- if .Values.389ds.initContainerImage.enabled }}
+        {{- toYaml .Values.directoryServer.podSecurityContext | nindent 8 }}
+      {{- if .Values.directoryServer.initContainerImage.enabled }}
       initContainers:
         # Init container is required to change the permissions after a persistent volume is mounted.
         # Otherwise dscontainer will be denied to create subdirectories and will fail to start.
         # really?
         - name: {{ .Chart.Name }}-init-container
-          image: "{{ .Values.389ds.initContainerImage.repository }}:{{ .Values.389ds.initContainerImage.tag | default stable }}"
-          command: {{ .Values.389ds.initContainerImage.command }}
+          image: "{{ .Values.directoryServer.initContainerImage.repository }}:{{ .Values.directoryServer.initContainerImage.tag | default `stable` }}"
+          command: {{ .Values.directoryServer.initContainerImage.command }}
           volumeMounts:
           - name: {{ .Release.Name }}-data
             mountPath: /data
@@ -43,12 +43,12 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.389ds.securityContext | nindent 12 }}
-          image: "{{ .Values.389ds.image.repository }}:{{ .Values.389ds.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.389ds.image.pullPolicy }}
+            {{- toYaml .Values.directoryServer.securityContext | nindent 12 }}
+          image: "{{ .Values.directoryServer.image.repository }}:{{ .Values.directoryServer.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.directoryServer.image.pullPolicy }}
           env:
           ## Set `cn=Directory Manager`'s password
-          {{- if .Values.389ds.env.DS_DM_PASSWORD }}
+          {{- if .Values.directoryServer.env.DS_DM_PASSWORD }}
           - name: DS_DM_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -56,29 +56,29 @@ spec:
                 key: DS_DM_PASSWORD
           {{- end }}
           ## DS_ERRORLOG_LEVEL - set the log level for `ns-slapd`, default is 266354688
-          {{- if .Values.389ds.env.DS_ERRORLOG_LEVEL }}
+          {{- if .Values.directoryServer.env.DS_ERRORLOG_LEVEL }}
           - name: DS_ERRORLOG_LEVEL
-            value: "{{ .Values.389ds.env.DS_ERRORLOG_LEVEL }}"
+            value: "{{ .Values.directoryServer.env.DS_ERRORLOG_LEVEL }}"
           {{- end }}
           ## DS_MEMORY_PERCENTAGE - set LDBM autotune percentage (`nsslapd-cache-autosize`), default is 25
-          {{- if .Values.389ds.env.DS_MEMORY_PERCENTAGE }}
+          {{- if .Values.directoryServer.env.DS_MEMORY_PERCENTAGE }}
           - name: DS_MEMORY_PERCENTAGE
-           value: "{{ .Values.389ds.env.DS_MEMORY_PERCENTAGE }}"
+           value: "{{ .Values.directoryServer.env.DS_MEMORY_PERCENTAGE }}"
           {{- end }}
           ## DS_REINDEX` - run database reindex task (`db2index`)
-          {{- if .Values.389ds.env.DS_REINDEX }}
+          {{- if .Values.directoryServer.env.DS_REINDEX }}
           - name: DS_REINDEX
-            value: "{{ .Values.389ds.env.DS_REINDEX }}"
+            value: "{{ .Values.directoryServer.env.DS_REINDEX }}"
           {{- end }}
           ## DS_STARTUP_TIMEOUT - set container startup timeout in seconds, default is 60 seconds.
-          {{- if .Values.389ds.env.DS_STARTUP_TIMEOUT }}
+          {{- if .Values.directoryServer.env.DS_STARTUP_TIMEOUT }}
           - name: DS_STARTUP_TIMEOUT
             value: "120"
           {{- end }}
           ## DS_SUFFIX_NAME - Use suffix as a basedn in `dsrc` file
-          {{- if .Values.389ds.env.DS_SUFFIX_NAME }}
+          {{- if .Values.directoryServer.env.DS_SUFFIX_NAME }}
           - name: DS_SUFFIX_NAME
-            value: "{{ .Values.389ds.env.DS_SUFFIX_NAME }}"
+            value: "{{ .Values.directoryServer.env.DS_SUFFIX_NAME }}"
           {{- end }}
           ports:
             - name: ldap-tcp
@@ -120,16 +120,21 @@ spec:
             failureThreshold: 30
             periodSeconds: 15
           resources:
-            {{- toYaml .Values.389ds.resources | nindent 12 }}
+            {{- toYaml .Values.directoryServer.resources | nindent 12 }}
       volumes:
+        {{- if and .Values.directoryServer.persistence.enabled .Values.directoryServer.persistence.existingClaim }}
         - name: {{ .Release.Name }}-data
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-data
-        {{- if .Values.BYOC.enabled }}
-        {{- if and ( .Values.BYOC.fromCertMan.enabled) (not .Values.BYOC.fromExistSecret) }}
+            claimName: {{ tpl .Values.directoryServer.persistence.existingClaim . }}
+        {{- else if not .Values.directoryServer.persistence.enabled }}
+        - name: {{ .Release.Name }}-data
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.bringYourOwnCert.enabled }}
+        {{- if and ( .Values.bringYourOwnCert.fromCertMan.enabled) (not .Values.bringYourOwnCert.fromExistSecret.enabled) }}
         - name: {{ .Release.Name }}-tls
           secret:
-            secretName: {{ .Values.BYOC.fromCertMan.certificate.secretName }}
+            secretName: {{ .Values.bringYourOwnCert.fromCertMan.certificate.secretName }}
             items:
             - key: tls.key
               path: server.key
@@ -137,15 +142,15 @@ spec:
               path: server.crt
         - name: {{ .Release.Name }}-tls-ca
           secret:
-            secretName: {{ .Values.BYOC.fromCertMan.certificate.secretName }}
+            secretName: {{ .Values.bringYourOwnCert.fromCertMan.certificate.secretName }}
             items:
             - key: ca.crt
               path: ca.crt
         {{- end }}
-        {{- if and (not .Values.BYOC.fromCertMan.enabled) ( .Values.BYOC.fromExistSecret) }}
+        {{- if and (not .Values.bringYourOwnCert.fromCertMan.enabled) ( .Values.bringYourOwnCert.fromExistSecret.enabled) }}
         - name: {{ .Release.Name }}-tls
           secret:
-            secretName: {{ .Values.BYOC.fromExistSecret.existSecret }}
+            secretName: {{ .Values.bringYourOwnCert.fromExistSecret.existSecret }}
             items:
             - key: tls.key
               path: server.key
@@ -153,29 +158,40 @@ spec:
               path: server.crt
         - name: {{ .Release.Name }}-tls-ca
           secret:
-            secretName: {{ .Values.BYOC.fromExistSecret.existSecret }}
+            secretName: {{ .Values.bringYourOwnCert.fromExistSecret.existSecret }}
             items:
             - key: ca.crt
               path: ca.crt
         {{- end }}
         {{- end }}
-      {{- with .Values.389ds.nodeSelector }}
+      {{- with .Values.directoryServer.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.389ds.affinity }}
+      {{- with .Values.directoryServer.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.389ds.tolerations }}
+      {{- with .Values.directoryServer.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
+  {{- if and .Values.directoryServer.persistence.enabled (not .Values.directoryServer.persistence.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
-      name: dirsrv-data
+      name: {{ .Release.Name }}-data
+      labels:
+        {{- include "389ds.labels" . | nindent 8 }}
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes:
+        {{- range .Values.directoryServer.persistence.accessModes }}
+        - {{ . | quote }}
+        {{- end }}
       resources:
         requests:
-          storage: 10Gi
+          storage: {{ .Values.directoryServer.persistence.size | quote }}
+      {{- if .Values.directoryServer.persistence.storageClass }}
+      storageClassName:  {{ .Values.directoryServer.persistence.storageClass }}
+      {{- end }}
+  {{- end }}
