@@ -48,7 +48,7 @@ spec:
           imagePullPolicy: {{ .Values.directoryServer.image.pullPolicy }}
           env:
           ## Set `cn=Directory Manager`'s password
-          {{- if .Values.directoryServer.env.DS_DM_PASSWORD }}
+          {{- if .Values.directoryServer.appConfEnvVars.DS_DM_PASSWORD }}
           - name: DS_DM_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -56,29 +56,32 @@ spec:
                 key: DS_DM_PASSWORD
           {{- end }}
           ## DS_ERRORLOG_LEVEL - set the log level for `ns-slapd`, default is 266354688
-          {{- if .Values.directoryServer.env.DS_ERRORLOG_LEVEL }}
+          {{- if .Values.directoryServer.appConfEnvVars.DS_ERRORLOG_LEVEL }}
           - name: DS_ERRORLOG_LEVEL
-            value: "{{ .Values.directoryServer.env.DS_ERRORLOG_LEVEL }}"
+            value: "{{ .Values.directoryServer.appConfEnvVars.DS_ERRORLOG_LEVEL }}"
           {{- end }}
           ## DS_MEMORY_PERCENTAGE - set LDBM autotune percentage (`nsslapd-cache-autosize`), default is 25
-          {{- if .Values.directoryServer.env.DS_MEMORY_PERCENTAGE }}
+          {{- if .Values.directoryServer.appConfEnvVars.DS_MEMORY_PERCENTAGE }}
           - name: DS_MEMORY_PERCENTAGE
-           value: "{{ .Values.directoryServer.env.DS_MEMORY_PERCENTAGE }}"
+           value: "{{ .Values.directoryServer.appConfEnvVars.DS_MEMORY_PERCENTAGE }}"
           {{- end }}
           ## DS_REINDEX` - run database reindex task (`db2index`)
-          {{- if .Values.directoryServer.env.DS_REINDEX }}
+          {{- if .Values.directoryServer.appConfEnvVars.DS_REINDEX }}
           - name: DS_REINDEX
-            value: "{{ .Values.directoryServer.env.DS_REINDEX }}"
+            value: "{{ .Values.directoryServer.appConfEnvVars.DS_REINDEX }}"
           {{- end }}
           ## DS_STARTUP_TIMEOUT - set container startup timeout in seconds, default is 60 seconds.
-          {{- if .Values.directoryServer.env.DS_STARTUP_TIMEOUT }}
+          {{- if .Values.directoryServer.appConfEnvVars.DS_STARTUP_TIMEOUT }}
           - name: DS_STARTUP_TIMEOUT
             value: "120"
           {{- end }}
           ## DS_SUFFIX_NAME - Use suffix as a basedn in `dsrc` file
-          {{- if .Values.directoryServer.env.DS_SUFFIX_NAME }}
+          {{- if .Values.directoryServer.appConfEnvVars.DS_SUFFIX_NAME }}
           - name: DS_SUFFIX_NAME
-            value: "{{ .Values.directoryServer.env.DS_SUFFIX_NAME }}"
+            value: "{{ .Values.directoryServer.appConfEnvVars.DS_SUFFIX_NAME }}"
+          {{- end }}
+          {{- with .Values.directoryServer.extraEnvVars }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
           ports:
             - name: ldap-tcp

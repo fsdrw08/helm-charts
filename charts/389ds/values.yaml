@@ -69,8 +69,8 @@ directoryServer:
   # @ignored
   affinity: {}
 
-  # -- 389ds's application config
-  env:
+  # -- environment variable for 389ds's application config
+  appConfEnvVars:
     # -- set cn=Directory Manager’s password
     DS_DM_PASSWORD: ""
     # -- set the log level for ns-slapd, default is 266354688.
@@ -84,25 +84,32 @@ directoryServer:
     # -- use suffix as a basedn in dsrc file, default one is derived from the hostname.
     DS_SUFFIX_NAME: ""
 
-  ## -- Enable persistence using Persistent Volume Claims
-  ## -- ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+  # -- Extra environment variables to be set on 389ds containers
+  # -- E.g.
+  # -- extraEnvVars:
+  # -- name: TZ
+  # -- value: "Europe/Paris"
+  extraEnvVars: []
+
+  # -- Enable persistence using Persistent Volume Claims
+  # -- ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
   persistence: 
-    ## -- Enable persistence on 389ds replicas using a `PersistentVolumeClaim`. If false, use emptyDir
-    enabled: true
-    ## -- Name of an existing `PersistentVolumeClaim` for 389ds replicas
-    ## -- NOTE: When it's set, the rest of persistence parameters are ignored
+    # -- Enable persistence on 389ds replicas using a `PersistentVolumeClaim`. If false, use emptyDir
+    enabled: false
+    # -- Name of an existing `PersistentVolumeClaim` for 389ds replicas
+    # -- NOTE: When it's set, the rest of persistence parameters are ignored
     existingClaim: ""
-    ## -- 389ds persistent volume access Modes
+    # -- 389ds persistent volume access Modes
     accessModes:
       - ReadWriteOnce
-    ## -- 389ds persistent volume size
+    # -- 389ds persistent volume size
     size: 8Gi
-    ## -- 389ds persistent volume storage Class
-    ## -- If defined, storageClassName: <storageClass>
-    ## -- If set to "-", storageClassName: "", which disables dynamic provisioning
-    ## -- If undefined (the default) or set to null, no storageClassName spec is
-    ## -- set, choosing the default provisioner.  (gp2 on AWS, standard on
-    ## -- GKE, AWS & OpenStack)
+    # -- 389ds persistent volume storage Class
+    # -- If defined, storageClassName: <storageClass>
+    # -- If set to "-", storageClassName: "", which disables dynamic provisioning
+    # -- If undefined (the default) or set to null, no storageClassName spec is
+    # -- set, choosing the default provisioner.  (gp2 on AWS, standard on
+    # -- GKE, AWS & OpenStack)
     storageClass: ""
 
 # -- Bring your own cert for 389ds
@@ -137,6 +144,8 @@ serviceAccount:
 
 service:
   type: LoadBalancer
+  ## -- Provide any additional annotations which may be required
+  annotations: {}
   ports:
     ldap-tcp:
       enabled: true
@@ -148,19 +157,3 @@ service:
       port: 636
       protocal: TCP
       targetPort: 3636
-
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local

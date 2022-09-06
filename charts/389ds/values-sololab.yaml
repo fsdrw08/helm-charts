@@ -69,8 +69,8 @@ directoryServer:
   # @ignored
   affinity: {}
 
-  # -- 389ds's application config
-  env:
+  # -- environment variable for 389ds's application config
+  appConfEnvVars:
     # -- set cn=Directory Manager’s password
     DS_DM_PASSWORD: "password"
     # -- set the log level for ns-slapd, default is 266354688.
@@ -83,6 +83,15 @@ directoryServer:
     DS_STARTUP_TIMEOUT: "120"
     # -- use suffix as a basedn in dsrc file, default one is derived from the hostname.
     DS_SUFFIX_NAME: "dc=sololab"
+
+  # -- Extra environment variables to be set on 389ds containers
+  # -- E.g.
+  # -- extraEnvVars:
+  # -- name: TZ
+  # -- value: "Europe/Paris"
+  extraEnvVars: 
+    - name: TZ
+      value: "Asia/Shanghai"
 
 # -- Bring your own cert for 389ds
 bringYourOwnCert:
