@@ -4,6 +4,10 @@ metadata:
   name: service-{{ include "389ds.fullname" . }}
   labels:
     {{- include "389ds.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
