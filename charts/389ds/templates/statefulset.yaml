@@ -1,10 +1,12 @@
 apiVersion: apps/v1
+# kind: Deployment
 kind: StatefulSet
 metadata:
   name: {{ include "389ds.fullname" . }}
   labels:
     {{- include "389ds.labels" . | nindent 4 }}
 spec:
+  # serviceName for statefulset
   serviceName: {{ include "389ds.fullname" . }}
   {{- if not .Values.directoryServer.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -73,7 +75,7 @@ spec:
           ## DS_STARTUP_TIMEOUT - set container startup timeout in seconds, default is 60 seconds.
           {{- if .Values.directoryServer.appConfEnvVars.DS_STARTUP_TIMEOUT }}
           - name: DS_STARTUP_TIMEOUT
-            value: "120"
+            value: "{{ .Values.directoryServer.appConfEnvVars.DS_STARTUP_TIMEOUT }}"
           {{- end }}
           ## DS_SUFFIX_NAME - Use suffix as a basedn in `dsrc` file
           {{- if .Values.directoryServer.appConfEnvVars.DS_SUFFIX_NAME }}
@@ -95,33 +97,35 @@ spec:
           volumeMounts:
             - name: {{ .Release.Name }}-data
               mountPath: "/data"
+            {{- if .Values.bringYourOwnCert.enabled }}
             - name: {{ .Release.Name }}-tls
               mountPath: '/data/tls/'
               readOnly: true
             - name: {{ .Release.Name }}-tls-ca
               mountPath: '/data/tls/ca'
               readOnly: true
-          livenessProbe:
-            exec:
-              command:
-                - "/usr/lib/dirsrv/dscontainer"
-                - "-H"
-            initialDelaySeconds: 30
-            periodSeconds: 15
-          readinessProbe:
-            exec:
-              command:
-                - "/usr/lib/dirsrv/dscontainer"
-                - "-H"
-            initialDelaySeconds: 30
-            periodSeconds: 15
-          startupProbe:
-            exec:
-              command:
-                - "/usr/lib/dirsrv/dscontainer"
-                - "-H"
-            failureThreshold: 30
-            periodSeconds: 15
+            {{- end }}
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #       - "/usr/lib/dirsrv/dscontainer"
+          #       - "-H"
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 15
+          # readinessProbe:
+          #   exec:
+          #     command:
+          #       - "/usr/lib/dirsrv/dscontainer"
+          #       - "-H"
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 15
+          # startupProbe:
+          #   exec:
+          #     command:
+          #       - "/usr/lib/dirsrv/dscontainer"
+          #       - "-H"
+          #   failureThreshold: 30
+          #   periodSeconds: 15
           resources:
             {{- toYaml .Values.directoryServer.resources | nindent 12 }}
       volumes:
@@ -129,6 +133,12 @@ spec:
         - name: {{ .Release.Name }}-data
           persistentVolumeClaim:
             claimName: {{ tpl .Values.directoryServer.persistence.existingClaim . }}
+        # for deployment ↓
+        # {{- else if and .Values.directoryServer.persistence.enabled (not .Values.directoryServer.persistence.existingClaim) }}
+        # - name: {{ .Release.Name }}-data
+        #   persistentVolumeClaim:
+        #     claimName: {{ .Release.Name }}-data
+        # for deployment ↑
         {{- else if not .Values.directoryServer.persistence.enabled }}
         - name: {{ .Release.Name }}-data
           emptyDir: {}
@@ -180,6 +190,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
+  # for statefulset
   {{- if and .Values.directoryServer.persistence.enabled (not .Values.directoryServer.persistence.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
