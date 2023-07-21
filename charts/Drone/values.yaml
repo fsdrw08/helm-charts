@@ -1,0 +1,440 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+
+## @section drone Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+droneServer:
+  ## drone image
+  ## ref: https://hub.docker.com/r/drone/drone/tags
+  ## @param droneServer.image.registry drone image registry
+  ## @param droneServer.image.repository drone image repository
+  ## @param droneServer.image.tag drone image tag (immutable tags are recommended)
+  ## @param droneServer.image.digest drone image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param droneServer.image.pullPolicy drone image pull policy
+  ## @param droneServer.image.pullSecrets drone image pull secrets
+  ## @param droneServer.image.debug Enable drone image debug mode
+  ##
+  image:
+    registry: docker.io
+    repository: drone/drone
+    tag: 2.18
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+    ## Enable debug mode
+    ##
+    debug: false
+  ## @param droneServer.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param droneServer.containerPorts.http %%MAIN_CONTAINER_NAME%% HTTP container port
+  ## @param droneServer.containerPorts.https %%MAIN_CONTAINER_NAME%% HTTPS container port
+  ##
+  containerPorts:
+    http: 80
+    https: 443
+  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param droneServer.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param droneServer.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param droneServer.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param droneServer.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param droneServer.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param droneServer.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 300
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    httpGet:
+      path: /healthz
+      port: http
+  ## @param droneServer.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param droneServer.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param droneServer.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param droneServer.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param droneServer.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param droneServer.readinessProbe.successThreshold Success threshold for readinessProbe
+  ##
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 300
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    httpGet:
+      path: /healthz
+      port: http
+  ## @param droneServer.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param droneServer.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param droneServer.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param droneServer.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param droneServer.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param droneServer.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param droneServer.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param droneServer.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param droneServer.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param droneServer.resources.limits The resources limits for the %%MAIN_CONTAINER_NAME%% containers
+  ## @param droneServer.resources.requests The requested resources for the %%MAIN_CONTAINER_NAME%% containers
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param droneServer.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param droneServer.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param droneServer.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+  ## @param droneServer.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+  ## @param droneServer.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param droneServer.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  ## @param droneServer.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ##
+  existingConfigmap:
+  ## @param droneServer.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param droneServer.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param droneServer.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param droneServer.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param droneServer.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param droneServer.podAffinityPreset Pod affinity preset. Ignored if `droneServer.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param droneServer.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `droneServer.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param droneServer.autoscaling.enabled Enable autoscaling for droneServer
+  ## @param droneServer.autoscaling.minReplicas Minimum number of droneServer replicas
+  ## @param droneServer.autoscaling.maxReplicas Maximum number of droneServer replicas
+  ## @param droneServer.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param droneServer.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param droneServer.priorityClassName %%MAIN_CONTAINER_NAME%% pods' priorityClassName
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: 
+    ## REQUIRED: Set the user-visible Drone hostname, sans protocol.
+    ## Ref: https://docs.drone.io/installation/reference/drone-server-host/
+    ##
+    - name: DRONE_SERVER_HOST
+      value: ""
+    ## The protocol to pair with the value in DRONE_SERVER_HOST (http or https).
+    ## Ref: https://docs.drone.io/installation/reference/drone-server-proto/
+    ##
+    - name: DRONE_SERVER_PROTO
+      value: http
+
+    ## REQUIRED: Set the secret secret token that the Drone server and its Runners will use
+    ## to authenticate. This is commented out in order to leave you the ability to set the
+    ## key via a separately provisioned secret (see existingSecretName above).
+    ## Ref: https://docs.drone.io/installation/reference/drone-rpc-secret/
+    ##
+    # - name: DRONE_RPC_SECRET:
+
+    ## If you'd like to use a DB other than SQLite (the default), set a driver + DSN here.
+    ## Ref: https://docs.drone.io/installation/storage/database/
+    ##
+    # - name: DRONE_DATABASE_DRIVER:
+    # - name: DRONE_DATABASE_DATASOURCE:
+
+    ## If you are going to store build secrets in the Drone database, it is suggested that
+    ## you set a database encryption secret. This must be set before any secrets are stored
+    ## in the database.
+    ## Ref: https://docs.drone.io/installation/storage/encryption/
+    ##
+    # - name: DRONE_DATABASE_SECRET:
+
+    ## If you are using self-hosted GitHub or GitLab, you'll need to set this to true.
+    ## Ref: https://docs.drone.io/installation/reference/drone-git-always-auth/
+    ##
+    # - name: DRONE_GIT_ALWAYS_AUTH: false
+
+    ## ===================================================================================
+    ##                         Provider Directives (select ONE)
+    ## -----------------------------------------------------------------------------------
+    ## Select one provider (and only one). Refer to the corresponding documentation link
+    ## before filling the values in. Also note that you can use the 'secretMounts' value
+    ## if you'd rather not have secrets in Kubernetes Secret instead of a ConfigMap.
+    ## ===================================================================================
+
+    ## GitHub-specific variables. See the provider docs here:
+    ## Ref: https://docs.drone.io/installation/providers/github/
+    ##
+    # - name: DRONE_GITHUB_CLIENT_ID:
+    # - name: DRONE_GITHUB_CLIENT_SECRET:
+
+    ## GitLab-specific variables. See the provider docs here:
+    ## Ref: https://docs.drone.io/installation/providers/gitlab/
+    ##
+    # - name: DRONE_GITLAB_CLIENT_ID:
+    # - name: DRONE_GITLAB_CLIENT_SECRET:
+    # - name: DRONE_GITLAB_SERVER:
+
+    ## Bitbucket Cloud-specific variables. See the provider docs here:
+    ## Ref: https://docs.drone.io/installation/providers/bitbucket-cloud/
+    ##
+    # - name: DRONE_BITBUCKET_CLIENT_ID:
+    # - name: DRONE_BITBUCKET_CLIENT_SECRET:
+
+    ## Bitbucket-specific variables. See the provider docs here:
+    ## Ref: https://docs.drone.io/installation/providers/bitbucket-server/
+    ##
+    # - name: DRONE_GIT_USERNAME:
+    # - name: DRONE_GIT_PASSWORD:
+    # - name: DRONE_STASH_CONSUMER_KEY:
+    # - name: DRONE_STASH_PRIVATE_KEY:
+    # - name: DRONE_STASH_SERVER:
+
+    ## Gitea-specific variables. See the provider docs here:
+    ## Ref: https://docs.drone.io/installation/providers/gitea/
+    ##
+    # - name: DRONE_GITEA_CLIENT_ID:
+    # - name: DRONE_GITEA_CLIENT_SECRET:
+    # - name: DRONE_GITEA_SERVER:
+
+    ## Gogs-specific variables. See the provider docs here:
+    ## Ref: https://docs.drone.io/installation/providers/gogs/
+    ##
+    # - name: DRONE_GOGS_SERVER:
+
+
+  ## @param droneServer.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param droneServer.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param droneServer.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param droneServer.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param droneServer.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param droneServer.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param volumePermissions.resources.limits The resources limits for the init container
+  ## @param volumePermissions.resources.requests The requested resources for the init container
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
