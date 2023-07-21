@@ -35,7 +35,7 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @section %%MAIN_CONTAINER%% Parameters
+## @section jenkinsController Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
@@ -176,7 +176,24 @@ jenkinsController:
 
   ## @param jenkinsController.jenkinsUriPrefix If you set this prefix and use ingress controller then you might want to set the ingress path below
   jenkinsUriPrefix: "" # "/jenkins"
-
+  ## @param jenkinsController.adminSecret The default configuration uses this secret to configure an admin user
+  ## If you don't need that user or use a different security realm then you can disable it
+  adminSecret: true
+  ## @param jenkinsController.adminUser When enabling LDAP or another non-Jenkins identity source, the built-in admin account will no longer exist.
+  ## If you disable the non-Jenkins identity store and instead use the Jenkins internal one,
+  ## you should revert controller.adminUser to your preferred admin user:
+  adminUser: "admin"
+  ## @param jenkinsController.adminPassword Defaults to a random 10-character alphanumeric string if not set
+  adminPassword: ""
+  admin:
+    userKey: jenkins-admin-user
+    passwordKey: jenkins-admin-password
+  ## @param jenkinsController.additionalSecrets
+  ## Usually it's for JCasC (Jenkins config as code) to manage credentials and other sensitive information in the YAML configuration files
+  # additionalSecrets:
+  #   - name: nameOfSecret
+  #     value: secretText
+  additionalSecrets: []
   ## @param jenkinsController.existingConfigmap The name of an existing ConfigMap with your custom configuration for jenkins
   ##
   existingConfigmap:

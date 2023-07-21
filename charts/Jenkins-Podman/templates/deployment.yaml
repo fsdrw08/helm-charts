@@ -50,7 +50,7 @@ spec:
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: jenkins_home
+            - name: jenkins-home
               mountPath: {{ .Values.persistence.mountPath }}
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
@@ -73,8 +73,15 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.jenkinsController.args "context" $) | nindent 12 }}
           {{- end }}
           env:
-            - name: foo
-              value: bar
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            
+            {{- if or .Values.jenkinsController.additionalSecrets .Values.jenkinsController.adminSecret }}
+            - name: SECRETS
+              value: /run/secrets/additional
+            {{- end }}
             {{- if .Values.jenkinsController.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.jenkinsController.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
@@ -114,11 +121,16 @@ spec:
             %%httpGet || command || etc%%
           {{- end }}
           volumeMounts:
-            - name: jenkins_home
+            - name: jenkins-home
               mountPath: {{ .Values.persistence.mountPath }}
               {{- if .Values.persistence.subPath }}
               subPath: {{ .Values.persistence.subPath }}
               {{- end }}
+            {{- if or .Values.jenkinsController.additionalSecrets .Values.jenkinsController.adminSecret }}
+            - name: jenkins-secrets
+              mountPath: /run/secrets/additional
+              readOnly: true
+            {{- end }}
           {{- if .Values.jenkinsController.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.jenkinsController.extraVolumeMounts "context" $) | nindent 12 }}
           {{- end }}
@@ -132,6 +144,25 @@ spec:
             claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
         {{- else }}
           emptyDir: {}
+        {{- end }}
+        # removed existingSecret related part from https://github.com/jenkinsci/helm-charts/blob/51d16d0762e672fc3fc1a5a064ee19c7c42184dd/charts/jenkins/templates/jenkins-controller-statefulset.yaml#L385-L415
+        {{- if or .Values.jenkinsController.additionalSecrets .Values.jenkinsController.adminSecret }}
+        - name: jenkins-secrets
+          projected:
+            sources:
+            {{- if .Values.jenkinsController.additionalSecrets }}
+            - secret:
+                name: {{ template "common.names.fullname" . }}-additional-secrets
+            {{- end }}
+            {{- if .Values.jenkinsController.adminSecret }}
+            - secret:
+                name: {{ template "common.names.fullname" . }}
+                items:
+                  - key: {{ .Values.jenkinsController.admin.userKey | default "jenkins-admin-user" }}
+                    path: chart-admin-username
+                  - key: {{ .Values.jenkinsController.admin.passwordKey | default "jenkins-admin-password" }}
+                    path: chart-admin-password
+            {{- end }}
         {{- end }}
         {{- if .Values.jenkinsController.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.jenkinsController.extraVolumes "context" $) | nindent 8 }}
