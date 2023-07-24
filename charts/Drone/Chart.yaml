@@ -26,7 +26,7 @@ keywords:
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts
-name: Drone
+name: drone
 sources:
   - https://github.com/fsdrw08/helm-charts/Drone
   - https://github.com/harness/drone/tree/master

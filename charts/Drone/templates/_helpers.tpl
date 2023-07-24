@@ -1,7 +1,3 @@
-{{/*
-Copyright VMware, Inc.
-SPDX-License-Identifier: APACHE-2.0
-*/}}
 
 {{/*
 Return the proper droneServer image name
@@ -21,19 +17,9 @@ Return the proper image name (for the init container volume-permissions image)
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "drone.imagePullSecrets" -}}
-{{- include "common.images.pullSecrets" (dict "images" (list .Values.droneServer.image .Values.%%SECONDARY_OBJECT_BLOCK%%.image .Values.volumePermissions.image) "global" .Values.global) -}}
+{{- include "common.images.pullSecrets" (dict "images" (list .Values.droneServer.image  .Values.volumePermissions.image) "global" .Values.global) -}}
 {{- end -}}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "drone.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
 
 {{/*
 Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations

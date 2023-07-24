@@ -25,13 +25,15 @@ nameOverride: ""
 ## @param fullnameOverride String to fully override common.names.fullname
 ##
 fullnameOverride: ""
+## @param namespaceOverride String to fully override common.names.namespace
+##
+namespaceOverride: ""
 ## @param commonLabels Labels to add to all deployed objects
 ##
 commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 ##
 commonAnnotations: {}
-
 
 ## @section drone Parameters
 ##
@@ -73,12 +75,18 @@ droneServer:
   ## @param droneServer.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
   ##
   replicaCount: 1
-  ## @param droneServer.containerPorts.http %%MAIN_CONTAINER_NAME%% HTTP container port
-  ## @param droneServer.containerPorts.https %%MAIN_CONTAINER_NAME%% HTTPS container port
+  ## @param droneServer.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
   ##
-  containerPorts:
-    http: 80
-    https: 443
+  containerPorts: {}
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param droneServer.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
@@ -144,7 +152,9 @@ droneServer:
   ## @param droneServer.resources.requests The requested resources for the %%MAIN_CONTAINER_NAME%% containers
   ##
   resources:
-    limits: {}
+    limits:
+      cpu: 200m
+      memory: 256Mi
     requests: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
@@ -152,7 +162,7 @@ droneServer:
   ## @param droneServer.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
   ##
   podSecurityContext:
-    enabled: true
+    enabled: false
     fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
@@ -162,7 +172,7 @@ droneServer:
   ## @param droneServer.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
-    enabled: true
+    enabled: false
     runAsUser: 1001
     runAsNonRoot: true
     readOnlyRootFilesystem: false
@@ -213,53 +223,53 @@ droneServer:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param droneServer.priorityClassName %%MAIN_CONTAINER_NAME%% pods' priorityClassName
+  ## @param droneServer.extraEnvVars
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
-  extraEnvVars: 
+  extraEnvVars:
+  ## @param droneServer.extraEnvVarsInSecret
+  extraEnvVarsInSecret:
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_SERVER_HOST
     ## REQUIRED: Set the user-visible Drone hostname, sans protocol.
     ## Ref: https://docs.drone.io/installation/reference/drone-server-host/
     ##
-    - name: DRONE_SERVER_HOST
-      value: ""
+    DRONE_SERVER_HOST: ""
     ## The protocol to pair with the value in DRONE_SERVER_HOST (http or https).
     ## Ref: https://docs.drone.io/installation/reference/drone-server-proto/
     ##
-    - name: DRONE_SERVER_PROTO
-      value: http
-
+    DRONE_SERVER_PROTO: http
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_RPC_SECRET
     ## REQUIRED: Set the secret secret token that the Drone server and its Runners will use
     ## to authenticate. This is commented out in order to leave you the ability to set the
-    ## key via a separately provisioned secret (see extraSecretNamesForEnvFrom extraEnvVarsSecret above).
+    ## key via a separately provisioned secret (see existingSecretName above).
     ## Ref: https://docs.drone.io/installation/reference/drone-rpc-secret/
     ##
-    # - name: DRONE_RPC_SECRET
-    #   value:
+    # DRONE_RPC_SECRET:
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_DATABASE_DRIVER
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_DATABASE_DATASOURCE
     ## If you'd like to use a DB other than SQLite (the default), set a driver + DSN here.
     ## Ref: https://docs.drone.io/installation/storage/database/
     ##
-    # - name: DRONE_DATABASE_DRIVER:
-    # - value:
-    # - name: DRONE_DATABASE_DATASOURCE:
-    # - value:
+    # DRONE_DATABASE_DRIVER:
+    # DRONE_DATABASE_DATASOURCE:
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_DATABASE_SECRET
     ## If you are going to store build secrets in the Drone database, it is suggested that
     ## you set a database encryption secret. This must be set before any secrets are stored
     ## in the database.
     ## Ref: https://docs.drone.io/installation/storage/encryption/
     ##
-    # - name: DRONE_DATABASE_SECRET:
-    # - value:
+    # DRONE_DATABASE_SECRET:
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GIT_ALWAYS_AUTH
     ## If you are using self-hosted GitHub or GitLab, you'll need to set this to true.
     ## Ref: https://docs.drone.io/installation/reference/drone-git-always-auth/
     ##
-    # - name: DRONE_GIT_ALWAYS_AUTH:
-    # - value: false
+    # DRONE_GIT_ALWAYS_AUTH: false
 
     ## ===================================================================================
     ##                         Provider Directives (select ONE)
@@ -269,62 +279,61 @@ droneServer:
     ## if you'd rather not have secrets in Kubernetes Secret instead of a ConfigMap.
     ## ===================================================================================
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GITHUB_CLIENT_ID
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GITHUB_CLIENT_SECRET
     ## GitHub-specific variables. See the provider docs here:
     ## Ref: https://docs.drone.io/installation/providers/github/
     ##
-    # - name: DRONE_GITHUB_CLIENT_ID:
-    # - value:
-    # - name: DRONE_GITHUB_CLIENT_SECRET:
-    # - value:
+    # DRONE_GITHUB_CLIENT_ID:
+    # DRONE_GITHUB_CLIENT_SECRET:
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GITLAB_CLIENT_ID
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GITLAB_CLIENT_SECRET
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GITLAB_SERVER
     ## GitLab-specific variables. See the provider docs here:
     ## Ref: https://docs.drone.io/installation/providers/gitlab/
     ##
-    # - name: DRONE_GITLAB_CLIENT_ID:
-    # - value:
-    # - name: DRONE_GITLAB_CLIENT_SECRET:
-    # - value:
-    # - name: DRONE_GITLAB_SERVER:
-    # - value:
+    # DRONE_GITLAB_CLIENT_ID:
+    # DRONE_GITLAB_CLIENT_SECRET:
+    # DRONE_GITLAB_SERVER:
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_BITBUCKET_CLIENT_ID
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_BITBUCKET_CLIENT_SECRET
     ## Bitbucket Cloud-specific variables. See the provider docs here:
     ## Ref: https://docs.drone.io/installation/providers/bitbucket-cloud/
     ##
-    # - name: DRONE_BITBUCKET_CLIENT_ID:
-    # - value:
-    # - name: DRONE_BITBUCKET_CLIENT_SECRET:
-    # - value:
+    # DRONE_BITBUCKET_CLIENT_ID:
+    # DRONE_BITBUCKET_CLIENT_SECRET:
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GIT_USERNAME
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GIT_PASSWORD
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_STASH_CONSUMER_KEY
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_STASH_PRIVATE_KEY
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_STASH_SERVER
     ## Bitbucket-specific variables. See the provider docs here:
     ## Ref: https://docs.drone.io/installation/providers/bitbucket-server/
     ##
-    # - name: DRONE_GIT_USERNAME:
-    # - value:
-    # - name: DRONE_GIT_PASSWORD:
-    # - value:
-    # - name: DRONE_STASH_CONSUMER_KEY:
-    # - value:
-    # - name: DRONE_STASH_PRIVATE_KEY:
-    # - value:
-    # - name: DRONE_STASH_SERVER:
-    # - value:
+    # DRONE_GIT_USERNAME:
+    # DRONE_GIT_PASSWORD:
+    # DRONE_STASH_CONSUMER_KEY:
+    # DRONE_STASH_PRIVATE_KEY:
+    # DRONE_STASH_SERVER:
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GITEA_CLIENT_ID
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GITEA_CLIENT_SECRET
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GITEA_SERVER
     ## Gitea-specific variables. See the provider docs here:
     ## Ref: https://docs.drone.io/installation/providers/gitea/
     ##
-    # - name: DRONE_GITEA_CLIENT_ID:
-    # - value:
-    # - name: DRONE_GITEA_CLIENT_SECRET:
-    # - value:
-    # - name: DRONE_GITEA_SERVER:
-    # - value:
+    # DRONE_GITEA_CLIENT_ID:
+    # DRONE_GITEA_CLIENT_SECRET:
+    # DRONE_GITEA_SERVER:
 
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_GOGS_SERVER
     ## Gogs-specific variables. See the provider docs here:
     ## Ref: https://docs.drone.io/installation/providers/gogs/
     ##
-    # - name: DRONE_GOGS_SERVER:
-    # - value:
-
+    # DRONE_GOGS_SERVER:
 
   ## @param droneServer.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
   ##
@@ -422,7 +431,7 @@ volumePermissions:
   image:
     registry: docker.io
     repository: bitnami/os-shell
-    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    tag: 11-debian-11-r # %%IMAGE_REVISION%%
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -436,7 +445,14 @@ volumePermissions:
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ## @param volumePermissions.resources.limits The resources limits for the init container
   ## @param volumePermissions.resources.requests The requested resources for the init container
-  ##
+  ## e.g.
+  ## resources:
+  ##   limits:
+  ##     cpu: 100m
+  ##     memory: 128Mi
+  ##   requests:
+  ##     cpu: 100m
+  ##     memory: 128Mi
   resources:
     limits: {}
     requests: {}

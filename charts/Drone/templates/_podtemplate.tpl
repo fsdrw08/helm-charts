@@ -1,25 +1,4 @@
-apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
-kind: Deployment
-metadata:
-  name: {{ template "common.names.fullname" . }}
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: server
-    {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
-    {{- end }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-  {{- end }}
-spec:
-  {{- if not .Values.droneServer.autoscaling.enabled }}
-  replicas: {{ .Values.droneServer.replicaCount }}
-  {{- end }}
-  selector:
-    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
-      app.kubernetes.io/component: server
-  template: {{ template "drone.podTemplate" . }}
-  {{/*
+{{- define "drone.podTemplate" }}
     metadata:
       {{- if .Values.droneServer.podAnnotations }}
       annotations: {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.podAnnotations "context" $) | nindent 8 }}
@@ -39,7 +18,7 @@ spec:
       {{- end }}
       {{- if .Values.droneServer.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.droneServer.podSecurityContext "enabled" | toYaml | nindent 8 }}
-      {{- end }}
+      {{- end -}}
       initContainers:
         {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
         - name: volume-permissions
@@ -92,11 +71,9 @@ spec:
           {{- if .Values.droneServer.resources }}
           resources: {{- toYaml .Values.droneServer.resources | nindent 12 }}
           {{- end }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.droneServer.containerPorts.http }}
-            - name: https
-              containerPort: {{ .Values.droneServer.containerPorts.https }}
+          {{- if .Values.droneServer.containerPorts }}
+          ports: {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.containerPorts "context" $) | nindent 12 -}}
+          {{- end }}
           {{- if .Values.droneServer.customLivenessProbe }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.customLivenessProbe "context" $) | nindent 12 }}
           {{- else if .Values.droneServer.livenessProbe.enabled }}
@@ -135,4 +112,4 @@ spec:
         {{- if .Values.droneServer.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.extraVolumes "context" $) | nindent 8 }}
         {{- end }}
-  */}}
+{{ end -}}
