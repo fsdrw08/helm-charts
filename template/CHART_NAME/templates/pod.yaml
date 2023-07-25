@@ -1,0 +1,5 @@
+{{- if eq .Values.%%MAIN_OBJECT_BLOCK%%.deployKind "Pod"  -}}
+apiVersion: v1
+kind: Pod
+{{ template "%%TEMPLATE_NAME%%.podTemplate" . }}
+{{- end }}

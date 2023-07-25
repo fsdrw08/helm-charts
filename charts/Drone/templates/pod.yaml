@@ -1,5 +1,5 @@
-{{/*
+{{- if eq .Values.droneServer.deployKind "Pod" -}}
 apiVersion: v1
 kind: Pod
-{{ template "drone.podTemplate" . | nindent 0 }}
-*/}}
+{{ template "drone.podTemplate" . }}
+{{- end }}

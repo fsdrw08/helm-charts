@@ -87,6 +87,11 @@ diagnosticMode:
     ## Enable debug mode
     ##
     debug: false
+  ## @param %%MAIN_OBJECT_BLOCK%%.deployKind specify the deploy kind： Pod, or Deployment
+  deployKind: Pod
+  ## @param %%MAIN_OBJECT_BLOCK%%.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
   ## @param %%MAIN_OBJECT_BLOCK%%.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
   ##
   replicaCount: 1
