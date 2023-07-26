@@ -2,7 +2,14 @@
 Return the proper droneServer image name
 */}}
 {{- define "server.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.droneServer.image "global" .Values.global) }}
+{{ include "common.images.image" (dict "imageRoot" .Values.droneRunnerDocker.image "global" .Values.global) }}
+{{- end -}}
+
+{{/*
+Return the proper droneRunnerDocker image name
+*/}}
+{{- define "runner.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.droneRunnerDocker.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
@@ -16,7 +23,7 @@ Return the proper image name (for the init container volume-permissions image)
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "drone.imagePullSecrets" -}}
-{{- include "common.images.pullSecrets" (dict "images" (list .Values.droneServer.image  .Values.volumePermissions.image) "global" .Values.global) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.droneRunnerDocker.image .Values.droneRunnerDocker.image .Values.volumePermissions.image) "global" .Values.global) -}}
 {{- end -}}
 
 

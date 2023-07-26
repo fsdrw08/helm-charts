@@ -1,4 +1,4 @@
-{{- if eq .Values.%%MAIN_OBJECT_BLOCK%%.deployKind "Deployment"  -}}
+{{- if eq .Values.deployKind "Deployment"  -}}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:

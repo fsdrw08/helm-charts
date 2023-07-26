@@ -35,6 +35,9 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
+## @param instanceKind specify the deploy kind： Pod, or Deployment
+instanceKind: Pod
+
 ## @section jenkinsController Parameters
 ##
 
@@ -72,6 +75,9 @@ jenkinsController:
     ## Enable debug mode
     ##
     debug: false
+  ## @param droneServer.podRestartPolicy specify the pod restart policy if instanceKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
   ## @param jenkinsController.replicaCount Number of jenkins replicas to deploy
   ##
   replicaCount: 1
@@ -148,7 +154,9 @@ jenkinsController:
   ## @param jenkinsController.resources.requests The requested resources for the jenkins containers
   ##
   resources:
-    limits: {}
+    limits:
+      cpu: 400m
+      memory: 512Mi
     requests: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod

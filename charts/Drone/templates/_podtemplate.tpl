@@ -1,6 +1,6 @@
 {{- define "drone.podTemplate" -}}
 metadata:
-  {{- if eq .Values.droneServer.deployKind "Pod" }}
+  {{- if eq .Values.instanceKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.droneServer.podAnnotations }}
@@ -19,9 +19,9 @@ spec:
   {{- if .Values.droneServer.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.hostAliases "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.droneServer.podSecurityContext.enabled }}
+  {{- if .Values.droneServer.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.droneServer.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end -}}
+  {{- end }}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -44,8 +44,8 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: drone
-      image: {{ template "drone.image" . }}
+    - name: server
+      image: {{ template "server.image" . }}
       imagePullPolicy: {{ .Values.droneServer.image.pullPolicy }}
       {{- if .Values.droneServer.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.droneServer.containerSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -93,7 +93,7 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.droneServer.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: storage-volume
+        - name: persistent-volume
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -105,7 +105,7 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.droneServer.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: storage-volume
+    - name: persistent-volume
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
@@ -115,7 +115,7 @@ spec:
     {{- if .Values.droneServer.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.droneServer.deployKind "Deployment" }}
+  {{ if eq .Values.instanceKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.droneServer.podRestartPolicy }}

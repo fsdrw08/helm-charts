@@ -50,6 +50,8 @@ diagnosticMode:
   args:
     - infinity
 
+## @param %%MAIN_OBJECT_BLOCK%%.deployKind specify the deploy kind： Pod, or Deployment
+deployKind: Pod
 ## @section %%MAIN_CONTAINER%% Parameters
 ##
 
@@ -87,8 +89,6 @@ diagnosticMode:
     ## Enable debug mode
     ##
     debug: false
-  ## @param %%MAIN_OBJECT_BLOCK%%.deployKind specify the deploy kind： Pod, or Deployment
-  deployKind: Pod
   ## @param %%MAIN_OBJECT_BLOCK%%.podRestartPolicy specify the pod restart policy if deployKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
@@ -206,14 +206,6 @@ diagnosticMode:
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
-  ## @param %%MAIN_OBJECT_BLOCK%%.podAffinityPreset Pod affinity preset. Ignored if `%%MAIN_OBJECT_BLOCK%%.affinity` is set. Allowed values: `soft` or `hard`
-  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
-  ##
-  podAffinityPreset: ""
-  ## @param %%MAIN_OBJECT_BLOCK%%.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `%%MAIN_OBJECT_BLOCK%%.affinity` is set. Allowed values: `soft` or `hard`
-  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
-  ##
-  podAntiAffinityPreset: soft
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.enabled Enable autoscaling for %%MAIN_OBJECT_BLOCK%%

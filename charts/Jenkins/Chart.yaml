@@ -1,0 +1,34 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+# https://github.com/jenkinsci/docker/releases
+appVersion: "2.401.2"
+# dependencies:
+#   - condition: SUBCHART_NAME.enabled
+#     name: SUBCHART_NAME
+#     repository: oci://registry-1.docker.io/bitnamicharts
+#     version: %%MAJOR_SUBCHART_VERSION_(A.X.X)%%
+#   - name: common
+#     repository: oci://registry-1.docker.io/bitnamicharts
+#     tags:
+#       - bitnami-common
+#     version: 2.x.x
+description: Jenkins server helm chart for podman kube play
+home: https://github.com/fsdrw08/helm-charts
+icon: https://camo.githubusercontent.com/a5004ae5bffb9a59384514fd88d3f18c47e1e0373bfda94a18b422e4a164d399/68747470733a2f2f6a656e6b696e732e696f2f73697465732f64656661756c742f66696c65732f6a656e6b696e735f6c6f676f2e706e67
+
+keywords:
+  - podman kube play
+  - Jenkins
+  - ci
+  - cd
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: jenkins
+sources:
+  - https://github.com/fsdrw08/helm-charts/Jenkins
+version: 0.1.0

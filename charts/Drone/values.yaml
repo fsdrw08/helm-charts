@@ -35,6 +35,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
+## @param instanceKind specify the deploy kind： Pod, or Deployment
+instanceKind: Pod
 ## @section drone Parameters
 ##
 
@@ -72,9 +74,7 @@ droneServer:
     ## Enable debug mode
     ##
     debug: false
-  ## @param droneServer.deployKind specify the deploy kind： Pod, or Deployment
-  deployKind: Pod
-  ## @param droneServer.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param droneServer.podRestartPolicy specify the pod restart policy if instanceKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param droneServer.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
@@ -205,14 +205,6 @@ droneServer:
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
-  ## @param droneServer.podAffinityPreset Pod affinity preset. Ignored if `droneServer.affinity` is set. Allowed values: `soft` or `hard`
-  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
-  ##
-  podAffinityPreset: ""
-  ## @param droneServer.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `droneServer.affinity` is set. Allowed values: `soft` or `hard`
-  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
-  ##
-  podAntiAffinityPreset: soft
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param droneServer.autoscaling.enabled Enable autoscaling for droneServer
@@ -254,7 +246,7 @@ droneServer:
     ## REQUIRED: Set the user-visible Drone hostname, sans protocol.
     ## Ref: https://docs.drone.io/installation/reference/drone-server-host/
     ##
-    DRONE_SERVER_HOST:
+    DRONE_SERVER_HOST: ""
 
     ## @param droneServer.extraEnvVarsInSecret.DRONE_SERVER_PROTO
     ## The protocol to pair with the value in DRONE_SERVER_HOST (http or https).
@@ -447,6 +439,10 @@ volumePermissions:
     registry: docker.io
     repository: bitnami/os-shell
     tag: 11-debian-11-r # %%IMAGE_REVISION%%
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.

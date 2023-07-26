@@ -1,6 +1,6 @@
 {{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
 metadata:
-  {{ if eq .Values.%%MAIN_OBJECT_BLOCK%%.deployKind "Pod" }}
+  {{ if eq .Values.deployKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations }}
@@ -19,9 +19,9 @@ spec:
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled }}
+  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end -}}
+  {{- end }}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -115,9 +115,9 @@ spec:
     {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.%%MAIN_OBJECT_BLOCK%%.deployKind "Deployment" }}
+  {{ if eq .Values.deployKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
-  restartPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.deployKind }}
+  restartPolicy: {{ .Values.deployKind }}
   {{- end }}
 {{- end -}}

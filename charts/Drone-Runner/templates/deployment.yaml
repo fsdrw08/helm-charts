@@ -13,8 +13,8 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.droneServer.autoscaling.enabled }}
-  replicas: {{ .Values.droneServer.replicaCount }}
+  {{- if not .Values.droneRunnerDocker.autoscaling.enabled }}
+  replicas: {{ .Values.droneRunnerDocker.replicaCount }}
   {{- end }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
