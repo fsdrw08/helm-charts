@@ -44,7 +44,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: droneServer
+    - name: drone
       image: {{ template "drone.image" . }}
       imagePullPolicy: {{ .Values.droneServer.image.pullPolicy }}
       {{- if .Values.droneServer.containerSecurityContext.enabled }}
