@@ -102,7 +102,7 @@ droneServer:
   ## @param droneServer.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: 60
     periodSeconds: 300
     timeoutSeconds: 10
@@ -119,7 +119,7 @@ droneServer:
   ## @param droneServer.readinessProbe.successThreshold Success threshold for readinessProbe
   ##
   readinessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: 60
     periodSeconds: 300
     timeoutSeconds: 10
@@ -235,17 +235,33 @@ droneServer:
   ##     value: "bar"
   ##
   extraEnvVars:
+    ## @param droneServer.extraEnvVars.DRONE_GIT_ALWAYS_AUTH
+    ## If you are using self-hosted GitHub or GitLab, you'll need to set this to true.
+    ## Ref: https://docs.drone.io/installation/reference/drone-git-always-auth/
+    ##
+    # - name: DRONE_GIT_ALWAYS_AUTH
+    #   value: false
+
+    ## @param droneServer.extraEnvVars.DRONE_GITLAB_SKIP_VERIFY
+    ## Boolean value disables TLS verification when establishing a connection to the remote GitLab server. The default value is false.
+    ## Ref: https://docs.drone.io/server/reference/drone-gitlab-skip-verify/
+    # - name: DRONE_GITLAB_SKIP_VERIFY
+    #   value: true
+
   ## @param droneServer.extraEnvVarsInSecret
   extraEnvVarsInSecret:
     ## @param droneServer.extraEnvVarsInSecret.DRONE_SERVER_HOST
     ## REQUIRED: Set the user-visible Drone hostname, sans protocol.
     ## Ref: https://docs.drone.io/installation/reference/drone-server-host/
     ##
-    DRONE_SERVER_HOST: ""
+    DRONE_SERVER_HOST:
+
+    ## @param droneServer.extraEnvVarsInSecret.DRONE_SERVER_PROTO
     ## The protocol to pair with the value in DRONE_SERVER_HOST (http or https).
     ## Ref: https://docs.drone.io/installation/reference/drone-server-proto/
     ##
     DRONE_SERVER_PROTO: http
+
     ## @param droneServer.extraEnvVarsInSecret.DRONE_RPC_SECRET
     ## REQUIRED: Set the secret secret token that the Drone server and its Runners will use
     ## to authenticate. This is commented out in order to leave you the ability to set the
@@ -269,12 +285,6 @@ droneServer:
     ## Ref: https://docs.drone.io/installation/storage/encryption/
     ##
     # DRONE_DATABASE_SECRET:
-
-    ## @param droneServer.extraEnvVarsInSecret.DRONE_GIT_ALWAYS_AUTH
-    ## If you are using self-hosted GitHub or GitLab, you'll need to set this to true.
-    ## Ref: https://docs.drone.io/installation/reference/drone-git-always-auth/
-    ##
-    # DRONE_GIT_ALWAYS_AUTH: false
 
     ## ===================================================================================
     ##                         Provider Directives (select ONE)
