@@ -16,9 +16,8 @@ appVersion: v2.18
 #     tags:
 #       - bitnami-common
 #     version: 2.x.x
-description: Drone is a self-service Continuous Integration platform for busy development teams.
+description: Drone server helm chart for podman, deploy drone server in podman with podman kube play. Drone is a self-service Continuous Integration platform for busy development teams.
 home: https://www.drone.io/
-icon: https://bitnami.com/assets/stacks/%%IMAGE_NAME%%/img/%%IMAGE_NAME%%-stack-220x234.png
 keywords:
   - podman kube play
   - drone
@@ -28,7 +27,7 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: drone
 sources:
-  - https://github.com/fsdrw08/helm-charts/Drone
+  - https://github.com/fsdrw08/helm-charts/drone
   - https://github.com/harness/drone/tree/master
   - ...
 version: 0.1.0
