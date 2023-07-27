@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.droneRunnerDocker.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.droneRunnerDocker.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -44,7 +44,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.droneRunnerDocker.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: runner
+    - name: podman
       image: {{ template "runner.image" . }}
       imagePullPolicy: {{ .Values.droneRunnerDocker.image.pullPolicy }}
       {{- if .Values.droneRunnerDocker.containerSecurityContext.enabled }}
@@ -93,23 +93,31 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.droneRunnerDocker.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: podman-socket
+        - name: podman-socket-dir
+          mountPath: /var/run/
+        - name: podman-socket-file
           mountPath: /var/run/docker.sock
-          subPath: docker.sock
+        {{- if .Values.persistence.mountPath }}
         - name: persistent-volume
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        {{- end -}}
       {{- if .Values.droneRunnerDocker.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.droneRunnerDocker.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
-    {{- end }}
+
     {{- if .Values.droneRunnerDocker.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.droneRunnerDocker.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: podman-socket
+    - name: podman-socket-dir
+      hostPath:
+        # Ensure the file directory is created.
+        path: {{ .Values.droneRunnerDocker.podmanSocketDir }}
+        type: DirectoryOrCreate
+    - name: podman-socket-file
       hostPath:
         path: {{ .Values.droneRunnerDocker.podmanSocket }}
         # https://kubernetes.io/docs/concepts/storage/volumes/#hostpath-fileorcreate-example
@@ -129,3 +137,4 @@ spec:
   {{- else -}}
   restartPolicy: {{ .Values.droneRunnerDocker.podRestartPolicy }}
   {{- end }}
+{{- end -}}

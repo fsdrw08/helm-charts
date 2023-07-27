@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -93,11 +93,13 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: foo
+        {{- if .Values.persistence.mountPath }}
+        - name: persistent-volume
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        {{- end -}}
       {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -105,7 +107,7 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: foo
+    - name: persistent-volume
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}

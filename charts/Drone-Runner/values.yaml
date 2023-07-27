@@ -37,6 +37,7 @@ commonAnnotations: {}
 
 ## @param instanceKind specify the deploy kind： Pod, or Deployment
 instanceKind: Pod
+
 ## @section drone Parameters
 ##
 
@@ -184,6 +185,9 @@ droneRunnerDocker:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
+  ## @param droneRunnerDocker.podmanSocketDir podman socket mount to drone runner docker container path: /var/run/docker.sock
+  ##
+  podmanSocketDir: /run/user/1000/podman/
   ## @param droneRunnerDocker.podmanSocket podman socket mount to drone runner docker container path: /var/run/docker.sock
   ##
   podmanSocket: /run/user/1000/podman/podman.sock
@@ -242,19 +246,24 @@ droneRunnerDocker:
     ## Ref: https://docs.drone.io/runner/docker/configuration/reference/drone-runner-name/
     - name: DRONE_RUNNER_NAME
       value: podman_runner
+    ## @param droneRunnerDocker.extraEnvVars.DRONE_RPC_SKIP_VERIFY
+    ## Optional string value. Sets the name of the runner. The runner name is stored in the server and can be used to trace a build back to a specific runner.
+    ## Ref: https://docs.drone.io/runner/docker/configuration/reference/drone-runner-name/
+    - name: DRONE_RPC_SKIP_VERIFY
+      value: false
 
   ## @param droneRunnerDocker.extraEnvVarsInSecret
   extraEnvVarsInSecret:
-    ## @param droneRunnerDocker.extraEnvVarsInSecret.DRONE_SERVER_HOST
+    ## @param droneRunnerDocker.extraEnvVarsInSecret.DRONE_RPC_HOST
     ## REQUIRED: Set the user-visible Drone hostname, sans protocol.
     ## Ref: https://docs.drone.io/installation/reference/drone-server-host/
     ##
-    DRONE_SERVER_HOST:
-    ## @param droneRunnerDocker.extraEnvVarsInSecret.DRONE_SERVER_PROTO
+    DRONE_RPC_HOST:
+    ## @param droneRunnerDocker.extraEnvVarsInSecret.DRONE_RPC_PROTO
     ## The protocol to pair with the value in DRONE_SERVER_HOST (http or https).
     ## Ref: https://docs.drone.io/installation/reference/drone-server-proto/
     ##
-    DRONE_SERVER_PROTO: https
+    DRONE_RPC_PROTO: https
     ## @param droneRunnerDocker.extraEnvVarsInSecret.DRONE_RPC_SECRET
     ## REQUIRED: Set the secret secret token that the Drone server and its Runners will use
     ## to authenticate. This is commented out in order to leave you the ability to set the
@@ -262,6 +271,42 @@ droneRunnerDocker:
     ## Ref: https://docs.drone.io/installation/reference/drone-rpc-secret/
     ##
     DRONE_RPC_SECRET: secret
+  ## @param droneRunnerDocker.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param droneRunnerDocker.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param droneRunnerDocker.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param droneRunnerDocker.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param droneRunnerDocker.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param droneRunnerDocker.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## %%SECONDARY_CONTAINER/POD_DESCRIPTION%%
+##
 
 ## @section Persistence Parameters
 ##
@@ -272,10 +317,10 @@ droneRunnerDocker:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /data
+  mountPath:
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

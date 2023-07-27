@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.droneServer.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.droneServer.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -93,11 +93,13 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.droneServer.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        {{- if .Values.persistence.mountPath }}
         - name: persistent-volume
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        {{- end -}}
       {{- if .Values.droneServer.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}

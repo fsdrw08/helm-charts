@@ -26,17 +26,6 @@ Return the proper Docker Image Registry Secret Names
 {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.droneRunnerDocker.image .Values.droneRunnerDocker.image .Values.volumePermissions.image) "global" .Values.global) -}}
 {{- end -}}
 
-
-{{/*
-Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
-Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
-*/}}
-{{- define "drone.ingress.certManagerRequest" -}}
-{{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
-    {{- true -}}
-{{- end -}}
-{{- end -}}
-
 {{/*
 Compile all warnings into a single message.
 */}}

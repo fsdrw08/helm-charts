@@ -35,11 +35,11 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @section drone Parameters
-##
-
 ## @param instanceKind specify the deploy kind： Pod, or Deployment
 instanceKind: Pod
+
+## @section drone Parameters
+##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
@@ -442,6 +442,10 @@ volumePermissions:
     registry: docker.io
     repository: bitnami/os-shell
     tag: 11-debian-11-r # %%IMAGE_REVISION%%
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.

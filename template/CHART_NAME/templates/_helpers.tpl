@@ -1,9 +1,4 @@
 {{/*
-Copyright VMware, Inc.
-SPDX-License-Identifier: APACHE-2.0
-*/}}
-
-{{/*
 Return the proper %%MAIN_OBJECT_BLOCK%% image name
 */}}
 {{- define "%%TEMPLATE_NAME%%.image" -}}
@@ -32,16 +27,6 @@ Create the name of the service account to use
     {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
-Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
-*/}}
-{{- define "%%TEMPLATE_NAME%%.ingress.certManagerRequest" -}}
-{{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
-    {{- true -}}
 {{- end -}}
 {{- end -}}
 

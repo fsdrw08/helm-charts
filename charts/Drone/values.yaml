@@ -37,6 +37,7 @@ commonAnnotations: {}
 
 ## @param instanceKind specify the deploy kind： Pod, or Deployment
 instanceKind: Pod
+
 ## @section drone Parameters
 ##
 
@@ -219,7 +220,6 @@ droneServer:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-
   ## @param droneServer.extraEnvVars
   ## e.g:
   ## extraEnvVars:
@@ -375,6 +375,9 @@ droneServer:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
+
+## %%SECONDARY_CONTAINER/POD_DESCRIPTION%%
+##
 
 ## @section Persistence Parameters
 ##
