@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 Return the proper jenkinsController image name
 */}}
 {{- define "jenkins.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.jenkinsController.image "global" .Values.global) }}
+{{ include "common.images.image" (dict "imageRoot" .Values.controller.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
@@ -21,7 +21,7 @@ Return the proper image name (for the init container volume-permissions image)
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "jenkins.imagePullSecrets" -}}
-{{- include "common.images.pullSecrets" (dict "images" (list .Values.jenkinsController.image .Values.volumePermissions.image) "global" .Values.global) -}}
+{{- include "common.images.pullSecrets" (dict "images" (list .Values.controller.image .Values.volumePermissions.image) "global" .Values.global) -}}
 {{- end -}}
 
 {{/*

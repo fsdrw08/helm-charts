@@ -7,8 +7,9 @@ Drone is a self-service Continuous Integration platform for busy development tea
 
 ## TL;DR
 
-```console
-helm template .\charts\drone-runner\ --name-template=drone-runner | podman kube play -
+```powershell
+$releaseName = "drone-runner"
+helm template .\charts\drone-runner\ --name-template=$releaseName | podman kube play -
 ```
 
 ## Introduction

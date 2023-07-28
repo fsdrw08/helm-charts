@@ -65,6 +65,7 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.droneServer.extraEnvVarsCM "context" $) }}
         {{- end }}
+        # extraEnvVarsInSecret
         - secretRef:
             name: {{ template "common.names.fullname" . }}
         {{- if .Values.droneServer.extraEnvVarsSecret }}
