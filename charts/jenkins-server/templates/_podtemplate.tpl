@@ -113,18 +113,50 @@ spec:
       args: 
         - --httpPort={{.Values.controller.targetPort}}
       {{- end }}
-      {{- end }}
       env:
         {{- if .Values.controller.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
+        {{- if or .Values.controller.additionalSecrets .Values.controller.existingSecret 
+                  .Values.controller.additionalExistingSecrets .Values.controller.adminSecret }}
+        - name: SECRETS
+          value: /run/secrets/additional
+        {{- end }}
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: JAVA_OPTS
+          value: >-
+            -Dcasc.reload.token=$(POD_NAME) 
+            {{ default "" .Values.controller.javaOpts }}
+        - name: JENKINS_OPTS
+          value: >-
+            {{ if .Values.controller.jenkinsUriPrefix }}--prefix={{ .Values.controller.jenkinsUriPrefix }} {{ end }} 
+            --webroot=/var/jenkins_cache/war 
+            {{ default "" .Values.controller.jenkinsOpts}}
+        - name: JENKINS_SLAVE_AGENT_PORT
+          value: "{{ .Values.controller.agentListenerPort }}"
+        {{- if .Values.controller.httpsKeyStore.enable }}
+        - name: JENKINS_HTTPS_KEYSTORE_PASSWORD
+        {{- if not .Values.controller.httpsKeyStore.disableSecretMount }}
+          valueFrom:
+            secretKeyRef:
+              name: {{ if .Values.controller.httpsKeyStore.jenkinsHttpsJksSecretName }} {{ .Values.controller.httpsKeyStore.jenkinsHttpsJksSecretName }} {{ else }} {{ template "jenkins.fullname" . }}-https-jks  {{ end }}
+              key: {{ "https-jks-password" | quote }}
+        {{- else }}
+          value: {{ .Values.controller.httpsKeyStore.password }}
+        {{- end }}
+        {{- end }}
+        - name: CASC_JENKINS_CONFIG
+          value: >-
+            {{ printf "%s/casc_configs" (.Values.controller.jenkinsRef)) }}
+            {{- if .Values.controller.JCasC.configUrls }},{{ join "," .Values.controller.JCasC.configUrls }}{{- end }}
       envFrom:
         {{- if .Values.controller.extraEnvVarsCM }}
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVarsCM "context" $) }}
         {{- end }}
-        - secretRef:
-            name: {{ template "common.names.fullname" . }}
         {{- if .Values.controller.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVarsSecret "context" $) }}
@@ -132,9 +164,33 @@ spec:
       {{- if .Values.controller.resources }}
       resources: {{- toYaml .Values.controller.resources | nindent 8 }}
       {{- end }}
+      {{/*
       {{- if .Values.controller.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.controller.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      */}}
+      ports:
+        {{- if .Values.controller.exposeHttp }}
+        - name: http
+          {{- if .Values.controller.httpsKeyStore.enable }}
+          containerPort: {{.Values.controller.httpsKeyStore.httpPort}}
+          hostPort: {{.Values.controller.hostHttpPort}}
+          {{- else }}
+          containerPort: {{.Values.controller.targetPort}}
+          hostPort: {{.Values.controller.hostTargetPort}}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.controller.agentListenerEnabled }}
+        - name: agent-listener
+          containerPort: {{ .Values.controller.agentListenerPort }}
+          {{- if .Values.controller.agentListenerHostPort }}
+          hostPort: {{ .Values.controller.agentListenerHostPort }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.controller.jmxPort }}
+        - name: jmx
+          containerPort: {{ .Values.controller.jmxPort }}
+        {{- end }}
       {{- if .Values.controller.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.controller.livenessProbe.enabled }}
@@ -151,11 +207,36 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.controller.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        {{- if and .Values.controller.httpsKeyStore.enable (not .Values.controller.httpsKeyStore.disableSecretMount) }}
+        - mountPath: {{ .Values.controller.httpsKeyStore.path }}
+          name: jenkins-https-keystore
+        {{- end }}
         - name: jenkins-home
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        - name: jenkins-config
+          mountPath: /var/jenkins_config
+          readOnly: true
+        {{- if .Values.controller.installPlugins }}
+        - name: plugin-dir
+          mountPath: {{ .Values.controller.jenkinsRef }}/plugins/
+          readOnly: false
+        {{- end }}
+        {{- if or .Values.controller.initScripts .Values.controller.initConfigMap }}
+        - name: init-scripts
+          mountPath: {{ .Values.controller.jenkinsHome }}/init.groovy.d
+        {{- end }}
+        {{- if or .Values.controller.additionalSecrets .Values.controller.existingSecret .Values.controller.additionalExistingSecrets .Values.controller.adminSecret }}
+        - name: jenkins-secrets
+          mountPath: /run/secrets/additional
+          readOnly: true
+        {{- end }}
+        - name: jenkins-cache
+          mountPath: /var/jenkins_cache
+        - name: tmp-volume
+          mountPath: /tmp
       {{- if .Values.controller.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
