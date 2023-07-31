@@ -42,8 +42,6 @@ spec:
       {{- end }}
       {{- if .Values.controller.provision.resources }}
       resources: {{- toYaml .Values.controller.provision.resources | nindent 8 }}
-      {{- else }}
-      resources: {{- toYaml .Values.controller.resources | indent 8 }}
       {{- end }}
       volumeMounts:
         - name: jenkins-home
@@ -63,7 +61,7 @@ spec:
         - name: tmp-volume
           mountPath: /tmp
         {{- end }}
-        {{- if or .Values.controller.initScripts .Values.controller.initConfigMap }}
+        {{- if or .Values.controller.initScripts }}
         - name: init-scripts
           mountPath: {{ .Values.controller.jenkinsHome }}/init.groovy.d
         {{- end }}
@@ -224,7 +222,7 @@ spec:
           mountPath: {{ .Values.controller.jenkinsRef }}/plugins/
           readOnly: false
         {{- end }}
-        {{- if or .Values.controller.initScripts .Values.controller.initConfigMap }}
+        {{- if or .Values.controller.initScripts controller. }}
         - name: init-scripts
           mountPath: {{ .Values.controller.jenkinsHome }}/init.groovy.d
         {{- end }}
@@ -252,19 +250,7 @@ spec:
     {{- end }}
     {{- end }}
     {{- /* init-scripts */}}
-    {{- if and .Values.controller.initScripts .Values.controller.initConfigMap }}
-    - name: init-scripts
-      projected:
-        sources:
-        - configMap:
-            name: {{ template "common.names.fullname" . }}-init-scripts
-        - configMap:
-            name: {{ .Values.controller.initConfigMap }}
-    {{- else if .Values.controller.initConfigMap }}
-    - name: init-scripts
-      configMap:
-        name: {{ .Values.controller.initConfigMap }}
-    {{- else if .Values.controller.initScripts }}
+    {{- if .Values.controller.initScripts }}
     - name: init-scripts
       configMap:
         name: {{ template "common.names.fullname" . }}-init-scripts
