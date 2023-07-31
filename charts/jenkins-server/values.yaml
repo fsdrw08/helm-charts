@@ -111,7 +111,7 @@ controller:
     successThreshold: 1
     httpGet:
       path: '{{ default "" .Values.controller.jenkinsUriPrefix }}/login'
-      port: http
+      port: 8080
   ## @param controller.readinessProbe.enabled Enable readinessProbe on jenkins containers
   ## @param controller.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param controller.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -194,6 +194,16 @@ controller:
     - configuration-as-code:1647.ve39ca_b_829b_42
     - workflow-aggregator:596.v8c21c963d92d
     - git:5.1.0
+  ## @param controller.installLatestPlugins install latest plugins
+  ## Set to false to download the minimum required version of all dependencies.
+  ##
+  installLatestPlugins: true
+  ## @param controller.installLatestSpecifiedPlugins
+  ## Set to true to download latest dependencies of any plugin that is requested to have the latest version.
+  ##
+  installLatestSpecifiedPlugins: false
+  ## @param controller.additionalPlugins List of plugins to install in addition to those listed in controller.installPlugins
+  additionalPlugins: []
   ## @param controller.overwritePluginsFromImage
   ## Configures if plugins bundled with `controller.image` should be overwritten with the values of 'controller.installPlugins' on upgrade or redeployment.
   ##
@@ -208,8 +218,10 @@ controller:
   ## Cloudbees Jenkins Distribution docker, you should set jenkinsRef: "/usr/share/cloudbees-jenkins-distribution/ref"
   ##
   jenkinsRef: "/usr/share/jenkins/ref"
+  ## @param controller.jenkinsWar Path to the jenkins war file which is used by jenkins-plugin-cli.
+  jenkinsWar: "/usr/share/jenkins/jenkins.war"
   ## @param controller.JCasC config of Jenkins Config as Code
-  ## Below is the implementation of Jenkins Configuration as Code. 
+  ## Below is the implementation of Jenkins Configuration as Code.
   ## Add a key under configScripts for each configuration area, where each corresponds to a plugin or section of the UI.
   ## Each key (prior to | character) is just a label, and can be any value.
   ## Keys are only used to give the section a meaningful name.  The only restriction is they may only contain RFC 1123 \ DNS label
@@ -220,7 +232,7 @@ controller:
   JCasC:
     defaultConfig: true
     ## @param controller.JCasC.configUrls list of Remote URLs for JCasC configuration files.
-    ## e.g. 
+    ## e.g.
     ## configUrls:
     ##   - https://acme.org/jenkins.yaml
     ##
@@ -244,7 +256,7 @@ controller:
     ##                  fromUserRecord:
     ##                    attributeName: "memberOf"
     configScripts: {}
-    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section. 
+    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
     ## For legacy,  default the chart includes apiToken configurations
     security:
       apiToken:
@@ -270,6 +282,11 @@ controller:
   agentListenerEnabled: true
   agentListenerPort: 50000
   agentListenerHostPort: 50000
+  ## @param controller.csrf CSRF Crumb issuer
+  csrf:
+    defaultCrumbIssuer:
+      enabled: true
+      proxyCompatability: true
   ## http related
   ## @param controller.exposeHttp
   http: false
@@ -277,11 +294,13 @@ controller:
   targetPort: 8080
   ## @param controller.targetHostPort host http port params set to jenkins and also for expose in container level
   hostTargetPort: 8080
+  ## @param controller.jenkinsUrl If you are not using the provided ingress you can specify `controller.jenkinsUrl` to change the url definition.
+  jenkinsUrl: ""
   ## @param controller.jenkinsUriPrefix If you set this prefix and use ingress controller then you might want to set the ingress path below
-  ## e.g. 
+  ## e.g.
   ## jenkinsUriPrefix: "/jenkins"
   ##
-  jenkinsUriPrefix: "" 
+  jenkinsUriPrefix: ""
   ## @param controller.httpsKeyStore keystore for https (usually contain cert and private key)
   ##
   httpsKeyStore:
@@ -289,7 +308,7 @@ controller:
     enable: false
     disableSecretMount: false
     ## @param controller.httpsKeyStore.httpPort HTTP Port that Jenkins should listen on along with HTTPS
-    ## It also serves liveness and readiness probs port. 
+    ## It also serves liveness and readiness probs port.
     ## When HTTPS keystore is enabled, servicePort and targetPort will be used as HTTPS port
     httpPort: 8081
     hostHttpPort: 8081
@@ -339,7 +358,6 @@ controller:
       /MwpRxxazoda9r45kqQpyG+XoM4pB+Fd3JzMc4FUGxfVPxJU4jLawnJJiZ3vqiSyaB0YyUL+Er1Q
       6NnqtR4gEBF0ZVlQmkycFvD4EC2boP943dLqNUvop+4R3SM1QMM6P5u8iTXtHd/VN4MwMyy1wtog
       hYAzODo1Jt59pcqqKJEas0C/lFJEB3frw4ImNx5fNlJYOpx+ijfQs9m39CevDq0=
-
   ## @ param controller.initScripts List of groovy init scripts to be executed during Jenkins controller start
   ## e.g.
   ## initScripts:
@@ -378,10 +396,10 @@ controller:
   ## and must start and end with an alphanumeric character (e.g. 'my-name',  or '123-abc')
   ## existingSecret: existing secret "secret-credentials" and a key inside it named "github-username" should be used in Jcasc as ${github-username}
   ## When using existingSecret, no need to specify the keyName under additionalExistingSecrets.
-  ## e.g. 
+  ## e.g.
   ## existingSecret: secret-credentials
   ##
-  existingSecret: 
+  existingSecret:
   ## @param controller.additionalExistingSecrets additional existing secrets mount to volume "jenkins-secrets"
   ## e.g.
   ## additionalExistingSecrets:
@@ -401,13 +419,13 @@ controller:
   javaOpts: ""
   ## @param controller.jenkinsOpts Jenkins launch arguments
   ## This is useful for customizing arguments to the jenkins launcher in a derived Jenkins image.
-  ## The following sample Dockerfile uses this option to 
+  ## The following sample Dockerfile uses this option to
   ## force use of HTTPS with a certificate included in the image.
   ## e.g.
   ## jenkinsOpts: >-
-  ##   --httpPort=-1 
-  ##   --httpsPort=8083 
-  ##   --httpsKeyStore=/var/lib/jenkins/certificate.pfx 
+  ##   --httpPort=-1
+  ##   --httpsPort=8083
+  ##   --httpsKeyStore=/var/lib/jenkins/certificate.pfx
   ##   --httpsKeyStorePassword=Password12
   jenkinsOpts: ""
   ## @param controller.provision initContainer for jenkins controller provision

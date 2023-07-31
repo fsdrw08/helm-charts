@@ -129,12 +129,12 @@ spec:
         - name: JAVA_OPTS
           value: >-
             -Dcasc.reload.token=$(POD_NAME) 
-            {{ default "" .Values.controller.javaOpts }}
+            {{- default "" .Values.controller.javaOpts }}
         - name: JENKINS_OPTS
           value: >-
-            {{ if .Values.controller.jenkinsUriPrefix }}--prefix={{ .Values.controller.jenkinsUriPrefix }} {{ end }} 
-            --webroot=/var/jenkins_cache/war 
-            {{ default "" .Values.controller.jenkinsOpts}}
+            {{- if .Values.controller.jenkinsUriPrefix }}--prefix={{ .Values.controller.jenkinsUriPrefix }} {{ end }}
+            --webroot=/var/jenkins_cache/war
+            {{- default "" .Values.controller.jenkinsOpts}}
         - name: JENKINS_SLAVE_AGENT_PORT
           value: "{{ .Values.controller.agentListenerPort }}"
         {{- if .Values.controller.httpsKeyStore.enable }}
@@ -142,7 +142,7 @@ spec:
         {{- if not .Values.controller.httpsKeyStore.disableSecretMount }}
           valueFrom:
             secretKeyRef:
-              name: {{ if .Values.controller.httpsKeyStore.jenkinsHttpsJksSecretName }} {{ .Values.controller.httpsKeyStore.jenkinsHttpsJksSecretName }} {{ else }} {{ template "jenkins.fullname" . }}-https-jks  {{ end }}
+              name: {{ if .Values.controller.httpsKeyStore.jenkinsHttpsJksSecretName }} {{ .Values.controller.httpsKeyStore.jenkinsHttpsJksSecretName }} {{ else }} {{ template "common.names.fullname" . }}-https-jks  {{ end }}
               key: {{ "https-jks-password" | quote }}
         {{- else }}
           value: {{ .Values.controller.httpsKeyStore.password }}
@@ -150,7 +150,7 @@ spec:
         {{- end }}
         - name: CASC_JENKINS_CONFIG
           value: >-
-            {{ printf "%s/casc_configs" (.Values.controller.jenkinsRef)) }}
+            {{ printf "%s/casc_configs" (.Values.controller.jenkinsRef) }}
             {{- if .Values.controller.JCasC.configUrls }},{{ join "," .Values.controller.JCasC.configUrls }}{{- end }}
       envFrom:
         {{- if .Values.controller.extraEnvVarsCM }}
@@ -244,6 +244,76 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.controller.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    {{- /* plugins */}}
+    {{- if .Values.controller.installPlugins }}
+    {{- if .Values.controller.overwritePluginsFromImage }}
+    - name: plugins
+      emptyDir: {}
+    {{- end }}
+    {{- end }}
+    {{- /* init-scripts */}}
+    {{- if and .Values.controller.initScripts .Values.controller.initConfigMap }}
+    - name: init-scripts
+      projected:
+        sources:
+        - configMap:
+            name: {{ template "common.names.fullname" . }}-init-scripts
+        - configMap:
+            name: {{ .Values.controller.initConfigMap }}
+    {{- else if .Values.controller.initConfigMap }}
+    - name: init-scripts
+      configMap:
+        name: {{ .Values.controller.initConfigMap }}
+    {{- else if .Values.controller.initScripts }}
+    - name: init-scripts
+      configMap:
+        name: {{ template "common.names.fullname" . }}-init-scripts
+    {{- end }}
+    {{- /* jenkins-config */}}
+    - name: jenkins-config
+      configMap:
+        name: {{ template "common.names.fullname" . }}
+    {{- /* plugin-dir */}}
+    {{- if .Values.controller.installPlugins }}
+    - name: plugin-dir
+      emptyDir: {}
+    {{- end }}
+    {{- /* jenkins-secrets */}}
+    {{- if or .Values.controller.additionalSecrets .Values.controller.existingSecret .Values.controller.additionalExistingSecrets .Values.controller.adminSecret }}
+    - name: jenkins-secrets
+      projected:
+        sources:
+        {{- if .Values.controller.additionalSecrets }}
+        - secret:
+            name: {{ template "common.names.fullname" . }}-additional-secrets
+        {{- end }}
+        {{- if .Values.controller.additionalExistingSecrets }}
+        {{- range $key, $value := .Values.controller.additionalExistingSecrets }}
+        - secret:
+            name: {{ tpl $value.name $ }}
+            items:
+              - key: {{ tpl $value.keyName $ }}
+                path: {{ tpl $value.name $ }}-{{ tpl $value.keyName $ }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.controller.adminSecret }}
+        - secret:
+            name: {{ .Values.controller.admin.existingSecret | default (include "common.names.fullname" .) }}
+            items:
+              - key: {{ .Values.controller.admin.userKey | default "jenkins-admin-user" }}
+                path: chart-admin-username
+              - key: {{ .Values.controller.admin.passwordKey | default "jenkins-admin-password" }}
+                path: chart-admin-password
+      {{- end }}
+      {{- if .Values.controller.existingSecret }}
+        - secret:
+            name: {{ .Values.controller.existingSecret }}
+      {{- end }}
+    {{- end }}
+    {{- /* jenkins-cache */}}
+    - name: jenkins-cache
+      emptyDir: {}
+    {{- /* jenkins-home */}}
     - name: jenkins-home
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
@@ -251,12 +321,16 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
+    - name: sc-config-volume
+      emptyDir: {}
+    - name: tmp-volume
+      emptyDir: {}
     {{- if .Values.controller.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
   {{ if eq .Values.instanceKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
-  restartPolicy: {{ .Values.instanceKind }}
+  restartPolicy: {{ .Values.controller.podRestartPolicy }}
   {{- end }}
 {{- end -}}
