@@ -13,53 +13,91 @@ metadata:
 data:
   apply_config.sh: |-
     set -e
-  {{- if .Values.controller.initializeOnce }}
+    {{- if .Values.controller.initializeOnce }}
     if [ -f {{ .Values.controller.jenkinsHome }}/initialization-completed ]; then
       echo "controller was previously initialized, refusing to re-initialize"
       exit 0
     fi
-  {{- end }}
+    {{- end }}
     echo "disable Setup Wizard"
     # Prevent Setup Wizard when JCasC is enabled
     echo $JENKINS_VERSION > {{ .Values.controller.jenkinsHome }}/jenkins.install.UpgradeWizard.state
     echo $JENKINS_VERSION > {{ .Values.controller.jenkinsHome }}/jenkins.install.InstallUtil.lastExecVersion
-  {{- if .Values.controller.overwritePlugins }}
+    {{- if .Values.controller.overwritePlugins }}
     echo "remove all plugins from shared volume"
     # remove all plugins from shared volume
     rm -rf {{ .Values.controller.jenkinsHome }}/plugins/*
-  {{- end }}
-  {{- if .Values.controller.installPlugins }}
+    {{- end }}
+    {{- if .Values.controller.installPlugins }}
     echo "download plugins"
     # Install missing plugins
     cp /var/jenkins_config/plugins.txt {{ .Values.controller.jenkinsHome }};
     rm -rf {{ .Values.controller.jenkinsRef }}/plugins/*.lock
     version () { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
     if [ -f "{{ .Values.controller.jenkinsWar }}" ] && [ -n "$(command -v jenkins-plugin-cli)" 2>/dev/null ] && [ $(version $(jenkins-plugin-cli --version)) -ge $(version "2.1.1") ]; then
-      jenkins-plugin-cli --verbose --war "{{ .Values.controller.jenkinsWar }}" --plugin-file "{{ .Values.controller.jenkinsHome }}/plugins.txt" --latest {{ .Values.controller.installLatestPlugins }}{{- if .Values.controller.installLatestSpecifiedPlugins }} --latest-specified{{- end }};
+      jenkins-plugin-cli --verbose \
+        --war "{{ .Values.controller.jenkinsWar }}" \
+        --plugin-file "{{ .Values.controller.jenkinsHome }}/plugins.txt" \
+        --latest {{ .Values.controller.installLatestPlugins }}{{- if .Values.controller.installLatestSpecifiedPlugins }} \
+        --latest-specified{{- end }};
     else
       /usr/local/bin/install-plugins.sh `echo $(cat {{ .Values.controller.jenkinsHome }}/plugins.txt)`;
     fi
     echo "copy plugins to shared volume"
     # Copy plugins to shared volume
     yes n | cp -i {{ .Values.controller.jenkinsRef }}/plugins/* /var/jenkins_plugins/;
-  {{- end }}
-  {{- /* if not .Values.controller.sidecars.configAutoReload.enabled */}}
+    {{- end }}
+    {{- /* if not .Values.controller.sidecars.configAutoReload.enabled */}}
     echo "copy configuration as code files"
     mkdir -p {{ .Values.controller.jenkinsHome }}/casc_configs;
     rm -rf {{ .Values.controller.jenkinsHome }}/casc_configs/*
     {{- if or .Values.controller.JCasC.defaultConfig .Values.controller.JCasC.configScripts }}
     cp -v /var/jenkins_config/*.yaml {{ .Values.controller.jenkinsHome }}/casc_configs
     {{- end }}
-  {{- /*end */}}
+    {{- /*end */}}
     echo "finished initialization"
-  {{- if .Values.controller.initializeOnce }}
+    {{- if .Values.controller.initializeOnce }}
     touch {{ .Values.controller.jenkinsHome }}/initialization-completed
-  {{- end }}
+    {{- end }}
   {{- /* if not .Values.controller.sidecars.configAutoReload.enabled */}}
-# Only add config to this script if we aren't auto-reloading otherwise the pod will restart upon each config change:
+  # Only add config to this script if we aren't auto-reloading otherwise the pod will restart upon each config change:
   {{- if .Values.controller.JCasC.defaultConfig }}
   jcasc-default-config.yaml: |-
-    {{- include "jenkins.casc.defaults" . |nindent 4}}
+    jenkins:
+      {{- $configScripts := toYaml .Values.controller.JCasC.configScripts }}
+      {{- if and (.Values.controller.JCasC.authorizationStrategy) (not (contains "authorizationStrategy:" $configScripts)) }}
+      authorizationStrategy:
+        {{- tpl .Values.controller.JCasC.authorizationStrategy . | nindent 4 }}
+      {{- end }}
+      {{- if and (.Values.controller.JCasC.securityRealm) (not (contains "securityRealm:" $configScripts)) }}
+      securityRealm:
+        {{- tpl .Values.controller.JCasC.securityRealm . | nindent 4 }}
+      {{- end }}
+      disableRememberMe: {{ .Values.controller.JCasC.disableRememberMe }}
+      {{- if .Values.controller.JCasC.remotingSecurity }}
+      remotingSecurity:
+        enabled: true
+      {{- end }}
+      mode: {{ .Values.controller.executorMode }}
+      numExecutors: {{ .Values.controller.numExecutors }}
+      {{- if not (kindIs "invalid" .Values.controller.customJenkinsLabels) }}
+      labelString: "{{ join " " .Values.controller.customJenkinsLabels }}"
+      {{- end }}
+      {{- if .Values.controller.projectNamingStrategy }}
+      {{- if kindIs "string" .Values.controller.projectNamingStrategy }}
+      projectNamingStrategy: "{{ .Values.controller.projectNamingStrategy }}"
+      {{- else }}
+      projectNamingStrategy:
+        {{- toYaml .Values.controller.projectNamingStrategy | nindent 4 }}
+      {{- end }}
+      {{- end }}
+      markupFormatter:
+        {{- if .Values.controller.enableRawHtmlMarkupFormatter }}
+        rawHtml:
+          disableSyntaxHighlighting: true
+        {{- else }}
+        {{- toYaml .Values.controller.markupFormatter | nindent 4 }}
+        {{- end }}    
   {{- end }}
 {{- range $key, $val := .Values.controller.JCasC.configScripts }}
   {{ $key }}.yaml: |-

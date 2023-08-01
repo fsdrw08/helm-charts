@@ -115,8 +115,7 @@ spec:
         {{- if .Values.controller.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
-        {{- if or .Values.controller.additionalSecrets .Values.controller.existingSecret 
-                  .Values.controller.additionalExistingSecrets .Values.controller.adminSecret }}
+        {{- if or .Values.controller.additionalSecrets .Values.controller.adminSecret }}
         - name: SECRETS
           value: /run/secrets/additional
         {{- end }}
@@ -222,11 +221,11 @@ spec:
           mountPath: {{ .Values.controller.jenkinsRef }}/plugins/
           readOnly: false
         {{- end }}
-        {{- if or .Values.controller.initScripts controller. }}
+        {{- if .Values.controller.initScripts }}
         - name: init-scripts
           mountPath: {{ .Values.controller.jenkinsHome }}/init.groovy.d
         {{- end }}
-        {{- if or .Values.controller.additionalSecrets .Values.controller.existingSecret .Values.controller.additionalExistingSecrets .Values.controller.adminSecret }}
+        {{- if or .Values.controller.additionalSecrets .Values.controller.adminSecret }}
         - name: jenkins-secrets
           mountPath: /run/secrets/additional
           readOnly: true
@@ -265,22 +264,13 @@ spec:
       emptyDir: {}
     {{- end }}
     {{- /* jenkins-secrets */}}
-    {{- if or .Values.controller.additionalSecrets .Values.controller.existingSecret .Values.controller.additionalExistingSecrets .Values.controller.adminSecret }}
+    {{- if or .Values.controller.additionalSecrets .Values.controller.adminSecret }}
     - name: jenkins-secrets
       projected:
         sources:
         {{- if .Values.controller.additionalSecrets }}
         - secret:
             name: {{ template "common.names.fullname" . }}-additional-secrets
-        {{- end }}
-        {{- if .Values.controller.additionalExistingSecrets }}
-        {{- range $key, $value := .Values.controller.additionalExistingSecrets }}
-        - secret:
-            name: {{ tpl $value.name $ }}
-            items:
-              - key: {{ tpl $value.keyName $ }}
-                path: {{ tpl $value.name $ }}-{{ tpl $value.keyName $ }}
-        {{- end }}
         {{- end }}
         {{- if .Values.controller.adminSecret }}
         - secret:
@@ -290,10 +280,6 @@ spec:
                 path: chart-admin-username
               - key: {{ .Values.controller.admin.passwordKey | default "jenkins-admin-password" }}
                 path: chart-admin-password
-      {{- end }}
-      {{- if .Values.controller.existingSecret }}
-        - secret:
-            name: {{ .Values.controller.existingSecret }}
       {{- end }}
     {{- end }}
     {{- /* jenkins-cache */}}

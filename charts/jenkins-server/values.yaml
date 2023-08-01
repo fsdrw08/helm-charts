@@ -188,12 +188,24 @@ controller:
     allowPrivilegeEscalation: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param controller.initializeOnce Enable to initialize the Jenkins controller only once on initial installation.
+  ## Without this, whenever the controller gets restarted (Evicted, etc.) it will fetch plugin updates which has the potential to cause breakage.
+  ## Note that for this to work, `persistence.enabled` needs to be set to `true`
+  initializeOnce: false
+  ## @param controller.overwritePlugins Overwrite installed plugins on start
+  ## Enable to always override the installed plugins with the values of 'controller.installPlugins' on upgrade or redeployment.
+  overwritePlugins: true
   ## @param controller.installPlugins List of plugins to be install during Jenkins controller start
   ##
+  ## @param controller.overwritePluginsFromImage
+  ## Configures if plugins bundled with `controller.image` should be overwritten with the values of 'controller.installPlugins' on upgrade or redeployment.
+  ##
+  overwritePluginsFromImage: true
   installPlugins:
-    - configuration-as-code:1647.ve39ca_b_829b_42
+    - configuration-as-code:1670.v564dc8b_982d0
     - workflow-aggregator:596.v8c21c963d92d
-    - git:5.1.0
+    - git:5.2.0
+    - docker-plugin:1.4
   ## @param controller.installLatestPlugins install latest plugins
   ## Set to false to download the minimum required version of all dependencies.
   ##
@@ -204,10 +216,6 @@ controller:
   installLatestSpecifiedPlugins: false
   ## @param controller.additionalPlugins List of plugins to install in addition to those listed in controller.installPlugins
   additionalPlugins: []
-  ## @param controller.overwritePluginsFromImage
-  ## Configures if plugins bundled with `controller.image` should be overwritten with the values of 'controller.installPlugins' on upgrade or redeployment.
-  ##
-  overwritePluginsFromImage: true
   ## @param controller.jenkinsHome jenkins home dir
   ## This values should not be changed unless you use your custom image of jenkins or any devired from.
   ## If you want to use Cloudbees Jenkins Distribution docker, you should set jenkinsHome: "/var/cloudbees-jenkins-distribution"
@@ -272,10 +280,14 @@ controller:
         - id: "${chart-admin-username}"
           name: "Jenkins Admin"
           password: "${chart-admin-password}"
-    ## ## @param controller.JCasC.authorizationStrategy Ignored if authorizationStrategy is defined in controller.JCasC.configScripts
+    ## @param controller.JCasC.authorizationStrategy Ignored if authorizationStrategy is defined in controller.JCasC.configScripts
     authorizationStrategy: |-
       loggedInUsersCanDoAnything:
         allowAnonymousRead: false
+    ## @param controller.JCasC.disableRememberMe Disable use of remember me
+    disableRememberMe: false
+    ## @param controller.JCasC.remotingSecurity
+    remotingSecurity: true
   ## @param controller.agentListenerEnabled expose agent listener port to host
   ## @param controller.agentListenerPort Listening port for agents
   ## @param controller.agentListenerHostPort
@@ -389,25 +401,6 @@ controller:
   ##     value: secretText
   ##
   additionalSecrets: []
-  ## @param controller.existingSecret The name of an existing secret containing keys credentials mount to volume "jenkins-secrets".
-  ## The 'name' and 'keyName' are concatenated with a '-' in between, so for example:
-  ## an existing secret "secret-credentials" and a key inside it named "github-password" should be used in Jcasc as ${secret-credentials-github-password}
-  ## 'name' and 'keyName' must be lowercase RFC 1123 label must consist of lower case alphanumeric characters or '-',
-  ## and must start and end with an alphanumeric character (e.g. 'my-name',  or '123-abc')
-  ## existingSecret: existing secret "secret-credentials" and a key inside it named "github-username" should be used in Jcasc as ${github-username}
-  ## When using existingSecret, no need to specify the keyName under additionalExistingSecrets.
-  ## e.g.
-  ## existingSecret: secret-credentials
-  ##
-  existingSecret:
-  ## @param controller.additionalExistingSecrets additional existing secrets mount to volume "jenkins-secrets"
-  ## e.g.
-  ## additionalExistingSecrets:
-  ##   - name: secret-name-1
-  ##     keyName: username
-  ##   - name: secret-name-1
-  ##     keyName: password
-  additionalExistingSecrets: []
   ## @param controller.javaOpts additional java options for jenkins controller
   ## e.g.
   ## javaOpts: >-
@@ -455,9 +448,6 @@ controller:
         cpu: 400m
         memory: 512Mi
       requests: {}
-  ## @param controller.existingConfigmap The name of an existing ConfigMap with your custom configuration for jenkins
-  ##
-  existingConfigmap:
   ## @param controller.command Override default container command (useful when using custom images)
   ##
   command: []
