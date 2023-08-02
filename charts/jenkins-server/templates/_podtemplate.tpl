@@ -167,7 +167,7 @@ spec:
       {{- end }}
       */}}
       ports:
-        {{- if .Values.controller.exposeHttp }}
+        {{- if .Values.controller.exposeHttpToHost }}
         - name: http
           {{- if .Values.controller.httpsKeyStore.enable }}
           containerPort: {{.Values.controller.httpsKeyStore.httpPort}}
@@ -177,11 +177,11 @@ spec:
           hostPort: {{.Values.controller.hostTargetPort}}
           {{- end }}
         {{- end }}
-        {{- if .Values.controller.agentListenerEnabled }}
+        {{- if .Values.controller.agentListener.enabled }}
         - name: agent-listener
-          containerPort: {{ .Values.controller.agentListenerPort }}
-          {{- if .Values.controller.agentListenerHostPort }}
-          hostPort: {{ .Values.controller.agentListenerHostPort }}
+          containerPort: {{ .Values.controller.agentListener.port }}
+          {{- if .Values.controller.agentListener.hostPort }}
+          hostPort: {{ .Values.controller.agentListener.hostPort }}
           {{- end }}
         {{- end }}
         {{- if .Values.controller.jmxPort }}

@@ -38,21 +38,21 @@ commonAnnotations: {}
 ## @param instanceKind specify the deploy kind： Pod, or Deployment
 instanceKind: Pod
 
-## @section jenkinsController Parameters
+## @section jenkins controller Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 controller:
-  ## Bitnami %%MAIN_CONTAINER%% image
+  ## Jenkins controller image
   ## ref: https://hub.docker.com/r/jenkins/jenkins/tags/
-  ## @param controller.image.registry %%MAIN_CONTAINER%% image registry
-  ## @param controller.image.repository %%MAIN_CONTAINER%% image repository
-  ## @param controller.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
-  ## @param controller.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param controller.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
-  ## @param controller.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
-  ## @param controller.image.debug Enable %%MAIN_CONTAINER%% image debug mode
+  ## @param controller.image.registry Jenkins controller image registry
+  ## @param controller.image.repository Jenkins controller image repository
+  ## @param controller.image.tag Jenkins controller image tag (immutable tags are recommended)
+  ## @param controller.image.digest Jenkins controller image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param controller.image.pullPolicy Jenkins controller image pull policy
+  ## @param controller.image.pullSecrets Jenkins controller image pull secrets
+  ## @param controller.image.debug Enable Jenkins controller image debug mode
   ##
   image:
     registry: docker.io
@@ -187,7 +187,7 @@ controller:
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
 
-  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @section Jenkins plugins and initialize
   ## @param controller.initializeOnce Enable to initialize the Jenkins controller only once on initial installation.
   ## Without this, whenever the controller gets restarted (Evicted, etc.) it will fetch plugin updates which has the potential to cause breakage.
   ## Note that for this to work, `persistence.enabled` needs to be set to `true`
@@ -195,12 +195,12 @@ controller:
   ## @param controller.overwritePlugins Overwrite installed plugins on start
   ## Enable to always override the installed plugins with the values of 'controller.installPlugins' on upgrade or redeployment.
   overwritePlugins: true
-  ## @param controller.installPlugins List of plugins to be install during Jenkins controller start
-  ##
   ## @param controller.overwritePluginsFromImage
   ## Configures if plugins bundled with `controller.image` should be overwritten with the values of 'controller.installPlugins' on upgrade or redeployment.
   ##
   overwritePluginsFromImage: true
+  ## @param controller.installPlugins List of plugins to be install during Jenkins controller start
+  ##
   installPlugins:
     - configuration-as-code:1670.v564dc8b_982d0
     - workflow-aggregator:596.v8c21c963d92d
@@ -213,9 +213,45 @@ controller:
   ## @param controller.installLatestSpecifiedPlugins
   ## Set to true to download latest dependencies of any plugin that is requested to have the latest version.
   ##
-  installLatestSpecifiedPlugins: false
+  installLatestSpecifiedPlugins: true
   ## @param controller.additionalPlugins List of plugins to install in addition to those listed in controller.installPlugins
   additionalPlugins: []
+  ## @param controller.provision initContainer settings for jenkins controller provision
+  provision:
+    ##
+    ## @param controller.provision.extraEnvVars Environment variables that get added to the provision init container (useful for e.g. http_proxy)
+    ## e.g.
+    ## extraEnvVars:
+    ##   - name: http_proxy
+    ##     value: "http://192.168.64.1:3128"
+    extraEnvVars: []
+    ##
+    ## @param controller.provision.extraEnvVarsFrom Environment variables that get added to the provision init container (useful for e.g. http_proxy)
+    ## e.g.
+    ## extraEnvVarsFrom:
+    ##   - configMapRef:
+    ##     name: xxx
+    extraEnvVarsFrom: []
+    ##
+    ## jenkins provision initContainer resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ## @param controller.provision.resources.limits The resources limits for the jenkins provision initContainer
+    ## @param controller.provision.resources.requests The requested resources for the jenkins provision initContainer
+    ##
+    resources:
+      limits:
+        cpu: 400m
+        memory: 512Mi
+      requests: {}
+  ## @ param controller.initScripts List of groovy init scripts to be executed during Jenkins controller start
+  ## e.g.
+  ## initScripts:
+  ##   - |
+  ##     print 'adding global pipeline libraries, register properties, bootstrap jobs...'
+  ##
+  initScripts: []
+
+  ## @section Jenkins Configuration parameters
   ## @param controller.jenkinsHome jenkins home dir
   ## This values should not be changed unless you use your custom image of jenkins or any devired from.
   ## If you want to use Cloudbees Jenkins Distribution docker, you should set jenkinsHome: "/var/cloudbees-jenkins-distribution"
@@ -228,85 +264,27 @@ controller:
   jenkinsRef: "/usr/share/jenkins/ref"
   ## @param controller.jenkinsWar Path to the jenkins war file which is used by jenkins-plugin-cli.
   jenkinsWar: "/usr/share/jenkins/jenkins.war"
-  ## @param controller.JCasC config of Jenkins Config as Code
-  ## Below is the implementation of Jenkins Configuration as Code.
-  ## Add a key under configScripts for each configuration area, where each corresponds to a plugin or section of the UI.
-  ## Each key (prior to | character) is just a label, and can be any value.
-  ## Keys are only used to give the section a meaningful name.  The only restriction is they may only contain RFC 1123 \ DNS label
-  ## characters: lowercase letters, numbers, and hyphens.  The keys become the name of a configuration yaml file on the controller in
-  ## /var/jenkins_home/casc_configs (by default) and will be processed by the Configuration as Code Plugin.  The lines after each |
-  ## become the content of the configuration yaml file.  The first line after this is a JCasC root element, eg jenkins, credentials,
-  ## etc.
-  JCasC:
-    defaultConfig: true
-    ## @param controller.JCasC.configUrls list of Remote URLs for JCasC configuration files.
-    ## e.g.
-    ## configUrls:
-    ##   - https://acme.org/jenkins.yaml
-    ##
-    configUrls: []
-    ## @param controller.JCasC.configScripts List of Jenkins Config as Code scripts
-    ## for each configuration area where each corresponds to a plugin or section of the UI.
-    ## e.g.
-    ##  configScripts:
-    ##    welcome-message: |
-    ##      jenkins:
-    ##        systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'.
-    ##    ldap-settings: |
-    ##      jenkins:
-    ##        securityRealm:
-    ##          ldap:
-    ##            configurations:
-    ##              - server: ldap.acme.com
-    ##                rootDN: dc=acme,dc=uk
-    ##                managerPasswordSecret: ${LDAP_PASSWORD}
-    ##                groupMembershipStrategy:
-    ##                  fromUserRecord:
-    ##                    attributeName: "memberOf"
-    configScripts: {}
-    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
-    ## For legacy,  default the chart includes apiToken configurations
-    security:
-      apiToken:
-        creationOfLegacyTokenEnabled: false
-        tokenGenerationOnCreationEnabled: false
-        usageStatisticsEnabled: true
-    ## @param controller.JCasC.securityRealm Ignored if securityRealm is defined in controller.JCasC.configScripts
-    securityRealm: |-
-      local:
-        allowsSignup: false
-        enableCaptcha: false
-        users:
-        - id: "${chart-admin-username}"
-          name: "Jenkins Admin"
-          password: "${chart-admin-password}"
-    ## @param controller.JCasC.authorizationStrategy Ignored if authorizationStrategy is defined in controller.JCasC.configScripts
-    authorizationStrategy: |-
-      loggedInUsersCanDoAnything:
-        allowAnonymousRead: false
-    ## @param controller.JCasC.disableRememberMe Disable use of remember me
-    disableRememberMe: false
-    ## @param controller.JCasC.remotingSecurity
-    remotingSecurity: true
-  ## @param controller.agentListenerEnabled expose agent listener port to host
-  ## @param controller.agentListenerPort Listening port for agents
-  ## @param controller.agentListenerHostPort
-  agentListenerEnabled: true
-  agentListenerPort: 50000
-  agentListenerHostPort: 50000
-  ## @param controller.csrf CSRF Crumb issuer
-  csrf:
-    defaultCrumbIssuer:
-      enabled: true
-      proxyCompatability: true
-  ## http related
-  ## @param controller.exposeHttp
-  http: false
+
+  ## @section Jenkins port config
+  ## @param controller.agentListener.enabled expose agent listener port to host
+  ## @param controller.agentListener.port Listening port for agents
+  ## @param controller.agentListener.hostPort
+  agentListener:
+    enabled: true
+    port: 50000
+    hostPort: 50000
   ## @param controller.targetPort http port params set to jenkins and also for expose in container level
+  ##
   targetPort: 8080
+  ## @param controller.exposeHttpToHost expose http port to podman host
+  ##
+  exposeHttpToHost: false
   ## @param controller.targetHostPort host http port params set to jenkins and also for expose in container level
+  ## only take effect when controller.exposeHttpToHost set to true
+  ##
   hostTargetPort: 8080
   ## @param controller.jenkinsUrl If you are not using the provided ingress you can specify `controller.jenkinsUrl` to change the url definition.
+  ##
   jenkinsUrl: ""
   ## @param controller.jenkinsUriPrefix If you set this prefix and use ingress controller then you might want to set the ingress path below
   ## e.g.
@@ -370,13 +348,6 @@ controller:
       /MwpRxxazoda9r45kqQpyG+XoM4pB+Fd3JzMc4FUGxfVPxJU4jLawnJJiZ3vqiSyaB0YyUL+Er1Q
       6NnqtR4gEBF0ZVlQmkycFvD4EC2boP943dLqNUvop+4R3SM1QMM6P5u8iTXtHd/VN4MwMyy1wtog
       hYAzODo1Jt59pcqqKJEas0C/lFJEB3frw4ImNx5fNlJYOpx+ijfQs9m39CevDq0=
-  ## @ param controller.initScripts List of groovy init scripts to be executed during Jenkins controller start
-  ## e.g.
-  ## initScripts:
-  ##   - |
-  ##     print 'adding global pipeline libraries, register properties, bootstrap jobs...'
-  ##
-  initScripts: []
 
   ## @param controller.adminSecret The default configuration uses this secret to configure an admin user
   ## If you don't need that user or use a different security realm then you can disable it
@@ -421,33 +392,7 @@ controller:
   ##   --httpsKeyStore=/var/lib/jenkins/certificate.pfx
   ##   --httpsKeyStorePassword=Password12
   jenkinsOpts: ""
-  ## @param controller.provision initContainer for jenkins controller provision
-  provision:
-    ##
-    ## @param controller.provision.extraEnvVars Environment variables that get added to the provision init container (useful for e.g. http_proxy)
-    ## e.g.
-    ## extraEnvVars:
-    ##   - name: http_proxy
-    ##     value: "http://192.168.64.1:3128"
-    extraEnvVars: []
-    ##
-    ## @param controller.provision.extraEnvVarsFrom Environment variables that get added to the provision init container (useful for e.g. http_proxy)
-    ## e.g.
-    ## extraEnvVarsFrom:
-    ##   - configMapRef:
-    ##     name: xxx
-    extraEnvVarsFrom: []
-    ##
-    ## jenkins provision initContainer resource requests and limits
-    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-    ## @param controller.provision.resources.limits The resources limits for the jenkins provision initContainer
-    ## @param controller.provision.resources.requests The requested resources for the jenkins provision initContainer
-    ##
-    resources:
-      limits:
-        cpu: 400m
-        memory: 512Mi
-      requests: {}
+
   ## @param controller.command Override default container command (useful when using custom images)
   ##
   command: []
@@ -524,6 +469,82 @@ controller:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
+  ## @param controller.JCasC config of Jenkins Config as Code
+  ## Below is the implementation of Jenkins Configuration as Code.
+  ## Each key (prior to | character) is just a label, and can be any value.
+  ## Keys are only used to give the section a meaningful name.  The only restriction is they may only contain RFC 1123 \ DNS label
+  ## characters: lowercase letters, numbers, and hyphens.  The keys become the name of a configuration yaml file on the controller in
+  ## /var/jenkins_home/casc_configs (by default) and will be processed by the Configuration as Code Plugin.  The lines after each |
+  ## become the content of the configuration yaml file.  The first line after this is a JCasC root element, eg jenkins, credentials,
+  ## etc.
+  JCasC:
+    ## @param controller.JCasC.configUrls list of Remote URLs for JCasC configuration files.
+    ## e.g.
+    ## configUrls:
+    ##   - https://acme.org/jenkins.yaml
+    ##
+    configUrls: []
+    ## @param controller.JCasC.authorizationStrategy Jenkins Config as Code for Authorization Strategy
+    authorizationStrategy:
+      loggedInUsersCanDoAnything:
+        allowAnonymousRead: false
+    ## @param controller.JCasC.crumbIssuer
+    ## Some HTTP proxies filter out information that the default crumb issuer uses to calculate the nonce value.
+    ## If an HTTP proxy sits between your browser client and your Jenkins server
+    ## and you receive a 403 response when submitting a form to Jenkins, checking this option may help.
+    ## Using this option makes the nonce value easier to forge.
+    crumbIssuer:
+      standard:
+        excludeClientIPFromCrumbP: true
+    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
+    ## For legacy,  default the chart includes apiToken configurations
+    security:
+      apiToken:
+        creationOfLegacyTokenEnabled: false
+        tokenGenerationOnCreationEnabled: false
+        usageStatisticsEnabled: true
+    ## @param controller.JCasC.securityRealm Jenkins Config as Code for securityRealm
+    ## e.g.
+    ## securityRealm: |-
+    ##   local:
+    ##     allowsSignup: false
+    ##     enableCaptcha: false
+    ##     users:
+    ##       - id: "${chart-admin-username}"
+    ##         name: "Jenkins Admin"
+    ##         password: "${chart-admin-password}"
+    securityRealm: {}
+    unclassified:
+      location:
+        adminAddress:
+        url: "{{ .Values.controller.jenkinsUrl }}"
+    ## @param configAsCode.extraConfig Append additional settings at the root of the configuration-as-code file
+    ## e.g.
+    ## extraConfig:
+    ##   ## Select this option to remove the “Remember me on this computer” checkbox from the login screen.
+    ##   ## ref: https://github.com/jenkinsci/jenkins/blob/master/core/src/main/resources/hudson/security/GlobalSecurityConfiguration/help-disableRememberMe.html
+    ##   disableRememberMe: true
+    ##   ## Set executor mode of the Jenkins node. Possible values are: NORMAL or EXCLUSIVE
+    ##   ## EXCLUSIVE maps to "Only build jobs with label restrictions matching this node."
+    ##   ## NORMAL maps to "Utilize this node as much as possible"
+    ##   ## ref: https://stackoverflow.com/questions/41473024/jenkins-slave-groovy-definition-how-to-set-usage-parameter
+    ##   mode: "NORMAL"
+    ##   ## This controls the number of concurrent builds that Jenkins can perform on this
+    ##   ## agent. So the value affects the overall system load Jenkins may incur. A good
+    ##   ## value to start with would be the number of processors.
+    ##   ## ref: https://github.com/jenkinsci/jenkins/blob/master/war/src/main/webapp/help/system-config/master-slave/numExecutors.html
+    ##   numExecutors: 2
+    ##   ## other config
+    ##   ## Append Jenkins labels to the controller
+    ##   # labelString:
+    ##   #   -
+    ##   #   -
+    ##   ## Configures the restrictions for naming projects.
+    ##   # projectNamingStrategy:
+    ##   # markupFormatter
+    ##   #   rawHtml:
+    ##   #     disableSyntaxHighlighting: true
+    extraConfig: {}
 
 ## @section Persistence Parameters
 ##

@@ -170,11 +170,6 @@ jenkins:
       {{- end }}
       {{- end }}
   */}}
-  {{- if .Values.controller.csrf.defaultCrumbIssuer.enabled }}
-  crumbIssuer:
-    standard:
-      excludeClientIPFromCrumb: {{ if .Values.controller.csrf.defaultCrumbIssuer.proxyCompatability }}true{{ else }}false{{- end }}
-  {{- end }}
 {{- include "jenkins.casc.security" . }}
 {{- if .Values.controller.scriptApproval }}
   scriptApproval:

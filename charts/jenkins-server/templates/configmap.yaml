@@ -43,67 +43,36 @@ data:
     else
       /usr/local/bin/install-plugins.sh `echo $(cat {{ .Values.controller.jenkinsHome }}/plugins.txt)`;
     fi
-    echo "copy plugins to shared volume"
     # Copy plugins to shared volume
+    echo "copy plugins to shared volume"
     yes n | cp -i {{ .Values.controller.jenkinsRef }}/plugins/* /var/jenkins_plugins/;
     {{- end }}
-    {{- /* if not .Values.controller.sidecars.configAutoReload.enabled */}}
+    # copy configuration as code files
     echo "copy configuration as code files"
     mkdir -p {{ .Values.controller.jenkinsHome }}/casc_configs;
     rm -rf {{ .Values.controller.jenkinsHome }}/casc_configs/*
-    {{- if or .Values.controller.JCasC.defaultConfig .Values.controller.JCasC.configScripts }}
-    cp -v /var/jenkins_config/*.yaml {{ .Values.controller.jenkinsHome }}/casc_configs
-    {{- end }}
-    {{- /*end */}}
     echo "finished initialization"
     {{- if .Values.controller.initializeOnce }}
     touch {{ .Values.controller.jenkinsHome }}/initialization-completed
     {{- end }}
-  {{- /* if not .Values.controller.sidecars.configAutoReload.enabled */}}
-  # Only add config to this script if we aren't auto-reloading otherwise the pod will restart upon each config change:
-  {{- if .Values.controller.JCasC.defaultConfig }}
   jcasc-default-config.yaml: |-
     jenkins:
-      {{- $configScripts := toYaml .Values.controller.JCasC.configScripts }}
-      {{- if and (.Values.controller.JCasC.authorizationStrategy) (not (contains "authorizationStrategy:" $configScripts)) }}
-      authorizationStrategy:
-        {{- tpl .Values.controller.JCasC.authorizationStrategy . | nindent 4 }}
+      {{- if .Values.controller.JCasC.authorizationStrategy }}
+      authorizationStrategy: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.authorizationStrategy "context" $ ) | nindent 8 }}
       {{- end }}
-      {{- if and (.Values.controller.JCasC.securityRealm) (not (contains "securityRealm:" $configScripts)) }}
-      securityRealm:
-        {{- tpl .Values.controller.JCasC.securityRealm . | nindent 4 }}
+      {{- if .Values.controller.JCasC.security }}
+      security: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.security "context" $ ) | nindent 8 }}
       {{- end }}
-      disableRememberMe: {{ .Values.controller.JCasC.disableRememberMe }}
-      {{- if .Values.controller.JCasC.remotingSecurity }}
-      remotingSecurity:
-        enabled: true
+      {{- if .Values.controller.JCasC.securityRealm }}
+      securityRealm: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.securityRealm "context" $ ) | nindent 8 }}
       {{- end }}
-      mode: {{ .Values.controller.executorMode }}
-      numExecutors: {{ .Values.controller.numExecutors }}
-      {{- if not (kindIs "invalid" .Values.controller.customJenkinsLabels) }}
-      labelString: "{{ join " " .Values.controller.customJenkinsLabels }}"
+      {{- if .Values.controller.JCasC.crumbIssuer }}
+      crumbIssuer: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.crumbIssuer "context" $ ) | nindent 8 }}
       {{- end }}
-      {{- if .Values.controller.projectNamingStrategy }}
-      {{- if kindIs "string" .Values.controller.projectNamingStrategy }}
-      projectNamingStrategy: "{{ .Values.controller.projectNamingStrategy }}"
-      {{- else }}
-      projectNamingStrategy:
-        {{- toYaml .Values.controller.projectNamingStrategy | nindent 4 }}
+      unclassified: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.unclassified "context" $ ) | nindent 8 }}
+      {{- if  .Values.controller.JCasC.extraConfig }}
+      {{- include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.extraConfig "context" $ ) | nindent 4 }}
       {{- end }}
-      {{- end }}
-      markupFormatter:
-        {{- if .Values.controller.enableRawHtmlMarkupFormatter }}
-        rawHtml:
-          disableSyntaxHighlighting: true
-        {{- else }}
-        {{- toYaml .Values.controller.markupFormatter | nindent 4 }}
-        {{- end }}    
-  {{- end }}
-{{- range $key, $val := .Values.controller.JCasC.configScripts }}
-  {{ $key }}.yaml: |-
-{{ tpl $val $| indent 4 }}
-{{- end }}
-{{- /*end */}}
   plugins.txt: |-
 {{- if .Values.controller.installPlugins }}
   {{- range $installPlugin := .Values.controller.installPlugins }}
