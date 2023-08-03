@@ -101,7 +101,7 @@ controller:
   ##
   resources:
     limits:
-      cpu: 1000m
+      cpu: 400m
       memory: 3072Mi
     requests: {}
   ## Configure Pods Security Context
@@ -163,7 +163,15 @@ controller:
     ## extraEnvVars:
     ##   - name: http_proxy
     ##     value: "http://192.168.64.1:3128"
-    extraEnvVars: []
+    extraEnvVars:
+      # - name: JENKINS_UC
+      #   value: "https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates"
+      # - name: JENKINS_UC_DOWNLOAD
+      #   value: "https://mirrors.tuna.tsinghua.edu.cn/jenkins"
+      - name: http_proxy
+        value: "http://192.168.255.1:7890"
+      - name: https_proxy
+        value: "http://192.168.255.1:7890"
     ##
     ## @param controller.provision.extraEnvVarsFrom Environment variables that get added to the provision init container (useful for e.g. http_proxy)
     ## e.g.
@@ -501,6 +509,13 @@ controller:
     crumbIssuer:
       standard:
         excludeClientIPFromCrumb: true
+    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
+    ## For legacy,  default the chart includes apiToken configurations
+    security:
+      apiToken:
+        creationOfLegacyTokenEnabled: false
+        tokenGenerationOnCreationEnabled: false
+        usageStatisticsEnabled: true
     ## @param controller.JCasC.securityRealm Jenkins Config as Code for securityRealm
     ## e.g.
     ## securityRealm: |-
@@ -516,13 +531,6 @@ controller:
       location:
         adminAddress:
         url: "{{ .Values.controller.jenkinsUrl }}"
-    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
-    ## For legacy,  default the chart includes apiToken configurations
-    security:
-      apiToken:
-        creationOfLegacyTokenEnabled: false
-        tokenGenerationOnCreationEnabled: false
-        usageStatisticsEnabled: true
     ## @param configAsCode.extraConfig Append additional settings at the root of the configuration-as-code file
     ## e.g.
     ## extraConfig:

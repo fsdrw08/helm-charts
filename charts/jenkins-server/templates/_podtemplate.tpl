@@ -23,6 +23,26 @@ spec:
   securityContext: {{- omit .Values.controller.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
   initContainers:
+    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
+    - name: volume-permissions
+      image: {{ include "jenkins.volumePermissions.image" . }}
+      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
+      command:
+        - /bin/bash
+        - -ec
+        - |
+          chown -R {{ .Values.controller.containerSecurityContext.runAsUser }}:{{ .Values.controller.containerSecurityContext.runAsGroup }} {{ .Values.controller.jenkinsHome }}
+      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
+      {{- if .Values.volumePermissions.resources }}
+      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- end }}
+      volumeMounts:
+        - name: jenkins-home
+          mountPath: {{ .Values.persistence.mountPath }}
+          {{- if .Values.persistence.subPath }}
+          subPath: {{ .Values.persistence.subPath }}
+          {{- end }}
+    {{- end }}
     - name: provision
       image: {{ template "jenkins.image" . }}
       imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
@@ -69,23 +89,7 @@ spec:
         - name: jenkins-https-keystore
           mountPath: {{ .Values.controller.httpsKeyStore.path }}
         {{- end }}
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "jenkins.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
-    {{- end }}
+    
     {{- if .Values.controller.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.controller.initContainers "context" $) | nindent 4 }}
     {{- end }}
@@ -147,7 +151,7 @@ spec:
         {{- end }}
         - name: CASC_JENKINS_CONFIG
           value: >-
-            {{ printf "%s/casc_configs" (.Values.controller.jenkinsRef) }}
+            {{ printf "%s/casc_configs" (.Values.controller.jenkinsHome) }}
             {{- if .Values.controller.JCasC.configUrls }},{{ join "," .Values.controller.JCasC.configUrls }}{{- end }}
       envFrom:
         {{- if .Values.controller.extraEnvVarsCM }}
@@ -245,7 +249,8 @@ spec:
     {{- if .Values.controller.installPlugins }}
     {{- if .Values.controller.overwritePluginsFromImage }}
     - name: plugins
-      emptyDir: {}
+      persistentVolumeClaim:
+        claimName: {{ include "common.names.fullname" . }}-plugins
     {{- end }}
     {{- end }}
     {{- /* init-scripts */}}
@@ -257,31 +262,37 @@ spec:
     {{- /* jenkins-config */}}
     - name: jenkins-config
       configMap:
-        name: {{ template "common.names.fullname" . }}
+        name: {{ template "common.names.fullname" . }}-cm
     {{- /* plugin-dir */}}
     {{- if .Values.controller.installPlugins }}
     - name: plugin-dir
-      emptyDir: {}
+      persistentVolumeClaim:
+        claimName: {{ include "common.names.fullname" . }}-plugin-dir
     {{- end }}
     {{- /* jenkins-secrets */}}
+    - name: jenkins-secrets
+      secret:
+        secretName: {{ include "common.names.fullname" . }}-sec
+    {{- /*
     {{- if or .Values.controller.additionalSecrets .Values.controller.adminSecret }}
     - name: jenkins-secrets
       projected:
         sources:
-        {{- if .Values.controller.additionalSecrets }}
-        - secret:
-            name: {{ template "common.names.fullname" . }}-additional-secrets
-        {{- end }}
-        {{- if .Values.controller.adminSecret }}
-        - secret:
-            name: {{ .Values.controller.admin.existingSecret | default (include "common.names.fullname" .) }}
-            items:
-              - key: {{ .Values.controller.admin.userKey | default "jenkins-admin-user" }}
-                path: chart-admin-username
-              - key: {{ .Values.controller.admin.passwordKey | default "jenkins-admin-password" }}
-                path: chart-admin-password
-      {{- end }}
+          {{- if .Values.controller.adminSecret }}
+          - secret:
+              name: {{ include "common.names.fullname" . }}
+              items:
+                - key: jenkins-admin-user
+                  path: chart-admin-username
+                - key: jenkins-admin-password
+                  path: chart-admin-password
+          {{- end }}
+          {{- if .Values.controller.additionalSecrets }}
+          - secret:
+              name: {{ template "common.names.fullname" . }}-additional-secrets
+          {{- end }}
     {{- end }}
+    */}}
     {{- /* jenkins-cache */}}
     - name: jenkins-cache
       emptyDir: {}
