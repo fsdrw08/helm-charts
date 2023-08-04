@@ -19,13 +19,15 @@ data:
       exit 0
     fi
     {{- end }}
-    echo "disable Setup Wizard"
-
+    
+    {{- if .Values.controller.JCasC.enabled }}
     # Prevent Setup Wizard when JCasC is enabled
+    echo "disable Setup Wizard"
     echo $JENKINS_VERSION > {{ .Values.controller.jenkinsHome }}/jenkins.install.UpgradeWizard.state
     echo $JENKINS_VERSION > {{ .Values.controller.jenkinsHome }}/jenkins.install.InstallUtil.lastExecVersion
+    {{- end }}
+
     {{- if .Values.controller.overwritePlugins }}
-    
     # remove all plugins from shared volume
     echo "remove all plugins from shared volume"
     rm -rf {{ .Values.controller.jenkinsHome }}/plugins/*
@@ -61,7 +63,7 @@ data:
     mkdir -p {{ .Values.controller.jenkinsHome }}/casc_configs;
     rm -rf {{ .Values.controller.jenkinsHome }}/casc_configs/*
     {{- if .Values.controller.JCasC.enabled }}
-    cp -v /var/jenkins_config/*.yaml {{ .Values.controller.jenkinsHome }}/casc_configs
+    cp -v /var/jenkins_config/jcasc/*.yaml {{ .Values.controller.jenkinsHome }}/casc_configs
     {{- end }}
 
     # finished initialization
@@ -69,7 +71,8 @@ data:
     {{- if .Values.controller.initializeOnce }}
     touch {{ .Values.controller.jenkinsHome }}/initialization-completed
     {{- end }}
-    sleep 1m
+
+  {{/*
   jcasc-default-config.yaml: |-
     jenkins:
       {{- if .Values.controller.JCasC.authorizationStrategy }}
@@ -88,6 +91,7 @@ data:
     {{- if  .Values.controller.JCasC.extraConfig }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.extraConfig "context" $ ) | nindent 4 }}
     {{- end }}
+  */}}
   plugins.txt: |-
 {{- if .Values.controller.installPlugins }}
   {{- range $installPlugin := .Values.controller.installPlugins }}

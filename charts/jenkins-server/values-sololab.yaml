@@ -491,6 +491,16 @@ controller:
     ## @param JCasC.enabled Enable configuration as code.
     ##
     enabled: true
+    ## @param configAsCode.extraConfigFiles List of additional configuration-as-code files to be mounted
+    ## E.g.:
+    ##  welcome-message.yaml: |-
+    ##    jenkins:
+    ##      systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'.
+    ##
+    extraConfigFiles:
+      welcome-message.yaml: |-
+        jenkins:
+          systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'.
     ## @param controller.JCasC.configUrls list of Remote URLs for JCasC configuration files.
     ## e.g.
     ## configUrls:

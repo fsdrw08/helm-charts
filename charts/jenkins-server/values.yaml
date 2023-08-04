@@ -139,8 +139,11 @@ controller:
   ##
   overwritePluginsFromImage: true
   ## @param controller.installPlugins List of plugins to be install during Jenkins controller start
+  ## ref: https://github.com/jenkinsci/kubernetes-operator/issues/746
   ##
   installPlugins:
+    - workflow-api:1251.vd4889a_b_0a_065
+    - workflow-durable-task-step:1278.v94b_dc2b_50c6f
     - configuration-as-code:1670.v564dc8b_982d0
     - workflow-aggregator:596.v8c21c963d92d
     - git:5.2.0
@@ -483,6 +486,13 @@ controller:
     ## @param JCasC.enabled Enable configuration as code.
     ##
     enabled: true
+    ## @param configAsCode.extraConfigFiles List of additional configuration-as-code files to be mounted
+    ## E.g.:
+    ##  welcome-message.yaml: |-
+    ##    jenkins:
+    ##      systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'.
+    ##
+    extraConfigFiles: {}
     ## @param controller.JCasC.configUrls list of Remote URLs for JCasC configuration files.
     ## e.g.
     ## configUrls:

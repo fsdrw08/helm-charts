@@ -71,6 +71,10 @@ spec:
           {{- end }}
         - name: jenkins-config
           mountPath: /var/jenkins_config
+        {{- if .Values.controller.JCasC.enabled }}
+        - name: jenkins-config-jcasc
+          mountPath: /var/jenkins_config/jcasc
+        {{- end }}
         {{- if .Values.controller.installPlugins }}
         {{- if .Values.controller.overwritePluginsFromImage }}
         - name: plugins
@@ -220,6 +224,10 @@ spec:
         - name: jenkins-config
           mountPath: /var/jenkins_config
           readOnly: true
+        {{- if .Values.controller.JCasC.enabled }}
+        - name: jenkins-config-jcasc
+          mountPath: /var/jenkins_config/jcasc
+        {{- end }}
         {{- if .Values.controller.installPlugins }}
         - name: plugin-dir
           mountPath: {{ .Values.controller.jenkinsRef }}/plugins/
@@ -263,6 +271,10 @@ spec:
     - name: jenkins-config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    {{- /* jenkins-config-jcasc */}}
+    - name: jenkins-config-jcasc
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm-jcasc
     {{- /* plugin-dir */}}
     {{- if .Values.controller.installPlugins }}
     - name: plugin-dir
