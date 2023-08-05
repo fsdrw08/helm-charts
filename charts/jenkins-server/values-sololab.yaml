@@ -1,6 +1,3 @@
-# Copyright VMware, Inc.
-# SPDX-License-Identifier: APACHE-2.0
-
 ## @section Global parameters
 ## Global Docker image parameters
 ## Please, note that this will override the image parameters, including dependencies, configured to use the global value
@@ -101,7 +98,7 @@ controller:
   ##
   resources:
     limits:
-      cpu: 400m
+      cpu: 1000m
       memory: 3072Mi
     requests: {}
   ## Configure Pods Security Context
@@ -139,10 +136,18 @@ controller:
   ##
   overwritePluginsFromImage: true
   ## @param controller.installPlugins List of plugins to be install during Jenkins controller start
+  ## ref: https://github.com/jenkinsci/kubernetes-operator/issues/746
   ##
   installPlugins:
-    - configuration-as-code:1670.v564dc8b_982d0
+    - workflow-api:1251.vd4889a_b_0a_065
+    - workflow-durable-task-step:1278.v94b_dc2b_50c6f
     - workflow-aggregator:596.v8c21c963d92d
+    - workflow-cps:3731.ve4b_5b_857b_a_d3
+    - pipeline-model-api:2.2144.v077a_d1928a_40
+    - pipeline-model-definition:2.2144.v077a_d1928a_40
+    - pipeline-model-extensions:2.2144.v077a_d1928a_40
+    - pipeline-stage-step:305.ve96d0205c1c6
+    - configuration-as-code:1670.v564dc8b_982d0
     - git:5.2.0
     - docker-plugin:1.4
   ## @param controller.installLatestPlugins install latest plugins
@@ -164,10 +169,10 @@ controller:
     ##   - name: http_proxy
     ##     value: "http://192.168.64.1:3128"
     extraEnvVars:
-      # - name: JENKINS_UC
-      #   value: "https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates"
-      # - name: JENKINS_UC_DOWNLOAD
-      #   value: "https://mirrors.tuna.tsinghua.edu.cn/jenkins"
+      - name: JENKINS_UC
+        value: "https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates"
+      - name: JENKINS_UC_DOWNLOAD
+        value: "https://mirrors.tuna.tsinghua.edu.cn/jenkins"
       - name: http_proxy
         value: "http://192.168.255.1:7890"
       - name: https_proxy
@@ -233,7 +238,7 @@ controller:
   ## @param controller.adminPassword Admin password (and user) created as a secret if adminSecret is true
   ## Defaults to a random 10-character alphanumeric string if not set
   ##
-  adminPassword: ""
+  adminPassword: "P@ssw0rd"
   ## @param controller.additionalSecrets List of additional secrets to create and mount according to [JCasC docs](https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/docs/features/secrets.adoc#kubernetes-secrets)
   ## Usually it's for JCasC (Jenkins config as code) to manage credentials and other sensitive information in the YAML configuration files
   ## e.g.
@@ -519,13 +524,6 @@ controller:
     crumbIssuer:
       standard:
         excludeClientIPFromCrumb: true
-    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
-    ## For legacy,  default the chart includes apiToken configurations
-    security:
-      apiToken:
-        creationOfLegacyTokenEnabled: false
-        tokenGenerationOnCreationEnabled: false
-        usageStatisticsEnabled: true
     ## @param controller.JCasC.securityRealm Jenkins Config as Code for securityRealm
     ## e.g.
     ## securityRealm: |-
@@ -541,6 +539,13 @@ controller:
       location:
         adminAddress:
         url: "{{ .Values.controller.jenkinsUrl }}"
+    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
+    ## For legacy,  default the chart includes apiToken configurations
+    security:
+      apiToken:
+        creationOfLegacyTokenEnabled: false
+        tokenGenerationOnCreationEnabled: false
+        usageStatisticsEnabled: true
     ## @param configAsCode.extraConfig Append additional settings at the root of the configuration-as-code file
     ## e.g.
     ## extraConfig:
