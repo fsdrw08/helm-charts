@@ -38,7 +38,7 @@ spec:
       {{- end }}
       volumeMounts:
         - name: jenkins-home
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ .Values.controller.jenkinsHome }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -65,7 +65,7 @@ spec:
       {{- end }}
       volumeMounts:
         - name: jenkins-home
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ .Values.controller.jenkinsHome }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -217,7 +217,7 @@ spec:
           name: jenkins-https-keystore
         {{- end }}
         - name: jenkins-home
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ .Values.controller.jenkinsHome }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
