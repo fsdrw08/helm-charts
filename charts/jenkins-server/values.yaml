@@ -139,17 +139,36 @@ controller:
   ## ref: https://github.com/jenkinsci/kubernetes-operator/issues/746
   ##
   installPlugins:
-    - workflow-api:1251.vd4889a_b_0a_065
-    - workflow-durable-task-step:1278.v94b_dc2b_50c6f
-    - workflow-aggregator:596.v8c21c963d92d
-    - workflow-cps:3731.ve4b_5b_857b_a_d3
+    - configuration-as-code:1670.v564dc8b_982d0
+    - authentication-tokens:1.53.v1c90fd9191a_b_
+    - cloud-stats:302.v45b_647b_90608
+    - credentials:1271.v54b_1c2c6388a_
+    - credentials-binding:631.v861c06d062b_4
+    - cloudbees-folder:6.815.v0dd5a_cb_40e0e
+    - display-url-api:2.3.8
+    - docker-plugin:1.4
+    - docker-commons:439.va_3cb_0a_6a_fb_29
+    - git:5.2.0
+    - instance-identity:173.va_37c494ec4e5
+    - mailer:463.vedf8358e006b_
+    - pipeline-build-step:505.v5f0844d8d126
+    - pipeline-input-step:477.v339683a_8d55e
+    - pipeline-milestone-step:111.v449306f708b_7
     - pipeline-model-api:2.2144.v077a_d1928a_40
     - pipeline-model-definition:2.2144.v077a_d1928a_40
     - pipeline-model-extensions:2.2144.v077a_d1928a_40
     - pipeline-stage-step:305.ve96d0205c1c6
-    - configuration-as-code:1670.v564dc8b_982d0
-    - git:5.2.0
-    - docker-plugin:1.4
+    - ssh-slaves:2.916.vd17b_43357ce4
+    - ssh-credentials:308.ve4497b_ccd8f4
+    - sshd:3.312.v1c601b_c83b_0e
+    - token-macro:383.v36161104b_002
+    - workflow-aggregator:596.v8c21c963d92d
+    - workflow-api:1251.vd4889a_b_0a_065
+    - workflow-basic-steps
+    - workflow-cps:3731.ve4b_5b_857b_a_d3
+    - workflow-durable-task-step:1278.v94b_dc2b_50c6f
+    - workflow-job:1316.vd2290d3341a_f
+    - workflow-multibranch:756.v891d88f2cd46
   ## @param controller.installLatestPlugins install latest plugins
   ## Set to false to download the minimum required version of all dependencies.
   ##
@@ -523,18 +542,27 @@ controller:
     ##       - id: "${chart-admin-username}"
     ##         name: "Jenkins Admin"
     ##         password: "${chart-admin-password}"
-    securityRealm: {}
+    securityRealm: |-
+      local:
+        allowsSignup: false
+        enableCaptcha: false
+        users:
+          - id: "${jenkins-admin-user}"
+            name: "Jenkins Admin"
+            password: "${jenkins-admin-password}"
     unclassified:
       location:
         adminAddress:
         url: "{{ .Values.controller.jenkinsUrl }}"
     ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
     ## For legacy,  default the chart includes apiToken configurations
-    security:
-      apiToken:
-        creationOfLegacyTokenEnabled: false
-        tokenGenerationOnCreationEnabled: false
-        usageStatisticsEnabled: true
+    ## e.g. 
+    ## security:
+    ##   apiToken:
+    ##     creationOfLegacyTokenEnabled: false
+    ##     tokenGenerationOnCreationEnabled: false
+    ##     usageStatisticsEnabled: true
+    security: {}
     ## @param configAsCode.extraConfig Append additional settings at the root of the configuration-as-code file
     ## e.g.
     ## extraConfig:
@@ -566,16 +594,13 @@ controller:
 ## @section Persistence Parameters
 ##
 
-## Enable persistence using Persistent Volume Claims
+## Enable persistence using Persistent Volume Claims for .Values.controller.jenkinsHome
 ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
 ##
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
   enabled: true
-  ## @param persistence.mountPath Path to mount the volume at.
-  ##
-  mountPath: /var/jenkins_home
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
