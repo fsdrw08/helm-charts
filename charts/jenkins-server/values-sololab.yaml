@@ -73,6 +73,8 @@ controller:
       value: "http://192.168.255.1:7890"
     - name: https_proxy
       value: "http://192.168.255.1:7890"
+    - name: no_proxy
+      value: "localhost"
 
   ## @section Jenkins config as code
   ## @param controller.JCasC config of Jenkins Config as Code

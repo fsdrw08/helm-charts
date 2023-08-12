@@ -139,36 +139,38 @@ controller:
   ## ref: https://github.com/jenkinsci/kubernetes-operator/issues/746
   ##
   installPlugins:
-    - configuration-as-code:1670.v564dc8b_982d0
-    - authentication-tokens:1.53.v1c90fd9191a_b_
-    - cloud-stats:302.v45b_647b_90608
-    - credentials:1271.v54b_1c2c6388a_
-    - credentials-binding:631.v861c06d062b_4
-    - cloudbees-folder:6.815.v0dd5a_cb_40e0e
-    - display-url-api:2.3.8
-    - docker-plugin:1.4
-    - docker-commons:439.va_3cb_0a_6a_fb_29
-    - git:5.2.0
-    - instance-identity:173.va_37c494ec4e5
-    - mailer:463.vedf8358e006b_
-    - pipeline-build-step:505.v5f0844d8d126
-    - pipeline-input-step:477.v339683a_8d55e
-    - pipeline-milestone-step:111.v449306f708b_7
-    - pipeline-model-api:2.2144.v077a_d1928a_40
-    - pipeline-model-definition:2.2144.v077a_d1928a_40
-    - pipeline-model-extensions:2.2144.v077a_d1928a_40
-    - pipeline-stage-step:305.ve96d0205c1c6
-    - ssh-slaves:2.916.vd17b_43357ce4
-    - ssh-credentials:308.ve4497b_ccd8f4
-    - sshd:3.312.v1c601b_c83b_0e
-    - token-macro:383.v36161104b_002
-    - workflow-aggregator:596.v8c21c963d92d
-    - workflow-api:1251.vd4889a_b_0a_065
-    - workflow-basic-steps
-    - workflow-cps:3731.ve4b_5b_857b_a_d3
-    - workflow-durable-task-step:1278.v94b_dc2b_50c6f
-    - workflow-job:1316.vd2290d3341a_f
-    - workflow-multibranch:756.v891d88f2cd46
+    - commons-text-api:latest
+    - configuration-as-code:latest
+    - authentication-tokens:latest
+    - cloud-stats:latest
+    - credentials:latest
+    - credentials-binding:latest
+    - cloudbees-folder:latest
+    - display-url-api:latest
+    - docker-plugin:latest
+    - docker-commons:latest
+    - git:latest
+    - instance-identity:latest
+    - mailer:latest
+    - pipeline-build-step:latest
+    - pipeline-input-step:latest
+    - pipeline-milestone-step:latest
+    - pipeline-model-api:latest
+    - pipeline-model-definition:latest
+    - pipeline-model-extensions:latest
+    - pipeline-stage-step:latest
+    - script-security:latest
+    - ssh-slaves:latest
+    - ssh-credentials:latest
+    - sshd:latest
+    - token-macro:latest
+    - workflow-aggregator:latest
+    - workflow-api:latest
+    - workflow-basic-steps:latest
+    - workflow-cps:latest
+    - workflow-durable-task-step:latest
+    - workflow-job:latest
+    - workflow-multibranch:latest
   ## @param controller.installLatestPlugins install latest plugins
   ## Set to false to download the minimum required version of all dependencies.
   ##
@@ -366,7 +368,7 @@ controller:
   livenessProbe:
     enabled: true
     initialDelaySeconds: 60
-    periodSeconds: 10
+    periodSeconds: 120
     timeoutSeconds: 10
     failureThreshold: 5
     successThreshold: 1
@@ -383,7 +385,7 @@ controller:
   readinessProbe:
     enabled: false
     initialDelaySeconds: 60
-    periodSeconds: 10
+    periodSeconds: 120
     timeoutSeconds: 10
     failureThreshold: 5
     successThreshold: 1
@@ -400,7 +402,7 @@ controller:
   startupProbe:
     enabled: false
     initialDelaySeconds: 60
-    periodSeconds: 10
+    periodSeconds: 120
     timeoutSeconds: 10
     failureThreshold: 5
     successThreshold: 1
@@ -507,6 +509,82 @@ controller:
     ## @param JCasC.enabled Enable configuration as code.
     ##
     enabled: true
+    ## @param JCasC.default default config content for configuration as code
+    default:
+      jenkins:
+        ## @param controller.JCasC.default.jenkins.authorizationStrategy Jenkins Config as Code for Authorization Strategy
+        authorizationStrategy:
+          loggedInUsersCanDoAnything:
+            allowAnonymousRead: false
+        ## @param controller.JCasC.default.jenkins.crumbIssuer
+        ## Some HTTP proxies filter out information that the default crumb issuer uses to calculate the nonce value.
+        ## If an HTTP proxy sits between your browser client and your Jenkins server
+        ## and you receive a 403 response when submitting a form to Jenkins, checking this option may help.
+        ## Using this option makes the nonce value easier to forge.
+        crumbIssuer:
+          standard:
+            excludeClientIPFromCrumb: true
+        ## @param controller.JCasC.default.jenkins.securityRealm Jenkins Config as Code for securityRealm
+        ## e.g.
+        ## securityRealm: |-
+        ##   local:
+        ##     allowsSignup: false
+        ##     enableCaptcha: false
+        ##     users:
+        ##       - id: "${chart-admin-username}"
+        ##         name: "Jenkins Admin"
+        ##         password: "${chart-admin-password}"
+        securityRealm: |-
+          local:
+            allowsSignup: false
+            enableCaptcha: false
+            users:
+              - id: "${jenkins-admin-user}"
+                name: "Jenkins Admin"
+                password: "${jenkins-admin-password}"
+      ## @param controller.JCasC.default.security Allows adding to the top-level security JCasC section.
+      ## For legacy,  default the chart includes apiToken configurations
+      ## e.g. 
+      ## security:
+      ##   apiToken:
+      ##     creationOfLegacyTokenEnabled: false
+      ##     tokenGenerationOnCreationEnabled: false
+      ##     usageStatisticsEnabled: true
+      security: {}
+      ## @param controller.JCasC.default.unclassified
+      unclassified:
+        location:
+          adminAddress:
+          url: "{{ .Values.controller.jenkinsUrl }}"
+      ## @param configAsCode.JCasC.default.extraConfig Append additional settings at the root of the default configuration-as-code file
+      ## e.g.
+      ## extraConfig:
+      ##   ## Select this option to remove the “Remember me on this computer” checkbox from the login screen.
+      ##   ## ref: https://github.com/jenkinsci/jenkins/blob/master/core/src/main/resources/hudson/security/GlobalSecurityConfiguration/help-disableRememberMe.html
+      ##   disableRememberMe: true
+      ##   ## Set executor mode of the Jenkins node. Possible values are: NORMAL or EXCLUSIVE
+      ##   ## EXCLUSIVE maps to "Only build jobs with label restrictions matching this node."
+      ##   ## NORMAL maps to "Utilize this node as much as possible"
+      ##   ## ref: https://stackoverflow.com/questions/41473024/jenkins-slave-groovy-definition-how-to-set-usage-parameter
+      ##   mode: "NORMAL"
+      ##   ## This controls the number of concurrent builds that Jenkins can perform on this
+      ##   ## agent. So the value affects the overall system load Jenkins may incur. A good
+      ##   ## value to start with would be the number of processors.
+      ##   ## ref: https://github.com/jenkinsci/jenkins/blob/master/war/src/main/webapp/help/system-config/master-slave/numExecutors.html
+      ##   numExecutors: 2
+      ##   ## other config
+      ##   ## Append Jenkins labels to the controller
+      ##   labelString:
+      ##     -
+      ##     -
+      ##   ## Configures the restrictions for naming projects.
+      ##   projectNamingStrategy:
+      ##   ## Enable HTML parsing using OWASP Markup Formatter Plugin (antisamy-markup-formatter), useful with ghprb plugin.
+      ##   ## The plugin is not installed by default, please update controller.installPlugins.
+      ##   markupFormatter
+      ##     rawHtml:
+      ##       disableSyntaxHighlighting: true
+      extraConfig: {}
     ## @param configAsCode.extraConfigFiles List of additional configuration-as-code files to be mounted
     ## E.g.:
     ##  welcome-message.yaml: |-
@@ -520,76 +598,6 @@ controller:
     ##   - https://acme.org/jenkins.yaml
     ##
     configUrls: []
-    ## @param controller.JCasC.authorizationStrategy Jenkins Config as Code for Authorization Strategy
-    authorizationStrategy:
-      loggedInUsersCanDoAnything:
-        allowAnonymousRead: false
-    ## @param controller.JCasC.crumbIssuer
-    ## Some HTTP proxies filter out information that the default crumb issuer uses to calculate the nonce value.
-    ## If an HTTP proxy sits between your browser client and your Jenkins server
-    ## and you receive a 403 response when submitting a form to Jenkins, checking this option may help.
-    ## Using this option makes the nonce value easier to forge.
-    crumbIssuer:
-      standard:
-        excludeClientIPFromCrumb: true
-    ## @param controller.JCasC.securityRealm Jenkins Config as Code for securityRealm
-    ## e.g.
-    ## securityRealm: |-
-    ##   local:
-    ##     allowsSignup: false
-    ##     enableCaptcha: false
-    ##     users:
-    ##       - id: "${chart-admin-username}"
-    ##         name: "Jenkins Admin"
-    ##         password: "${chart-admin-password}"
-    securityRealm: |-
-      local:
-        allowsSignup: false
-        enableCaptcha: false
-        users:
-          - id: "${jenkins-admin-user}"
-            name: "Jenkins Admin"
-            password: "${jenkins-admin-password}"
-    unclassified:
-      location:
-        adminAddress:
-        url: "{{ .Values.controller.jenkinsUrl }}"
-    ## @param controller.JCasC.security Allows adding to the top-level security JCasC section.
-    ## For legacy,  default the chart includes apiToken configurations
-    ## e.g. 
-    ## security:
-    ##   apiToken:
-    ##     creationOfLegacyTokenEnabled: false
-    ##     tokenGenerationOnCreationEnabled: false
-    ##     usageStatisticsEnabled: true
-    security: {}
-    ## @param configAsCode.extraConfig Append additional settings at the root of the configuration-as-code file
-    ## e.g.
-    ## extraConfig:
-    ##   ## Select this option to remove the “Remember me on this computer” checkbox from the login screen.
-    ##   ## ref: https://github.com/jenkinsci/jenkins/blob/master/core/src/main/resources/hudson/security/GlobalSecurityConfiguration/help-disableRememberMe.html
-    ##   disableRememberMe: true
-    ##   ## Set executor mode of the Jenkins node. Possible values are: NORMAL or EXCLUSIVE
-    ##   ## EXCLUSIVE maps to "Only build jobs with label restrictions matching this node."
-    ##   ## NORMAL maps to "Utilize this node as much as possible"
-    ##   ## ref: https://stackoverflow.com/questions/41473024/jenkins-slave-groovy-definition-how-to-set-usage-parameter
-    ##   mode: "NORMAL"
-    ##   ## This controls the number of concurrent builds that Jenkins can perform on this
-    ##   ## agent. So the value affects the overall system load Jenkins may incur. A good
-    ##   ## value to start with would be the number of processors.
-    ##   ## ref: https://github.com/jenkinsci/jenkins/blob/master/war/src/main/webapp/help/system-config/master-slave/numExecutors.html
-    ##   numExecutors: 2
-    ##   ## other config
-    ##   ## Append Jenkins labels to the controller
-    ##   # labelString:
-    ##   #   -
-    ##   #   -
-    ##   ## Configures the restrictions for naming projects.
-    ##   # projectNamingStrategy:
-    ##   # markupFormatter
-    ##   #   rawHtml:
-    ##   #     disableSyntaxHighlighting: true
-    extraConfig: {}
 
 ## @section Persistence Parameters
 ##

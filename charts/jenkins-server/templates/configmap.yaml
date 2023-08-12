@@ -58,40 +58,12 @@ data:
     yes n | cp -i {{ .Values.controller.jenkinsRef }}/plugins/* /var/jenkins_plugins/;
     {{- end }}
 
-    # copy configuration as code files
-    echo "copy configuration as code files"
-    mkdir -p {{ .Values.controller.jenkinsHome }}/casc_configs;
-    rm -rf {{ .Values.controller.jenkinsHome }}/casc_configs/*
-    {{- if .Values.controller.JCasC.enabled }}
-    cp -v /var/jenkins_config/jcasc/*.yaml {{ .Values.controller.jenkinsHome }}/casc_configs
-    {{- end }}
-
     # finished initialization
     echo "finished initialization"
     {{- if .Values.controller.initializeOnce }}
     touch {{ .Values.controller.jenkinsHome }}/initialization-completed
     {{- end }}
 
-  {{/*
-  jcasc-default-config.yaml: |-
-    jenkins:
-      {{- if .Values.controller.JCasC.authorizationStrategy }}
-      authorizationStrategy: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.authorizationStrategy "context" $ ) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.controller.JCasC.securityRealm }}
-      securityRealm: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.securityRealm "context" $ ) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.controller.JCasC.crumbIssuer }}
-      crumbIssuer: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.crumbIssuer "context" $ ) | nindent 8 }}
-      {{- end }}
-    {{- if .Values.controller.JCasC.security }}
-    security: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.security "context" $ ) | nindent 6 }}
-    {{- end }}
-    unclassified: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.unclassified "context" $ ) | nindent 8 }}
-    {{- if  .Values.controller.JCasC.extraConfig }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.extraConfig "context" $ ) | nindent 4 }}
-    {{- end }}
-  */}}
   plugins.txt: |-
 {{- if .Values.controller.installPlugins }}
   {{- range $installPlugin := .Values.controller.installPlugins }}
