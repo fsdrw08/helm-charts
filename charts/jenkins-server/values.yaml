@@ -69,9 +69,6 @@ controller:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-    ## Enable debug mode
-    ##
-    debug: false
   ## @param controller.podRestartPolicy specify the pod restart policy if instanceKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
@@ -598,6 +595,60 @@ controller:
     ##   - https://acme.org/jenkins.yaml
     ##
     configUrls: []
+    ## @param controller.JCasC.autoReload Configuration auto-reload sidecar container
+    ##
+    autoReload:
+      ## @param controller.JCasC.autoReload.enabled Enable the creation of the autoReload sidecar container.
+      ## Note: This container will trigger the configuration reload each time the Configmap is updated. Changes applied via Jenkins UI will be overwritten.
+      ## If disabled, config as code files will only take effect during the container first boot.
+      ##
+      enabled: true
+      ## Jenkins controller image
+      ## ref: https://hub.docker.com/r/jenkins/jenkins/tags/
+      ## @param controller.JCasC.autoReload.image.registry Jenkins controller image registry
+      ## @param controller.JCasC.autoReload.image.repository Jenkins controller image repository
+      ## @param controller.JCasC.autoReload.image.tag Jenkins controller image tag (immutable tags are recommended)
+      ## @param controller.JCasC.autoReload.image.digest Jenkins controller image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+      ## @param controller.JCasC.autoReload.image.pullPolicy Jenkins controller image pull policy
+      ## @param controller.JCasC.autoReload.image.pullSecrets Jenkins controller image pull secrets
+      ## @param controller.JCasC.autoReload.image.debug Enable Jenkins controller image debug mode
+      ##
+      image:
+        registry: docker.io
+        repository: dockerpinata/inotify-tools
+        tag: 2.1
+        digest: ""
+        ## Specify a imagePullPolicy
+        ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+        ##
+        pullPolicy: IfNotPresent
+        ## Optionally specify an array of imagePullSecrets.
+        ## Secrets must be manually created in the namespace.
+        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        ## e.g:
+        ## pullSecrets:
+        ##   - myRegistryKeySecretName
+        ##
+        pullSecrets: []
+      ## Configure Container Security Context
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      ## @param controller.JCasC.autoReload.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+      ## @param controller.JCasC.autoReload.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+      ## @param controller.JCasC.autoReload.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+      ## @param controller.JCasC.autoReload.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+      ##
+      containerSecurityContext:
+        enabled: true
+        runAsUser: 1001
+        runAsNonRoot: true
+        readOnlyRootFilesystem: false
+      ## @param controller.JCasC.autoReload.command
+      ##
+      command: []
+      ## @param controller.JCasC.autoReload.args
+      ##
+      args: []
 
 ## @section Persistence Parameters
 ##

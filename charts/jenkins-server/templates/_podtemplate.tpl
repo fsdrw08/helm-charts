@@ -129,7 +129,7 @@ spec:
               fieldPath: metadata.name
         - name: JAVA_OPTS
           value: >-
-            -Dcasc.reload.token=$(POD_NAME) 
+            -Dcasc.reload.token=$POD_NAME 
             {{- default "" .Values.controller.javaOpts }}
         - name: JENKINS_OPTS
           value: >-
@@ -245,6 +245,43 @@ spec:
       {{- if .Values.controller.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
+    {{- if and .Values.controller.JCasC.enabled .Values.controller.JCasC.autoReload.enabled }}
+    - name: reload-JCasC
+      image: {{ include "common.images.image" (dict "imageRoot" .Values.controller.JCasC.autoReload.image "global" .Values.global) }}
+      imagePullPolicy: {{ .Values.controller.JCasC.autoReload.image.pullPolicy | quote }}
+      {{- if .Values.controller.JCasC.autoReload.containerSecurityContext.enabled }}
+      securityContext: {{- omit .Values.controller.JCasC.autoReload.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      {{- if .Values.controller.JCasC.autoReload.command }}
+      command: {{- include "common.tplvalues.render" (dict "value" .controller.JCasC.autoReload.command "context" $) | nindent 8 }}
+      {{- else }}
+      command:
+        - /bin/sh
+        - -c
+      {{- end }}
+      {{- if .Values.controller.JCasC.autoReload.args }}
+      args: {{- include "common.tplvalues.render" (dict "value" .Values.controller.JCasC.autoReload.args "context" $) | nindent 12 }}
+      {{- else }}
+          # while true; do
+          #   inotifywait -r --event modify create delete {{ .Values.controller.jenkinsHome }}/casc_configs;
+          #   wget --post-data casc-reload-token=$(POD_NAME) http://localhost:{{.Values.controller.targetPort}}/reload-configuration-as-code/
+          # done
+      args:
+        - |-
+          inotifywait -mr -e modify {{ .Values.controller.jenkinsHome }}/casc_configs | while read MODIFY
+          do
+            wget --post-data casc-reload-token=$POD_NAME http://localhost:{{.Values.controller.targetPort}}/reload-configuration-as-code/
+          done
+      {{- end }}
+      volumeMounts:
+        - name: jenkins-config-jcasc
+          mountPath: {{ .Values.controller.jenkinsHome }}/casc_configs
+    {{- end }}
     {{- if .Values.controller.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.controller.sidecars "context" $) | nindent 4 }}
     {{- end }}

@@ -1,9 +1,4 @@
 {{/*
-Copyright VMware, Inc.
-SPDX-License-Identifier: APACHE-2.0
-*/}}
-
-{{/*
 Return the proper jenkinsController image name
 */}}
 {{- define "jenkins.image" -}}

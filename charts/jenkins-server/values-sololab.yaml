@@ -98,4 +98,4 @@ controller:
     extraConfigFiles:
       welcome-message.yaml: |-
         jenkins:
-          systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'.
+          systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'. 
