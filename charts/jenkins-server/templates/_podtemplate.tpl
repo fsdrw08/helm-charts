@@ -127,9 +127,14 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        {{- if and .Values.controller.JCasC.enabled .Values.controller.JCasC.autoReload.enabled }}
+        - name: CASC_RELOAD_TOKEN 
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        {{- end }}
         - name: JAVA_OPTS
           value: >-
-            -Dcasc.reload.token=$POD_NAME 
             {{- default "" .Values.controller.javaOpts }}
         - name: JENKINS_OPTS
           value: >-
