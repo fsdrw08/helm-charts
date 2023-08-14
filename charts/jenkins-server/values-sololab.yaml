@@ -75,7 +75,14 @@ controller:
       value: "http://192.168.255.1:7890"
     - name: no_proxy
       value: "localhost"
-
+  extraVolumes:
+    - name: docker-socket
+      hostPath:
+        path: /run/user/1001/podman/podman.sock
+        type: Socket
+  extraVolumeMounts:
+    - name: docker-socket
+      mountPath: /var/run/docker.sock
   ## @section Jenkins config as code
   ## @param controller.JCasC config of Jenkins Config as Code
   ## Below is the implementation of Jenkins Configuration as Code.
@@ -98,4 +105,4 @@ controller:
     extraConfigFiles:
       welcome-message.yaml: |-
         jenkins:
-          systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'. 
+          systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'.
