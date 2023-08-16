@@ -541,7 +541,7 @@ controller:
                 password: "${jenkins-admin-password}"
       ## @param controller.JCasC.default.security Allows adding to the top-level security JCasC section.
       ## For legacy,  default the chart includes apiToken configurations
-      ## e.g. 
+      ## e.g.
       ## security:
       ##   apiToken:
       ##     creationOfLegacyTokenEnabled: false

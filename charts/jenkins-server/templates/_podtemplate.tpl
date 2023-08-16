@@ -23,7 +23,7 @@ spec:
   securityContext: {{- omit .Values.controller.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled .Values.controller.containerSecurityContext.enabled}}
     - name: volume-permissions
       image: {{ include "jenkins.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}

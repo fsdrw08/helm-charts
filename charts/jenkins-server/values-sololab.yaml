@@ -106,3 +106,29 @@ controller:
       welcome-message.yaml: |-
         jenkins:
           systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'.
+
+      docker.yaml: |-
+        jenkins:
+          clouds:
+            - docker:
+                name: "docker"
+                dockerApi:
+                  dockerHost:
+                    uri: "unix:///var/run/docker.sock"
+                templates:
+                  - labelString: "docker-agent"
+                    dockerTemplateBase:
+                      image: "jenkins/agent"
+                      mounts:
+                        - "type=tmpfs,destination=/run"
+                        - "type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock"
+                        - "type=volume,src=hello,dst=/world"
+                      environmentsString: |
+                        TZ=Asia/Shanghai
+                    remoteFs: "/home/jenkins/agent"
+                    connector:
+                      attach:
+                        user: "jenkins"
+                    instanceCapStr: "10"
+                    retentionStrategy:
+                      idleMinutes: 1
