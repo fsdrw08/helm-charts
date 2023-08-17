@@ -40,6 +40,16 @@ controller:
         value: "http://192.168.255.1:7890"
       - name: https_proxy
         value: "http://192.168.255.1:7890"
+  # need to set to runas root to make jenkins communicate with docker.sock and make jcasc reload success
+  podSecurityContext:
+    enabled: false
+    runAsUser: 1000
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 0
+    runAsGroup: 0
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: false
   ## @param controller.jenkinsUrl If you are not using the provided ingress you can specify `controller.jenkinsUrl` to change the url definition.
   ##
   jenkinsUrl: "https://jenkins.infra.sololab"
@@ -121,8 +131,7 @@ controller:
                       image: "jenkins/agent"
                       mounts:
                         - "type=tmpfs,destination=/run"
-                        - "type=bind,source=/var/run/docker.sock,destination=/var/run/docker.sock"
-                        - "type=volume,src=hello,dst=/world"
+                        - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
                       environmentsString: |
                         TZ=Asia/Shanghai
                     remoteFs: "/home/jenkins/agent"
