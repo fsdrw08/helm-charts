@@ -54,7 +54,7 @@ controller:
   image:
     registry: docker.io
     repository: jenkins/jenkins
-    tag: 2.401.3-lts-jdk11
+    tag: 2.414.1-lts
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
