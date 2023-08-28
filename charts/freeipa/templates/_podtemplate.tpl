@@ -1,96 +1,96 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "freeipa.podTemplate" -}}
 metadata:
   {{ if eq .Values.deployKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations }}
-  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations "context" $) | nindent 4 }}
+  {{- if .Values.freeipa.podAnnotations }}
+  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podLabels }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.podLabels "context" $) | nindent 4 }}
+    app.kubernetes.io/component: freeIPA
+    {{- if .Values.freeipa.podLabels }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.podLabels "context" $) | nindent 4 }}
     {{- end }}
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases "context" $) | nindent 4 }}
+  {{- include "freeipa.imagePullSecrets" . | nindent 2 }}
+  {{- if .Values.freeipa.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.hostAliases "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled -}}
-  securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext "enabled" | toYaml | nindent 4 }}
+  {{- if .Values.freeipa.podSecurityContext.enabled -}}
+  securityContext: {{- omit .Values.freeipa.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "freeipa.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
-        - %%commands%%
+        - chmod
+        - -R
+        - "777"
+        - /dev/shm
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+        - name: dshm
+          mountPath: /dev/shm
     {{- end }}
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.initContainers }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.initContainers "context" $) | nindent 4 }}
+    {{- if .Values.freeipa.initContainers }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: %%MAIN_OBJECT_BLOCK%%
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
-      imagePullPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.image.pullPolicy }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+    - name: freeipa
+      image: {{ template "freeipa.image" . }}
+      imagePullPolicy: {{ .Values.freeipa.image.pullPolicy }}
+      {{- if .Values.freeipa.containerSecurityContext.enabled }}
+      securityContext: {{- omit .Values.freeipa.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.command }}
-      command: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.command "context" $) | nindent 8 }}
+      {{- if .Values.freeipa.command }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.command "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.args }}
-      args: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.args "context" $) | nindent 8 }}
+      {{- if .Values.freeipa.args }}
+      args: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.args "context" $) | nindent 8 }}
       {{- end }}
       env:
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVars }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVars "context" $) | nindent 8 }}
+        {{- if .Values.freeipa.extraEnvVars }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
       envFrom:
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM }}
+        {{- if .Values.freeipa.extraEnvVarsCM }}
         - configMapRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM "context" $) }}
+            name: {{ include "common.tplvalues.render" (dict "value" .Values.freeipa.extraEnvVarsCM "context" $) }}
         {{- end }}
         - secretRef:
             name: {{ template "common.names.fullname" . }}
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret }}
+        {{- if .Values.freeipa.extraEnvVarsSecret }}
         - secretRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret "context" $) }}
+            name: {{ include "common.tplvalues.render" (dict "value" .Values.freeipa.extraEnvVarsSecret "context" $) }}
         {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.resources }}
-      resources: {{- toYaml .Values.%%MAIN_OBJECT_BLOCK%%.resources | nindent 8 }}
+      {{- if .Values.freeipa.resources }}
+      resources: {{- toYaml .Values.freeipa.resources | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerPorts }}
-      ports: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.containerPorts "context" $) | nindent 8 -}}
+      {{- if .Values.freeipa.containerPorts }}
+      ports: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customLivenessProbe }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customLivenessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.livenessProbe.enabled }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.livenessProbe "enabled") "context" $) | nindent 8 }}
+      {{- if .Values.freeipa.customLivenessProbe }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.customLivenessProbe "context" $) | nindent 8 }}
+      {{- else if .Values.freeipa.livenessProbe.enabled }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.freeipa.livenessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customReadinessProbe }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customReadinessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.readinessProbe.enabled }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.readinessProbe "enabled") "context" $) | nindent 8 }}
+      {{- if .Values.freeipa.customReadinessProbe }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.customReadinessProbe "context" $) | nindent 8 }}
+      {{- else if .Values.freeipa.readinessProbe.enabled }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.freeipa.readinessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customStartupProbe }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customStartupProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe.enabled }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- if .Values.freeipa.customStartupProbe }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.customStartupProbe "context" $) | nindent 8 }}
+      {{- else if .Values.freeipa.startupProbe.enabled }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.freeipa.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         {{- if .Values.persistence.mountPath }}
@@ -99,12 +99,14 @@ spec:
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-        {{- end -}}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts "context" $) | nindent 8 }}
-      {{- end }}
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.sidecars }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.sidecars "context" $) | nindent 4 }}
+        {{- end }}
+        - name: dshm
+          mountPath: /dev/shm
+        {{- if .Values.freeipa.extraVolumeMounts }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.extraVolumeMounts "context" $) | nindent 8 }}
+        {{- end }}
+    {{- if .Values.freeipa.sidecars }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.freeipa.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
     - name: persistent-volume
@@ -114,9 +116,15 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes "context" $) | nindent 4 }}
+    - name: dshm
+      emptyDir:
+        medium: Memory
+    {{- if .Values.freeipa.extraVolumes }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
+  {{- if .Values.freeipa.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
   {{ if eq .Values.deployKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}

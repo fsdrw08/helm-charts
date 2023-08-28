@@ -1,28 +1,28 @@
 {{/*
-Return the proper %%MAIN_OBJECT_BLOCK%% image name
+Return the proper freeipa image name
 */}}
-{{- define "%%TEMPLATE_NAME%%.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.%%MAIN_OBJECT_BLOCK%%.image "global" .Values.global) }}
+{{- define "freeipa.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.freeipa.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "%%TEMPLATE_NAME%%.volumePermissions.image" -}}
+{{- define "freeipa.volumePermissions.image" -}}
 {{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
-{{- define "%%TEMPLATE_NAME%%.imagePullSecrets" -}}
-{{- include "common.images.pullSecrets" (dict "images" (list .Values.%%MAIN_OBJECT_BLOCK%%.image .Values.%%SECONDARY_OBJECT_BLOCK%%.image .Values.volumePermissions.image) "global" .Values.global) -}}
+{{- define "freeipa.imagePullSecrets" -}}
+{{- include "common.images.pullSecrets" (dict "images" (list .Values.freeipa.image .Values.volumePermissions.image) "global" .Values.global) -}}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "%%TEMPLATE_NAME%%.serviceAccountName" -}}
+{{- define "freeipa.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
     {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
@@ -33,10 +33,10 @@ Create the name of the service account to use
 {{/*
 Compile all warnings into a single message.
 */}}
-{{- define "%%TEMPLATE_NAME%%.validateValues" -}}
+{{- define "freeipa.validateValues" -}}
 {{- $messages := list -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.foo" .) -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.bar" .) -}}
+{{- $messages := append $messages (include "freeipa.validateValues.foo" .) -}}
+{{- $messages := append $messages (include "freeipa.validateValues.bar" .) -}}
 {{- $messages := without $messages "" -}}
 {{- $message := join "\n" $messages -}}
 

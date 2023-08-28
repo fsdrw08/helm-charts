@@ -1,0 +1,248 @@
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+freeipa:
+  ## @param freeipa.containerPorts freeipa container port to expose to host
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts: 
+    - name: dns_tcp
+      containerPort: 53
+      protocol: TCP
+      hostIP: "{{ .Values.freeipa.hostIP }}"
+    - name: dns_udp
+      containerPort: 53
+      protocol: UDP
+      hostIP: "{{ .Values.freeipa.hostIP }}"
+
+    - name: http
+      containerPort: 80
+      hostIP: "{{ .Values.freeipa.hostIP }}"
+    - name: https
+      containerPort: 443
+      hostIP: "{{ .Values.freeipa.hostIP }}"
+    - name: http_pki
+      containerPort: 8080
+      hostIP: "{{ .Values.freeipa.hostIP }}"
+    - name: https_pki
+      containerPort: 8443
+      hostIP: "{{ .Values.freeipa.hostIP }}"
+
+    - name: ldap
+      containerPort: 389
+    - name: ldaps
+      containerPort: 636
+
+    - name: kerberos_kdc_tcp
+      containerPort: 88
+      protocol: TCP
+    - name: kerberos_kdc_udp
+      containerPort: 88
+      protocol: UDP
+    - name: kerberos_password_tcp
+      containerPort: 464
+      protocol: TCP
+    - name: kerberos_password_udp
+      containerPort: 464
+      protocol: UDP
+
+    - name: ntp
+      containerPort: 123
+      protocol: UDP
+  ## freeipa resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param freeipa.resources.limits The resources limits for the freeipa containers
+  ## @param freeipa.resources.requests The requested resources for the freeipa containers
+  ##
+  resources:
+    limits: 
+      memory: "1336Mi"
+      cpu: "1000m"
+    requests: {}
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  ## @param freeipa.dnsConfig config pod dns
+  ## ref: https://github.com/freeipa/freeipa-container#running-freeipa-server-container
+  dnsConfig:
+    nameservers:
+      - 127.0.0.1
+  ## #param freeipa.hostName
+  hostName: freeipa
+  ## #param freeipa.hostIP
+  hostIP: 192.168.255.10
+  ## @param freeipa.args Override default container args (useful when using custom images)
+  ##
+  args: 
+    - --unattended
+
+    - --domain=example.org
+    - --realm=example.org
+    - --ds-password=P@ssw0rd
+    - --admin-password=P@ssw0rd
+
+    - --no-ntp
+    - --no_hbac_allow
+
+    - --setup-dns
+    - --no-host-dns
+    - --forwarder=8.8.8.8
+    - --auto-reverse
+    - --ip-address="{{ .Values.freeipa.hostIP }}"
+
+    - --debug
+    - --skip-mem-check
+  ## @param freeipa.priorityClassName freeipa pods' priorityClassName
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+      # value: '{{ default null .Values.freeipa.hostIP }}'
+  extraEnvVars: 
+    - name: IPA_SERVER_IP
+      value: '{{ default "" .Values.freeipa.hostIP }}'
+    - name: IPA_SERVER_HOSTNAME
+      value: '{{ default "" .Values.freeipa.hostIP }}'
+    - name: DEBUG_TRACE
+      value: 1
+  ## @param freeipa.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for freeipa nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param freeipa.extraEnvVarsSecret Name of existing Secret containing extra env vars for freeipa nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param freeipa.extraVolumes Optionally specify extra list of additional volumes for the freeipa pod(s)
+  ##
+  extraVolumes: []
+  ## @param freeipa.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the freeipa container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param freeipa.sidecars Add additional sidecar containers to the freeipa pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param freeipa.initContainers Add additional init containers to the freeipa pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: true
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param volumePermissions.resources.limits The resources limits for the init container
+  ## @param volumePermissions.resources.requests The requested resources for the init container
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
