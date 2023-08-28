@@ -5,7 +5,8 @@ annotations:
   licenses: Apache-2.0
 apiVersion: v2
 # https://github.com/jenkinsci/docker/releases
-appVersion: "2.401.2"
+# https://hub.docker.com/r/jenkins/jenkins/tags?page=1
+appVersion: "2.414.1-lts"
 # dependencies:
 #   - condition: SUBCHART_NAME.enabled
 #     name: SUBCHART_NAME
@@ -30,5 +31,5 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: jenkins
 sources:
-  - https://github.com/fsdrw08/helm-charts/Jenkins
+  - https://github.com/fsdrw08/helm-charts/jenkins-server
 version: 0.1.0

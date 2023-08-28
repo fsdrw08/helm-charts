@@ -7,7 +7,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.controller.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: server
+    app.kubernetes.io/component: jenkins-controller
     {{- if .Values.controller.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.controller.podLabels "context" $) | nindent 4 }}
     {{- end }}
