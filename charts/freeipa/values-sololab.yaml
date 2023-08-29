@@ -12,7 +12,7 @@ freeipa:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: 
+  containerPorts:
     - name: dns_tcp
       containerPort: 53
       protocol: TCP
@@ -62,7 +62,7 @@ freeipa:
   ## @param freeipa.resources.requests The requested resources for the freeipa containers
   ##
   resources:
-    limits: 
+    limits:
       memory: "1336Mi"
       cpu: "1000m"
     requests: {}
@@ -80,11 +80,11 @@ freeipa:
   hostIP: 192.168.255.10
   ## @param freeipa.args Override default container args (useful when using custom images)
   ##
-  args: 
+  args:
     - --unattended
 
-    - --domain=example.org
-    - --realm=example.org
+    - --domain=infra.sololab
+    - --realm=infra.sololab
     - --ds-password=P@ssw0rd
     - --admin-password=P@ssw0rd
 
@@ -93,7 +93,7 @@ freeipa:
 
     - --setup-dns
     - --no-host-dns
-    - --forwarder=8.8.8.8
+    - --forwarder=192.168.255.1
     - --auto-reverse
     - --ip-address="{{ .Values.freeipa.hostIP }}"
 
@@ -105,8 +105,8 @@ freeipa:
   ##   - name: FOO
   ##     value: "bar"
   ##
-      # value: '{{ default null .Values.freeipa.hostIP }}'
-  extraEnvVars: 
+  # value: '{{ default null .Values.freeipa.hostIP }}'
+  extraEnvVars:
     - name: IPA_SERVER_IP
       value: '{{ default "" .Values.freeipa.hostIP }}'
     - name: IPA_SERVER_HOSTNAME
