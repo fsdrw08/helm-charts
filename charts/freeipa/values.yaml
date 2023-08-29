@@ -290,7 +290,6 @@ freeipa:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-
   ## @param freeipa.priorityClassName freeipa pods' priorityClassName
   ## e.g:
   ## extraEnvVars:
@@ -317,6 +316,15 @@ freeipa:
   ## @param freeipa.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the freeipa container(s)
   ##
   extraVolumeMounts: []
+  ## @param freeipa.additionalSecrets Add additional secret data to freeipa
+  ## e.g. 
+  ## additionalSecrets:
+  ##   ipa-ext.conf: |
+  ##     key "tsig_key_name" {
+  ##          algorithm hmac-sha256;
+  ##          secret "j/2DR2zkVAyDHL2XjE731sMt9s6cmRhXE6niScAgHA0=";
+  ##  };
+  additionalSecrets: {}
   ## @param freeipa.sidecars Add additional sidecar containers to the freeipa pod(s)
   ## e.g:
   ## sidecars:

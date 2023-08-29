@@ -121,10 +121,27 @@ freeipa:
   extraEnvVarsSecret: ""
   ## @param freeipa.extraVolumes Optionally specify extra list of additional volumes for the freeipa pod(s)
   ##
-  extraVolumes: []
+  extraVolumes: 
+    - name: ipa-ext.conf
+      secret:
+        name: freeipa
+        items:
+          - key: ipa-ext.conf
+            path: ipa-ext.conf
   ## @param freeipa.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the freeipa container(s)
   ##
-  extraVolumeMounts: []
+  extraVolumeMounts: 
+    - name: ipa-ext.conf
+      mountPath: /etc/named/ipa-ext.conf
+      subPath: ipa-ext.conf
+  ## @param freeipa.additionalSecrets Add additional secret data to freeipa
+  ##
+  additionalSecrets:
+    ipa-ext.conf: |
+      key "tsig_key_name" {
+           algorithm hmac-sha256;
+           secret "j/2DR2zkVAyDHL2XjE731sMt9s6cmRhXE6niScAgHA0=";
+      };
   ## @param freeipa.sidecars Add additional sidecar containers to the freeipa pod(s)
   ## e.g:
   ## sidecars:
