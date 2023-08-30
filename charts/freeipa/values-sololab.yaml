@@ -75,9 +75,9 @@ freeipa:
     nameservers:
       - 127.0.0.1
   ## #param freeipa.hostName
-  hostName: freeipa
+  hostName: ipa.infra.sololab
   ## #param freeipa.hostIP
-  hostIP: 192.168.255.10
+  hostIP: 192.168.255.11
   ## @param freeipa.args Override default container args (useful when using custom images)
   ##
   args:
@@ -95,7 +95,7 @@ freeipa:
     - --no-host-dns
     - --forwarder=192.168.255.1
     - --auto-reverse
-    - --ip-address="{{ .Values.freeipa.hostIP }}"
+    - --ip-address={{ .Values.freeipa.hostIP }}
 
     - --debug
     - --skip-mem-check
@@ -110,7 +110,7 @@ freeipa:
     - name: IPA_SERVER_IP
       value: '{{ default "" .Values.freeipa.hostIP }}'
     - name: IPA_SERVER_HOSTNAME
-      value: '{{ default "" .Values.freeipa.hostIP }}'
+      value: '{{ default "" .Values.freeipa.hostName }}'
     - name: DEBUG_TRACE
       value: 1
   ## @param freeipa.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for freeipa nodes
@@ -121,16 +121,16 @@ freeipa:
   extraEnvVarsSecret: ""
   ## @param freeipa.extraVolumes Optionally specify extra list of additional volumes for the freeipa pod(s)
   ##
-  extraVolumes: 
+  extraVolumes:
     - name: ipa-ext.conf
       secret:
-        name: freeipa
+        secretName: '{{ template "common.names.fullname" . }}-sec'
         items:
           - key: ipa-ext.conf
             path: ipa-ext.conf
   ## @param freeipa.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the freeipa container(s)
   ##
-  extraVolumeMounts: 
+  extraVolumeMounts:
     - name: ipa-ext.conf
       mountPath: /etc/named/ipa-ext.conf
       subPath: ipa-ext.conf

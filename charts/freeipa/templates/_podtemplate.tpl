@@ -1,6 +1,6 @@
 {{- define "freeipa.podTemplate" -}}
 metadata:
-  {{ if eq .Values.deployKind "Pod" }}
+  {{- if eq .Values.deployKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.freeipa.podAnnotations }}
@@ -19,6 +19,9 @@ spec:
   {{- if .Values.freeipa.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.hostAliases "context" $) | nindent 4 }}
   {{- end }}
+  {{- if .Values.freeipa.hostName -}}
+  hostname: {{ .Values.freeipa.hostName }}
+  {{ end }}
   {{- if .Values.freeipa.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.freeipa.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end -}}
@@ -65,8 +68,6 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.freeipa.extraEnvVarsCM "context" $) }}
         {{- end }}
-        - secretRef:
-            name: {{ template "common.names.fullname" . }}
         {{- if .Values.freeipa.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.freeipa.extraEnvVarsSecret "context" $) }}
