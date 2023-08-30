@@ -1,6 +1,6 @@
 {{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
 metadata:
-  {{ if eq .Values.deployKind "Pod" }}
+  {{- if eq .Values.deployKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations }}
