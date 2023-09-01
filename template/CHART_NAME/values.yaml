@@ -227,7 +227,7 @@ deployKind: Pod
     targetCPU: ""
     targetMemory: ""
 
-  ## @param %%MAIN_OBJECT_BLOCK%%.priorityClassName %%MAIN_CONTAINER_NAME%% pods' priorityClassName
+  ## @param %%MAIN_OBJECT_BLOCK%%.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO

@@ -16,9 +16,9 @@ metadata:
     {{- end }}
 spec:
   {{- include "freeipa.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.freeipa.hostAliases }}
+  {{- if .Values.freeipa.hostAliases -}}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
+  {{ end }}
   {{- if .Values.freeipa.hostName -}}
   hostname: {{ .Values.freeipa.hostName }}
   {{ end }}

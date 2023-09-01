@@ -2,7 +2,8 @@
 ##
 controller:
   ## @param controller.additionalPlugins List of plugins to install in addition to those listed in controller.installPlugins
-  additionalPlugins: []
+  additionalPlugins:
+    - job-dsl:latest
   ## @param controller.provision initContainer settings for jenkins controller provision
   provision:
     ##
@@ -21,15 +22,15 @@ controller:
       - name: https_proxy
         value: "http://192.168.255.1:7890"
   # need to set to runas root to make jenkins communicate with docker.sock and make jcasc reload success
-  podSecurityContext:
-    enabled: false
-    runAsUser: 1000
-  containerSecurityContext:
-    enabled: true
-    runAsUser: 0
-    runAsGroup: 0
-    readOnlyRootFilesystem: false
-    allowPrivilegeEscalation: false
+  # podSecurityContext:
+  #   enabled: false
+  #   runAsUser: 1000
+  # containerSecurityContext:
+  #   enabled: true
+  #   runAsUser: 0
+  #   runAsGroup: 0
+  #   readOnlyRootFilesystem: false
+  #   allowPrivilegeEscalation: false
   ## @param controller.jenkinsUrl If you are not using the provided ingress you can specify `controller.jenkinsUrl` to change the url definition.
   ##
   jenkinsUrl: "https://jenkins.infra.sololab"
@@ -72,7 +73,7 @@ controller:
         type: Socket
   extraVolumeMounts:
     - name: docker-socket
-      mountPath: /var/run/docker.sock
+      mountPath: "/var/run/docker.sock"
   ## @section Jenkins config as code
   ## @param controller.JCasC config of Jenkins Config as Code
   ## Below is the implementation of Jenkins Configuration as Code.
@@ -121,3 +122,26 @@ controller:
                     instanceCapStr: "10"
                     retentionStrategy:
                       idleMinutes: 1
+
+      # job-dsl.yaml: |-
+      #   jobs:
+      #     - script: |
+      #         def projects = ['nodejs', 'java']
+      #         projects.each{ prj ->
+      #           pipelineJob(prj + '-calc'){
+      #             definition{
+      #               cpsScm{
+      #                 lightweight(true)
+      #                 scm{
+      #                   git{
+      #                     remote {
+      #                       url('https://github.com/odavid/my-bloody-jenkins.git')
+      #                     }
+      #                     branches("refs/heads/master")
+      #                   }
+      #                   scriptPath('demo/assets/apps/' + prj + '-calc/Jenkinsfile')
+      #                 }
+      #               }
+      #             }
+      #           }
+      #         }

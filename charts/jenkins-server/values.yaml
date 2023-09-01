@@ -543,6 +543,7 @@ controller:
       ## For legacy,  default the chart includes apiToken configurations
       ## e.g.
       ## security:
+      ##   realm: jenkins_database
       ##   apiToken:
       ##     creationOfLegacyTokenEnabled: false
       ##     tokenGenerationOnCreationEnabled: false

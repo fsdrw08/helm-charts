@@ -103,7 +103,7 @@ freeipa:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: 
+  containerPorts:
     - name: dns_tcp
       containerPort: 53
       protocol: TCP
@@ -245,7 +245,7 @@ freeipa:
   command: []
   ## @param freeipa.args Override default container args (useful when using custom images)
   ##
-  args: 
+  args:
     - --unattended
 
     - --domain=example.org
@@ -290,14 +290,14 @@ freeipa:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param freeipa.priorityClassName freeipa pods' priorityClassName
+  ## @param freeipa.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
-      # value: '{{ default null .Values.freeipa.hostIP }}'
-  extraEnvVars: 
+  # value: '{{ default null .Values.freeipa.hostIP }}'
+  extraEnvVars:
     - name: IPA_SERVER_IP
       value: '{{ default "" .Values.freeipa.hostIP }}'
     - name: IPA_SERVER_HOSTNAME
@@ -317,7 +317,7 @@ freeipa:
   ##
   extraVolumeMounts: []
   ## @param freeipa.additionalSecrets Add additional secret data to freeipa
-  ## e.g. 
+  ## e.g.
   ## additionalSecrets:
   ##   ipa-ext.conf: |
   ##     key "tsig_key_name" {

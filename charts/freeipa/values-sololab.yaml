@@ -99,7 +99,14 @@ freeipa:
 
     - --debug
     - --skip-mem-check
-  ## @param freeipa.priorityClassName freeipa pods' priorityClassName
+  ## @param freeipa.hostAliases freeipa pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases:
+    - ip: "{{ .Values.freeipa.hostIP }}"
+      hostnames:
+        - "{{ .Values.freeipa.hostName }}"
+  ## @param freeipa.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
@@ -138,7 +145,7 @@ freeipa:
   ##
   additionalSecrets:
     ipa-ext.conf: |
-      key "tsig_key_name" {
+      key "keySololab" {
            algorithm hmac-sha256;
            secret "j/2DR2zkVAyDHL2XjE731sMt9s6cmRhXE6niScAgHA0=";
       };
