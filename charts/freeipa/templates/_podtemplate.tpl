@@ -101,6 +101,11 @@ spec:
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
         {{- end }}
+        {{- if .Values.freeipa.serverInstallOptions }}
+        - name: ipa-server-install-options
+          mountPath: /data/ipa-server-install-options
+          subPath: ipa-server-install-options
+        {{- end }}
         - name: dshm
           mountPath: /dev/shm
         {{- if .Values.freeipa.extraVolumeMounts }}
@@ -116,6 +121,14 @@ spec:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
+    {{- end }}
+    {{- if .Values.freeipa.serverInstallOptions }}
+    - name: ipa-server-install-options
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec
+        items:
+          - key: ipa-server-install-options
+            path: ipa-server-install-options
     {{- end }}
     - name: dshm
       emptyDir:
