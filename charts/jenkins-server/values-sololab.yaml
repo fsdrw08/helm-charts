@@ -22,15 +22,15 @@ controller:
       - name: https_proxy
         value: "http://192.168.255.1:7890"
   # need to set to runas root to make jenkins communicate with docker.sock and make jcasc reload success
-  # podSecurityContext:
-  #   enabled: false
-  #   runAsUser: 1000
-  # containerSecurityContext:
-  #   enabled: true
-  #   runAsUser: 0
-  #   runAsGroup: 0
-  #   readOnlyRootFilesystem: false
-  #   allowPrivilegeEscalation: false
+  podSecurityContext:
+    enabled: true
+    runAsUser: 0
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 0
+    runAsGroup: 0
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: true
   ## @param controller.jenkinsUrl If you are not using the provided ingress you can specify `controller.jenkinsUrl` to change the url definition.
   ##
   jenkinsUrl: "https://jenkins.infra.sololab"
@@ -107,21 +107,44 @@ controller:
                   dockerHost:
                     uri: "unix:///var/run/docker.sock"
                 templates:
+                  # https://github.com/Zsomx/devops-course-szte/blob/c04caad7793f4899f8ea7614ed191de831ef03d3/jenkins/docker/config/docker.yml#L46
                   - labelString: "docker-agent"
                     dockerTemplateBase:
-                      image: "jenkins/agent"
+                      image: "jenkins/jnlp-agent-docker"
                       mounts:
                         - "type=tmpfs,destination=/run"
                         - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
                       environmentsString: |
                         TZ=Asia/Shanghai
-                    remoteFs: "/home/jenkins/agent"
+                        JENKINS_URL=http://jenkins:8080
                     connector:
-                      attach:
-                        user: "jenkins"
+                      jnlp:
+                        jnlpLauncher:
+                          workDirSettings:
+                            disabled: false
+                            failIfWorkDirIsMissing: false
+                            internalDir: "remoting"
+                        user: root
+                    remoteFs: "/home/jenkins"
                     instanceCapStr: "10"
                     retentionStrategy:
                       idleMinutes: 1
+
+      # - labelString: "docker-agent"
+      #   dockerTemplateBase:
+      #     image: "jenkins/jnlp-agent-docker"
+      #     mounts:
+      #       - "type=tmpfs,destination=/run"
+      #       - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
+      #     environmentsString: |
+      #       TZ=Asia/Shanghai
+      #   remoteFs: "/home/jenkins/agent"
+      #   connector:
+      #     attach:
+      #       user: "jenkins"
+      #   instanceCapStr: "10"
+      #   retentionStrategy:
+      #     idleMinutes: 1
 
       # job-dsl.yaml: |-
       #   jobs:
