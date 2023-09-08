@@ -111,14 +111,18 @@ controller:
                   - labelString: "docker-agent"
                     dockerTemplateBase:
                       image: "jenkins/jnlp-agent-docker"
+                      dnsHosts:
+                        - "10.89.0.1"
+                        - "192.168.255.10"
+                      environmentsString: 
+                        - "TZ=Asia/Shanghai"
                       mounts:
                         - "type=tmpfs,destination=/run"
                         - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
-                      environmentsString: |
-                        TZ=Asia/Shanghai
-                        JENKINS_URL=http://jenkins:8080
+                      user: "root"
                     connector:
                       jnlp:
+                        jenkinsUrl: "http://jenkins:8080/"
                         jnlpLauncher:
                           workDirSettings:
                             disabled: false
