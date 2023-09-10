@@ -640,7 +640,7 @@ controller:
       ## @param controller.JCasC.autoReload.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
       ##
       containerSecurityContext:
-        enabled: true
+        enabled: false
         runAsUser: 1001
         runAsNonRoot: true
         readOnlyRootFilesystem: false

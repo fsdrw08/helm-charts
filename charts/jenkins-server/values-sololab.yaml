@@ -98,6 +98,11 @@ controller:
         jenkins:
           systemMessage: Welcome to our CI\CD server.  This Jenkins is configured and managed 'as code'.
 
+      fix-agent-port.yaml: |-
+        jenkins:
+          slaveAgentPort: 50000
+
+      # https://github.com/Zsomx/devops-course-szte/blob/c04caad7793f4899f8ea7614ed191de831ef03d3/jenkins/docker/config/docker.yml#L46
       docker.yaml: |-
         jenkins:
           clouds:
@@ -107,14 +112,13 @@ controller:
                   dockerHost:
                     uri: "unix:///var/run/docker.sock"
                 templates:
-                  # https://github.com/Zsomx/devops-course-szte/blob/c04caad7793f4899f8ea7614ed191de831ef03d3/jenkins/docker/config/docker.yml#L46
                   - labelString: "docker-agent"
                     dockerTemplateBase:
-                      image: "jenkins/jnlp-agent-docker"
+                      image: "docker.io/jenkins/jnlp-agent-docker:latest"
                       dnsHosts:
                         - "10.89.0.1"
                         - "192.168.255.10"
-                      environmentsString: 
+                      environment: 
                         - "TZ=Asia/Shanghai"
                       mounts:
                         - "type=tmpfs,destination=/run"
@@ -134,41 +138,21 @@ controller:
                     retentionStrategy:
                       idleMinutes: 1
 
-      # - labelString: "docker-agent"
-      #   dockerTemplateBase:
-      #     image: "jenkins/jnlp-agent-docker"
-      #     mounts:
-      #       - "type=tmpfs,destination=/run"
-      #       - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
-      #     environmentsString: |
-      #       TZ=Asia/Shanghai
-      #   remoteFs: "/home/jenkins/agent"
-      #   connector:
-      #     attach:
-      #       user: "jenkins"
-      #   instanceCapStr: "10"
-      #   retentionStrategy:
-      #     idleMinutes: 1
-
-      # job-dsl.yaml: |-
-      #   jobs:
-      #     - script: |
-      #         def projects = ['nodejs', 'java']
-      #         projects.each{ prj ->
-      #           pipelineJob(prj + '-calc'){
-      #             definition{
-      #               cpsScm{
-      #                 lightweight(true)
-      #                 scm{
-      #                   git{
-      #                     remote {
-      #                       url('https://github.com/odavid/my-bloody-jenkins.git')
-      #                     }
-      #                     branches("refs/heads/master")
-      #                   }
-      #                   scriptPath('demo/assets/apps/' + prj + '-calc/Jenkinsfile')
-      #                 }
-      #               }
-      #             }
-      #           }
-      #         }
+      job-dsl.yaml: |-
+        jobs:
+          - script: |
+              pipelineJob('test'){
+                definition{
+                  cpsScm{
+                    scm{
+                      git{
+                        remote {
+                          url('https://github.com/fsdrw08/packto-samples.git')
+                        }
+                        branches("refs/heads/main")
+                      }
+                      scriptPath('java/maven/Jenkinsfile')
+                    }
+                  }
+                }
+              }
