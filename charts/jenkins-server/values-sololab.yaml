@@ -123,6 +123,7 @@ controller:
                       mounts:
                         - "type=tmpfs,destination=/run"
                         - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
+                        - "type=volume,src=ci-workspace,dst=/home/jenkins"
                       user: "root"
                     connector:
                       jnlp:
@@ -150,6 +151,12 @@ controller:
                           url('https://github.com/fsdrw08/packto-samples.git')
                         }
                         branches("refs/heads/main")
+                        extensions {
+                          cloneOptions {
+                            depth(1)
+                            shallow(true)
+                          }
+                        }
                       }
                       scriptPath('java/maven/Jenkinsfile')
                     }
