@@ -113,6 +113,7 @@ controller:
                     uri: "unix:///var/run/docker.sock"
                 templates:
                   - labelString: "docker-agent"
+                    pullStrategy: PULL_NEVER
                     dockerTemplateBase:
                       image: "docker.io/jenkins/jnlp-agent-docker:latest"
                       dnsHosts:
@@ -123,7 +124,7 @@ controller:
                       mounts:
                         - "type=tmpfs,destination=/run"
                         - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
-                        - "type=volume,src=ci-workspace,dst=/home/jenkins"
+                        - "type=volume,src=jenkins-workspace,dst=/home/jenkins"
                       user: "root"
                     connector:
                       jnlp:
