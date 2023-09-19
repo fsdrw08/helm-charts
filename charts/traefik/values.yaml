@@ -47,28 +47,28 @@ diagnosticMode:
   args:
     - infinity
 
-## @param %%MAIN_OBJECT_BLOCK%%.deployKind specify the deploy kind： Pod, or Deployment
+## @param traefik.deployKind specify the deploy kind： Pod, or Deployment
 deployKind: Pod
-## @section %%MAIN_CONTAINER%% Parameters
+## @section traefik Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
-%%MAIN_OBJECT_BLOCK%%:
-  ## Bitnami %%MAIN_CONTAINER%% image
+traefik:
+  ## traefik image
   ## ref: https://hub.docker.com/r/bitnami/%%IMAGE_NAME%%/tags/
-  ## @param %%MAIN_OBJECT_BLOCK%%.image.registry %%MAIN_CONTAINER%% image registry
-  ## @param %%MAIN_OBJECT_BLOCK%%.image.repository %%MAIN_CONTAINER%% image repository
-  ## @param %%MAIN_OBJECT_BLOCK%%.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
-  ## @param %%MAIN_OBJECT_BLOCK%%.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param %%MAIN_OBJECT_BLOCK%%.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
-  ## @param %%MAIN_OBJECT_BLOCK%%.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
-  ## @param %%MAIN_OBJECT_BLOCK%%.image.debug Enable %%MAIN_CONTAINER%% image debug mode
+  ## @param traefik.image.registry traefik image registry
+  ## @param traefik.image.repository traefik image repository
+  ## @param traefik.image.tag traefik image tag (immutable tags are recommended)
+  ## @param traefik.image.digest traefik image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param traefik.image.pullPolicy traefik image pull policy
+  ## @param traefik.image.pullSecrets traefik image pull secrets
+  ## @param traefik.image.debug Enable traefik image debug mode
   ##
   image:
     registry: docker.io
-    repository: bitnami/%%IMAGE_NAME%%
-    tag: %%IMAGE_TAG%%
+    repository: library/traefik
+    tag: latest
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -86,13 +86,13 @@ deployKind: Pod
     ## Enable debug mode
     ##
     debug: false
-  ## @param %%MAIN_OBJECT_BLOCK%%.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param traefik.podRestartPolicy specify the pod restart policy if deployKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param %%MAIN_OBJECT_BLOCK%%.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ## @param traefik.replicaCount Number of traefik replicas to deploy
   ##
   replicaCount: 1
-  ## @param %%MAIN_OBJECT_BLOCK%%.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param traefik.containerPorts traefik container port to expose to host
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
@@ -103,43 +103,57 @@ deployKind: Pod
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  containerPorts:
+    - name: http
+      containerPort: 80
+      protocol: TCP
+    - name: https
+      containerPort: 443
+      protocol: TCP
+  ## Configure extra options for traefik containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param %%MAIN_OBJECT_BLOCK%%.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param %%MAIN_OBJECT_BLOCK%%.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.livenessProbe.periodSeconds Period seconds for livenessProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.livenessProbe.failureThreshold Failure threshold for livenessProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.livenessProbe.successThreshold Success threshold for livenessProbe
+  ## @param traefik.livenessProbe.enabled Enable livenessProbe on traefik containers
+  ## @param traefik.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param traefik.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param traefik.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param traefik.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param traefik.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.periodSeconds Period seconds for readinessProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.failureThreshold Failure threshold for readinessProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.successThreshold Success threshold for readinessProbe
+    initialDelaySeconds: 60
+    periodSeconds: 120
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - traefik
+        - healthcheck
+  ## @param traefik.readinessProbe.enabled Enable readinessProbe on traefik containers
+  ## @param traefik.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param traefik.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param traefik.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param traefik.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param traefik.readinessProbe.successThreshold Success threshold for readinessProbe
   ##
   readinessProbe:
-    enabled: true
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param %%MAIN_OBJECT_BLOCK%%.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param %%MAIN_OBJECT_BLOCK%%.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.startupProbe.periodSeconds Period seconds for startupProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.startupProbe.timeoutSeconds Timeout seconds for startupProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.startupProbe.failureThreshold Failure threshold for startupProbe
-  ## @param %%MAIN_OBJECT_BLOCK%%.startupProbe.successThreshold Success threshold for startupProbe
+    enabled: false
+    initialDelaySeconds: 60
+    periodSeconds: 120
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - traefik
+        - healthcheck
+  ## @param traefik.startupProbe.enabled Enable startupProbe on traefik containers
+  ## @param traefik.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param traefik.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param traefik.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param traefik.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param traefik.startupProbe.successThreshold Success threshold for startupProbe
   ##
   startupProbe:
     enabled: false
@@ -148,74 +162,126 @@ deployKind: Pod
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param %%MAIN_OBJECT_BLOCK%%.customLivenessProbe Custom livenessProbe that overrides the default one
+  ## @param traefik.customLivenessProbe Custom livenessProbe that overrides the default one
   ##
   customLivenessProbe: {}
-  ## @param %%MAIN_OBJECT_BLOCK%%.customReadinessProbe Custom readinessProbe that overrides the default one
+  ## @param traefik.customReadinessProbe Custom readinessProbe that overrides the default one
   ##
   customReadinessProbe: {}
-  ## @param %%MAIN_OBJECT_BLOCK%%.customStartupProbe Custom startupProbe that overrides the default one
+  ## @param traefik.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## traefik resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  ## @param %%MAIN_OBJECT_BLOCK%%.resources.limits The resources limits for the %%MAIN_CONTAINER_NAME%% containers
-  ## @param %%MAIN_OBJECT_BLOCK%%.resources.requests The requested resources for the %%MAIN_CONTAINER_NAME%% containers
+  ## @param traefik.resources.limits The resources limits for the traefik containers
+  ## @param traefik.resources.requests The requested resources for the traefik containers
   ##
   resources:
     limits: {}
     requests: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param %%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param %%MAIN_OBJECT_BLOCK%%.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param traefik.podSecurityContext.enabled Enabled traefik pods' Security Context
+  ## @param traefik.podSecurityContext.fsGroup Set traefik pod's Security Context fsGroup
   ##
   podSecurityContext:
-    enabled: true
+    enabled: false
     fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param %%MAIN_OBJECT_BLOCK%%.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param %%MAIN_OBJECT_BLOCK%%.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param %%MAIN_OBJECT_BLOCK%%.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param %%MAIN_OBJECT_BLOCK%%.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param traefik.containerSecurityContext.enabled Enabled traefik containers' Security Context
+  ## @param traefik.containerSecurityContext.runAsUser Set traefik containers' Security Context runAsUser
+  ## @param traefik.containerSecurityContext.runAsNonRoot Set traefik containers' Security Context runAsNonRoot
+  ## @param traefik.containerSecurityContext.readOnlyRootFilesystem Set traefik containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
-    enabled: true
+    enabled: false
     runAsUser: 1001
     runAsNonRoot: true
     readOnlyRootFilesystem: false
 
-  %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
-  ## @param %%MAIN_OBJECT_BLOCK%%.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param traefik.staticConfiguration
+  # https://doc.traefik.io/traefik/getting-started/configuration-overview/#the-static-configuration
+  staticConfiguration:
+    ## @param traefik.staticConfiguration.providers
+    ## ref: https://doc.traefik.io/traefik/providers/overview/
+    ##
+    providers:
+      docker:
+        endpoint: "unix:///var/run/docker.sock"
+        useBindPortIP: false
+        exposedByDefault: false
+    ## @param traefik.staticConfiguration.globalArguments global arguments
+    ## e.g.
+    ## globalArguments:
+    ##   checkNewVersion: false
+    ##   sendAnonymousUsage: false
+    ##
+    globalArguments: {}
+    ## @param traefik.staticConfiguration.entryPoints
+    ## ref: # https://doc.traefik.io/traefik/routing/overview/
+    ##
+    entryPoints:
+      web:
+        address: ":80"
+        forwardedHeaders:
+          trustedIPs: []
+      # https://community.traefik.io/t/lets-encrypt-x509-certificate-signed-by-unknown-authority/11112/1
+      websecure:
+        address: ":443"
+        # https://doc.traefik.io/traefik/routing/entrypoints/#forwarded-headers
+        # https://community.traefik.io/t/how-to-get-real-ip-from-the-client/8239
+        # https://www.bboy.app/2020/04/16/traefik%E5%90%8E%E7%AB%AF%E5%BA%94%E7%94%A8%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E7%9C%9F%E5%AE%9Eip/
+        forwardedHeaders:
+          trustedIPs: []
+    ## @param traefik.staticConfiguration.api
+    ## Traefik exposes a number of information through an API handler
+    ##
+    api:
+      dashboard: true
+    ## @param traefik.staticConfiguration.certificatesResolvers
+    ## ref: https://doc.traefik.io/traefik/https/acme/
+    ## e.g.
+    ## certificatesResolvers:
+    ##   external:
+    ##     acme:
+    ##       caServer: https://acme-v02.api.letsencrypt.org/directory
+    ##       certificatesDuration: 2160
+    ##       email:
+    ##       storage: /mnt/acmeStorage/external_acme.json
+    ##       tlsChallenge: {}
+    ##
+    certificatesResolvers: {}
+  ## @param traefik.existingConfigmap The name of an existing ConfigMap with your custom configuration for traefik
   ##
   existingConfigmap:
-  ## @param %%MAIN_OBJECT_BLOCK%%.command Override default container command (useful when using custom images)
+  ## @param traefik.command Override default container command (useful when using custom images)
   ##
   command: []
-  ## @param %%MAIN_OBJECT_BLOCK%%.args Override default container args (useful when using custom images)
+  ## @param traefik.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param %%MAIN_OBJECT_BLOCK%%.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param traefik.hostAliases traefik pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param %%MAIN_OBJECT_BLOCK%%.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param traefik.podLabels Extra labels for traefik pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param %%MAIN_OBJECT_BLOCK%%.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param traefik.podAnnotations Annotations for traefik pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.enabled Enable autoscaling for %%MAIN_OBJECT_BLOCK%%
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.minReplicas Minimum number of %%MAIN_OBJECT_BLOCK%% replicas
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.maxReplicas Maximum number of %%MAIN_OBJECT_BLOCK%% replicas
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.targetMemory Target Memory utilization percentage
+  ## @param traefik.autoscaling.enabled Enable autoscaling for traefik
+  ## @param traefik.autoscaling.minReplicas Minimum number of traefik replicas
+  ## @param traefik.autoscaling.maxReplicas Maximum number of traefik replicas
+  ## @param traefik.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param traefik.autoscaling.targetMemory Target Memory utilization percentage
   ##
   autoscaling:
     enabled: false
@@ -224,26 +290,26 @@ deployKind: Pod
     targetCPU: ""
     targetMemory: ""
 
-  ## @param %%MAIN_OBJECT_BLOCK%%.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param traefik.extraEnvVars Array with extra environment variables to add to traefik nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param %%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param traefik.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for traefik nodes
   ##
   extraEnvVarsCM: ""
-  ## @param %%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param traefik.extraEnvVarsSecret Name of existing Secret containing extra env vars for traefik nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param %%MAIN_OBJECT_BLOCK%%.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the traefik pod(s)
   ##
   extraVolumes: []
-  ## @param %%MAIN_OBJECT_BLOCK%%.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param traefik.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the traefik container(s)
   ##
   extraVolumeMounts: []
-  ## @param %%MAIN_OBJECT_BLOCK%%.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param traefik.sidecars Add additional sidecar containers to the traefik pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -254,7 +320,7 @@ deployKind: Pod
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param %%MAIN_OBJECT_BLOCK%%.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param traefik.initContainers Add additional init containers to the traefik pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -277,7 +343,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/%%MAIN_OBJECT_BLOCK%%/data
+  mountPath: /bitnami/traefik/data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
@@ -354,13 +420,5 @@ volumePermissions:
   ##
   containerSecurityContext:
     runAsUser: 0
-
 ## @section Other Parameters
 ##
-
-## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
-##
-# %%SUBCHART_NAME%%:
-SUBCHART_NAME:
-  enabled: false
-  %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
