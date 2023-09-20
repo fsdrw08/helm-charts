@@ -301,7 +301,6 @@ controller:
   httpsKeyStore:
     jenkinsHttpsJksSecretName: ""
     enable: false
-    disableSecretMount: false
     ## @param controller.httpsKeyStore.httpPort HTTP Port that Jenkins should listen on along with HTTPS
     ## It also serves liveness and readiness probs port.
     ## When HTTPS keystore is enabled, servicePort and targetPort will be used as HTTPS port

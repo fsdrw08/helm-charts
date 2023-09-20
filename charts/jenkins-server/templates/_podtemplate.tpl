@@ -85,7 +85,7 @@ spec:
         - name: init-scripts
           mountPath: {{ .Values.controller.jenkinsHome }}/init.groovy.d
         {{- end }}
-        {{- if and .Values.controller.httpsKeyStore.enable (not .Values.controller.httpsKeyStore.disableSecretMount) }}
+        {{- if and .Values.controller.httpsKeyStore.enable }}
         - name: jenkins-https-keystore
           mountPath: {{ .Values.controller.httpsKeyStore.path }}
         {{- end }}
@@ -145,12 +145,6 @@ spec:
           value: "{{ .Values.controller.agentListenerPort }}"
         {{- if .Values.controller.httpsKeyStore.enable }}
         - name: JENKINS_HTTPS_KEYSTORE_PASSWORD
-        {{- if not .Values.controller.httpsKeyStore.disableSecretMount }}
-          valueFrom:
-            secretKeyRef:
-              name: {{ if .Values.controller.httpsKeyStore.jenkinsHttpsJksSecretName }} {{ .Values.controller.httpsKeyStore.jenkinsHttpsJksSecretName }} {{ else }} {{ template "common.names.fullname" . }}-https-jks  {{ end }}
-              key: {{ "https-jks-password" | quote }}
-        {{- else }}
           value: {{ .Values.controller.httpsKeyStore.password }}
         {{- end }}
         {{- end }}
@@ -213,9 +207,9 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.controller.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        {{- if and .Values.controller.httpsKeyStore.enable (not .Values.controller.httpsKeyStore.disableSecretMount) }}
-        - mountPath: {{ .Values.controller.httpsKeyStore.path }}
-          name: jenkins-https-keystore
+        {{- if and .Values.controller.httpsKeyStore.enable }}
+        - name: jenkins-https-keystore
+          mountPath: {{ .Values.controller.httpsKeyStore.path }}
         {{- end }}
         - name: jenkins-home
           mountPath: {{ .Values.controller.jenkinsHome }}
@@ -323,26 +317,6 @@ spec:
     - name: jenkins-secrets
       secret:
         secretName: {{ include "common.names.fullname" . }}-sec
-    {{- /*
-    {{- if or .Values.controller.additionalSecrets .Values.controller.adminSecret }}
-    - name: jenkins-secrets
-      projected:
-        sources:
-          {{- if .Values.controller.adminSecret }}
-          - secret:
-              name: {{ include "common.names.fullname" . }}
-              items:
-                - key: jenkins-admin-user
-                  path: chart-admin-username
-                - key: jenkins-admin-password
-                  path: chart-admin-password
-          {{- end }}
-          {{- if .Values.controller.additionalSecrets }}
-          - secret:
-              name: {{ template "common.names.fullname" . }}-additional-secrets
-          {{- end }}
-    {{- end }}
-    */}}
     {{- /* jenkins-cache */}}
     - name: jenkins-cache
       emptyDir: {}
@@ -354,10 +328,16 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    - name: sc-config-volume
-      emptyDir: {}
     - name: tmp-volume
       emptyDir: {}
+    {{- if and .Values.controller.httpsKeyStore.enable }}
+    - name: jenkins-https-keystore
+      secret:
+        secretName: {{ template "jenkins.fullname" . }}-https-jks
+        items:
+        - key: jenkins-jks-file
+          path: {{ .Values.controller.httpsKeyStore.fileName }}
+    {{- end }}
     {{- if .Values.controller.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraVolumes "context" $) | nindent 4 }}
     {{- end }}

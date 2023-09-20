@@ -252,8 +252,25 @@ traefik:
     ##       email:
     ##       storage: /mnt/acmeStorage/external_acme.json
     ##       tlsChallenge: {}
+    ##   internal:
+    ##     acme:
+    ##       caServer:
+    ##       certificatesDuration: 2160
+    ##       email:
+    ##       storage: /mnt/acmeStorage/internal_acme.json
+    ##       tlsChallenge: {}
     ##
     certificatesResolvers: {}
+    ## @param traefik.staticConfiguration.log
+    ## ref: https://doc.traefik.io/traefik/observability/logs/
+    ##
+    log:
+      ## @param traefik.staticConfiguration.log.level
+      ## Alternative logging levels are DEBUG, INFO, WARN, ERROR, FATAL, and PANIC.
+      level: ERROR
+  ## @param traefik.customRootCA set up a custom root CA to trust (for private ACME)
+  ## ref: https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/index.html#traefik-v2
+  customRootCA: ""
   ## @param traefik.existingConfigmap The name of an existing ConfigMap with your custom configuration for traefik
   ##
   existingConfigmap:
@@ -304,10 +321,17 @@ traefik:
   ##
   extraEnvVarsSecret: ""
   ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the traefik pod(s)
-  ##
+  ## e.g.
+  ## extraVolumes:
+  ##   - name: acmeStorage
+  ##     persistentVolumeClaim:
+  ##       claimName: traefik-pvc
   extraVolumes: []
   ## @param traefik.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the traefik container(s)
-  ##
+  ## e.g.
+  ## extraVolumeMounts:
+  ##   - name: acmeStorage
+  ##     mountPath: /mnt/acmeStorage
   extraVolumeMounts: []
   ## @param traefik.sidecars Add additional sidecar containers to the traefik pod(s)
   ## e.g:
