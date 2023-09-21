@@ -71,8 +71,6 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.traefik.extraEnvVarsCM "context" $) }}
         {{- end }}
-        - secretRef:
-            name: {{ template "common.names.fullname" . }}
         {{- if .Values.traefik.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.traefik.extraEnvVarsSecret "context" $) }}
@@ -99,13 +97,14 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.traefik.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        {{- if .Values.persistence.mountPath }}
+        - name: static-configuration
+          mountPath: /etc/traefik/traefik.yml
+          subPath: traefik.yml
         - name: persistent-volume
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-        {{- end }}
         {{- if .Values.traefik.customRootCA }}
         - name: root_ca.crt
           mountPath: /etc/traefik/root_ca.crt
@@ -118,10 +117,16 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.traefik.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: static-configuration
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+        items:
+          - key: traefik.yml
+            path: traefik.yml
     - name: persistent-volume
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" . | ) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}
@@ -139,6 +144,6 @@ spec:
   {{ if eq .Values.deployKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
-  restartPolicy: {{ .Values.deployKind }}
+  restartPolicy: {{ .Values.traefik.podRestartPolicy }}
   {{- end }}
 {{- end -}}

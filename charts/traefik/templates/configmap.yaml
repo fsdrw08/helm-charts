@@ -1,3 +1,4 @@
+{{- if .Values.traefik.staticConfiguration -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,5 +12,6 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  root_ca.cert: |
-  # Config file
+  traefik.yml: |
+    {{- include "common.tplvalues.render" (dict "value" .Values.traefik.staticConfiguration "context" $) | nindent 4 -}}
+{{- end -}}

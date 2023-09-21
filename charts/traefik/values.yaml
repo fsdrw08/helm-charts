@@ -224,6 +224,8 @@ traefik:
     ## ref: # https://doc.traefik.io/traefik/routing/overview/
     ##
     entryPoints:
+      traefik:
+        address: ":9000"
       web:
         address: ":80"
         forwardedHeaders:
@@ -268,6 +270,10 @@ traefik:
       ## @param traefik.staticConfiguration.log.level
       ## Alternative logging levels are DEBUG, INFO, WARN, ERROR, FATAL, and PANIC.
       level: ERROR
+    ## @param traefik.staticConfiguration.ping Checking the Health of Your Traefik Instances
+    ## ref: https://doc.traefik.io/traefik/operations/ping/
+    ##
+    ping: {}
   ## @param traefik.customRootCA set up a custom root CA to trust (for private ACME)
   ## ref: https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/index.html#traefik-v2
   customRootCA: ""
@@ -326,13 +332,19 @@ traefik:
   ##   - name: acmeStorage
   ##     persistentVolumeClaim:
   ##       claimName: traefik-pvc
-  extraVolumes: []
+  extraVolumes:
+    - name: docker-socket
+      hostPath:
+        path: /run/user/1001/podman/podman.sock
+        type: Socket
   ## @param traefik.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the traefik container(s)
   ## e.g.
   ## extraVolumeMounts:
   ##   - name: acmeStorage
   ##     mountPath: /mnt/acmeStorage
-  extraVolumeMounts: []
+  extraVolumeMounts:
+    - name: docker-socket
+      mountPath: "/var/run/docker.sock"
   ## @param traefik.sidecars Add additional sidecar containers to the traefik pod(s)
   ## e.g:
   ## sidecars:
@@ -367,7 +379,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/traefik/data
+  mountPath: /mnt
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

@@ -93,13 +93,11 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        {{- if .Values.persistence.mountPath }}
         - name: persistent-volume
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-        {{- end -}}
       {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -120,6 +118,6 @@ spec:
   {{ if eq .Values.deployKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
-  restartPolicy: {{ .Values.deployKind }}
+  restartPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.podRestartPolicy }}
   {{- end }}
 {{- end -}}
