@@ -13,6 +13,8 @@ metadata:
   {{- end }}
 data:
   jcasc-default-config.yaml: |-
+    {{- include "common.tplvalues.render" (dict "value" .Values.controller.JCasC.default "context" $) | nindent 4 -}}
+    {{/*
     jenkins:
       {{- if .Values.controller.JCasC.default.jenkins.authorizationStrategy }}
       authorizationStrategy: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.default.jenkins.authorizationStrategy "context" $ ) | nindent 8 }}
@@ -30,6 +32,7 @@ data:
     {{- if  .Values.controller.JCasC.extraConfig }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.default.extraConfig "context" $ ) | nindent 4 }}
     {{- end }}
+    */}}
   {{- range $key, $val := .Values.controller.JCasC.extraConfigFiles }}
   {{- if $val }}
   {{ $key }}: |- 

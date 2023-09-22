@@ -54,7 +54,7 @@ controller:
   image:
     registry: docker.io
     repository: jenkins/jenkins
-    tag: 2.414.1-lts
+    tag: lts-jdk11
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -530,7 +530,7 @@ controller:
         ##       - id: "${chart-admin-username}"
         ##         name: "Jenkins Admin"
         ##         password: "${chart-admin-password}"
-        securityRealm: |-
+        securityRealm:
           local:
             allowsSignup: false
             enableCaptcha: false
@@ -547,7 +547,7 @@ controller:
       ##     creationOfLegacyTokenEnabled: false
       ##     tokenGenerationOnCreationEnabled: false
       ##     usageStatisticsEnabled: true
-      security: {}
+      # security: {}
       ## @param controller.JCasC.default.unclassified
       unclassified:
         location:
@@ -581,7 +581,7 @@ controller:
       ##   markupFormatter
       ##     rawHtml:
       ##       disableSyntaxHighlighting: true
-      extraConfig: {}
+      # extraConfig: {}
     ## @param configAsCode.extraConfigFiles List of additional configuration-as-code files to be mounted
     ## E.g.:
     ##  welcome-message.yaml: |-

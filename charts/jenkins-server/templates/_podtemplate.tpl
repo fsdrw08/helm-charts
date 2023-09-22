@@ -147,7 +147,6 @@ spec:
         - name: JENKINS_HTTPS_KEYSTORE_PASSWORD
           value: {{ .Values.controller.httpsKeyStore.password }}
         {{- end }}
-        {{- end }}
         - name: CASC_JENKINS_CONFIG
           value: >-
             {{ printf "%s/casc_configs" (.Values.controller.jenkinsHome) }}
@@ -290,28 +289,30 @@ spec:
     {{- if .Values.controller.overwritePluginsFromImage }}
     - name: plugins
       persistentVolumeClaim:
-        claimName: {{ include "common.names.fullname" . }}-plugins
+        claimName: {{ include "common.names.fullname" . }}-pvc-plugins
     {{- end }}
     {{- end }}
     {{- /* init-scripts */}}
     {{- if .Values.controller.initScripts }}
     - name: init-scripts
       configMap:
-        name: {{ template "common.names.fullname" . }}-init-scripts
+        name: {{ template "common.names.fullname" . }}-cm-init-scripts
     {{- end }}
     {{- /* jenkins-config */}}
     - name: jenkins-config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
     {{- /* jenkins-config-jcasc */}}
+    {{- if .Values.controller.JCasC.enabled }}
     - name: jenkins-config-jcasc
       configMap:
         name: {{ template "common.names.fullname" . }}-cm-jcasc
+    {{- end }}
     {{- /* plugin-dir */}}
     {{- if .Values.controller.installPlugins }}
     - name: plugin-dir
       persistentVolumeClaim:
-        claimName: {{ include "common.names.fullname" . }}-plugin-dir
+        claimName: {{ include "common.names.fullname" . }}-pvc-plugin-dir
     {{- end }}
     {{- /* jenkins-secrets */}}
     - name: jenkins-secrets
@@ -324,7 +325,7 @@ spec:
     - name: jenkins-home
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}
@@ -333,7 +334,7 @@ spec:
     {{- if and .Values.controller.httpsKeyStore.enable }}
     - name: jenkins-https-keystore
       secret:
-        secretName: {{ template "jenkins.fullname" . }}-https-jks
+        secretName: {{ template "jenkins.fullname" . }}-sec-https-jks
         items:
         - key: jenkins-jks-file
           path: {{ .Values.controller.httpsKeyStore.fileName }}
@@ -346,4 +347,4 @@ spec:
   {{- else -}}
   restartPolicy: {{ .Values.controller.podRestartPolicy }}
   {{- end }}
-{{- end -}}
+{{- end }}

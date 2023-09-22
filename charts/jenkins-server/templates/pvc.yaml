@@ -2,7 +2,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ include "common.names.fullname" . }}
+  name: {{ include "common.names.fullname" . }}-pvc
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: jenkins-controller
     {{- if .Values.commonLabels }}
@@ -36,7 +36,7 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ include "common.names.fullname" . }}-plugins
+  name: {{ include "common.names.fullname" . }}-pvc-plugins
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: jenkins-controller
     {{- if .Values.commonLabels }}
@@ -70,7 +70,7 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ include "common.names.fullname" . }}-plugin-dir
+  name: {{ include "common.names.fullname" . }}-pvc-plugin-dir
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: jenkins-controller
     {{- if .Values.commonLabels }}

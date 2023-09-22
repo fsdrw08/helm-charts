@@ -74,6 +74,15 @@ controller:
   extraVolumeMounts:
     - name: docker-socket
       mountPath: "/var/run/docker.sock"
+  ## @param controller.podLabels Extra labels for jenkins pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels:
+    traefik.enable: true
+    traefik.http.routers.jenkins.rule: "Host(`jenkins.infra.sololab`)"
+    traefik.http.routers.jenkins.entryPoints: websecure
+    traefik.http.routers.jenkins.tls.certresolver: internal
+    traefik.http.services.jenkins.loadbalancer.server.port: 8080
   ## @section Jenkins config as code
   ## @param controller.JCasC config of Jenkins Config as Code
   ## Below is the implementation of Jenkins Configuration as Code.

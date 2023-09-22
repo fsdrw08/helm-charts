@@ -125,7 +125,6 @@ traefik:
     traefik.http.routers.dashboard.entryPoints: web, websecure
     traefik.http.routers.dashboard.middlewares: userpass, tohttps
     traefik.http.routers.dashboard.tls.certresolver: internal
-
   ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the traefik pod(s)
   ## e.g.
   ## extraVolumes:
