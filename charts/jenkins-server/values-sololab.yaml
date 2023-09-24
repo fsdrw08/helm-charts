@@ -122,7 +122,15 @@ controller:
                     uri: "unix:///var/run/docker.sock"
                 templates:
                   - labelString: "docker-agent"
-                    pullStrategy: PULL_NEVER
+                    connector:
+                      jnlp:
+                        jenkinsUrl: "http://jenkins:8080/"
+                        jnlpLauncher:
+                          workDirSettings:
+                            disabled: false
+                            failIfWorkDirIsMissing: false
+                            internalDir: "remoting"
+                        user: root
                     dockerTemplateBase:
                       image: "docker.io/jenkins/jnlp-agent-docker:latest"
                       dnsHosts:
@@ -135,15 +143,31 @@ controller:
                         - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
                         - "type=volume,src=jenkins-workspace,dst=/home/jenkins"
                       user: "root"
-                    connector:
-                      jnlp:
-                        jenkinsUrl: "http://jenkins:8080/"
-                        jnlpLauncher:
-                          workDirSettings:
-                            disabled: false
-                            failIfWorkDirIsMissing: false
-                            internalDir: "remoting"
-                        user: root
+                    pullStrategy: PULL_NEVER
+                    remoteFs: "/home/jenkins"
+                    instanceCapStr: "10"
+                    retentionStrategy:
+                      idleMinutes: 1
+            - docker:
+                name: "docker-dev"
+                dockerApi:
+                  dockerHost:
+                    uri: "tcp://192.168.255.12:8888"
+                templates:
+                  - labelString: "dev-docker-agent"
+                    pullStrategy: PULL_NEVER
+                    connector: "attach"
+                    dockerTemplateBase:
+                      image: "docker.io/jenkins/agent:latest"
+                      dnsHosts:
+                        - "192.168.255.10"
+                      environment: 
+                        - "TZ=Asia/Shanghai"
+                      mounts:
+                        - "type=tmpfs,destination=/run"
+                        - "type=bind,source=/run/user/1001/podman/podman.sock,destination=/var/run/docker.sock"
+                        - "type=volume,src=jenkins-workspace,dst=/home/jenkins"
+                      user: "root"
                     remoteFs: "/home/jenkins"
                     instanceCapStr: "10"
                     retentionStrategy:
@@ -170,6 +194,29 @@ controller:
                       }
                       scriptPath('java/maven/Jenkinsfile')
                     }
+                  }
+                }
+              }
+              
+          - script: |
+              pipelineJob('test2') {
+                definition {
+                  cps {
+                    sandbox()
+                    script("""
+                      pipeline {
+                        agent {
+                          label "dev-docker-agent"
+                        }
+                        stages {
+                          stage("test") {
+                            steps {
+                              sh 'echo "Hello, World!"'
+                            }
+                          }
+                        }
+                      }
+                    """)
                   }
                 }
               }

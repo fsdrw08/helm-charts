@@ -157,6 +157,7 @@ controller:
     - pipeline-model-extensions:latest
     - pipeline-stage-step:latest
     - script-security:latest
+    - scm-api
     - ssh-slaves:latest
     - ssh-credentials:latest
     - sshd:latest
@@ -168,6 +169,7 @@ controller:
     - workflow-durable-task-step:latest
     - workflow-job:latest
     - workflow-multibranch:latest
+    - workflow-scm-step
   ## @param controller.installLatestPlugins install latest plugins
   ## Set to false to download the minimum required version of all dependencies.
   ##
