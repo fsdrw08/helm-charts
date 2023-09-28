@@ -109,6 +109,13 @@ traefik:
           email:
           storage: /mnt/acmeStorage/internal_acme.json
           tlsChallenge: {}
+    ## @param traefik.staticConfiguration.log
+    ## ref: https://doc.traefik.io/traefik/observability/logs/
+    ##
+    log:
+      ## @param traefik.staticConfiguration.log.level
+      ## Alternative logging levels are DEBUG, INFO, WARN, ERROR, FATAL, and PANIC.
+      level: INFO
   ## @param traefik.customRootCA set up a custom root CA to trust (for private ACME)
   ## ref: https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/index.html#traefik-v2
   customRootCA: ""

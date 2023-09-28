@@ -4,6 +4,7 @@ controller:
   ## @param controller.additionalPlugins List of plugins to install in addition to those listed in controller.installPlugins
   additionalPlugins:
     - job-dsl:latest
+    - docker-workflow:latest
   ## @param controller.provision initContainer settings for jenkins controller provision
   provision:
     ##
@@ -158,7 +159,7 @@ controller:
                     pullStrategy: PULL_NEVER
                     connector: "attach"
                     dockerTemplateBase:
-                      image: "docker.io/jenkins/agent:latest"
+                      image: "docker.io/jenkins/jnlp-agent-docker:latest"
                       dnsHosts:
                         - "192.168.255.10"
                       environment: 
@@ -203,19 +204,51 @@ controller:
                 definition {
                   cps {
                     sandbox()
-                    script("""
-                      pipeline {
-                        agent {
-                          label "dev-docker-agent"
-                        }
-                        stages {
-                          stage("test") {
-                            steps {
-                              sh 'echo "Hello, World!"'
-                            }
-                          }
-                        }
+                    script("""\
+              pipeline {
+                agent {
+                  label "dev-docker-agent"
+                }
+                stages {
+                  stage("checkout") {
+                    // https://www.jenkins.io/doc/pipeline/steps/
+                    steps {
+                      // https://plugins.jenkins.io/git/
+                      // https://www.jenkins.io/doc/pipeline/steps/params/scmgit/
+                      // https://github.com/pplmx/LearningDocker/blob/0b40004e2a1f77b2a1566537273057870fe7f5d1/compose/jenkins/Pipeline_Sonar.groovy#L11
+                      // https://github.com/easysoft/zentaopms/blob/8272c6cc90a2074cf80f117700a68fa14df3b395/misc/ci/Jenkinsfile.devops#L72
+                      checkout scmGit(
+                        userRemoteConfigs: [[url: 'https://github.com/fsdrw08/packto-samples.git']],
+                        branches: [[name:'*/main']],
+                        extensions: [cloneOption(depth: 1, shallow: true)]
+                      )
+                      sh 'pwd'
+                    }
+                  }
+                  stage("build") {
+                    steps {
+                      script {
+                        sh '''
+                          docker run \
+                            --rm \
+                            --tmpfs /tmp:rw \
+                            --volume /run/user/1001/podman/podman.sock:/var/run/docker.sock \
+                            --volume jenkins-workspace:/workspace:rw \
+                            --workdir /workspace \
+                            --env HOME="/workspace" \
+                            docker.io/buildpacksio/pack:latest build \
+                              --trust-builder \
+                              --docker-host unix:///run/user/1001/podman/podman.sock \
+                              paketo-demo-app \
+                              --path ./workspace/test/java/maven/ \
+                              --builder docker.io/paketobuildpacks/builder:base \
+                              --buildpack docker.io/paketobuildpacks/java-azure:10
+                        '''
                       }
+                    }
+                  }
+                }
+              }
                     """)
                   }
                 }
