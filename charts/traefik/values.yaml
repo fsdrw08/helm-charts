@@ -32,22 +32,7 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## Enable diagnostic mode in the deployment
-##
-diagnosticMode:
-  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
-  ##
-  enabled: false
-  ## @param diagnosticMode.command Command to override all containers in the deployment
-  ##
-  command:
-    - sleep
-  ## @param diagnosticMode.args Args to override all containers in the deployment
-  ##
-  args:
-    - infinity
-
-## @param traefik.deployKind specify the deploy kind： Pod, or Deployment
+## @param deployKind specify the deploy kind： Pod, or Deployment
 deployKind: Pod
 ## @section traefik Parameters
 ##
@@ -63,7 +48,6 @@ traefik:
   ## @param traefik.image.digest traefik image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
   ## @param traefik.image.pullPolicy traefik image pull policy
   ## @param traefik.image.pullSecrets traefik image pull secrets
-  ## @param traefik.image.debug Enable traefik image debug mode
   ##
   image:
     registry: docker.io
@@ -83,9 +67,6 @@ traefik:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-    ## Enable debug mode
-    ##
-    debug: false
   ## @param traefik.podRestartPolicy specify the pod restart policy if deployKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
@@ -221,7 +202,7 @@ traefik:
     ##
     globalArguments: {}
     ## @param traefik.staticConfiguration.entryPoints
-    ## ref: # https://doc.traefik.io/traefik/routing/overview/
+    ## ref: https://doc.traefik.io/traefik/routing/overview/
     ##
     entryPoints:
       traefik:

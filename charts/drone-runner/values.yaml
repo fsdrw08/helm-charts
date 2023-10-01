@@ -52,7 +52,6 @@ droneRunnerDocker:
   ## @param droneRunnerDocker.image.digest drone image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
   ## @param droneRunnerDocker.image.pullPolicy drone image pull policy
   ## @param droneRunnerDocker.image.pullSecrets drone image pull secrets
-  ## @param droneRunnerDocker.image.debug Enable drone image debug mode
   ##
   image:
     registry: docker.io
@@ -72,9 +71,6 @@ droneRunnerDocker:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-    ## Enable debug mode
-    ##
-    debug: false
   ## @param droneRunnerDocker.podRestartPolicy specify the pod restart policy if instanceKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
