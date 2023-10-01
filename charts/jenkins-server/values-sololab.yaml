@@ -240,7 +240,7 @@ controller:
                               --trust-builder \
                               --docker-host unix:///run/user/1001/podman/podman.sock \
                               paketo-demo-app \
-                              --path ./workspace/test/java/maven/ \
+                              --path ./workspace/test2/java/maven/ \
                               --builder docker.io/paketobuildpacks/builder:base \
                               --buildpack docker.io/paketobuildpacks/java-azure:10
                         '''
