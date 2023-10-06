@@ -182,14 +182,15 @@ consul:
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files
   configFile:
     server:
-      ## @param consul.configFile.server.addresses This is the address that this agent will listen on for communication from other Consul members. By default, this is 0.0.0.0, meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster. 
+      ## @param consul.configFile.server.addresses This is the address that this agent will listen on for communication from other Consul members. By default, this is 0.0.0.0, meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
+      ## ref: https://github.com/hashicorp/consul-k8s/blob/main/charts/consul/templates/server-config-configmap.yaml
       addresses:
         http: "0.0.0.0"
       ## @param consul.configFile.server.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change. Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_auto_reload_config
       auto_reload_config: true
-      ## @param consul.configFile.server.bind_addr The address that should be bound to for internal cluster communications. This is an IP address that should be reachable by all other nodes in the cluster. By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster. 
+      ## @param consul.configFile.server.bind_addr The address that should be bound to for internal cluster communications. This is an IP address that should be reachable by all other nodes in the cluster. By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#bind_addr
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bind
       bind_addr: "0.0.0.0"
@@ -199,21 +200,23 @@ consul:
       ## @param consul.configFile.server.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers. By default, this is "127.0.0.1", allowing only loopback connections.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_client
       client_addr: "0.0.0.0"
+      ## @param consul.configFile.server.connect 
+      ## Consul's service mesh capabilities
+      connect:
+        enable: true
       ## @param consul.configFile.server.datacenter This flag controls the datacenter in which the agent is running. If not provided, it defaults to "dc1".
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
       datacenter: dc1
-      ## @param consul.configFile.server.data_dir This flag provides a data directory for the agent to store state. This is required for all agents. 
+      ## @param consul.configFile.server.data_dir This flag provides a data directory for the agent to store state. This is required for all agents.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
       data_dir: /consul/data
       ## @param consul.configFile.server.domain By default, Consul responds to DNS queries in the "consul." domain. This flag can be used to change that domain.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_domain
       domain: consul
-      ## @param consul.configFile.server.server This flag is used to control if an agent is in server or client mode. When provided, an agent will act as a Consul server. 
+      ## @param consul.configFile.server.server This flag is used to control if an agent is in server or client mode. When provided, an agent will act as a Consul server.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#server-1
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_server
       server: true
-
-
 
   ## @param consul.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
@@ -381,7 +384,6 @@ volumePermissions:
   ##
   containerSecurityContext:
     runAsUser: 0
-
 ## @section Other Parameters
 ##
 
