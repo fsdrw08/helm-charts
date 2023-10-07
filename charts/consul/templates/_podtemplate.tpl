@@ -1,4 +1,4 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "consul.podTemplate" -}}
 metadata:
   {{- if eq .Values.deployKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
@@ -15,17 +15,17 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "consul.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.consul.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.consul.hostAliases "context" $) | nindent 4 }}
   {{- end }}
   {{- if .Values.consul.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.consul.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end -}}
+  {{- end }}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "consul.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -45,16 +45,23 @@ spec:
     {{- end }}
   containers:
     - name: consul
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+      image: {{ template "consul.image" . }}
       imagePullPolicy: {{ .Values.consul.image.pullPolicy }}
       {{- if .Values.consul.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.consul.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       {{- if .Values.consul.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.consul.command "context" $) | nindent 8 }}
+      {{- else }}
+      command:
+        - consul
       {{- end }}
       {{- if .Values.consul.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.consul.args "context" $) | nindent 8 }}
+      {{- else }}
+      args:
+        - agent
+        - -config-dir=/consul/config
       {{- end }}
       env:
         {{- if .Values.consul.extraEnvVars }}
@@ -93,6 +100,8 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.consul.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /consul/config
         - name: persistent-volume
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -105,6 +114,9 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.consul.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
     - name: persistent-volume
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:

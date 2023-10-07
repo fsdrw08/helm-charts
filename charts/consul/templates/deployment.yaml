@@ -12,11 +12,11 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.%%MAIN_OBJECT_BLOCK%%.autoscaling.enabled }}
-  replicas: {{ .Values.%%MAIN_OBJECT_BLOCK%%.replicaCount }}
+  {{- if not .Values.consul.autoscaling.enabled }}
+  replicas: {{ .Values.consul.replicaCount }}
   {{- end }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
       app.kubernetes.io/component: consul
-  template: {{- include "%%TEMPLATE_NAME%%.podTemplate" . | nindent 4 }}
+  template: {{- include "consul.podTemplate" . | nindent 4 }}
 {{- end }}
