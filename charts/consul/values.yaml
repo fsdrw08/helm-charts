@@ -90,7 +90,18 @@ consul:
   ##     containerPort: 8600
   ##     protocol: UDP
   ##
-  containerPorts: {}
+  containerPorts:
+    - name: server
+      containerPort: 8300
+      hostIP: 192.168.255.10
+      protocol: TCP
+    - name: serf_lan
+      containerPort: 8301
+      hostIP: 192.168.255.10
+      protocol: TCP
+    - name: dns
+      containerPort: 8600
+      protocol: UDP
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param consul.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
@@ -160,6 +171,7 @@ consul:
     requests: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## ref: https://github.com/hashicorp/consul-k8s/blob/main/charts/consul/values.yaml#L940
   ## @param consul.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
   ## @param consul.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
   ##
@@ -177,9 +189,9 @@ consul:
   ##
   containerSecurityContext:
     enabled: true
-    runAsUser: 1001
+    runAsUser: 100
     runAsNonRoot: true
-    readOnlyRootFilesystem: false
+    readOnlyRootFilesystem: true
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
@@ -210,7 +222,7 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#connect
       ## ref: https://developer.hashicorp.com/consul/docs/connect
       connect:
-        enable: true
+        enabled: true
       ## @param consul.configFiles.server.datacenter This flag controls the datacenter in which the agent is running. If not provided, it defaults to "dc1".
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
       datacenter: dc1
@@ -345,9 +357,6 @@ persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
   enabled: true
-  ## @param persistence.mountPath Path to mount the volume at.
-  ##
-  mountPath: /bitnami/consul/data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

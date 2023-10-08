@@ -35,7 +35,7 @@ spec:
       {{- end }}
       volumeMounts:
         - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ .Values.consul.configFiles.server.data_dir }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -72,8 +72,6 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.consul.extraEnvVarsCM "context" $) }}
         {{- end }}
-        - secretRef:
-            name: {{ template "common.names.fullname" . }}
         {{- if .Values.consul.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.consul.extraEnvVarsSecret "context" $) }}
@@ -103,7 +101,7 @@ spec:
         - name: config
           mountPath: /consul/config
         - name: persistent-volume
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ .Values.consul.configFiles.server.data_dir }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -120,7 +118,7 @@ spec:
     - name: persistent-volume
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc
     {{- else }}
       emptyDir: {}
     {{- end }}
