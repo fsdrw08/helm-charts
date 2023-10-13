@@ -14,6 +14,7 @@ consul:
         tokens:
           initial_management: e95b599e-166e-7d80-08ad-aee76e7ddf19
           agent: e95b599e-166e-7d80-08ad-aee76e7ddf19
+          config_file_service_registration: e95b599e-166e-7d80-08ad-aee76e7ddf19
 
   ## @param consul.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
@@ -31,7 +32,7 @@ consul:
   ## @param consul.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
-  podLabels: 
+  podLabels:
     traefik.enable: true
     traefik.http.routers.consul.rule: "Host(`consul.infra.sololab`)"
     traefik.http.routers.consul.entryPoints: websecure
