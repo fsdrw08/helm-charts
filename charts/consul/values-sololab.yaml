@@ -57,13 +57,6 @@ consul:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param consul.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
-  ## e.g:
-  ## extraEnvVars:
-  ##   - name: FOO
-  ##     value: "bar"
-  ##
-  extraEnvVars: []
   ## @param consul.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
   ##
   extraEnvVarsCM: ""
@@ -182,8 +175,8 @@ volumePermissions:
   ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
   ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
   ##
-  containerSecurityContext:
-    runAsUser: 0
+  # containerSecurityContext:
+  #   runAsUser: 0
 ## @section Other Parameters
 ##
 

@@ -199,15 +199,23 @@ consul:
   ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files
   configFiles:
-    server:
-      ## @param consul.configFiles.server.addresses This is the address that this agent will listen on for communication from other Consul members. By default, this is 0.0.0.0, meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
-      ## ref: https://github.com/hashicorp/consul-k8s/blob/main/charts/consul/templates/server-config-configmap.yaml
-      addresses:
-        http: "0.0.0.0"
+    ## @param consul.configFiles.common common config for server and client agent
+    # https://developer.hashicorp.com/consul/tutorials/production-deploy/deployment-guide#configure-consul-agents
+    common:
       ## @param consul.configFiles.server.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change. Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_auto_reload_config
       auto_reload_config: true
+      ## @param consul.configFiles.common.datacenter This flag controls the datacenter in which the agent is running. If not provided, it defaults to "dc1".
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
+      datacenter: dc1
+      ## @param consul.configFiles.common.data_dir This flag provides a data directory for the agent to store state. This is required for all agents.
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
+      data_dir: /consul/data
+      ## @param consul.configFiles.common.encrypt Specifies the secret key to use for encryption of Consul network traffic.
+      ## The easiest way to create an encryption key is to use consul keygen.
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_encrypt
+      encrypt: qDOPBEr+/oUVeOFQOnVypxwDaHzLrD+lvjo5vCEBbZ0=
+    server:
       ## @param consul.configFiles.server.bind_addr The address that should be bound to for internal cluster communications. This is an IP address that should be reachable by all other nodes in the cluster. By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#bind_addr
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bind
@@ -215,7 +223,8 @@ consul:
       ## @param consul.configFiles.server.bootstrap_expect This flag provides the number of expected servers in the datacenter.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect
       bootstrap_expect: 1
-      ## @param consul.configFiles.server.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers. By default, this is "127.0.0.1", allowing only loopback connections.
+      ## @param consul.configFiles.server.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
+      ## By default, this is "127.0.0.1", allowing only loopback connections.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_client
       client_addr: "0.0.0.0"
       ## @param consul.configFiles.server.connect Consul's service mesh capabilities
@@ -223,16 +232,10 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/connect
       connect:
         enabled: true
-      ## @param consul.configFiles.server.datacenter This flag controls the datacenter in which the agent is running. If not provided, it defaults to "dc1".
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
-      datacenter: dc1
-      ## @param consul.configFiles.server.data_dir This flag provides a data directory for the agent to store state. This is required for all agents.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
-      data_dir: /consul/data
       ## @param consul.configFiles.server.domain By default, Consul responds to DNS queries in the "consul." domain. This flag can be used to change that domain.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_domain
       domain: consul
-      ## @param consul.configFiles.server.limits 
+      ## @param consul.configFiles.server.limits
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#limits
       limits:
         request_limits:
@@ -260,7 +263,7 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_server
       server: true
     ui:
-      ## @param consul.configFiles.ui.ui_config This object allows a number of sub-keys to be set which controls the display or features available in the UI. 
+      ## @param consul.configFiles.ui.ui_config This object allows a number of sub-keys to be set which controls the display or features available in the UI.
       ## Configuring the UI with this stanza was added in Consul 1.9.0.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui-parameters
       ui_config:
