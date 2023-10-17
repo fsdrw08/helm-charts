@@ -216,44 +216,9 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_encrypt
       encrypt: qDOPBEr+/oUVeOFQOnVypxwDaHzLrD+lvjo5vCEBbZ0=
     server:
-      ## @param consul.configFiles.server.bind_addr The address that should be bound to for internal cluster communications. This is an IP address that should be reachable by all other nodes in the cluster. By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#bind_addr
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bind
-      bind_addr: "0.0.0.0"
       ## @param consul.configFiles.server.bootstrap_expect This flag provides the number of expected servers in the datacenter.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect
       bootstrap_expect: 1
-      ## @param consul.configFiles.server.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
-      ## By default, this is "127.0.0.1", allowing only loopback connections.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_client
-      client_addr: "0.0.0.0"
-      ## @param consul.configFiles.server.connect Consul's service mesh capabilities
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#connect
-      ## ref: https://developer.hashicorp.com/consul/docs/connect
-      connect:
-        enabled: true
-      ## @param consul.configFiles.server.domain By default, Consul responds to DNS queries in the "consul." domain. This flag can be used to change that domain.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_domain
-      domain: consul
-      ## @param consul.configFiles.server.limits
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#limits
-      limits:
-        request_limits:
-          mode: disabled
-          read_rate: -1
-          write_rate: -1
-      ## @param consul.configFiles.server.peering This object allows setting options for cluster peering
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#peering
-      ## ref: https://developer.hashicorp.com/consul/docs/connect/cluster-peering
-      peering:
-        enabled: true
-      ## @param consul.configFiles.server.ports
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ports
-      ports:
-        dns: 8600
-        http: 8500
-        serf_lan: 8301
-        server: 8300
       ## @param consul.configFiles.server.recursors This flag provides addresses of upstream DNS servers that are used to recursively resolve queries if they are not inside the service domain for Consul
       recursors: []
       ## @param consul.configFiles.server.retry_join Address of another agent to join upon starting up
@@ -270,7 +235,7 @@ consul:
         ## @param consul.configFiles.ui.ui_config.enabled This enables the service of the web UI from this agent
         ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui_config_enabled
         enabled: true
-        ## This specifies the HTTP path that the web UI should be served from.
+        ## @param consul.configFiles.ui.ui_config.content_path This specifies the HTTP path that the web UI should be served from.
         ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui_config_content_path
         content_path: /ui/
   ## @param consul.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
