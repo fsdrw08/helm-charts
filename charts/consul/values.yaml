@@ -216,6 +216,12 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_encrypt
       encrypt: qDOPBEr+/oUVeOFQOnVypxwDaHzLrD+lvjo5vCEBbZ0=
     server:
+      ## @param consul.configFiles.server.addresses This is a nested object that allows setting bind addresses.
+      ## In Consul 1.0 and later these can be set to a space-separated list of addresses to bind to, or a [go-sockaddr] template that can potentially resolve to multiple addresses.
+      ## ref: https://github.com/hashicorp/learn-consul-docker/blob/110bc9484b0dcd714e64604cd011a360d03b9bc6/datacenter-deploy-acl-policy/server1.json#L7
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
+      addresses:
+        http: "0.0.0.0"
       ## @param consul.configFiles.server.bootstrap_expect This flag provides the number of expected servers in the datacenter.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect
       bootstrap_expect: 1

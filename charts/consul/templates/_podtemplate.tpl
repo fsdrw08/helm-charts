@@ -101,7 +101,7 @@ spec:
         - name: config
           mountPath: /consul/config
         - name: persistent-volume
-          mountPath: {{ .Values.consul.configFiles.server.data_dir }}
+          mountPath: {{ .Values.consul.configFiles.common.data_dir }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
