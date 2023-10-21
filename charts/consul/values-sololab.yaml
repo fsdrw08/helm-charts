@@ -1,10 +1,43 @@
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 consul:
+  ## @param consul.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## containerPorts:
+  ##   - name: server
+  ##     containerPort: 8300
+  ##     hostIP: 192.168.255.11
+  ##     protocol: TCP
+  ##   - name: serf_lan
+  ##     containerPort: 8301
+  ##     hostIP: 192.168.255.11
+  ##     protocol: TCP
+  ##   - name: web
+  ##     containerPort: 8500
+  ##   - name: dns
+  ##     containerPort: 8600
+  ##     protocol: UDP
+  # containerPorts:
+  # - name: server
+  #   containerPort: 8300
+  #   # hostIP: 192.168.255.11
+  #   protocol: TCP
+  # - name: serf_lan
+  #   containerPort: 8301
+  #   # hostIP: 192.168.255.11
+  #   protocol: TCP
+  # - name: dns
+  #   containerPort: 8600
+  #   protocol: UDP
   ## @param consul.configFiles config file to start consul, the sub config block will convert to json and injected as ConfigMap
   ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files
   configFiles:
+    common:
+      bind_addr: "192.168.255.11"
+      ## @param consul.configFiles.common.encrypt Specifies the secret key to use for encryption of Consul network traffic.
+      ## The easiest way to create an encryption key is to use consul keygen.
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_encrypt
+      encrypt: qDOPBEr+/oUVeOFQOnVypxwDaHzLrD+lvjo5vCEBbZ0=
     ## ref: https://github.com/hashicorp/learn-consul-docker/blob/v0.3/datacenter-deploy-auto-config/vault/consul/server1.json
     acl:
       acl:

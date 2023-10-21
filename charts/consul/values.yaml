@@ -78,11 +78,11 @@ consul:
   ## containerPorts:
   ##   - name: server
   ##     containerPort: 8300
-  ##     hostIP: 192.168.255.10
+  ##     hostIP: 192.168.255.11
   ##     protocol: TCP
   ##   - name: serf_lan
   ##     containerPort: 8301
-  ##     hostIP: 192.168.255.10
+  ##     hostIP: 192.168.255.11
   ##     protocol: TCP
   ##   - name: web
   ##     containerPort: 8500
@@ -90,18 +90,6 @@ consul:
   ##     containerPort: 8600
   ##     protocol: UDP
   ##
-  containerPorts:
-    - name: server
-      containerPort: 8300
-      hostIP: 192.168.255.10
-      protocol: TCP
-    - name: serf_lan
-      containerPort: 8301
-      hostIP: 192.168.255.10
-      protocol: TCP
-    - name: dns
-      containerPort: 8600
-      protocol: UDP
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param consul.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
@@ -202,33 +190,32 @@ consul:
     ## @param consul.configFiles.common common config for server and client agent
     # https://developer.hashicorp.com/consul/tutorials/production-deploy/deployment-guide#configure-consul-agents
     common:
+      ## @param consul.configFiles.common.addresses This is a nested object that allows setting bind addresses.
+      ## In Consul 1.0 and later these can be set to a space-separated list of addresses to bind to, or a [go-sockaddr] template that can potentially resolve to multiple addresses.
+      ## This address must be set when ui is enabled
+      ## ref: https://github.com/hashicorp/learn-consul-docker/blob/110bc9484b0dcd714e64604cd011a360d03b9bc6/datacenter-deploy-acl-policy/server1.json#L7
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
+      addresses:
+        http: "0.0.0.0"
       ## @param consul.configFiles.server.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change. Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_auto_reload_config
       auto_reload_config: true
-      ## @param consul.configFiles.common.datacenter This flag controls the datacenter in which the agent is running. If not provided, it defaults to "dc1".
+      ## @param consul.configFiles.common.datacenter This flag controls the datacenter in which the agent is running.
+      ## If not provided, it defaults to "dc1".
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
       datacenter: dc1
       ## @param consul.configFiles.common.data_dir This flag provides a data directory for the agent to store state. This is required for all agents.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
       data_dir: /consul/data
-      ## @param consul.configFiles.common.encrypt Specifies the secret key to use for encryption of Consul network traffic.
-      ## The easiest way to create an encryption key is to use consul keygen.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_encrypt
-      encrypt: qDOPBEr+/oUVeOFQOnVypxwDaHzLrD+lvjo5vCEBbZ0=
+      ## @param consul.configFiles.common.retry_join Address of another agent to join upon starting up
+      ## The retry_join parameter allows you to configure all Consul agents to automatically form a datacenter using a common Consul server accessed via DNS address, 
+      ## IP address or using Cloud Auto-join. 
+      ## Suggest to set to the host fqdn resolve by dns, e.g. SvcDisc.Infra.Sololab
+      retry_join: null
     server:
-      ## @param consul.configFiles.server.addresses This is a nested object that allows setting bind addresses.
-      ## In Consul 1.0 and later these can be set to a space-separated list of addresses to bind to, or a [go-sockaddr] template that can potentially resolve to multiple addresses.
-      ## ref: https://github.com/hashicorp/learn-consul-docker/blob/110bc9484b0dcd714e64604cd011a360d03b9bc6/datacenter-deploy-acl-policy/server1.json#L7
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
-      addresses:
-        http: "0.0.0.0"
       ## @param consul.configFiles.server.bootstrap_expect This flag provides the number of expected servers in the datacenter.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect
       bootstrap_expect: 1
-      ## @param consul.configFiles.server.recursors This flag provides addresses of upstream DNS servers that are used to recursively resolve queries if they are not inside the service domain for Consul
-      recursors: []
-      ## @param consul.configFiles.server.retry_join Address of another agent to join upon starting up
-      retry_join: null
       ## @param consul.configFiles.server.server This flag is used to control if an agent is in server or client mode. When provided, an agent will act as a Consul server.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#server-1
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_server
