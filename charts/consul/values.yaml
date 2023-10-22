@@ -212,14 +212,14 @@ consul:
       ## IP address or using Cloud Auto-join. 
       ## Suggest to set to the host fqdn resolve by dns, e.g. SvcDisc.Infra.Sololab
       retry_join: null
-    server:
-      ## @param consul.configFiles.server.bootstrap_expect This flag provides the number of expected servers in the datacenter.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect
-      bootstrap_expect: 1
-      ## @param consul.configFiles.server.server This flag is used to control if an agent is in server or client mode. When provided, an agent will act as a Consul server.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#server-1
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_server
-      server: true
+    # server:
+    #   ## @param consul.configFiles.server.bootstrap_expect This flag provides the number of expected servers in the datacenter.
+    #   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect
+    #   bootstrap_expect: 1
+    #   ## @param consul.configFiles.server.server This flag is used to control if an agent is in server or client mode. When provided, an agent will act as a Consul server.
+    #   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#server-1
+    #   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_server
+    #   server: true
     ui:
       ## @param consul.configFiles.ui.ui_config This object allows a number of sub-keys to be set which controls the display or features available in the UI.
       ## Configuring the UI with this stanza was added in Consul 1.9.0.
