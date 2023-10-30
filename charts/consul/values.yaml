@@ -197,6 +197,7 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
       addresses:
         http: "0.0.0.0"
+        dns: "0.0.0.0"
       ## @param consul.configFiles.server.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change. Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_auto_reload_config
       auto_reload_config: true
@@ -208,8 +209,8 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
       data_dir: /consul/data
       ## @param consul.configFiles.common.retry_join Address of another agent to join upon starting up
-      ## The retry_join parameter allows you to configure all Consul agents to automatically form a datacenter using a common Consul server accessed via DNS address, 
-      ## IP address or using Cloud Auto-join. 
+      ## The retry_join parameter allows you to configure all Consul agents to automatically form a datacenter using a common Consul server accessed via DNS address,
+      ## IP address or using Cloud Auto-join.
       ## Suggest to set to the host fqdn resolve by dns, e.g. SvcDisc.Infra.Sololab
       retry_join: null
     # server:
