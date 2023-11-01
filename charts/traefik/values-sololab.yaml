@@ -45,6 +45,16 @@ traefik:
         endpoint: "unix:///var/run/docker.sock"
         useBindPortIP: false
         exposedByDefault: false
+      # https://doc.traefik.io/traefik/providers/consul-catalog/#traefik-consul-catalog
+      consulCatalog:
+        endpoint:
+          address: consul.infra.sololab
+          datacenter: dc1
+          scheme: https
+          tls:
+            insecureSkipVerify: true
+        exposedByDefault: false
+
     ## @param traefik.staticConfiguration.globalArguments global arguments
     ## e.g.
     ## globalArguments:
