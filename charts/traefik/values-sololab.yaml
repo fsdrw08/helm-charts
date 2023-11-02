@@ -48,11 +48,9 @@ traefik:
       # https://doc.traefik.io/traefik/providers/consul-catalog/#traefik-consul-catalog
       consulCatalog:
         endpoint:
-          address: consul.infra.sololab
+          address: consul.infra.sololab:8500
           datacenter: dc1
-          scheme: https
-          tls:
-            insecureSkipVerify: true
+          scheme: http
         exposedByDefault: false
 
     ## @param traefik.staticConfiguration.globalArguments global arguments

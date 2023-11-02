@@ -127,7 +127,7 @@ traefik:
     traefik.http.middlewares.userpass.basicauth.users: admin:$apr1$/F5ai.wT$7nFJWh4F7ZA0qoY.JZ69l1
     traefik.http.middlewares.tohttps.redirectscheme.scheme: https
     traefik.http.middlewares.tohttps.redirectscheme.permanent: "true"
-    traefik.http.routers.dashboard.rule: "Host(`dev-traefik.infra.sololab`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+    traefik.http.routers.dashboard.rule: "Host(`dev-traefik.service.consul`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
     traefik.http.routers.dashboard.service: api@internal
     traefik.http.routers.dashboard.entryPoints: web, websecure
     traefik.http.routers.dashboard.middlewares: userpass, tohttps

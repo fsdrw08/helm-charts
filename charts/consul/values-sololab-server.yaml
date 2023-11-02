@@ -33,11 +33,26 @@ consul:
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files
   configFiles:
     common:
+      ## @param consul.configFiles.common.addresses This is a nested object that allows setting bind addresses.
+      ## In Consul 1.0 and later these can be set to a space-separated list of addresses to bind to, or a [go-sockaddr] template that can potentially resolve to multiple addresses.
+      ## This address must be set when ui is enabled
+      ## ref: https://github.com/hashicorp/learn-consul-docker/blob/110bc9484b0dcd714e64604cd011a360d03b9bc6/datacenter-deploy-acl-policy/server1.json#L7
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
+      addresses:
+        http: "192.168.255.11"
+        dns: "192.168.255.11"
+      ## @param consul.configFiles.common.bind_addr The address that should be bound to for internal cluster communications
+      ## This is an IP address that should be reachable by all other nodes in the cluster.
+      ## By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
+      ## If there are multiple private IPv4 addresses available, Consul will exit with an error at startup.
       bind_addr: "192.168.255.11"
+      client_addr: "192.168.255.11"
       ## @param consul.configFiles.common.encrypt Specifies the secret key to use for encryption of Consul network traffic.
       ## The easiest way to create an encryption key is to use consul keygen.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_encrypt
       encrypt: qDOPBEr+/oUVeOFQOnVypxwDaHzLrD+lvjo5vCEBbZ0=
+      ports:
+        dns: 53
     server:
       ## @param consul.configFiles.server.bootstrap_expect This flag provides the number of expected servers in the datacenter.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect

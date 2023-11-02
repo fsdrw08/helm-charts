@@ -190,17 +190,11 @@ consul:
     ## @param consul.configFiles.common common config for server and client agent
     # https://developer.hashicorp.com/consul/tutorials/production-deploy/deployment-guide#configure-consul-agents
     common:
-      ## @param consul.configFiles.common.addresses This is a nested object that allows setting bind addresses.
-      ## In Consul 1.0 and later these can be set to a space-separated list of addresses to bind to, or a [go-sockaddr] template that can potentially resolve to multiple addresses.
-      ## This address must be set when ui is enabled
-      ## ref: https://github.com/hashicorp/learn-consul-docker/blob/110bc9484b0dcd714e64604cd011a360d03b9bc6/datacenter-deploy-acl-policy/server1.json#L7
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
-      addresses:
-        http: "0.0.0.0"
-        dns: "0.0.0.0"
-      ## @param consul.configFiles.server.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change. Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
+      ## @param consul.configFiles.common.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change. Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_auto_reload_config
       auto_reload_config: true
+      ## @param consul.configFiles.common.client_addr
+      client_addr: "0.0.0.0"
       ## @param consul.configFiles.common.datacenter This flag controls the datacenter in which the agent is running.
       ## If not provided, it defaults to "dc1".
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
