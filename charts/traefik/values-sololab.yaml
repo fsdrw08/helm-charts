@@ -48,9 +48,11 @@ traefik:
       # https://doc.traefik.io/traefik/providers/consul-catalog/#traefik-consul-catalog
       consulCatalog:
         endpoint:
-          address: consul.infra.sololab:8500
+          address: consul.infra.sololab
           datacenter: dc1
-          scheme: http
+          scheme: https
+          tls:
+            ca: /etc/traefik/root_ca.crt
         exposedByDefault: false
 
     ## @param traefik.staticConfiguration.globalArguments global arguments
