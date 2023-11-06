@@ -45,6 +45,11 @@ traefik:
         endpoint: "unix:///var/run/docker.sock"
         useBindPortIP: false
         exposedByDefault: false
+    ## @param traefik.staticConfiguration.serversTransport
+    ## ref: https://doc.traefik.io/traefik/routing/overview/#transport-configuration
+    serversTransport:
+      rootCAs:
+        - /etc/traefik/root_ca.crt
     ## @param traefik.staticConfiguration.globalArguments global arguments
     ## e.g.
     ## globalArguments:
@@ -115,7 +120,10 @@ traefik:
     log:
       ## @param traefik.staticConfiguration.log.level
       ## Alternative logging levels are DEBUG, INFO, WARN, ERROR, FATAL, and PANIC.
-      level: INFO
+      level: DEBUG
+    ## @param traefik.staticConfiguration.accessLog
+    ## ref: https://doc.traefik.io/traefik/observability/access-logs/
+    accessLog: {}
   ## @param traefik.customRootCA set up a custom root CA to trust (for private ACME)
   ## ref: https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/index.html#traefik-v2
   customRootCA: ""
@@ -126,12 +134,20 @@ traefik:
     traefik.enable: true
     traefik.http.middlewares.userpass.basicauth.users: admin:$apr1$/F5ai.wT$7nFJWh4F7ZA0qoY.JZ69l1
     traefik.http.middlewares.tohttps.redirectscheme.scheme: https
-    traefik.http.middlewares.tohttps.redirectscheme.permanent: "true"
+    traefik.http.middlewares.tohttps.redirectscheme.permanent: true
     traefik.http.routers.dashboard.rule: "Host(`dev-traefik.service.consul`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
     traefik.http.routers.dashboard.service: api@internal
-    traefik.http.routers.dashboard.entryPoints: web, websecure
-    traefik.http.routers.dashboard.middlewares: userpass, tohttps
+    traefik.http.routers.dashboard.entryPoints: websecure
     traefik.http.routers.dashboard.tls.certresolver: internal
+  ## @param traefik.extraEnvVars Array with extra environment variables to add to traefik nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: 
+    - name: TZ
+      value: Asia/Shanghai
   ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the traefik pod(s)
   ## e.g.
   ## extraVolumes:

@@ -54,7 +54,12 @@ traefik:
           tls:
             ca: /etc/traefik/root_ca.crt
         exposedByDefault: false
-
+    ## @param traefik.staticConfiguration.serversTransport
+    ## ref: https://doc.traefik.io/traefik/routing/overview/#transport-configuration
+    serversTransport:
+      insecureSkipVerify: true
+      rootCAs:
+        - /etc/traefik/root_ca.crt
     ## @param traefik.staticConfiguration.globalArguments global arguments
     ## e.g.
     ## globalArguments:
@@ -71,7 +76,8 @@ traefik:
       web:
         address: ":80"
         forwardedHeaders:
-          trustedIPs: []
+          trustedIPs: 
+            - "0.0.0.0/0"
       # https://community.traefik.io/t/lets-encrypt-x509-certificate-signed-by-unknown-authority/11112/1
       websecure:
         address: ":443"
@@ -79,7 +85,8 @@ traefik:
         # https://community.traefik.io/t/how-to-get-real-ip-from-the-client/8239
         # https://www.bboy.app/2020/04/16/traefik%E5%90%8E%E7%AB%AF%E5%BA%94%E7%94%A8%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E7%9C%9F%E5%AE%9Eip/
         forwardedHeaders:
-          trustedIPs: []
+          trustedIPs: 
+            - "0.0.0.0/0"
     ## @param traefik.staticConfiguration.api
     ## Traefik exposes a number of information through an API handler
     ##
@@ -98,7 +105,7 @@ traefik:
     ##       tlsChallenge: {}
     ##   internal:
     ##     acme:
-    ##       caServer:
+    ##       caServer: https://step-ca.internal:9000/acme/acme/directory
     ##       certificatesDuration: 2160
     ##       email:
     ##       storage: /mnt/acmeStorage/internal_acme.json
@@ -126,6 +133,9 @@ traefik:
       ## @param traefik.staticConfiguration.log.level
       ## Alternative logging levels are DEBUG, INFO, WARN, ERROR, FATAL, and PANIC.
       level: INFO
+    ## @param traefik.staticConfiguration.accessLog
+    ## ref: https://doc.traefik.io/traefik/observability/access-logs/
+    accessLog: {}
   ## @param traefik.customRootCA set up a custom root CA to trust (for private ACME)
   ## ref: https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/index.html#traefik-v2
   customRootCA: ""
@@ -142,6 +152,15 @@ traefik:
     traefik.http.routers.dashboard.entryPoints: web, websecure
     traefik.http.routers.dashboard.middlewares: userpass, tohttps
     traefik.http.routers.dashboard.tls.certresolver: internal
+  ## @param traefik.extraEnvVars Array with extra environment variables to add to traefik nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: 
+    - name: TZ
+      value: Asia/Shanghai
   ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the traefik pod(s)
   ## e.g.
   ## extraVolumes:

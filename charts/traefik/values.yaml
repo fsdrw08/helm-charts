@@ -84,13 +84,13 @@ traefik:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts:
-    - name: http
-      containerPort: 80
-      protocol: TCP
-    - name: https
-      containerPort: 443
-      protocol: TCP
+  # containerPorts:
+  #   - name: http
+  #     containerPort: 80
+  #     protocol: TCP
+  #   - name: https
+  #     containerPort: 443
+  #     protocol: TCP
   ## Configure extra options for traefik containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param traefik.livenessProbe.enabled Enable livenessProbe on traefik containers
@@ -194,6 +194,10 @@ traefik:
         endpoint: "unix:///var/run/docker.sock"
         useBindPortIP: false
         exposedByDefault: false
+    ## @param traefik.staticConfiguration.serversTransport
+    ## ref: https://doc.traefik.io/traefik/routing/overview/#transport-configuration
+    serversTransport:
+      insecureSkipVerify: false
     ## @param traefik.staticConfiguration.globalArguments global arguments
     ## e.g.
     ## globalArguments:
