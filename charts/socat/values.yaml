@@ -176,8 +176,13 @@ socat:
   ##
   command: []
   ## @param socat.args Override default container args (useful when using custom images)
+  ## ref: https://github.com/alpine-docker/multi-arch-libs/tree/master/socat#example
   ##
-  args: []
+  args:
+    - tcp-listen:2375
+    - fork
+    - reuseaddr
+    - unix-connect:/var/run/docker.sock
   ## @param socat.hostAliases socat pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
