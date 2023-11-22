@@ -153,7 +153,7 @@ controller:
                 name: "docker-dev"
                 dockerApi:
                   dockerHost:
-                    uri: "tcp://192.168.255.12:8888"
+                    uri: "tcp://192.168.255.20:2375"
                 templates:
                   - labelString: "dev-docker-agent"
                     pullStrategy: PULL_NEVER
