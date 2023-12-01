@@ -160,6 +160,7 @@ controller:
     - ssh-slaves:latest
     - ssh-credentials:latest
     - sshd:latest
+    - swarm:latest
     - token-macro:latest
     - workflow-aggregator:latest
     - workflow-api:latest
