@@ -177,9 +177,9 @@ traefik:
   ##
   containerSecurityContext:
     enabled: false
-    runAsUser: 1001
-    runAsNonRoot: true
-    readOnlyRootFilesystem: false
+    # runAsUser: 1001
+    # runAsNonRoot: true
+    # readOnlyRootFilesystem: false
 
   ## %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
