@@ -73,10 +73,10 @@ spec:
           mountPath: /var/jenkins_config
         {{- if .Values.controller.installPlugins }}
         {{- if .Values.controller.overwritePluginsFromImage }}
-        - name: plugins
+        - name: plugins-loading
           mountPath: {{ .Values.controller.jenkinsRef }}/plugins
         {{- end }}
-        - name: plugin-dir
+        - name: plugins-storage
           mountPath: /var/jenkins_plugins
         - name: tmp-volume
           mountPath: /tmp
@@ -223,7 +223,7 @@ spec:
           mountPath: {{ .Values.controller.jenkinsHome }}/casc_configs
         {{- end }}
         {{- if .Values.controller.installPlugins }}
-        - name: plugin-dir
+        - name: plugins-storage
           mountPath: {{ .Values.controller.jenkinsRef }}/plugins/
           readOnly: false
         {{- end }}
@@ -284,12 +284,12 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.controller.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    {{- /* plugins */}}
+    {{- /* plugins loading zone aka plugins */}}
     {{- if .Values.controller.installPlugins }}
     {{- if .Values.controller.overwritePluginsFromImage }}
-    - name: plugins
+    - name: plugins-loading
       persistentVolumeClaim:
-        claimName: {{ include "common.names.fullname" . }}-pvc-plugins
+        claimName: {{ include "common.names.fullname" . }}-pvc-plugins-loading
     {{- end }}
     {{- end }}
     {{- /* init-scripts */}}
@@ -308,11 +308,11 @@ spec:
       configMap:
         name: {{ template "common.names.fullname" . }}-cm-jcasc
     {{- end }}
-    {{- /* plugin-dir */}}
+    {{- /* plugins-storage aka plugin-dir */}}
     {{- if .Values.controller.installPlugins }}
-    - name: plugin-dir
+    - name: plugins-storage
       persistentVolumeClaim:
-        claimName: {{ include "common.names.fullname" . }}-pvc-plugin-dir
+        claimName: {{ include "common.names.fullname" . }}-pvc-plugins-storage
     {{- end }}
     {{- /* jenkins-secrets */}}
     - name: jenkins-secrets
@@ -325,7 +325,7 @@ spec:
     - name: jenkins-home
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-home" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}
