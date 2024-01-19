@@ -25,6 +25,8 @@ data:
     echo "disable Setup Wizard"
     echo $JENKINS_VERSION > {{ .Values.controller.jenkinsHome }}/jenkins.install.UpgradeWizard.state
     echo $JENKINS_VERSION > {{ .Values.controller.jenkinsHome }}/jenkins.install.InstallUtil.lastExecVersion
+    echo "prepare casc_configs dir"
+    mkdir -p {{ .Values.controller.jenkinsHome }}/casc_configs
     {{- end }}
 
     {{- if .Values.controller.overwritePlugins }}
