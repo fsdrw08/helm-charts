@@ -106,6 +106,9 @@ spec:
       {{- if .Values.controller.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.controller.args "context" $) | nindent 8 }}
       {{- else if .Values.controller.httpsKeyStore.enable }}
+      {{/*
+      # https://www.jenkins.io/doc/book/installing/initial-settings/
+      */}}
       args: 
         - --httpPort={{.Values.controller.httpsKeyStore.httpPort}}
         - --httpsPort={{.Values.controller.targetPort}}
@@ -120,12 +123,14 @@ spec:
         {{- include "common.tplvalues.render" (dict "value" .Values.controller.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
         {{- if or .Values.controller.additionalSecrets .Values.controller.adminSecret }}
+        {{/*
         # https://github.com/jenkinsci/configuration-as-code-plugin/blob/810dc950b514b9f3542defa22fc7e36eb077c18f/demos/kubernetes-secrets/README.md
         # With the help of SECRETS environment variable
         # we point Jenkins Configuration as Code plugin the location of the secrets
         # JCasC read the config yaml, find the var key(e.g. pattern with ${xxx}),
         # then go to the dir set in env var $SECRETS,
         # find related var key files content as key value
+        */}}
         - name: SECRETS
           value: /run/secrets/additional
         {{- end }}
@@ -153,6 +158,10 @@ spec:
         - name: JENKINS_HTTPS_KEYSTORE_PASSWORD
           value: {{ .Values.controller.httpsKeyStore.password }}
         {{- end }}
+        {{/*
+        # https://github.com/jenkinsci/configuration-as-code-plugin/blob/810dc950b514b9f3542defa22fc7e36eb077c18f/demos/kubernetes-secrets/README.md
+        # Read the configuration-as-code from the ConfigMap
+        */}}
         - name: CASC_JENKINS_CONFIG
           value: >-
             {{ printf "%s/casc_configs" (.Values.controller.jenkinsHome) }}
