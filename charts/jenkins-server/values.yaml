@@ -53,7 +53,7 @@ controller:
   image:
     registry: docker.io
     repository: jenkins/jenkins
-    tag: lts-jdk17
+    tag: jdk17
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -135,41 +135,39 @@ controller:
   ## ref: https://github.com/jenkinsci/kubernetes-operator/issues/746
   ##
   installPlugins:
-    - commons-text-api:latest
-    - configuration-as-code:latest
-    - authentication-tokens:latest
-    - cloud-stats:latest
-    - credentials:latest
-    - credentials-binding:latest
-    - cloudbees-folder:latest
-    - display-url-api:latest
-    - docker-plugin:latest
-    - docker-commons:latest
-    - git:latest
-    - instance-identity:latest
-    - mailer:latest
-    - pipeline-build-step:latest
-    - pipeline-input-step:latest
-    - pipeline-milestone-step:latest
-    - pipeline-model-api:latest
-    - pipeline-model-definition:latest
-    - pipeline-model-extensions:latest
-    - pipeline-stage-step:latest
-    - script-security:latest
-    - scm-api
-    - ssh-slaves:latest
-    - ssh-credentials:latest
-    - sshd:latest
-    - swarm:latest
-    - token-macro:latest
-    - workflow-aggregator:latest
-    - workflow-api:latest
-    - workflow-basic-steps:latest
-    - workflow-cps:latest
-    - workflow-durable-task-step:latest
-    - workflow-job:latest
-    - workflow-multibranch:latest
-    - workflow-scm-step
+    # - commons-text-api:latest # aka: commons-text API Plugin; need by: Font Awesome API Plugin, Bootstrap 5 API Plugin, ...Configuration as Code plugin
+    - configuration-as-code:latest # require; aka: Configuration as Code Plugin
+    # - authentication-tokens:latest # aka: Authentication Tokens API Plugin; need by: Docker Commons Plugin
+    # - cloud-stats:latest # aka: Cloud Statistics Plugin; need by: Docker plugin
+    # - credentials:latest # aka: Credentials Plugin; need by: many..
+    # - credentials-binding:latest # aka: Credentials Binding Plugin; need by: Docker Commons Plugin, Pipeline: Declarative Extension Points API, Git plugin, Pipeline: Declarative
+    # - cloudbees-folder:latest # need by docker pipeline, job dsl, pipeline: groovy libraries, branch api plugin, pipeline: multibranch
+    # - display-url-api:latest
+    - docker-plugin:latest # aka: Docker Plugin
+    # - docker-commons:latest # aka: Docker Commons Plugin; need by: Docker Pipeline, Docker Plugin
+    - git:latest # require;
+    # - instance-identity:latest # aka: Instance Identity; need by: many...
+    # - mailer:latest # aka: Mailer Plugin; need by: Git plugin, Pipeline: Declarative, Pipeline: Basic Steps
+    # - pipeline-build-step:latest # aka: Pipeline: Build Step, need by: Pipeline
+    # - pipeline-input-step:latest # aka: Pipeline: Input Step; need by: Pipeline, Pipeline: Declarative
+    # - pipeline-milestone-step:latest # aka: Pipeline: Milestone Step; need by: Pipeline
+    # - pipeline-model-api:latest # aka: Pipeline: Model API; need by: Pipeline: Declarative Extension Points API, Pipeline: Declarative
+    # - pipeline-model-definition:latest # aka: Pipeline: Declarative; need by Docker Pipeline, pipeline
+    # - pipeline-model-extensions:latest # aka: Pipeline: Declarative Extension Points API; need by: pipeline: declarative
+    # - pipeline-stage-step:latest # aka: Pipeline: Stage Step; need by: Pipeline: Declarative Extension Points API, Pipeline, Pipeline: Declarative
+    # - script-security:latest # aka: Script Security Plugin; need by: pipeline related, git related
+    # - scm-api # aka: SCM API Plugin; need by: many...
+    # - ssh-slaves:latest # aka: SSH Build Agents plugin; need by: Docker Plugin
+    # - ssh-credentials:latest # aka: SSH Credentials Plugin; need by: Credentials Binding Plugin, Git plugin, Git client plugin
+    # - token-macro:latest # aka: Token Macro Plugin; need by: Docker Plugin
+    - workflow-aggregator:latest # required; aka: Pipeline
+    # - workflow-api:latest # aka: Pipeline: API; need by: many...
+    # - workflow-basic-steps:latest # aka: Pipeline: Basic Steps, need by: Docker Pipeline, Pipeline, Pipeline: Declarative
+    # - workflow-cps:latest # aka: Pipeline: Groovy; need by: many...
+    # - workflow-durable-task-step:latest # aka: Pipeline: Nodes and Processes; need by: pipeline related
+    # - workflow-job:latest #aka: Pipeline: Job; need by: pipeline related
+    # - workflow-multibranch:latest # aka: Pipeline: Multibranch; need by: pipeline related
+    # - workflow-scm-step:latest # aka: Pipeline: SCM Step; need by: pipeline related
   ## @param controller.installLatestPlugins install latest plugins
   ## Set to false to download the minimum required version of all dependencies.
   ##
