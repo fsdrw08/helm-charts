@@ -3,8 +3,43 @@
 controller:
   ## @param controller.additionalPlugins List of plugins to install in addition to those listed in controller.installPlugins
   additionalPlugins:
-    - job-dsl:latest
-    - docker-workflow:latest
+    - docker-plugin:latest # aka: Docker Plugin
+    - docker-workflow:latest # aka: Docker Pipeline
+    - job-dsl:latest # aka: job dsl
+    - role-strategy:latest
+    - sshd:latest # aka: ssh server
+    - swarm:latest
+    # dependency
+    - apache-httpcomponents-client-5-api:latest # aka: Apache HttpComponents Client 5.x API; need by: Docker plugin
+    - authentication-tokens:latest # aka: Authentication Tokens API Plugin; need by: Docker Commons Plugin
+    - commons-text-api:latest # aka: commons-text API Plugin; need by: Font Awesome API Plugin, Bootstrap 5 API Plugin, ...Configuration as Code plugin
+    - cloud-stats:latest # aka: Cloud Statistics Plugin; need by: Docker plugin
+    - credentials:latest # aka: Credentials Plugin; need by: many..
+    - credentials-binding:latest # aka: Credentials Binding Plugin; need by: Docker Commons Plugin, Pipeline: Declarative Extension Points API, Git plugin, Pipeline: Declarative
+    - cloudbees-folder:latest # need by docker pipeline, job dsl, pipeline: groovy libraries, branch api plugin, pipeline: multibranch
+    - display-url-api:latest
+    - docker-commons:latest # aka: Docker Commons Plugin; need by: Docker Pipeline, Docker Plugin
+    - instance-identity:latest # aka: Instance Identity; need by: many...
+    - mailer:latest # aka: Mailer Plugin; need by: Git plugin, Pipeline: Declarative, Pipeline: Basic Steps
+    - pipeline-build-step:latest # aka: Pipeline: Build Step, need by: Pipeline
+    - pipeline-input-step:latest # aka: Pipeline: Input Step; need by: Pipeline, Pipeline: Declarative
+    - pipeline-milestone-step:latest # aka: Pipeline: Milestone Step; need by: Pipeline
+    - pipeline-model-api:latest # aka: Pipeline: Model API; need by: Pipeline: Declarative Extension Points API, Pipeline: Declarative
+    - pipeline-model-definition:latest # aka: Pipeline: Declarative; need by Docker Pipeline, pipeline
+    - pipeline-model-extensions:latest # aka: Pipeline: Declarative Extension Points API; need by: pipeline: declarative
+    - pipeline-stage-step:latest # aka: Pipeline: Stage Step; need by: Pipeline: Declarative Extension Points API, Pipeline, Pipeline: Declarative
+    - script-security:latest # aka: Script Security Plugin; need by: pipeline related, git related
+    - scm-api # aka: SCM API Plugin; need by: many...
+    - ssh-slaves:latest # aka: SSH Build Agents plugin; need by: Docker Plugin
+    - ssh-credentials:latest # aka: SSH Credentials Plugin; need by: Credentials Binding Plugin, Git plugin, Git client plugin
+    - token-macro:latest # aka: Token Macro Plugin; need by: Docker Plugin
+    - workflow-api:latest # aka: Pipeline: API; need by: many...
+    - workflow-basic-steps:latest # aka: Pipeline: Basic Steps, need by: Docker Pipeline, Pipeline, Pipeline: Declarative
+    - workflow-cps:latest # aka: Pipeline: Groovy; need by: many...
+    - workflow-durable-task-step:latest # aka: Pipeline: Nodes and Processes; need by: pipeline related
+    - workflow-job:latest #aka: Pipeline: Job; need by: pipeline related
+    - workflow-multibranch:latest # aka: Pipeline: Multibranch; need by: pipeline related
+    - workflow-scm-step:latest # aka: Pipeline: SCM Step; need by: pipeline related
   ## @param controller.provision initContainer settings for jenkins controller provision
   provision:
     ##

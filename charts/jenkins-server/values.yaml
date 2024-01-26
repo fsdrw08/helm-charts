@@ -143,7 +143,6 @@ controller:
     # - credentials-binding:latest # aka: Credentials Binding Plugin; need by: Docker Commons Plugin, Pipeline: Declarative Extension Points API, Git plugin, Pipeline: Declarative
     # - cloudbees-folder:latest # need by docker pipeline, job dsl, pipeline: groovy libraries, branch api plugin, pipeline: multibranch
     # - display-url-api:latest
-    - docker-plugin:latest # aka: Docker Plugin
     # - docker-commons:latest # aka: Docker Commons Plugin; need by: Docker Pipeline, Docker Plugin
     - git:latest # require;
     # - instance-identity:latest # aka: Instance Identity; need by: many...
@@ -509,9 +508,9 @@ controller:
     default:
       jenkins:
         ## @param controller.JCasC.default.jenkins.authorizationStrategy Jenkins Config as Code for Authorization Strategy
-        authorizationStrategy:
-          loggedInUsersCanDoAnything:
-            allowAnonymousRead: false
+        # authorizationStrategy:
+        #   loggedInUsersCanDoAnything:
+        #     allowAnonymousRead: false
         ## @param controller.JCasC.default.jenkins.crumbIssuer
         ## Some HTTP proxies filter out information that the default crumb issuer uses to calculate the nonce value.
         ## If an HTTP proxy sits between your browser client and your Jenkins server
