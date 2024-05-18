@@ -41,7 +41,7 @@ deployKind: Pod
 ##
 consul:
   ## hashicorp consul image
-  ## ref: https://hub.docker.com/r/bitnami/hashicorp/consul/tags/
+  ## ref: https://hub.docker.com/r/hashicorp/consul/tags/
   ## @param consul.image.registry consul image registry
   ## @param consul.image.repository consul image repository
   ## @param consul.image.tag consul image tag (immutable tags are recommended)
@@ -194,13 +194,13 @@ consul:
       ## Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_auto_reload_config
       auto_reload_config: true
-      ## @param consul.configFiles.common.bind_addr The address that should be bound to for internal cluster communications. 
-      ## This is an IP address that should be reachable by all other nodes in the cluster. 
-      ## By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster. 
+      ## @param consul.configFiles.common.bind_addr The address that should be bound to for internal cluster communications.
+      ## This is an IP address that should be reachable by all other nodes in the cluster.
+      ## By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
       ## If there are multiple private IPv4 addresses available, Consul will exit with an error at startup.
       ## ref:https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bind
       bind_addr: "0.0.0.0"
-      ## @param consul.configFiles.common.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers. 
+      ## @param consul.configFiles.common.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
       ## By default, this is "127.0.0.1", allowing only loopback connections.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_client
       client_addr: "127.0.0.1"

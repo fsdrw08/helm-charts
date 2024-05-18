@@ -28,7 +28,7 @@ To install the chart with the release name `my-release`:
 helm template .\charts\freeipa\ --name-template=freeipa | podman kube play -
 ```
 
-The command deploys freeipa on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
+The command deploys freeipa on the podman host in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
 
 > **Tip**: List all releases using `helm list`
 
