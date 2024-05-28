@@ -65,8 +65,6 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.vault.extraEnvVarsCM "context" $) }}
         {{- end }}
-        - secretRef:
-            name: {{ template "common.names.fullname" . }}
         {{- if .Values.vault.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.vault.extraEnvVarsSecret "context" $) }}
@@ -98,13 +96,9 @@ spec:
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-        {{- if (first .Values.vault.configFiles.listeners.listener).tcp.tls_disable }}
+        {{- if not (first .Values.vault.configFiles.listeners.listener).tcp.tls_disable }}
         - name: tls
           mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file }}
-          subPath: tls.crt
-        - name: tls
-          mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_key_file }}
-          subPath: tls.key
         {{- end }}
       {{- if .Values.vault.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumeMounts "context" $) | nindent 8 }}
@@ -123,7 +117,7 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{- if (first .Values.vault.configFiles.listeners.listener).tcp.tls_disable }}
+    {{- if not (first .Values.vault.configFiles.listeners.listener).tcp.tls_disable }}
     - name: tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-tlsSec
