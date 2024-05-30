@@ -26,19 +26,24 @@ spec:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
       image: {{ include "vault.volumePermissions.image" . }}
+      {{/*
+      https://github.com/cello-proj/cello/blob/d00b16e337af4fa131146fd63c43863097ac36ed/scripts/quickstart_manifest.yaml#L420
+      */}}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
-        - %%commands%%
+        - chown
+        - -R
+        - 100:1000
+        - /vault
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+        - name: storage
+          mountPath: {{ .Values.persistence.storageMountPath }}
+        - name: logs
+          mountPath: {{ .Values.persistence.logsMountPath }}
     {{- end }}
     {{- if .Values.vault.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.initContainers "context" $) | nindent 4 }}
@@ -91,18 +96,55 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.vault.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: persistent-volume
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+        - name: config
+          mountPath: /vault/config
+        - name: storage
+          mountPath: {{ .Values.persistence.storageMountPath }}
+        - name: logs
+          mountPath: {{ .Values.persistence.logsMountPath }}
         {{- if not (first .Values.vault.configFiles.listeners.listener).tcp.tls_disable }}
+        {{- if eq (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file)
+                  (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_key_file) 
+                  (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_client_ca_file) }}
         - name: tls
           mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file }}
+        {{- else }}
+        - name: tls-cert
+          mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file }}
+          subPath: tls.crt
+        - name: tls-key
+          mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_key_file }}
+          subPath: tls.key
+        - name: tls-ca
+          mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_client_ca_file }}
+          subPath: ca.crt
+        {{- end }}
         {{- end }}
       {{- if .Values.vault.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
+    {{- if .Values.vault.autoUnseal.enabled }}
+    - name: unseal
+      image: {{ .Values.vault.autoUnseal.image }}
+      imagePullPolicy: {{ .Values.vault.image.pullPolicy }}
+      {{- if .Values.vault.autoUnseal.containerSecurityContext.enabled -}}
+      securityContext: {{- omit .Values.autoUnseal.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      command: 
+        - /bin/sh
+        - -c
+        - "chmod +x /vault/unseal/Unseal-Vault.sh && . /vault/unseal/Unseal-Vault.sh"
+      env:
+        {{- if .Values.vault.autoUnseal.env }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.env "context" $) | nindent 8 }}
+        {{- end }}
+      volumeMounts:
+        - name: config
+          mountPath: /vault/unseal/Unseal-Vault.sh
+          subPath: Unseal-Vault.sh
+        - name: unseal
+          mountPath: {{ .Values.persistence.unsealMountPath }}
+    {{- end }}
     {{- if .Values.vault.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.vault.sidecars "context" $) | nindent 4 }}
     {{- end }}
@@ -110,17 +152,46 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    - name: persistent-volume
+    - name: storage
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-file" ) .Values.persistence.existingClaim }}
+    {{- else }}
+      emptyDir: {}
+    {{- end }}
+    - name: logs
+    {{- if .Values.persistence.enabled }}
+      persistentVolumeClaim:
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-logs" ) .Values.persistence.existingClaim }}
+    {{- else }}
+      emptyDir: {}
+    {{- end }}
+    {{- if .Values.vault.autoUnseal.enabled }}
+    - name: unseal
+    {{- if .Values.persistence.enabled }}
+      persistentVolumeClaim:
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-unseal" ) .Values.persistence.existingClaim }}
+    {{- end }}
     {{- else }}
       emptyDir: {}
     {{- end }}
     {{- if not (first .Values.vault.configFiles.listeners.listener).tcp.tls_disable }}
+    {{- if eq (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file)
+                  (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_key_file) }}
     - name: tls
       secret:
-        secretName: {{ template "common.names.fullname" . }}-tlsSec
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- else }}
+    - name: tls-cert
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    - name: tls-key
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    - name: tls-ca
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     {{- end }}
     {{- if .Values.vault.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumes "context" $) | nindent 4 }}

@@ -87,9 +87,11 @@ vault:
   containerPorts:
     - name: api
       containerPort: 8200
+      hostPort: 8200
       protocol: TCP
     - name: cluster
       containerPort: 8201
+      hostPort: 8201
       protocol: TCP
   ## Configure extra options for vault containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -170,8 +172,8 @@ vault:
   ##
   containerSecurityContext:
     enabled: true
-    runAsUser: 1000
-    runAsGroup: 100
+    runAsUser: 100
+    runAsGroup: 1000
     runAsNonRoot: true
     readOnlyRootFilesystem: false
     # capabilities:
@@ -187,10 +189,6 @@ vault:
   configFiles:
     ## @param vault.configFiles.main main config for server
     main:
-      ## @param vault.configFiles.disable_mlock
-      ## Disables the server from executing the mlock syscall
-      ## Disabling mlock is strongly recommended if using integrated storage due to the fact that mlock does not interact well with memory mapped files such as those created by BoltDB, which is used by Raft to track state.
-      ## https://developer.hashicorp.com/vault/docs/configuration#disable_mlock
       disable_mlock: true
       log_level: info
     ## @param vault.configFiles.storage storage config for server
@@ -201,17 +199,17 @@ vault:
       ## https://github.com/kirubasankars/bedrock/blob/b2037fb394d149a9fed560cc60d284b28b4585fb/src/main/agent/vault/config/vault.json#L3
       storage:
         file:
-          path: /vault/data
+          path: /vault/file
     ## @param vault.configFiles.listeners listeners config for server
     listeners:
-      ## @param vault.configFiles.ui
+      ## @param vault.configFiles.listeners.ui
       ## Enables the built-in web UI, which is available on all listeners (address + port) at the /ui path.
       ## Browsers accessing the standard Vault API address will automatically redirect there.
       ## This can also be provided via the environment variable VAULT_UI.
       ## The UI runs on the same port as the Vault listener. As such, you must configure at least one listener stanza in order to access the UI.
       ## For more information, please see the https://developer.hashicorp.com/vault/docs/configuration/ui.
       ui: true
-      ## @param vault.configFiles.listener
+      ## @param vault.configFiles.listeners.listener
       ## Configures how Vault is listening for API requests.
       ## https://developer.hashicorp.com/vault/docs/configuration/listener/tcp
       ## https://github.com/hashicorp/vault/blob/aaf59a7705bb6c1d6ba2f6c2400787d5da872817/command/server/test-fixtures/config4.hcl.json#L6
@@ -234,6 +232,7 @@ vault:
   tls:
     crt: ""
     key: ""
+    ca: ""
 
   ## @param vault.existingConfigmap The name of an existing ConfigMap with your custom configuration for vault
   ##
@@ -243,7 +242,8 @@ vault:
   command: []
   ## @param vault.args Override default container args (useful when using custom images)
   ##
-  args: []
+  args:
+    - server
   ## @param vault.hostAliases vault pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -257,6 +257,7 @@ vault:
   ## ref: https://github.com/containers/podman/discussions/22378
   ## ref: https://github.com/hashicorp/vault/blob/main/Dockerfile#L112
   ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
   ## podAnnotations:
   ##   io.podman.annotations.userns: keep-id:uid=100,gid=1000
   podAnnotations: {}
@@ -281,7 +282,13 @@ vault:
   ##   - name: FOO
   ##     value: "bar"
   ##
-  extraEnvVars: []
+  extraEnvVars:
+    # https://github.com/hashicorp/vault/blob/main/.release/docker/docker-entrypoint.sh
+    # https://github.com/elihe2011/summary/blob/1603f477212f552a4c64ab8a0729539a52a1bd27/edgex/edgex/edgex_security/ok/02.edgex-vault.yaml#L64
+    - name: SKIP_CHOWN
+      value: "true"
+    - name: SKIP_SETCAP
+      value: "true"
   ## @param vault.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for vault nodes
   ##
   extraEnvVarsCM: ""
@@ -294,6 +301,108 @@ vault:
   ## @param vault.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the vault container(s)
   ##
   extraVolumeMounts: []
+
+  ## @param vault.autoUnseal run auto unseal process in a sidecar container
+  autoUnseal:
+    ## @param vault.autoUnseal.enabled enabled the auto unseal process
+    ## @param vault.autoUnseal.image the image to run the unseal process, this image should include the tools which unseal required, e.g. curl and jq
+    ## @param vault.autoUnseal.pullPolicy image pull policy
+    ## @param vault.autoUnseal.containerSecurityContext
+    enabled: false
+    image: docker.io/apteno/alpine-jq:latest
+    pullPolicy: ""
+    containerSecurityContext:
+      enabled: false
+    ## @param vault.autoUnseal.env Array with environment variables to add to unseal container
+    env:
+      - name: VAULT_ADDR
+        value: http://127.0.0.1:8200
+      - name: VAULT_OPERATOR_SECRETS_JSON_PATH
+        value: "/vault/unseal/vault_operator_secrets"
+    ## @param vault.autoUnseal.script script to implement the unseal process
+    script: |
+      #!/bin/sh
+
+      function wait_started {
+        counter=0
+        until STATUS=$(curl -k -X GET "$VAULT_ADDR/v1/sys/health" 2>&1); [ $? -ne 1 ]
+        do
+          if [ $counter -lt 20 ]; then
+            echo "Waiting for vault to come up, $(($counter*5))s passed"
+            sleep 5
+            ((counter++))
+          else
+            echo "check vault stauts manually"
+            exit 1
+          fi
+        done
+        echo "Vault is started"
+      }
+
+      function is_inited {
+        curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .initialized
+      }
+
+      function init {
+        # Initialize Vault
+        printf "Initializing Vault...\n"
+        VAULT_OPERATOR_SECRETS=$(curl -s -k -X POST \
+          -H "Content-Type: application/json" \
+          -d '{ "secret_shares": 1, "secret_threshold": 1 }' \
+          "$VAULT_ADDR/v1/sys/init")
+        # Export Vault operator keys (root_token and unseal keys)
+        echo $VAULT_OPERATOR_SECRETS | jq . >$VAULT_OPERATOR_SECRETS_JSON_PATH
+        printf "Vault initialized.\n"
+      }
+
+      function is_sealed {
+        curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .sealed
+      }
+
+      function unseal {
+        # Unseal Vault
+        printf "Unsealing Vault...\n"
+        VAULT_OPERATOR_SECRETS=$(cat $VAULT_OPERATOR_SECRETS_JSON_PATH)
+        VAULT_UNSEAL_KEYS=$(echo $VAULT_OPERATOR_SECRETS | jq -r .keys[])
+        for VAULT_UNSEAL_KEY in $VAULT_UNSEAL_KEYS; do
+            # https://developer.hashicorp.com/vault/api-docs/system/unseal
+            curl -s -k --request POST \
+              --data "{ \"key\": \"$VAULT_UNSEAL_KEY\" }" \
+              "$VAULT_ADDR/v1/sys/unseal"
+        done
+      }
+
+      wait_started
+
+      sleep 5s 
+      echo "is_inited"
+      is_inited
+
+      # init
+      if [[ $(is_inited) != "true" ]]; then
+        init
+      else
+        printf "Vault is already initialized.\n"
+      fi
+
+      sleep 5s 
+
+      echo "is_inited"
+      is_inited
+      echo "is_sealed"
+      is_sealed
+
+      # unseal
+      if [[ $(is_inited) == "true" && $(is_sealed) == "true" ]]; then
+        if [[ -f "$VAULT_OPERATOR_SECRETS_JSON_PATH" && $(stat -c%s "$VAULT_OPERATOR_SECRETS_JSON_PATH") -gt 1 ]]; then
+          unseal
+          exit 0
+        else
+          echo "no keys in file, please check"
+          exit 1
+        fi
+      fi
+
   ## @param vault.sidecars Add additional sidecar containers to the vault pod(s)
   ## e.g:
   ## sidecars:
@@ -326,9 +435,11 @@ persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
   enabled: true
-  ## @param persistence.mountPath Path to mount the volume at.
-  ## !! need to mount multi pvc for /vault/logs and /vault/file
-  mountPath: "/vault/data"
+  ## @param persistence.storageMountPath Path to mount the vault storage volume at.
+  ## @param persistence.logsMountPath Path to mount the vault logs volume at.
+  storageMountPath: /vault/file
+  logsMountPath: /vault/logs
+  unsealMountPath: /vault/unseal
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
@@ -353,9 +464,6 @@ persistence:
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   ##
   existingClaim: ""
-  ## @param persistence.dataSource Custom PVC data source
-  ##
-  dataSource: {}
 ## @section Init Container Parameters
 ##
 
@@ -366,7 +474,7 @@ persistence:
 volumePermissions:
   ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
   ##
-  enabled: false
+  enabled: true
   ## OS Shell + Utility image
   ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
   ## @param volumePermissions.image.registry OS Shell + Utility image registry
@@ -378,7 +486,7 @@ volumePermissions:
   image:
     registry: docker.io
     repository: bitnami/os-shell
-    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    tag: 12-debian-12
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.

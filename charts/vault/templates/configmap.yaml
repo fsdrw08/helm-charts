@@ -15,3 +15,7 @@ data:
   {{ $key }}.json: |-
 {{ toJson $val | indent 4 }}
 {{- end }}
+{{- if .Values.vault.autoUnseal.enabled }}
+  Unseal-Vault.sh: |
+{{ .Values.vault.autoUnseal.script | indent 4 }}
+{{- end }}
