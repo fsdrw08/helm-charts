@@ -95,6 +95,7 @@ vault:
       protocol: TCP
   ## Configure extra options for vault containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## ref: https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L101
   ## @param vault.livenessProbe.enabled Enable livenessProbe on vault containers
   ## @param vault.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param vault.livenessProbe.periodSeconds Period seconds for livenessProbe
@@ -109,20 +110,28 @@ vault:
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
+    exec:
+      command:
+        - /bin/sh
+        - -ec
+        - "wget -q -O /dev/stdout http://127.0.0.1:8200/v1/sys/health?standbyok=true"
+  ## ref: https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L113
   ## @param vault.readinessProbe.enabled Enable readinessProbe on vault containers
   ## @param vault.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param vault.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param vault.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
   ## @param vault.readinessProbe.failureThreshold Failure threshold for readinessProbe
   ## @param vault.readinessProbe.successThreshold Success threshold for readinessProbe
-  ##
+  ## there is no readinessProbe in podman currently
   readinessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: 180
     periodSeconds: 300
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
+    exec:
+      command: ["/bin/sh", "-ec", "vault status -tls-skip-verify"]
   ## @param vault.startupProbe.enabled Enable startupProbe on vault containers
   ## @param vault.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param vault.startupProbe.periodSeconds Period seconds for startupProbe
