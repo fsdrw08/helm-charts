@@ -61,6 +61,8 @@ spec:
       {{- else }}
       args:
         - agent
+        # https://github.com/hashicorp/consul-k8s/blob/bab097a7271d91ca743e367344f56de41152531b/charts/consul/templates/server-statefulset.yaml#L486C17-L486C47
+        - -advertise="$(getent hosts host.containers.internal | awk '{print $1}')"
         - -config-dir=/consul/config
       {{- end }}
       env:

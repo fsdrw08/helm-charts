@@ -90,6 +90,7 @@ consul:
   ##     containerPort: 8600
   ##     protocol: UDP
   ##
+  containerPorts: []
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param consul.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
@@ -235,6 +236,14 @@ consul:
         ## @param consul.configFiles.ui.ui_config.content_path This specifies the HTTP path that the web UI should be served from.
         ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui_config_content_path
         content_path: /ui/
+  ## @param consul.tls secret of cert and key for listener
+  ## If you're providing your own certificates, please use this to add the certificates as secrets
+  ## key and certificate should start with -----BEGIN CERTIFICATE----- or
+  ## -----BEGIN RSA PRIVATE KEY-----
+  tls:
+    crt: ""
+    key: ""
+    ca: ""
   ## @param consul.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
   existingConfigmap:
