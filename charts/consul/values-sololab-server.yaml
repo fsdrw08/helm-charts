@@ -1,7 +1,7 @@
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 consul:
-  ## @param consul.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param consul.containerPorts consul container port to expose to host
   ## containerPorts:
   ##   - name: server
   ##     containerPort: 8300
@@ -40,7 +40,7 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#addresses
       addresses:
         dns: "192.168.255.11" # Defaults to client_addr
-      ## @param consul.configFiles.common.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers. 
+      ## @param consul.configFiles.common.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
       ## By default, this is "127.0.0.1", allowing only loopback connections.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_client
       client_addr: "0.0.0.0"
@@ -74,7 +74,7 @@ consul:
           agent: e95b599e-166e-7d80-08ad-aee76e7ddf19
           config_file_service_registration: e95b599e-166e-7d80-08ad-aee76e7ddf19
 
-  ## @param consul.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param consul.existingConfigmap The name of an existing ConfigMap with your custom configuration for consul
   ##
   existingConfigmap:
   ## @param consul.command Override default container command (useful when using custom images)
@@ -83,11 +83,11 @@ consul:
   ## @param consul.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param consul.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param consul.hostAliases consul pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param consul.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param consul.podLabels Extra labels for consul pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels:
@@ -96,7 +96,7 @@ consul:
     traefik.http.routers.consul.entryPoints: websecure
     traefik.http.routers.consul.tls.certresolver: internal
     traefik.http.services.consul.loadbalancer.server.port: 8500
-  ## @param consul.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param consul.podAnnotations Annotations for consul pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
@@ -115,19 +115,19 @@ consul:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param consul.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param consul.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for consul nodes
   ##
   extraEnvVarsCM: ""
-  ## @param consul.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param consul.extraEnvVarsSecret Name of existing Secret containing extra env vars for consul nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param consul.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param consul.extraVolumes Optionally specify extra list of additional volumes for the consul pod(s)
   ##
   extraVolumes: []
-  ## @param consul.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param consul.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the consul container(s)
   ##
   extraVolumeMounts: []
-  ## @param consul.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param consul.sidecars Add additional sidecar containers to the consul pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -138,7 +138,7 @@ consul:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param consul.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param consul.initContainers Add additional init containers to the consul pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:

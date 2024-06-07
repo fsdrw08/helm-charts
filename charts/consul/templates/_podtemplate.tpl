@@ -34,8 +34,8 @@ spec:
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.consul.configFiles.common.data_dir }}
+        - name: persistent-volume
+          mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -54,16 +54,12 @@ spec:
       command: {{- include "common.tplvalues.render" (dict "value" .Values.consul.command "context" $) | nindent 8 }}
       {{- else }}
       command:
-        - consul
       {{- end }}
       {{- if .Values.consul.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.consul.args "context" $) | nindent 8 }}
       {{- else }}
       args:
         - agent
-        # https://github.com/hashicorp/consul-k8s/blob/bab097a7271d91ca743e367344f56de41152531b/charts/consul/templates/server-statefulset.yaml#L486C17-L486C47
-        - -advertise="$(getent hosts host.containers.internal | awk '{print $1}')"
-        - -config-dir=/consul/config
       {{- end }}
       env:
         {{- if .Values.consul.extraEnvVars }}
@@ -103,10 +99,14 @@ spec:
         - name: config
           mountPath: /consul/config
         - name: persistent-volume
-          mountPath: {{ .Values.consul.configFiles.common.data_dir }}
+          mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        {{- if .Values.consul.tls.content }}
+        - name: tls
+          mountPath: {{ .Values.consul.tls.mountPath }}
+        {{- end }}
       {{- if .Values.consul.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.consul.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -117,6 +117,11 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.consul.tls.content }}
+    - name: tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     - name: persistent-volume
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
