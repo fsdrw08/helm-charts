@@ -231,18 +231,27 @@ vault:
             cluster_address: "[::]:8201"
             # https://github.com/hashicorp/vault/blob/2718994242f94df3dc90215b2ecbc5d4198d9e3c/website/content/docs/platform/k8s/helm/examples/standalone-tls.mdx#L191
             # cert and key must put in the same dir: https://github.com/containers/podman/blob/22ca67a7536e2f8e8554e734c102fe1ae181fbb5/pkg/specgen/specgen.go#L641
+            # the tls file should better set together with below vault.tls block
             tls_cert_file: /vault/userconfig/vault-server-tls/tls.crt
             tls_key_file: /vault/userconfig/vault-server-tls/tls.key
             tls_disable_client_certs: true
 
-  ## @param vault.tls secret of cert and key for listener
-  ## If you're providing your own certificates, please use this to add the certificates as secrets
-  ## key and certificate should start with -----BEGIN CERTIFICATE----- or
-  ## -----BEGIN RSA PRIVATE KEY-----
+  ## @param vault.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param vault.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
   tls:
-    crt: ""
-    key: ""
-    ca: ""
+    mountPath: /vault/userconfig/vault-server-tls
+    ## @param vault.tls.content secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## content:
+    ##  ca.crt: ""
+    ##  tls.crt: ""
+    ##  tls.key: ""
+    ##
+    content: {}
   ## @param vault.existingConfigmap The name of an existing ConfigMap with your custom configuration for vault
   ##
   existingConfigmap:

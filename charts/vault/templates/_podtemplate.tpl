@@ -116,23 +116,9 @@ spec:
           mountPath: {{ .Values.persistence.mountPath.storage }}
         - name: logs
           mountPath: {{ .Values.persistence.mountPath.logs }}
-        {{- if not (first .Values.vault.configFiles.listeners.listener).tcp.tls_disable }}
-        {{- if eq (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file)
-                  (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_key_file) 
-                  (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_client_ca_file) }}
+        {{- if .Values.vault.tls.content }}
         - name: tls
-          mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file }}
-        {{- else }}
-        - name: tls-cert
-          mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file }}
-          subPath: tls.crt
-        - name: tls-key
-          mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_key_file }}
-          subPath: tls.key
-        - name: tls-ca
-          mountPath: {{ dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_client_ca_file }}
-          subPath: ca.crt
-        {{- end }}
+          mountPath: {{ .Values.vault.tls.mountPath }}
         {{- end }}
       {{- if .Values.vault.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumeMounts "context" $) | nindent 8 }}
@@ -158,23 +144,10 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{- if not (first .Values.vault.configFiles.listeners.listener).tcp.tls_disable }}
-    {{- if eq (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_cert_file)
-                  (dir (first .Values.vault.configFiles.listeners.listener).tcp.tls_key_file) }}
+    {{- if .Values.vault.tls.content }}
     - name: tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
-    {{- else }}
-    - name: tls-cert
-      secret:
-        secretName: {{ template "common.names.fullname" . }}-sec-tls
-    - name: tls-key
-      secret:
-        secretName: {{ template "common.names.fullname" . }}-sec-tls
-    - name: tls-ca
-      secret:
-        secretName: {{ template "common.names.fullname" . }}-sec-tls
-    {{- end }}
     {{- end }}
     {{- if .Values.vault.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumes "context" $) | nindent 4 }}
