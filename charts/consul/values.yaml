@@ -246,6 +246,16 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_server
       ##
       server: true
+    ## @param consul.configFiles.acl ACL Parameters
+    ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#acl-parameters
+    ##
+    acl:
+      ## @param consul.configFiles.acl.acl
+      ## This object allows a number of sub-keys to be set which controls the ACL system.
+      ## Configuring the ACL system within the ACL stanza was added in Consul 1.4.0
+      ##
+      acl:
+        enabled: false
     ## @param consul.configFiles.bootstrap Bootstrap Parameters
     ## ## the config under this node will convert to json file and place in /consul/config
     ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#bootstrap-parameters
