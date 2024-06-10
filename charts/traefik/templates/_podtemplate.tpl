@@ -57,12 +57,6 @@ spec:
       args: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.args "context" $) | nindent 8 }}
       {{- end }}
       env:
-        {{- if .Values.traefik.customRootCA }}
-        - name: LEGO_CA_CERTIFICATES
-          value: /etc/traefik/root_ca.crt
-        - name: LEGO_CA_SYSTEM_CERT_POOL
-          value: "true"
-        {{- end }}
         {{- if .Values.traefik.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.traefik.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
@@ -97,18 +91,19 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.traefik.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: static-configuration
+        - name: staticConfiguration
           mountPath: /etc/traefik/traefik.yml
           subPath: traefik.yml
+        - name: dynamicConfigurationFileDir
+          mountPath: {{ .Values.traefik.staticConfiguration.providers.file.directory }}/builtin
         - name: persistent-volume
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-        {{- if .Values.traefik.customRootCA }}
-        - name: root_ca.crt
-          mountPath: /etc/traefik/root_ca.crt
-          subPath: root_ca.crt
+        {{- if .Values.traefik.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.traefik.tls.mountPath }}
         {{- end }}
       {{- if .Values.traefik.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.traefik.extraVolumeMounts "context" $) | nindent 8 }}
@@ -117,12 +112,15 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.traefik.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: static-configuration
+    - name: staticConfiguration
       configMap:
-        name: {{ template "common.names.fullname" . }}-cm
+        name: {{ template "common.names.fullname" . }}-cm-stat
         items:
           - key: traefik.yml
             path: traefik.yml
+    - name: dynamicConfigurationFileDir
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm-dyn
     - name: persistent-volume
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
@@ -130,13 +128,10 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{- if .Values.traefik.customRootCA }}
-    - name: root_ca.crt
+    {{- if .Values.traefik.tls.contents }}
+    - name: tls
       secret:
-        secretName: {{ template "common.names.fullname" . }}-sec
-        items:
-          - key: root_ca.crt
-            path: root_ca.crt
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
     {{- if .Values.traefik.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.traefik.extraVolumes "context" $) | nindent 4 }}

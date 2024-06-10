@@ -87,9 +87,11 @@ traefik:
   containerPorts:
     - name: http
       containerPort: 80
+      hostPort: 80
       protocol: TCP
     - name: https
       containerPort: 443
+      hostPort: 443
       protocol: TCP
   ## Configure extra options for traefik containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -102,7 +104,7 @@ traefik:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 60
+    initialDelaySeconds: 10
     periodSeconds: 120
     timeoutSeconds: 10
     failureThreshold: 5
@@ -169,12 +171,18 @@ traefik:
     enabled: false
     fsGroup: 1001
   ## Configure Container Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param traefik.containerSecurityContext.enabled Enabled traefik containers' Security Context
   ## @param traefik.containerSecurityContext.runAsUser Set traefik containers' Security Context runAsUser
   ## @param traefik.containerSecurityContext.runAsNonRoot Set traefik containers' Security Context runAsNonRoot
   ## @param traefik.containerSecurityContext.readOnlyRootFilesystem Set traefik containers' Security Context runAsNonRoot
-  ##
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## ref: https://unix.stackexchange.com/questions/580339/how-to-grant-read-write-access-through-selinux-policy-to-a-bind-mounted-volume-v/595152#595152
+  ## ref: https://github.com/containers/podman/pull/5307#issuecomment-590830455
+  ## e.g. to disable selinux label for socket read from container
+  ## containerSecurityContext:
+  ##   enabled: true
+  ##   seLinuxOptions:
+  ##     type: spc_t
   containerSecurityContext:
     enabled: false
     # runAsUser: 1001
@@ -190,10 +198,22 @@ traefik:
     ## ref: https://doc.traefik.io/traefik/providers/overview/
     ##
     providers:
+      ## @param traefik.staticConfiguration.providers.docker
+      ## Config docker provider to let traefik understand how to route the traffic by reading docker label information
+      ## ref: https://doc.traefik.io/traefik/providers/docker/
+      ##
       docker:
-        endpoint: "unix:///var/run/docker.sock"
+        endpoint: unix:///var/run/docker.sock
         useBindPortIP: false
         exposedByDefault: false
+      ## @param traefik.staticConfiguration.providers.file
+      ## @param traefik.staticConfiguration.providers.file.directory
+      ## Config The file provider let traefik understand how to route the traffic by reading the YAML or TOML file
+      ## ref: https://doc.traefik.io/traefik/providers/file/
+      ##
+      file:
+        directory: /etc/traefik/dynamic
+        watch: true
     ## @param traefik.staticConfiguration.serversTransport
     ## ref: https://doc.traefik.io/traefik/routing/overview/#transport-configuration
     serversTransport:
@@ -216,7 +236,7 @@ traefik:
         forwardedHeaders:
           trustedIPs: []
       # https://community.traefik.io/t/lets-encrypt-x509-certificate-signed-by-unknown-authority/11112/1
-      websecure:
+      webSecure:
         address: ":443"
         # https://doc.traefik.io/traefik/routing/entrypoints/#forwarded-headers
         # https://community.traefik.io/t/how-to-get-real-ip-from-the-client/8239
@@ -247,7 +267,7 @@ traefik:
     ##       storage: /mnt/acmeStorage/internal_acme.json
     ##       tlsChallenge: {}
     ##
-    certificatesResolvers: {}
+    certificatesResolvers: null
     ## @param traefik.staticConfiguration.log
     ## ref: https://doc.traefik.io/traefik/observability/logs/
     ##
@@ -259,9 +279,41 @@ traefik:
     ## ref: https://doc.traefik.io/traefik/operations/ping/
     ##
     ping: {}
-  ## @param traefik.customRootCA set up a custom root CA to trust (for private ACME)
-  ## ref: https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/index.html#traefik-v2
-  customRootCA: ""
+  ## @param traefik.dynamicConfigurationFile
+  ## The file provider lets you define the dynamic configuration in a YAML or TOML file.
+  ## The block define here will put into configMap and let traefik treat as dynamic file configuration file.
+  ## The values will render as a yaml file put into configmap then mount to the path set in traefik.staticConfiguration.providers.file.directory
+  ## ref: https://doc.traefik.io/traefik/providers/file/
+  ##
+  dynamicConfigurationFiles:
+    mwToHttps.yaml:
+      http:
+        middlewares:
+          toHttps:
+            redirectScheme:
+              scheme: https
+              permanent: true
+    # tlsCerts:
+    #   tls:
+    #     certificates:
+    #       - certFile: /etc/traefik/tls/domain.crt
+    #         keyFile: /etc/traefik/tls/domain.key
+  ## @param traefik.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param traefik.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /etc/traefik/tls
+    ## @param traefik.tls.content secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## contents:
+    ##  ca.crt: ""
+    ##  tls.crt: ""
+    ##  tls.key: ""
+    ##
+    contents: {}
   ## @param traefik.existingConfigmap The name of an existing ConfigMap with your custom configuration for traefik
   ##
   existingConfigmap:
@@ -281,7 +333,9 @@ traefik:
   podLabels: {}
   ## @param traefik.podAnnotations Annotations for traefik pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
+  ## e.g.
+  ## podAnnotations:
+  ##  io.podman.annotations.label: disable
   podAnnotations: {}
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -303,6 +357,15 @@ traefik:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
+  ##   # below env var make traefik trust a custom root ca, it is used interact with self host acme server
+  ##   # ref: https://smallstep.com/blog/private-acme-server/#:~:text=To%20get%20a%20certificate%20from%20step%2Dca%20to%20Traefik%20you%20need%20to%3A
+  ##   # ref: https://github.com/traefik/traefik/issues/5196
+  ##   - name: LEGO_CA_CERTIFICATES
+  ##     value: /etc/traefik/tls/rootca.crt
+  ##   # below env var let traefik not only trust custom root ca, but also trust system builtin ca certs
+  ##   # ref: https://github.com/go-acme/lego/blob/96bb0ba904fc5c818780aa1edcde56731a61b9db/lego/client_config.go#L28
+  ##   - name: LEGO_CA_SYSTEM_CERT_POOL
+  ##     value: "true"
   ##
   extraEnvVars: []
   ## @param traefik.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for traefik nodes
@@ -317,6 +380,7 @@ traefik:
   ##   - name: acmeStorage
   ##     persistentVolumeClaim:
   ##       claimName: traefik-pvc
+  ##
   extraVolumes:
     - name: docker-socket
       hostPath:
@@ -327,9 +391,11 @@ traefik:
   ## extraVolumeMounts:
   ##   - name: acmeStorage
   ##     mountPath: /mnt/acmeStorage
+  ##
   extraVolumeMounts:
     - name: docker-socket
       mountPath: "/var/run/docker.sock"
+      readOnly: true
   ## @param traefik.sidecars Add additional sidecar containers to the traefik pod(s)
   ## e.g:
   ## sidecars:
@@ -361,7 +427,7 @@ traefik:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
   mountPath: /mnt
