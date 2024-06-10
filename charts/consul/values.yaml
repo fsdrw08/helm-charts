@@ -319,7 +319,7 @@ consul:
   ##
   tls:
     mountPath: /consul/config/certs
-    ## @param consul.tls.content secret content of cert and key or whatever tls content will set in the container
+    ## @param consul.tls.contents secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
@@ -329,7 +329,7 @@ consul:
     ##  dc1-server-consul-1.pem: ""
     ##  dc1-server-consul-1-key.pem: ""
     ##
-    content: {}
+    contents: {}
 
   ## @param consul.existingConfigmap The name of an existing ConfigMap with your custom configuration for consul
   ##

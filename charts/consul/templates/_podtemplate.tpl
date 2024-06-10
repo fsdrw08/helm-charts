@@ -103,7 +103,7 @@ spec:
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-        {{- if .Values.consul.tls.content }}
+        {{- if .Values.consul.tls.contents }}
         - name: tls
           mountPath: {{ .Values.consul.tls.mountPath }}
         {{- end }}
@@ -117,7 +117,7 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.consul.tls.content }}
+    {{- if .Values.consul.tls.contents }}
     - name: tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls

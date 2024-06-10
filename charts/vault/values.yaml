@@ -241,7 +241,7 @@ vault:
   ##
   tls:
     mountPath: /vault/userconfig/vault-server-tls
-    ## @param vault.tls.content secret content of cert and key or whatever tls content will set in the container
+    ## @param vault.tls.contents secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
@@ -251,7 +251,7 @@ vault:
     ##  tls.crt: ""
     ##  tls.key: ""
     ##
-    content: {}
+    contents: {}
   ## @param vault.existingConfigmap The name of an existing ConfigMap with your custom configuration for vault
   ##
   existingConfigmap:

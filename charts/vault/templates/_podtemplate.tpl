@@ -116,7 +116,7 @@ spec:
           mountPath: {{ .Values.persistence.mountPath.storage }}
         - name: logs
           mountPath: {{ .Values.persistence.mountPath.logs }}
-        {{- if .Values.vault.tls.content }}
+        {{- if .Values.vault.tls.contents }}
         - name: tls
           mountPath: {{ .Values.vault.tls.mountPath }}
         {{- end }}
@@ -144,7 +144,7 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{- if .Values.vault.tls.content }}
+    {{- if .Values.vault.tls.contents }}
     - name: tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
