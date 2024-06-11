@@ -1,4 +1,4 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "coredns.podTemplate" -}}
 metadata:
   {{- if eq .Values.deployKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
@@ -7,7 +7,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: coredns
     {{- if .Values.coredns.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.coredns.podLabels "context" $) | nindent 4 }}
     {{- end }}
@@ -15,17 +15,17 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "coredns.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.coredns.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.hostAliases "context" $) | nindent 4 }}
   {{- end }}
   {{- if .Values.coredns.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.coredns.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "coredns.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -45,7 +45,7 @@ spec:
     {{- end }}
   containers:
     - name: coredns
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+      image: {{ template "coredns.image" . }}
       imagePullPolicy: {{ .Values.coredns.image.pullPolicy }}
       {{- if .Values.coredns.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.coredns.containerSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -93,28 +93,16 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.coredns.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: persistent-volume
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
       {{- if .Values.coredns.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.coredns.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
     {{- if .Values.coredns.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.coredns.sidecars "context" $) | nindent 4 }}
     {{- end }}
+  {{- if .Values.coredns.extraVolumes }}
   volumes:
-    - name: persistent-volume
-    {{- if .Values.persistence.enabled }}
-      persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
-    {{- else }}
-      emptyDir: {}
-    {{- end }}
-    {{- if .Values.coredns.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.coredns.extraVolumes "context" $) | nindent 4 }}
-    {{- end }}
+  {{- end }}
   {{ if eq .Values.deployKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}

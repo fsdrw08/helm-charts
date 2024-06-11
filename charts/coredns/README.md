@@ -6,8 +6,9 @@
 
 ## TL;DR
 
-```console
-helm template %%HELM_REGISTRY%% --name-template=%%CHART_NAME%% | podman kube play -
+```powershell
+$releaseName="coredns"
+helm template .\charts\coredns --name-template=$releaseName -f .\charts\coredns\values-sololab.yaml | podman kube play -
 ```
 
 ## Introduction

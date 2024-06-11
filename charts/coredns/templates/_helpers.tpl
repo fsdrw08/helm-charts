@@ -1,28 +1,28 @@
 {{/*
 Return the proper coredns image name
 */}}
-{{- define "%%TEMPLATE_NAME%%.image" -}}
+{{- define "coredns.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.coredns.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "%%TEMPLATE_NAME%%.volumePermissions.image" -}}
+{{- define "coredns.volumePermissions.image" -}}
 {{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
-{{- define "%%TEMPLATE_NAME%%.imagePullSecrets" -}}
-{{- include "common.images.pullSecrets" (dict "images" (list .Values.coredns.image .Values.%%SECONDARY_OBJECT_BLOCK%%.image .Values.volumePermissions.image) "global" .Values.global) -}}
+{{- define "coredns.imagePullSecrets" -}}
+{{- include "common.images.pullSecrets" (dict "images" (list .Values.coredns.image .Values.volumePermissions.image) "global" .Values.global) -}}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "%%TEMPLATE_NAME%%.serviceAccountName" -}}
+{{- define "coredns.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
     {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
@@ -33,10 +33,10 @@ Create the name of the service account to use
 {{/*
 Compile all warnings into a single message.
 */}}
-{{- define "%%TEMPLATE_NAME%%.validateValues" -}}
+{{- define "coredns.validateValues" -}}
 {{- $messages := list -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.foo" .) -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.bar" .) -}}
+{{- $messages := append $messages (include "coredns.validateValues.foo" .) -}}
+{{- $messages := append $messages (include "coredns.validateValues.bar" .) -}}
 {{- $messages := without $messages "" -}}
 {{- $message := join "\n" $messages -}}
 

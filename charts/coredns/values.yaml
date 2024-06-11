@@ -70,10 +70,10 @@ coredns:
   ## @param coredns.podRestartPolicy specify the pod restart policy if deployKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param coredns.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ## @param coredns.replicaCount Number of coredns replicas to deploy
   ##
   replicaCount: 1
-  ## @param coredns.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param coredns.containerPorts coredns container port to expose to host
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
@@ -85,9 +85,10 @@ coredns:
   ##     protocol: TCP
   ##
   containerPorts: {}
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## Configure extra options for coredns containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param coredns.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## ref: https://github.com/coredns/helm/blob/master/charts/coredns/values.yaml#L360
+  ## @param coredns.livenessProbe.enabled Enable livenessProbe on coredns containers
   ## @param coredns.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param coredns.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param coredns.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -96,26 +97,31 @@ coredns:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param coredns.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+    httpGet:
+      path: /health
+      port: 8080
+      scheme: HTTP
+  ## @param coredns.readinessProbe.enabled Enable readinessProbe on coredns containers
   ## @param coredns.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param coredns.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param coredns.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
   ## @param coredns.readinessProbe.failureThreshold Failure threshold for readinessProbe
   ## @param coredns.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
   ##
   readinessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: foo
     periodSeconds: bar
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param coredns.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param coredns.startupProbe.enabled Enable startupProbe on coredns containers
   ## @param coredns.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param coredns.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param coredns.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -138,28 +144,28 @@ coredns:
   ## @param coredns.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## coredns resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  ## @param coredns.resources.limits The resources limits for the %%MAIN_CONTAINER_NAME%% containers
-  ## @param coredns.resources.requests The requested resources for the %%MAIN_CONTAINER_NAME%% containers
+  ## @param coredns.resources.limits The resources limits for the coredns containers
+  ## @param coredns.resources.requests The requested resources for the coredns containers
   ##
   resources:
     limits: {}
     requests: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param coredns.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param coredns.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
-  ##
+  ## @param coredns.podSecurityContext.enabled Enabled coredns pods' Security Context
+  ## @param coredns.podSecurityContext.fsGroup Set coredns pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
   podSecurityContext:
-    enabled: true
-    fsGroup: 1001
+    enabled: false
+    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param coredns.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param coredns.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param coredns.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param coredns.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param coredns.containerSecurityContext.enabled Enabled coredns containers' Security Context
+  ## @param coredns.containerSecurityContext.runAsUser Set coredns containers' Security Context runAsUser
+  ## @param coredns.containerSecurityContext.runAsNonRoot Set coredns containers' Security Context runAsNonRoot
+  ## @param coredns.containerSecurityContext.readOnlyRootFilesystem Set coredns containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
     enabled: true
@@ -168,8 +174,58 @@ coredns:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-
-  ## @param coredns.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param coredns.servers
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/#coredns-configmap-options
+  ## e.g.
+  ## servers:
+  ##  - zones:                 # the `zones` block can be left out entirely, defaults to "."
+  ##    - zone: hello.world.   # optional, defaults to "."
+  ##      scheme: tls://       # optional, defaults to "" (which equals "dns://" in CoreDNS)
+  ##    - zone: foo.bar.
+  ##      scheme: dns://
+  ##      use_tcp: true        # set this parameter to optionally expose the port on tcp as well as udp for the DNS protocol
+  ##                          # Note that this will not work if you are also exposing tls or grpc on the same server
+  ##    port: 12345            # optional, defaults to "" (which equals 53 in CoreDNS)
+  ##    plugins:               # the plugins to use for this server block
+  ##      - name: kubernetes     # name of plugin, if used multiple times ensure that the plugin supports it!
+  ##        parameters: foo bar  # list of parameters after the plugin
+  ##        configBlock: |-      # if the plugin supports extra block style config, supply it here
+  ##          hello world
+  ##          foo bar
+  servers:
+    - zones:
+        - zone: .
+      port: 53
+      plugins:
+        - name: errors
+        # Serves a /health endpoint on :8080, required for livenessProbe
+        - name: health
+          configBlock: |-
+            lameduck 5s
+        - name: forward
+          parameters: . /etc/resolv.conf
+        - name: cache
+          parameters: 30
+        # The loop plugin will send a random probe query to ourselves and will then keep track of how many times we see it.
+        # If we see it more than twice, we assume CoreDNS has seen a forwarding loop and we halt the process.
+        - name: loop
+        # This plugin allows automatic reload of a changed Corefile.
+        # To enable automatic reloading of zone file changes, use the auto plugin.
+        - name: reload
+  ## @param coredns.extraConfig
+  ## Extra configuration that is applied outside of the default zone block.
+  ## Example to include additional config files, which may come from extraVolumes:
+  ## e.g.
+  ## extraConfig:
+  ##   import:
+  ##     parameters: /opt/coredns/*.conf
+  ##
+  extraConfig: {}
+  ## @param coredns.zoneFiles
+  ## configure custom zone files as per https://coredns.io/2017/05/08/custom-dns-entries-for-kubernetes/
+  ##
+  zoneFiles: []
+  ## @param coredns.existingConfigmap The name of an existing ConfigMap with your custom configuration for coredns
   ##
   existingConfigmap:
   ## @param coredns.command Override default container command (useful when using custom images)
@@ -178,15 +234,15 @@ coredns:
   ## @param coredns.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param coredns.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param coredns.hostAliases coredns pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param coredns.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param coredns.podLabels Extra labels for coredns pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param coredns.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param coredns.podAnnotations Annotations for coredns pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
@@ -205,26 +261,26 @@ coredns:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param coredns.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param coredns.extraEnvVars Array with extra environment variables to add to coredns nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param coredns.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param coredns.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for coredns nodes
   ##
   extraEnvVarsCM: ""
-  ## @param coredns.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param coredns.extraEnvVarsSecret Name of existing Secret containing extra env vars for coredns nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param coredns.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param coredns.extraVolumes Optionally specify extra list of additional volumes for the coredns pod(s)
   ##
   extraVolumes: []
-  ## @param coredns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param coredns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the coredns container(s)
   ##
   extraVolumeMounts: []
-  ## @param coredns.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param coredns.sidecars Add additional sidecar containers to the coredns pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -235,7 +291,7 @@ coredns:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param coredns.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param coredns.initContainers Add additional init containers to the coredns pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -255,10 +311,10 @@ coredns:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/coredns/data
+  mountPath: ""
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
