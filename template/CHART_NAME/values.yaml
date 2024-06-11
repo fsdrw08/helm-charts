@@ -74,13 +74,16 @@ deployKind: Pod
   ##
   replicaCount: 1
   ## @param %%MAIN_OBJECT_BLOCK%%.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## e.g. 
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
+  ##     hostPort: 80
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##   - name: https
   ##     containerPort: 443
+  ##     hostPort: 443
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
@@ -107,9 +110,10 @@ deployKind: Pod
   ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
   ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.failureThreshold Failure threshold for readinessProbe
   ## @param %%MAIN_OBJECT_BLOCK%%.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
   ##
   readinessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: foo
     periodSeconds: bar
     timeoutSeconds: foo
@@ -150,10 +154,11 @@ deployKind: Pod
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param %%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
   ## @param %%MAIN_OBJECT_BLOCK%%.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
-    enabled: true
-    fsGroup: 1001
+    enabled: false
+    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param %%MAIN_OBJECT_BLOCK%%.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context

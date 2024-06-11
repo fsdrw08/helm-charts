@@ -3,7 +3,6 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: {{ include "common.names.fullname" . }}
-  namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: %%COMPONENT_NAME%%
     {{- if .Values.commonLabels }}
