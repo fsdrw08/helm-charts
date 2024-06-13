@@ -32,6 +32,8 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: foo
@@ -73,6 +75,8 @@ spec:
         {{- end }}
       {{- if .Values.%%MAIN_OBJECT_BLOCK%%.resources }}
       resources: {{- toYaml .Values.%%MAIN_OBJECT_BLOCK%%.resources | nindent 8 }}
+      {{- else if ne .Values.%%MAIN_OBJECT_BLOCK%%.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.%%MAIN_OBJECT_BLOCK%%.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.containerPorts "context" $) | nindent 8 -}}
@@ -93,7 +97,7 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: persistent-volume
+        - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -105,7 +109,7 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: persistent-volume
+    - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}

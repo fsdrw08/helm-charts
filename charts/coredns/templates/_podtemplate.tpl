@@ -32,6 +32,8 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: foo
@@ -73,6 +75,8 @@ spec:
         {{- end }}
       {{- if .Values.coredns.resources }}
       resources: {{- toYaml .Values.coredns.resources | nindent 8 }}
+      {{- else if ne .Values.coredns.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.coredns.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{- if .Values.coredns.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.containerPorts "context" $) | nindent 8 -}}

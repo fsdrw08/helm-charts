@@ -38,6 +38,8 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: dshm
@@ -74,6 +76,8 @@ spec:
         {{- end }}
       {{- if .Values.freeipa.resources }}
       resources: {{- toYaml .Values.freeipa.resources | nindent 8 }}
+      {{- else if ne .Values.freeipa.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.freeipa.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{- if .Values.freeipa.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.freeipa.containerPorts "context" $) | nindent 8 -}}
@@ -95,7 +99,7 @@ spec:
       {{- end }}
       volumeMounts:
         {{- if .Values.persistence.mountPath }}
-        - name: persistent-volume
+        - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -115,7 +119,7 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.freeipa.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: persistent-volume
+    - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default ( print (include "common.names.fullname" . ) "-pvc" ) .Values.persistence.existingClaim }}

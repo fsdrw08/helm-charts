@@ -32,6 +32,8 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: foo
@@ -74,6 +76,8 @@ spec:
         {{- end }}
       {{- if .Values.droneServer.resources }}
       resources: {{- toYaml .Values.droneServer.resources | nindent 8 }}
+      {{- else if ne .Values.droneServer.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.droneServer.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{- if .Values.droneServer.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.droneServer.containerPorts "context" $) | nindent 8 -}}
@@ -95,7 +99,7 @@ spec:
       {{- end }}
       volumeMounts:
         {{- if .Values.persistence.mountPath }}
-        - name: persistent-volume
+        - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -108,7 +112,7 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.droneServer.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: persistent-volume
+    - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}

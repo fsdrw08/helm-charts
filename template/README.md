@@ -1,4 +1,5 @@
 # Bitnami Charts Template
+This template ref from https://github.com/bitnami/charts/tree/main/template/CHART_NAME
 
 This directory contains a basic scaffolding to serve as the basis for creating a new chart.
 

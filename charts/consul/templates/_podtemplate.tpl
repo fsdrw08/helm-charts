@@ -32,9 +32,11 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: persistent-volume
+        - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -76,6 +78,8 @@ spec:
         {{- end }}
       {{- if .Values.consul.resources }}
       resources: {{- toYaml .Values.consul.resources | nindent 8 }}
+      {{- else if ne .Values.consul.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.consul.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{- if .Values.consul.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.consul.containerPorts "context" $) | nindent 8 -}}
@@ -98,7 +102,7 @@ spec:
       volumeMounts:
         - name: config
           mountPath: /consul/config
-        - name: persistent-volume
+        - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -122,7 +126,7 @@ spec:
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
-    - name: persistent-volume
+    - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc

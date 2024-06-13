@@ -93,7 +93,7 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.socat.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: persistent-volume
+        - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -105,7 +105,7 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.socat.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: persistent-volume
+    - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}

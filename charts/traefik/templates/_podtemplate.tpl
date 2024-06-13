@@ -32,6 +32,8 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: foo
@@ -71,6 +73,8 @@ spec:
         {{- end }}
       {{- if .Values.traefik.resources }}
       resources: {{- toYaml .Values.traefik.resources | nindent 8 }}
+      {{- else if ne .Values.traefik.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.traefik.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{- if .Values.traefik.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.containerPorts "context" $) | nindent 8 -}}
@@ -96,7 +100,7 @@ spec:
           subPath: traefik.yml
         - name: dynamicConfigurationFileDir
           mountPath: {{ .Values.traefik.staticConfiguration.providers.file.directory }}/builtin
-        - name: persistent-volume
+        - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -121,7 +125,7 @@ spec:
     - name: dynamicConfigurationFileDir
       configMap:
         name: {{ template "common.names.fullname" . }}-cm-dyn
-    - name: persistent-volume
+    - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default ( print (include "common.names.fullname" . ) "-pvc" ) .Values.persistence.existingClaim }}

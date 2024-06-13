@@ -32,6 +32,8 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: foo
@@ -73,6 +75,8 @@ spec:
         {{- end }}
       {{- if .Values.droneRunnerDocker.resources }}
       resources: {{- toYaml .Values.droneRunnerDocker.resources | nindent 8 }}
+      {{- else if ne .Values.droneRunnerDocker.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.droneRunnerDocker.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{- if .Values.droneRunnerDocker.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.droneRunnerDocker.containerPorts "context" $) | nindent 8 -}}
@@ -98,7 +102,7 @@ spec:
         - name: podman-socket-file
           mountPath: /var/run/docker.sock
         {{- if .Values.persistence.mountPath }}
-        - name: persistent-volume
+        - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
@@ -122,7 +126,7 @@ spec:
         path: {{ .Values.droneRunnerDocker.podmanSocket }}
         # https://kubernetes.io/docs/concepts/storage/volumes/#hostpath-fileorcreate-example
         type: FileOrCreate
-    - name: persistent-volume
+    - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}

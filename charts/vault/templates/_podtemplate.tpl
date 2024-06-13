@@ -38,6 +38,8 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: storage
@@ -79,6 +81,8 @@ spec:
         {{- end }}
       {{- if .Values.vault.resources }}
       resources: {{- toYaml .Values.vault.resources | nindent 8 }}
+      {{- else if ne .Values.vault.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.vault.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{- if .Values.vault.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.vault.containerPorts "context" $) | nindent 8 -}}

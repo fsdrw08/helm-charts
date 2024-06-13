@@ -35,6 +35,8 @@ spec:
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
       resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
+      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: jenkins-home
@@ -62,6 +64,8 @@ spec:
       {{- end }}
       {{- if .Values.controller.provision.resources }}
       resources: {{- toYaml .Values.controller.provision.resources | nindent 8 }}
+      {{- else if ne .Values.controller.provision.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: jenkins-home
@@ -177,6 +181,8 @@ spec:
         {{- end }}
       {{- if .Values.controller.resources }}
       resources: {{- toYaml .Values.controller.resources | nindent 8 }}
+      {{- else if ne .Values.controller.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.controller.resourcesPreset) | nindent 8 }}
       {{- end }}
       {{/*
       {{- if .Values.controller.containerPorts }}

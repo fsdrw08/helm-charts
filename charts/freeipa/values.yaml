@@ -87,40 +87,53 @@ freeipa:
   containerPorts:
     - name: dns_tcp
       containerPort: 53
+      hostPort: 53
       protocol: TCP
     - name: dns_udp
       containerPort: 53
+      hostPort: 53
       protocol: UDP
 
     - name: http
       containerPort: 80
+      hostPort: 80
     - name: https
       containerPort: 443
+      hostPort: 443
     - name: http_pki
       containerPort: 8080
+      hostPort: 8080
     - name: https_pki
       containerPort: 8443
+      hostPort: 8443
 
     - name: ldap
       containerPort: 389
+      hostPort: 389
     - name: ldaps
       containerPort: 636
+      hostPort: 636
 
     - name: kerberos_kdc_tcp
       containerPort: 88
+      hostPort: 88
       protocol: TCP
     - name: kerberos_kdc_udp
       containerPort: 88
+      hostPort: 88
       protocol: UDP
     - name: kerberos_password_tcp
       containerPort: 464
+      hostPort: 464
       protocol: TCP
     - name: kerberos_password_udp
       containerPort: 464
+      hostPort: 464
       protocol: UDP
 
     - name: ntp
       containerPort: 123
+      hostPort: 123
       protocol: UDP
   ## Configure extra options for freeipa containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -179,7 +192,11 @@ freeipa:
   ##
   customStartupProbe: {}
   ## freeipa resource requests and limits
-  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param freeipa.resourcesPreset Set freeipa container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if freeipa.resources is set (freeipa.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
   ## @param freeipa.resources.limits The resources limits for the freeipa containers
   ## @param freeipa.resources.requests The requested resources for the freeipa containers
   ##
@@ -421,7 +438,11 @@ volumePermissions:
     ##
     pullSecrets: []
   ## Init container's resource requests and limits
-  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
   ## @param volumePermissions.resources.limits The resources limits for the init container
   ## @param volumePermissions.resources.requests The requested resources for the init container
   ##
