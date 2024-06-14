@@ -67,8 +67,6 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.coredns.extraEnvVarsCM "context" $) }}
         {{- end }}
-        - secretRef:
-            name: {{ template "common.names.fullname" . }}
         {{- if .Values.coredns.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.coredns.extraEnvVarsSecret "context" $) }}
@@ -97,14 +95,35 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.coredns.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config-volume
+          mountPath: /etc/coredns
+        {{- if .Values.coredns.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.coredns.tls.mountPath }}
+        {{- end }}
       {{- if .Values.coredns.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.coredns.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
     {{- if .Values.coredns.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.coredns.sidecars "context" $) | nindent 4 }}
     {{- end }}
-  {{- if .Values.coredns.extraVolumes }}
   volumes:
+    - name: config-volume
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+        items:
+        - key: Corefile
+          path: Corefile
+        {{- range .Values.coredns.zoneFiles }}
+        - key: {{ .filename }}
+          path: {{ .filename }}
+        {{- end }}
+    {{- if .Values.coredns.tls.contents }}
+    - name: tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+  {{- if .Values.coredns.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.coredns.extraVolumes "context" $) | nindent 4 }}
   {{- end }}
   {{ if eq .Values.deployKind "Deployment" }}
