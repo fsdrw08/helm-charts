@@ -89,18 +89,21 @@ controller:
 
   ## jenkins resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param controller.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if controller.resources is set (controller.resources is recommended for production).
+  ## @param controller.resourcesPreset Set jenkins controller container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if controller.resources is set (controller.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param controller.resources.limits The resources limits for the jenkins containers
-  ## @param controller.resources.requests The requested resources for the jenkins containers
+  ## @param controller.resources Set jenkins controller container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
   ##
-  resources:
-    limits:
-      cpu: 1000m
-      memory: 3072Mi
-    requests: {}
+  resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param controller.podSecurityContext.enabled Enabled jenkins pods' Security Context
@@ -200,18 +203,21 @@ controller:
     ##
     ## jenkins provision initContainer resource requests and limits
     ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-    ## @param controller.provision.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if controller.provision.resources is set (controller.provision.resources is recommended for production).
+    ## @param controller.provision.resourcesPreset Set jenkins provision container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if controller.provision.resources is set (controller.provision.resources is recommended for production).
     ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
     ##
     resourcesPreset: "nano"
-    ## @param controller.provision.resources.limits The resources limits for the jenkins provision initContainer
-    ## @param controller.provision.resources.requests The requested resources for the jenkins provision initContainer
+    ## @param controller.provision.resources Set jenkins provision container requests and limits for different resources like CPU or memory (essential for production workloads)
+    ## Example:
+    ## resources:
+    ##   requests:
+    ##     cpu: 2
+    ##     memory: 512Mi
+    ##   limits:
+    ##     cpu: 3
+    ##     memory: 1024Mi
     ##
-    resources:
-      limits:
-        cpu: 1000m
-        memory: 3072Mi
-      requests: {}
+    resources: {}
   ## @ param controller.initScripts List of groovy init scripts to be executed during Jenkins controller start
   ## e.g.
   ## initScripts:
@@ -639,10 +645,10 @@ controller:
         pullSecrets: []
       ## Configure Container Security Context
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-      ## @param controller.JCasC.autoReload.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-      ## @param controller.JCasC.autoReload.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-      ## @param controller.JCasC.autoReload.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-      ## @param controller.JCasC.autoReload.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+      ## @param controller.JCasC.autoReload.containerSecurityContext.enabled Enabled jenkins controller containers' Security Context
+      ## @param controller.JCasC.autoReload.containerSecurityContext.runAsUser Set jenkins controller containers' Security Context runAsUser
+      ## @param controller.JCasC.autoReload.containerSecurityContext.runAsNonRoot Set jenkins controller containers' Security Context runAsNonRoot
+      ## @param controller.JCasC.autoReload.containerSecurityContext.readOnlyRootFilesystem Set jenkins controller containers' Security Context runAsNonRoot
       ##
       containerSecurityContext:
         enabled: false
@@ -737,12 +743,17 @@ volumePermissions:
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param volumePermissions.resources.limits The resources limits for the init container
-  ## @param volumePermissions.resources.requests The requested resources for the init container
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
   ##
-  resources:
-    limits: {}
-    requests: {}
+  resources: {}
   ## Init container Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser

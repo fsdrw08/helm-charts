@@ -74,10 +74,10 @@ droneRunnerDocker:
   ## @param droneRunnerDocker.podRestartPolicy specify the pod restart policy if instanceKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param droneRunnerDocker.replicaCount Number of %%SECONDARY_CONTAINER%% replicas to deploy
+  ## @param droneRunnerDocker.replicaCount Number of droneRunnerDocker replicas to deploy
   ##
   replicaCount: 1
-  ## @param droneRunnerDocker.containerPorts %%SECONDARY_CONTAINER%% container port to expose to host
+  ## @param droneRunnerDocker.containerPorts droneRunnerDocker container port to expose to host
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
@@ -89,9 +89,9 @@ droneRunnerDocker:
   ##     protocol: TCP
   ##
   containerPorts: {}
-  ## Configure extra options for %%SECONDARY_CONTAINER%% containers' liveness and readiness probes
+  ## Configure extra options for droneRunnerDocker containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param droneRunnerDocker.livenessProbe.enabled Enable livenessProbe on %%SECONDARY_CONTAINER%% containers
+  ## @param droneRunnerDocker.livenessProbe.enabled Enable livenessProbe on droneRunnerDocker containers
   ## @param droneRunnerDocker.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param droneRunnerDocker.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param droneRunnerDocker.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -108,7 +108,7 @@ droneRunnerDocker:
     httpGet:
       path: /healthz
       port: http
-  ## @param droneRunnerDocker.readinessProbe.enabled Enable readinessProbe on %%SECONDARY_CONTAINER%% containers
+  ## @param droneRunnerDocker.readinessProbe.enabled Enable readinessProbe on droneRunnerDocker containers
   ## @param droneRunnerDocker.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param droneRunnerDocker.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param droneRunnerDocker.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
@@ -125,7 +125,7 @@ droneRunnerDocker:
     httpGet:
       path: /healthz
       port: http
-  ## @param droneRunnerDocker.startupProbe.enabled Enable startupProbe on %%SECONDARY_CONTAINER%% containers
+  ## @param droneRunnerDocker.startupProbe.enabled Enable startupProbe on droneRunnerDocker containers
   ## @param droneRunnerDocker.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param droneRunnerDocker.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param droneRunnerDocker.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -148,34 +148,38 @@ droneRunnerDocker:
   ## @param droneRunnerDocker.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%SECONDARY_CONTAINER%% resource requests and limits
+  ## droneRunnerDocker resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param droneRunnerDocker.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if %%MAIN_OBJECT_BLOCK%%.resources is set (%%MAIN_OBJECT_BLOCK%%.resources is recommended for production).
+  ## @param droneRunnerDocker.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge).
+  ## This is ignored if droneRunnerDocker.resources is set (droneRunnerDocker.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param droneRunnerDocker.resources.limits The resources limits for the %%SECONDARY_CONTAINER%% containers
-  ## @param droneRunnerDocker.resources.requests The requested resources for the %%SECONDARY_CONTAINER%% containers
+  ## @param droneRunnerDocker.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
   ##
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests: {}
+  resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param droneRunnerDocker.podSecurityContext.enabled Enabled %%SECONDARY_CONTAINER%% pods' Security Context
-  ## @param droneRunnerDocker.podSecurityContext.fsGroup Set %%SECONDARY_CONTAINER%% pod's Security Context fsGroup
+  ## @param droneRunnerDocker.podSecurityContext.enabled Enabled droneRunnerDocker pods' Security Context
+  ## @param droneRunnerDocker.podSecurityContext.fsGroup Set droneRunnerDocker pod's Security Context fsGroup
   ##
   podSecurityContext:
     enabled: false
     fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param droneRunnerDocker.containerSecurityContext.enabled Enabled %%SECONDARY_CONTAINER%% containers' Security Context
-  ## @param droneRunnerDocker.containerSecurityContext.runAsUser Set %%SECONDARY_CONTAINER%% containers' Security Context runAsUser
-  ## @param droneRunnerDocker.containerSecurityContext.runAsNonRoot Set %%SECONDARY_CONTAINER%% containers' Security Context runAsNonRoot
-  ## @param droneRunnerDocker.containerSecurityContext.readOnlyRootFilesystem Set %%SECONDARY_CONTAINER%% containers' Security Context runAsNonRoot
+  ## @param droneRunnerDocker.containerSecurityContext.enabled Enabled droneRunnerDocker containers' Security Context
+  ## @param droneRunnerDocker.containerSecurityContext.runAsUser Set droneRunnerDocker containers' Security Context runAsUser
+  ## @param droneRunnerDocker.containerSecurityContext.runAsNonRoot Set droneRunnerDocker containers' Security Context runAsNonRoot
+  ## @param droneRunnerDocker.containerSecurityContext.readOnlyRootFilesystem Set droneRunnerDocker containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
     enabled: false
@@ -191,7 +195,7 @@ droneRunnerDocker:
   ## @param droneRunnerDocker.podmanSocket podman socket mount to drone runner docker container path: /var/run/docker.sock
   ##
   podmanSocket: /run/user/1000/podman/podman.sock
-  ## @param droneRunnerDocker.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%SECONDARY_CONTAINER%%
+  ## @param droneRunnerDocker.existingConfigmap The name of an existing ConfigMap with your custom configuration for droneRunnerDocker
   ##
   existingConfigmap:
   ## @param droneRunnerDocker.command Override default container command (useful when using custom images)
@@ -200,15 +204,15 @@ droneRunnerDocker:
   ## @param droneRunnerDocker.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param droneRunnerDocker.hostAliases %%SECONDARY_CONTAINER%% pods host aliases
+  ## @param droneRunnerDocker.hostAliases droneRunnerDocker pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param droneRunnerDocker.podLabels Extra labels for %%SECONDARY_CONTAINER%% pods
+  ## @param droneRunnerDocker.podLabels Extra labels for droneRunnerDocker pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param droneRunnerDocker.podAnnotations Annotations for %%SECONDARY_CONTAINER%% pods
+  ## @param droneRunnerDocker.podAnnotations Annotations for droneRunnerDocker pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
@@ -386,19 +390,17 @@ volumePermissions:
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param volumePermissions.resources.limits The resources limits for the init container
-  ## @param volumePermissions.resources.requests The requested resources for the init container
-  ## e.g.
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
   ## resources:
-  ##   limits:
-  ##     cpu: 100m
-  ##     memory: 128Mi
   ##   requests:
-  ##     cpu: 100m
-  ##     memory: 128Mi
-  resources:
-    limits: {}
-    requests: {}
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
   ## Init container Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser

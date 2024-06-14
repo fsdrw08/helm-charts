@@ -74,10 +74,10 @@ droneServer:
   ## @param droneServer.podRestartPolicy specify the pod restart policy if instanceKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param droneServer.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ## @param droneServer.replicaCount Number of droneServer replicas to deploy
   ##
   replicaCount: 1
-  ## @param droneServer.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param droneServer.containerPorts droneServer container port to expose to host
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
@@ -89,9 +89,9 @@ droneServer:
   ##     protocol: TCP
   ##
   containerPorts: {}
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## Configure extra options for droneServer containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param droneServer.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param droneServer.livenessProbe.enabled Enable livenessProbe on droneServer containers
   ## @param droneServer.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param droneServer.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param droneServer.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -108,7 +108,7 @@ droneServer:
     httpGet:
       path: /healthz
       port: http
-  ## @param droneServer.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param droneServer.readinessProbe.enabled Enable readinessProbe on droneServer containers
   ## @param droneServer.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param droneServer.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param droneServer.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
@@ -125,7 +125,7 @@ droneServer:
     httpGet:
       path: /healthz
       port: http
-  ## @param droneServer.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param droneServer.startupProbe.enabled Enable startupProbe on droneServer containers
   ## @param droneServer.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param droneServer.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param droneServer.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -150,32 +150,35 @@ droneServer:
   customStartupProbe: {}
   ## droneServer resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param droneServer.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if droneServer.resources is set (droneServer.resources is recommended for production).
+  ## @param droneServer.resourcesPreset Set droneServer container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if droneServer.resources is set (droneServer.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param droneServer.resources.limits The resources limits for the %%MAIN_CONTAINER_NAME%% containers
-  ## @param droneServer.resources.requests The requested resources for the %%MAIN_CONTAINER_NAME%% containers
+  ## @param droneServer.resources Set droneServer container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
   ##
-  resources:
-    limits:
-      cpu: 200m
-      memory: 256Mi
-    requests: {}
+  resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param droneServer.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param droneServer.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param droneServer.podSecurityContext.enabled Enabled droneServer pods' Security Context
+  ## @param droneServer.podSecurityContext.fsGroup Set droneServer pod's Security Context fsGroup
   ##
   podSecurityContext:
     enabled: false
     fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param droneServer.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param droneServer.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param droneServer.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param droneServer.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param droneServer.containerSecurityContext.enabled Enabled droneServer containers' Security Context
+  ## @param droneServer.containerSecurityContext.runAsUser Set droneServer containers' Security Context runAsUser
+  ## @param droneServer.containerSecurityContext.runAsNonRoot Set droneServer containers' Security Context runAsNonRoot
+  ## @param droneServer.containerSecurityContext.readOnlyRootFilesystem Set droneServer containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
     enabled: false
@@ -185,7 +188,7 @@ droneServer:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
-  ## @param droneServer.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param droneServer.existingConfigmap The name of an existing ConfigMap with your custom configuration for droneServer
   ##
   existingConfigmap:
   ## @param droneServer.command Override default container command (useful when using custom images)
@@ -194,15 +197,15 @@ droneServer:
   ## @param droneServer.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param droneServer.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param droneServer.hostAliases droneServer pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param droneServer.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param droneServer.podLabels Extra labels for droneServer pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param droneServer.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param droneServer.podAnnotations Annotations for droneServer pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
@@ -342,19 +345,19 @@ droneServer:
     ##
     # DRONE_GOGS_SERVER:
 
-  ## @param droneServer.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param droneServer.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for droneServer nodes
   ##
   extraEnvVarsCM: ""
-  ## @param droneServer.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param droneServer.extraEnvVarsSecret Name of existing Secret containing extra env vars for droneServer nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param droneServer.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param droneServer.extraVolumes Optionally specify extra list of additional volumes for the droneServer pod(s)
   ##
   extraVolumes: []
-  ## @param droneServer.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param droneServer.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the droneServer container(s)
   ##
   extraVolumeMounts: []
-  ## @param droneServer.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param droneServer.sidecars Add additional sidecar containers to the droneServer pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -365,7 +368,7 @@ droneServer:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param droneServer.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param droneServer.initContainers Add additional init containers to the droneServer pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -461,19 +464,17 @@ volumePermissions:
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param volumePermissions.resources.limits The resources limits for the init container
-  ## @param volumePermissions.resources.requests The requested resources for the init container
-  ## e.g.
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
   ## resources:
-  ##   limits:
-  ##     cpu: 100m
-  ##     memory: 128Mi
   ##   requests:
-  ##     cpu: 100m
-  ##     memory: 128Mi
-  resources:
-    limits: {}
-    requests: {}
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
   ## Init container Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
