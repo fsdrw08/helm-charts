@@ -27,5 +27,6 @@ data:
     }
     {{ end }}
   {{- range .Values.coredns.zoneFiles }}
-  {{ .filename }}: {{ toYaml .contents | indent 4 }}
+  {{ .filename }}: |
+{{ include "common.tplvalues.render" (dict "value" .contents "context" $) | indent 4 }}
   {{- end }}

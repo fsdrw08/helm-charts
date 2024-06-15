@@ -192,6 +192,9 @@ coredns:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param coredns.hostIP
+  ##
+  hostIP: ""
   ## @param coredns.servers
   ## ref: https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/#coredns-configmap-options
   ## e.g.
