@@ -6,16 +6,10 @@ annotations:
 apiVersion: v2
 # https://hub.docker.com/r/drone/drone/tags
 appVersion: v2.18
-# dependencies:
-#   - condition: SUBCHART_NAME.enabled
-#     name: SUBCHART_NAME
-#     repository: oci://registry-1.docker.io/bitnamicharts
-#     version: %%MAJOR_SUBCHART_VERSION_(A.X.X)%%
-#   - name: common
-#     repository: oci://registry-1.docker.io/bitnamicharts
-#     tags:
-#       - bitnami-common
-#     version: 2.x.x
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
 description: Drone server helm chart for podman, deploy drone server in podman with podman kube play. Drone is a self-service Continuous Integration platform for busy development teams.
 home: https://www.drone.io/
 keywords:
