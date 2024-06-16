@@ -6,6 +6,10 @@ annotations:
 apiVersion: v2
 # https://github.com/coredns/helm/blob/master/charts/coredns/Chart.yaml
 appVersion: 1.11.1
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
 description: CoreDNS is a DNS server that chains plugins
 home: https://github.com/fsdrw08/helm-charts
 icon: https://coredns.io/images/CoreDNS_Colour_Horizontal.png

@@ -5,6 +5,10 @@ annotations:
   licenses: Apache-2.0
 apiVersion: v2
 appVersion: v2.10
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
 description: traefik helm chart for podman kube play
 home: https://github.com/fsdrw08/helm-charts
 icon: https://github.com/traefik/traefik/blob/master/docs/content/assets/img/traefik.logo.png

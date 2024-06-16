@@ -4,23 +4,22 @@ annotations:
   category: Infrastructure
   licenses: Apache-2.0
 apiVersion: v2
-# https://quay.io/repository/freeipa/freeipa-server?tab=tags
-appVersion: "4.10.2"
+appVersion: 18.2.2
 dependencies:
   - name: common
     repository: file://../common
     version: 2.x.x
-description: freeipa helm chart for podman kube play
+description: Image containing all the Ceph daemons
 home: https://github.com/fsdrw08/helm-charts
-icon: https://raw.githubusercontent.com/freeipa/freeipa.github.io/main/src/_static/freeipa-logo-small.png
+icon: https://docs.ceph.com/en/latest/_static/logo.png
 keywords:
   - podman kube play
-  - freeipa
-  - idp
+  - ceph
+  - storage
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts
-name: freeipa
+name: ceph
 sources:
-  - https://github.com/fsdrw08/helm-charts/freeipa
+  - https://github.com/fsdrw08/helm-charts/tree/main/ceph
 version: 0.1.0

@@ -297,6 +297,11 @@ spec:
             wget --post-data casc-reload-token=$POD_NAME http://localhost:{{.Values.controller.targetPort}}/reload-configuration-as-code/
           done
       {{- end }}
+      {{- if .Values.controller.JCasC.autoReload.resources }}
+      resources: {{- toYaml .Values.controller.JCasC.autoReload.resources | nindent 8 }}
+      {{- else if ne .Values.controller.JCasC.autoReload.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.controller.JCasC.autoReload.resourcesPreset) | nindent 8 }}
+      {{- end }}
       volumeMounts:
         - name: jenkins-config-jcasc
           mountPath: {{ .Values.controller.jenkinsHome }}/casc_configs

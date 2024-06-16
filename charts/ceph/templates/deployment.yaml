@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: {{ template "common.names.fullname" . }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: traefik
+    app.kubernetes.io/component: ceph
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
@@ -12,11 +12,11 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.traefik.autoscaling.hpa.enabled }}
-  replicas: {{ .Values.traefik.replicaCount }}
+  {{- if not .Values.ceph.autoscaling.hpa.enabled }}
+  replicas: {{ .Values.ceph.replicaCount }}
   {{- end }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
-      app.kubernetes.io/component: traefik
-  template: {{- include "traefik.podTemplate" . | nindent 4 }}
+      app.kubernetes.io/component: ceph
+  template: {{- include "ceph.podTemplate" . | nindent 4 }}
 {{- end }}

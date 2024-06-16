@@ -5,6 +5,10 @@ annotations:
   licenses: Apache-2.0
 apiVersion: v2
 appVersion: v1.16
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
 description: HashiCorp Consul helm chart for podman kube play
 home: https://github.com/fsdrw08/helm-charts
 icon: https://bitnami.com/assets/stacks/consul/img/consul-stack-220x234.png
