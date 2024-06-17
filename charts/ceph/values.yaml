@@ -38,183 +38,13 @@ deployKind: Pod
 ##
 
 ceph:
-  ## @param mon.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param mon.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param mon.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param mon.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param mon.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
-## mon deploys a Ceph monitor
-##
-mon:
-  ## ceph monitor image
-  ## ref: https://quay.io/repository/ceph/daemon?tab=tags
-  ## @param mon.image.registry %%MAIN_CONTAINER%% image registry
-  ## @param mon.image.repository %%MAIN_CONTAINER%% image repository
-  ## @param mon.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
-  ## @param mon.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param mon.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
-  ## @param mon.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
-  ##
-  image:
-    registry: quay.io
-    repository: ceph/daemon
-    tag: latest-reef
-    digest: ""
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    ##
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    ##
-    pullSecrets: []
-  ## @param mon.podRestartPolicy specify the pod restart policy if deployKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param mon.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
-  ##
-  replicaCount: 1
-  ## @param mon.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
-  ## e.g.
-  ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##
-  containerPorts: {}
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param mon.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param mon.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
-  ## @param mon.livenessProbe.periodSeconds Period seconds for livenessProbe
-  ## @param mon.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
-  ## @param mon.livenessProbe.failureThreshold Failure threshold for livenessProbe
-  ## @param mon.livenessProbe.successThreshold Success threshold for livenessProbe
-  ##
-  livenessProbe:
-    enabled: true
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param mon.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param mon.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  ## @param mon.readinessProbe.periodSeconds Period seconds for readinessProbe
-  ## @param mon.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-  ## @param mon.readinessProbe.failureThreshold Failure threshold for readinessProbe
-  ## @param mon.readinessProbe.successThreshold Success threshold for readinessProbe
-  ## note: podman not support readinessProbe currently
-  ##
-  readinessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param mon.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param mon.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
-  ## @param mon.startupProbe.periodSeconds Period seconds for startupProbe
-  ## @param mon.startupProbe.timeoutSeconds Timeout seconds for startupProbe
-  ## @param mon.startupProbe.failureThreshold Failure threshold for startupProbe
-  ## @param mon.startupProbe.successThreshold Success threshold for startupProbe
-  ##
-  startupProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param mon.customLivenessProbe Custom livenessProbe that overrides the default one
-  ##
-  customLivenessProbe: {}
-  ## @param mon.customReadinessProbe Custom readinessProbe that overrides the default one
-  ##
-  customReadinessProbe: {}
-  ## @param mon.customStartupProbe Custom startupProbe that overrides the default one
-  ##
-  customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
-  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param mon.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if mon.resources is set (mon.resources is recommended for production).
-  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
-  ##
-  resourcesPreset: "nano"
-  ## @param mon.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
-  ## Example:
-  ## resources:
-  ##   requests:
-  ##     cpu: 2
-  ##     memory: 512Mi
-  ##   limits:
-  ##     cpu: 3
-  ##     memory: 1024Mi
-  ##
-  resources: {}
-  ## Configure Container Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#ceph-osd-directory
-  ## @param mon.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param mon.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param mon.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param mon.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ##
-  containerSecurityContext:
-    enabled: true
-    runAsUser: 167
-    runAsGroup: 167
-    runAsNonRoot: true
-    readOnlyRootFilesystem: false
-
-  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-
-  ## @param mon.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
-  ##
-  existingConfigmap:
-  ## @param mon.command Override default container command (useful when using custom images)
-  ##
-  command: []
-  ## @param mon.args Override default container args (useful when using custom images)
-  ##
-  args: []
-
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param mon.autoscaling.enabled Enable autoscaling for ceph
-  ## @param mon.autoscaling.minReplicas Minimum number of ceph replicas
-  ## @param mon.autoscaling.maxReplicas Maximum number of ceph replicas
-  ## @param mon.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param mon.autoscaling.targetMemory Target Memory utilization percentage
+  ## @param ceph.autoscaling.enabled Enable autoscaling for ceph
+  ## @param ceph.autoscaling.minReplicas Minimum number of ceph replicas
+  ## @param ceph.autoscaling.maxReplicas Maximum number of ceph replicas
+  ## @param ceph.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param ceph.autoscaling.targetMemory Target Memory utilization percentage
   ##
   autoscaling:
     enabled: false
@@ -222,47 +52,216 @@ mon:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
+  ## @param ceph.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param ceph.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param ceph.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+  ## @param ceph.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param ceph.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param ceph.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    fsGroup: 1001
+  ## @param ceph.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  ##
+  podRestartPolicy: Never
+  ## mon deploys a Ceph monitor
+  ##
+  mon:
+    ## ceph monitor image
+    ## ref: https://quay.io/repository/ceph/daemon?tab=tags
+    ## @param ceph.mon.image.registry %%MAIN_CONTAINER%% image registry
+    ## @param ceph.mon.image.repository %%MAIN_CONTAINER%% image repository
+    ## @param ceph.mon.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
+    ## @param ceph.mon.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+    ## @param ceph.mon.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
+    ## @param ceph.mon.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
+    ##
+    image:
+      registry: quay.io
+      repository: ceph/daemon
+      tag: latest-reef
+      digest: ""
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+    ## @param ceph.mon.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+    ## e.g.
+    ## containerPorts:
+    ##   - name: http
+    ##     containerPort: 80
+    ##     hostPort: 80
+    ##     hostIP: 192.168.255.10
+    ##     protocol: TCP
+    ##   - name: https
+    ##     containerPort: 443
+    ##     hostPort: 443
+    ##     hostIP: 192.168.255.10
+    ##     protocol: TCP
+    ##
+    containerPorts: {}
+    ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+    ## @param ceph.mon.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+    ## @param ceph.mon.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+    ## @param ceph.mon.livenessProbe.periodSeconds Period seconds for livenessProbe
+    ## @param ceph.mon.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+    ## @param ceph.mon.livenessProbe.failureThreshold Failure threshold for livenessProbe
+    ## @param ceph.mon.livenessProbe.successThreshold Success threshold for livenessProbe
+    ##
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: foo
+      periodSeconds: bar
+      timeoutSeconds: foo
+      failureThreshold: bar
+      successThreshold: foo
+    ## @param ceph.mon.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+    ## @param ceph.mon.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+    ## @param ceph.mon.readinessProbe.periodSeconds Period seconds for readinessProbe
+    ## @param ceph.mon.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+    ## @param ceph.mon.readinessProbe.failureThreshold Failure threshold for readinessProbe
+    ## @param ceph.mon.readinessProbe.successThreshold Success threshold for readinessProbe
+    ## note: podman not support readinessProbe currently
+    ##
+    readinessProbe:
+      enabled: false
+      initialDelaySeconds: foo
+      periodSeconds: bar
+      timeoutSeconds: foo
+      failureThreshold: bar
+      successThreshold: foo
+    ## @param ceph.mon.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+    ## @param ceph.mon.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+    ## @param ceph.mon.startupProbe.periodSeconds Period seconds for startupProbe
+    ## @param ceph.mon.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+    ## @param ceph.mon.startupProbe.failureThreshold Failure threshold for startupProbe
+    ## @param ceph.mon.startupProbe.successThreshold Success threshold for startupProbe
+    ##
+    startupProbe:
+      enabled: false
+      initialDelaySeconds: foo
+      periodSeconds: bar
+      timeoutSeconds: foo
+      failureThreshold: bar
+      successThreshold: foo
+    ## @param ceph.mon.customLivenessProbe Custom livenessProbe that overrides the default one
+    ##
+    customLivenessProbe: {}
+    ## @param ceph.mon.customReadinessProbe Custom readinessProbe that overrides the default one
+    ##
+    customReadinessProbe: {}
+    ## @param ceph.mon.customStartupProbe Custom startupProbe that overrides the default one
+    ##
+    customStartupProbe: {}
+    ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+    ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param ceph.mon.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if ceph.mon.resources is set (mon.resources is recommended for production).
+    ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+    ##
+    resourcesPreset: "nano"
+    ## @param ceph.mon.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+    ## Example:
+    ## resources:
+    ##   requests:
+    ##     cpu: 2
+    ##     memory: 512Mi
+    ##   limits:
+    ##     cpu: 3
+    ##     memory: 1024Mi
+    ##
+    resources: {}
+    ## Configure Container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#ceph-osd-directory
+    ## @param ceph.mon.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+    ## @param ceph.mon.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+    ## @param ceph.mon.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+    ## @param ceph.mon.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+    ##
+    containerSecurityContext:
+      enabled: true
+      runAsUser: 167
+      runAsGroup: 167
+      runAsNonRoot: true
+      readOnlyRootFilesystem: false
 
-  ## @param mon.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
-  ## e.g:
-  ## extraEnvVars:
-  ##   - name: FOO
-  ##     value: "bar"
-  ##
-  extraEnvVars: []
-  ## @param mon.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
-  ##
-  extraEnvVarsCM: ""
-  ## @param mon.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
-  ##
-  extraEnvVarsSecret: ""
-  ## @param mon.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-  ##
-  extraVolumes: []
-  ## @param mon.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
-  ##
-  extraVolumeMounts: []
-  ## @param mon.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param mon.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
+    # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+    ## @param ceph.mon.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+    ##
+    existingConfigmap:
+    ## @param ceph.mon.command Override default container command (useful when using custom images)
+    ##
+    command: []
+    ## @param ceph.mon.args Override default container args (useful when using custom images)
+    ##
+    args: []
+    ## @param ceph.mon.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+    ## e.g:
+    ## extraEnvVars:
+    ##   - name: FOO
+    ##     value: "bar"
+    ##
+    extraEnvVars: []
+    ## @param ceph.mon.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+    ##
+    extraEnvVarsCM: ""
+    ## @param ceph.mon.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+    ##
+    extraEnvVarsSecret: ""
+    ## @param ceph.mon.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+    ##
+    extraVolumes: []
+    ## @param ceph.mon.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+    ##
+    extraVolumeMounts: []
+    ## @param ceph.mon.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## e.g:
+    ## sidecars:
+    ##   - name: your-image-name
+    ##     image: your-image
+    ##     imagePullPolicy: Always
+    ##     ports:
+    ##       - name: portname
+    ##         containerPort: 1234
+    ##
+    sidecars: []
+    ## @param ceph.mon.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+    ## e.g:
+    ## initContainers:
+    ##  - name: your-image-name
+    ##    image: your-image
+    ##    imagePullPolicy: Always
+    ##    command: ['sh', '-c', 'echo "hello world"']
+    ##
+    initContainers: []
 
 ## @section Persistence Parameters
 ##

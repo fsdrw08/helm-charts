@@ -48,7 +48,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.ceph.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    {{- if and .Values.mon.enabled }}
+    {{- if and .Values.ceph.mon.enabled }}
     - name: mon
       image: {{ template "ceph.image" . }}
       imagePullPolicy: {{ .Values.ceph.image.pullPolicy }}
