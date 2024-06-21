@@ -38,7 +38,7 @@ deployKind: Pod
 ##
 
 ceph:
-  ## Autoscaling configuration
+  ## Autoscaling configuration, podman does not support scaling
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param ceph.autoscaling.enabled Enable autoscaling for ceph
   ## @param ceph.autoscaling.minReplicas Minimum number of ceph replicas
@@ -91,6 +91,10 @@ ceph:
   ## mon deploys a Ceph monitor
   ##
   mon:
+    ## @param ceph.mon.enabled enabled ceph mon daemon container
+    ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#deploy-a-monitor
+    ##
+    enabled: true
     ## ceph monitor image
     ## ref: https://quay.io/repository/ceph/daemon?tab=tags
     ## @param ceph.mon.image.registry %%MAIN_CONTAINER%% image registry
@@ -228,7 +232,15 @@ ceph:
     ##   - name: FOO
     ##     value: "bar"
     ##
-    extraEnvVars: []
+    extraEnvVars:
+      ## @param ceph.mon.extraEnvVars.[0].name CEPH_PUBLIC_NETWORK ceph use the public network to communicate with client and other peers
+      ## ref: https://docs.ceph.com/en/latest/rados/configuration/network-config-ref/
+      - name: CEPH_PUBLIC_NETWORK
+        value: "192.168.255.0/24"
+      ## @param ceph.mon.extraEnvVars.[0].name CEPH_PUBLIC_NETWORK ceph use the public network to communicate with client and other peers
+      ## ref: https://docs.ceph.com/en/latest/rados/configuration/network-config-ref/
+      - name: MON_IP
+        value: "192.168.255.20"
     ## @param ceph.mon.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
     ##
     extraEnvVarsCM: ""
