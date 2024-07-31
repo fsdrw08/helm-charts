@@ -62,6 +62,8 @@ spec:
       args: {{- include "common.tplvalues.render" (dict "value" .Values.ceph.mon.args "context" $) | nindent 8 }}
       {{- end }}
       env:
+        - name: CEPH_DAEMON
+          value: MON
         {{- if .Values.ceph.mon.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.ceph.mon.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
@@ -113,12 +115,17 @@ spec:
     {{- end }}
   volumes:
     - name: etc
+      {{- if .Values.ceph.config.setFromImage }}
+      persistentVolumeClaim:
+        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc-etc
+      {{- else }}
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+      {{- end }}
     - name: var
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc-var
     {{- else }}
       emptyDir: {}
     {{- end }}
