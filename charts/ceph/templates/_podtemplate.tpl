@@ -72,8 +72,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.ceph.mon.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{- /*
         - secretRef:
             name: {{ template "common.names.fullname" . }}
+        */}}
         {{- if .Values.ceph.mon.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.ceph.mon.extraEnvVarsSecret "context" $) }}
@@ -104,6 +106,11 @@ spec:
       volumeMounts:
         - name: etc
           mountPath: {{ .Values.persistence.mountPath.etc }}
+        {{- if .Values.ceph.config.enabled }}
+        - name: ceph_conf
+          mountPath: {{ .Values.ceph.config.path }}
+          subPath: {{ base .Values.ceph.config.path }}
+        {{- end }}
         - name: var
           mountPath: {{ .Values.persistence.mountPath.var }}
       {{- if .Values.ceph.mon.extraVolumeMounts }}
@@ -115,13 +122,13 @@ spec:
     {{- end }}
   volumes:
     - name: etc
-      {{- if .Values.ceph.config.setFromImage }}
       persistentVolumeClaim:
         claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc-etc
-      {{- else }}
+    {{- if .Values.ceph.config.enabled }}
+    - name: ceph_conf
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-      {{- end }}
+    {{- end }}
     - name: var
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:

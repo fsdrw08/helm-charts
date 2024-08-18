@@ -88,15 +88,22 @@ ceph:
   ## available options: Always, OnFailure, Never
   ##
   podRestartPolicy: Never
-  ## @param ceph.config config settings for ceph
+  ## @param ceph.config customize config settings for ceph
   ##
   config:
-    ## @param ceph.config.setFromImage define how to set the config
-    ## true: skip other configs, just set config via container init process
-    ## false: set config via the values below
-    setFromImage: true
+    ## @param ceph.config.enabled enable ceph config via helm chart instead of image builtin
+    ##
+    enabled: true
+    ## @param ceph.config.path set config file location
+    ##
+    path: /etc/ceph/ceph.conf
+    ## @param ceph.config.global
+    ## Settings under global affect all daemons and clients in a Ceph Storage Cluster
+    ## ref: https://docs.ceph.com/en/latest/rados/configuration/ceph-conf/#configuration-sections
+    ##
     global:
       fsid: 12345
+      # https://docs.ceph.com/en/latest/rados/configuration/auth-config-ref/#cephx-config-reference
       cephx: true
       cephx_require_signatures: false
       cephx_cluster_require_signatures: true
@@ -109,13 +116,19 @@ ceph:
       osd_pool_default_min_size: 1
       mon_osd_full_ratio: .95
       mon_osd_nearfull_ratio: .85
-      mon_host: ceph-mon
+      mon_host: ceph
+    ## @param ceph.config.mon
+    ## Settings under mon affect all ceph-mon daemons in the Ceph Storage Cluster, and override the same setting in global.
+    ##
     mon:
       mon_osd_down_out_interval: 600
       mon_osd_min_down_reporters: 4
       mon_clock_drift_allowed: .15
       mon_clock_drift_warn_backoff: 30
       mon_osd_report_timeout: 300
+    ## @param ceph.config.osd
+    ## Settings in the mgr section affect all ceph-mgr daemons in the Ceph Storage Cluster, and override the same setting in global.
+    ##
     osd:
       # network
       cluster_network: "192.168.255.0/24"
@@ -206,12 +219,14 @@ ceph:
     ## @param ceph.mon.livenessProbe.successThreshold Success threshold for livenessProbe
     ##
     livenessProbe:
-      enabled: true
-      initialDelaySeconds: foo
-      periodSeconds: bar
-      timeoutSeconds: foo
-      failureThreshold: bar
-      successThreshold: foo
+      enabled: false
+      initialDelaySeconds: 60
+      # periodSeconds: bar
+      timeoutSeconds: 5
+      # failureThreshold: bar
+      # successThreshold: foo
+      tcpSocket:
+        port: 6789
     ## @param ceph.mon.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
     ## @param ceph.mon.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
     ## @param ceph.mon.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -277,9 +292,9 @@ ceph:
     ##
     containerSecurityContext:
       enabled: true
-      runAsUser: 167
-      runAsGroup: 167
-      runAsNonRoot: true
+      # runAsUser: 167
+      # runAsGroup: 167
+      # runAsNonRoot: true
       readOnlyRootFilesystem: false
 
     # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%

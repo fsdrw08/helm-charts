@@ -1,3 +1,4 @@
+{{- if .Values.ceph.config.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,7 +12,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  {{/* ref: https://github.com/ceph/ceph-container/blob/main/examples/helm/ceph/templates/config/configmap.yaml */}}
+  {{- /* ref: https://github.com/ceph/ceph-container/blob/main/examples/helm/ceph/templates/config/configmap.yaml */}}
   ceph.conf: |
     [global]
     {{- range $key, $val := .Values.ceph.config.global }}
@@ -111,3 +112,5 @@ data:
   {{/*
     mds_cache_size = {{ .Values.ceph.config.client.mds_mds_cache_size | default "100000" | quote }}
   */}}
+
+{{- end -}}
