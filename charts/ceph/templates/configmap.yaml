@@ -51,6 +51,10 @@ data:
     mon_osd_report_timeout = {{ .Values.ceph.config.mon.mon_osd_report_timeout | default "300" | quote }}
 
   */}}
+    [mgr]
+    {{- range $key, $val := .Values.ceph.config.mgr }}
+    {{ $key }} = {{ if eq (typeOf $val) "bool" }}{{ $val }}{{ else }}{{ $val | quote }}{{end}}
+    {{- end }}
     [osd]
     {{- range $key, $val := .Values.ceph.config.osd }}
     {{ $key }} = {{ if eq (typeOf $val) "bool" }}{{ $val }}{{ else }}{{ $val | quote }}{{end}}

@@ -71,6 +71,25 @@ ceph:
   ##   - myRegistryKeySecretName
   ##
   pullSecrets: []
+  ## ceph image
+  ## ref: https://quay.io/repository/ceph/daemon?tab=tags
+  ## @param ceph.image.registry %%MAIN_CONTAINER%% image registry
+  ## @param ceph.image.repository %%MAIN_CONTAINER%% image repository
+  ## @param ceph.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
+  ## @param ceph.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param ceph.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
+  ## @param ceph.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
+  ##
+  image:
+    registry: quay.io
+    repository: ceph/daemon
+    tag: latest-reef
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
   ## @param ceph.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -103,6 +122,9 @@ ceph:
     ##
     global:
       fsid: 12345
+      # network
+      cluster_network: "192.168.255.0/24"
+      public_network: "10.244.0.0/16"
       # https://docs.ceph.com/en/latest/rados/configuration/auth-config-ref/#cephx-config-reference
       cephx: true
       cephx_require_signatures: false
@@ -119,6 +141,7 @@ ceph:
       mon_host: ceph
     ## @param ceph.config.mon
     ## Settings under mon affect all ceph-mon daemons in the Ceph Storage Cluster, and override the same setting in global.
+    ## ref: https://github.com/ceph/ceph/blob/main/src/common/options/mon.yaml.in
     ##
     mon:
       mon_osd_down_out_interval: 600
@@ -126,13 +149,15 @@ ceph:
       mon_clock_drift_allowed: .15
       mon_clock_drift_warn_backoff: 30
       mon_osd_report_timeout: 300
+    ## @param ceph.config.mgr
+    ## ref: https://github.com/ceph/ceph/blob/83fc625b564ccf3927977ee1f86e2936b1b884e2/src/common/options/mgr.yaml.in#L147
+    ## ref: https://docs.ceph.com/en/latest/mgr/administrator/#configuration
+    mgr:
+      mgr_initial_modules: dashboard balancer
     ## @param ceph.config.osd
     ## Settings in the mgr section affect all ceph-mgr daemons in the Ceph Storage Cluster, and override the same setting in global.
     ##
     osd:
-      # network
-      cluster_network: "192.168.255.0/24"
-      public_network: "10.244.0.0/16"
       osd_mon_heartbeat_interval: 30
       #ports
       ms_bind_port_min: 6800
@@ -175,25 +200,7 @@ ceph:
     ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#deploy-a-monitor
     ##
     enabled: true
-    ## ceph monitor image
-    ## ref: https://quay.io/repository/ceph/daemon?tab=tags
-    ## @param ceph.mon.image.registry %%MAIN_CONTAINER%% image registry
-    ## @param ceph.mon.image.repository %%MAIN_CONTAINER%% image repository
-    ## @param ceph.mon.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
-    ## @param ceph.mon.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-    ## @param ceph.mon.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
-    ## @param ceph.mon.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
-    ##
-    image:
-      registry: quay.io
-      repository: ceph/daemon
-      tag: latest-reef
-      digest: ""
-      ## Specify a imagePullPolicy
-      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-      ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-      ##
-      pullPolicy: IfNotPresent
+
     ## @param ceph.mon.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
     ## e.g.
     ## containerPorts:
@@ -338,27 +345,198 @@ ceph:
     ## @param ceph.mon.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
     ##
     extraVolumeMounts: []
-    ## @param ceph.mon.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-    ## e.g:
-    ## sidecars:
-    ##   - name: your-image-name
-    ##     image: your-image
-    ##     imagePullPolicy: Always
-    ##     ports:
-    ##       - name: portname
-    ##         containerPort: 1234
+  osd:
+    ## @param ceph.osd.enabled enabled ceph osd daemon container
+    ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#deploy-a-monitor
     ##
-    sidecars: []
-    ## @param ceph.mon.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-    ## e.g:
-    ## initContainers:
-    ##  - name: your-image-name
-    ##    image: your-image
-    ##    imagePullPolicy: Always
-    ##    command: ['sh', '-c', 'echo "hello world"']
+    enabled: true
+    ## @param ceph.osd.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+    ## e.g.
+    ## containerPorts:
+    ##   - name: http
+    ##     containerPort: 80
+    ##     hostPort: 80
+    ##     hostIP: 192.168.255.10
+    ##     protocol: TCP
+    ##   - name: https
+    ##     containerPort: 443
+    ##     hostPort: 443
+    ##     hostIP: 192.168.255.10
+    ##     protocol: TCP
     ##
-    initContainers: []
+    containerPorts: {}
+    ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+    ## @param ceph.osd.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+    ## @param ceph.osd.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+    ## @param ceph.osd.livenessProbe.periodSeconds Period seconds for livenessProbe
+    ## @param ceph.osd.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+    ## @param ceph.osd.livenessProbe.failureThreshold Failure threshold for livenessProbe
+    ## @param ceph.osd.livenessProbe.successThreshold Success threshold for livenessProbe
+    ##
+    livenessProbe:
+      enabled: false
+      initialDelaySeconds: 60
+      # periodSeconds: bar
+      timeoutSeconds: 5
+      # failureThreshold: bar
+      # successThreshold: foo
+      tcpSocket:
+        port: 6789
+    ## @param ceph.osd.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+    ## @param ceph.osd.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+    ## @param ceph.osd.readinessProbe.periodSeconds Period seconds for readinessProbe
+    ## @param ceph.osd.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+    ## @param ceph.osd.readinessProbe.failureThreshold Failure threshold for readinessProbe
+    ## @param ceph.osd.readinessProbe.successThreshold Success threshold for readinessProbe
+    ## note: podman not support readinessProbe currently
+    ##
+    readinessProbe:
+      enabled: false
+      initialDelaySeconds: foo
+      periodSeconds: bar
+      timeoutSeconds: foo
+      failureThreshold: bar
+      successThreshold: foo
+    ## @param ceph.osd.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+    ## @param ceph.osd.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+    ## @param ceph.osd.startupProbe.periodSeconds Period seconds for startupProbe
+    ## @param ceph.osd.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+    ## @param ceph.osd.startupProbe.failureThreshold Failure threshold for startupProbe
+    ## @param ceph.osd.startupProbe.successThreshold Success threshold for startupProbe
+    ##
+    startupProbe:
+      enabled: false
+      initialDelaySeconds: foo
+      periodSeconds: bar
+      timeoutSeconds: foo
+      failureThreshold: bar
+      successThreshold: foo
+    ## @param ceph.osd.customLivenessProbe Custom livenessProbe that overrides the default one
+    ##
+    customLivenessProbe: {}
+    ## @param ceph.osd.customReadinessProbe Custom readinessProbe that overrides the default one
+    ##
+    customReadinessProbe: {}
+    ## @param ceph.osd.customStartupProbe Custom startupProbe that overrides the default one
+    ##
+    customStartupProbe: {}
+    ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+    ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param ceph.osd.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one comosd preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if ceph.osd.resources is set (osd.resources is recommended for production).
+    ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+    ##
+    resourcesPreset: "nano"
+    ## @param ceph.osd.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+    ## Example:
+    ## resources:
+    ##   requests:
+    ##     cpu: 2
+    ##     memory: 512Mi
+    ##   limits:
+    ##     cpu: 3
+    ##     memory: 1024Mi
+    ##
+    resources: {}
+    ## Configure Container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#ceph-osd-directory
+    ## @param ceph.osd.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+    ## @param ceph.osd.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+    ## @param ceph.osd.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+    ## @param ceph.osd.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+    ##
+    containerSecurityContext:
+      enabled: true
+      # runAsUser: 167
+      # runAsGroup: 167
+      # runAsNonRoot: true
+      readOnlyRootFilesystem: false
+
+    # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+    ## @param ceph.osd.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+    ##
+    existingConfigmap:
+    ## @param ceph.osd.command Override default container command (useful when using custom images)
+    ##
+    command: []
+    ## @param ceph.osd.args Override default container args (useful when using custom images)
+    ##
+    args: []
+    ## @param ceph.osd.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+    ## e.g:
+    ## extraEnvVars:
+    ##   - name: FOO
+    ##     value: "bar"
+    ##
+    extraEnvVars:
+      ## There are four available OSD_TYPE values:
+      ## <none> - if no OSD_TYPE is set; one of disk, activate or directory will be used based on autodetection of the current OSD bootstrap state
+      ## activate - the daemon expects to be passed a block device of a ceph-disk-prepared disk (via the OSD_DEVICE environment variable); no bootstrapping will be performed
+      ## directory - the daemon expects to find the OSD filesystem(s) already mounted in /var/lib/ceph/osd/
+      ## disk - the daemon expects to be passed a block device via the OSD_DEVICE environment variable
+      ## prepare - the daemon expects to be passed a block device and run ceph-disk prepare to bootstrap the disk (via the OSD_DEVICE environment variable)
+      ##
+      - name: OSD_TYPE
+        value: directory
+      ## JOURNAL_DIR - if provided, new OSDs will be bootstrapped to use the specified directory as a common journal area.
+      ## This is usually used to store the journals for more than one OSD on a common, separate disk.
+      ## This currently only applies to the directory OSD type.
+      ## ref: https://github.com/ghym-cloud/ghym/blob/3972fe684c7300cd240866b83505a26eb1f09bc9/Docker/Ceph.yaml#L45
+      ##
+      - name: JOURNAL_DIR
+        value: /var/lib/ceph/osd
+      ## JOURNAL - if provided, the new OSD will be bootstrapped to use the specified journal file (if you do not wish to use the default).
+      ## This is currently only supported by the directory OSD type
+      ##
+      # - name: JOURNAL
+      #   value:
+      ## OSD_DEVICE - mandatory for activate and disk OSD types; this specifies which block device to use as the OSD
+      ##
+      # - name: OSD_DEVICE
+      #   value:
+      ## OSD_JOURNAL - optional override of the OSD journal file. this only applies to the activate and disk OSD types
+      ##
+      # - name: OSD_JOURNAL
+      #   value:
+      ## OSD_FORCE_EXT4 - optional override of the OSD journal file. this only applies to the activate and disk OSD types
+      ##
+      # - name: OSD_FORCE_EXT4
+      #   value:
+    ## @param ceph.osd.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+    ##
+    extraEnvVarsCM: ""
+    ## @param ceph.osd.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+    ##
+    extraEnvVarsSecret: ""
+    ## @param ceph.osd.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+    ##
+    extraVolumes: []
+    ## @param ceph.osd.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+    ##
+    extraVolumeMounts: []
+  ## @param ceph.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param ceph.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
 
 ## @section Persistence Parameters
 ##

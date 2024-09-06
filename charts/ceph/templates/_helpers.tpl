@@ -2,7 +2,7 @@
 Return the proper ceph image name
 */}}
 {{- define "ceph.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.ceph.mon.image "global" .Values.global) }}
+{{ include "common.images.image" (dict "imageRoot" .Values.ceph.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*

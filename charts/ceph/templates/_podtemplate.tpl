@@ -48,10 +48,10 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.ceph.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    {{- if and .Values.ceph.mon.enabled }}
+    {{- if .Values.ceph.mon.enabled }}
     - name: mon
       image: {{ template "ceph.image" . }}
-      imagePullPolicy: {{ .Values.ceph.mon.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.ceph.image.pullPolicy }}
       {{- if .Values.ceph.mon.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.ceph.mon.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -116,9 +116,78 @@ spec:
       {{- if .Values.ceph.mon.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.ceph.mon.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
-    {{- if .Values.ceph.mon.sidecars }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.ceph.mon.sidecars "context" $) | nindent 4 }}
     {{- end }}
+    {{- if .Values.ceph.osd.enabled }}
+    - name: osd
+      image: {{ template "ceph.image" . }}
+      imagePullPolicy: {{ .Values.ceph.image.pullPolicy }}
+      {{- if .Values.ceph.osd.containerSecurityContext.enabled }}
+      securityContext: {{- omit .Values.ceph.osd.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.ceph.osd.command }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.command "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.ceph.osd.args }}
+      args: {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.args "context" $) | nindent 8 }}
+      {{- end }}
+      env:
+        - name: CEPH_DAEMON
+          value: MON
+        {{- if .Values.ceph.osd.extraEnvVars }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.extraEnvVars "context" $) | nindent 8 }}
+        {{- end }}
+      envFrom:
+        {{- if .Values.ceph.osd.extraEnvVarsCM }}
+        - configMapRef:
+            name: {{ include "common.tplvalues.render" (dict "value" .Values.ceph.osd.extraEnvVarsCM "context" $) }}
+        {{- end }}
+        {{- /*
+        - secretRef:
+            name: {{ template "common.names.fullname" . }}
+        */}}
+        {{- if .Values.ceph.osd.extraEnvVarsSecret }}
+        - secretRef:
+            name: {{ include "common.tplvalues.render" (dict "value" .Values.ceph.osd.extraEnvVarsSecret "context" $) }}
+        {{- end }}
+      {{- if .Values.ceph.osd.resources }}
+      resources: {{- toYaml .Values.ceph.osd.resources | nindent 8 }}
+      {{- else if ne .Values.ceph.osd.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.ceph.osd.resourcesPreset) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.ceph.osd.containerPorts }}
+      ports: {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.containerPorts "context" $) | nindent 8 -}}
+      {{- end }}
+      {{- if .Values.ceph.osd.customLivenessProbe }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.customLivenessProbe "context" $) | nindent 8 }}
+      {{- else if .Values.ceph.osd.livenessProbe.enabled }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.ceph.osd.livenessProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.ceph.osd.customReadinessProbe }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.customReadinessProbe "context" $) | nindent 8 }}
+      {{- else if .Values.ceph.osd.readinessProbe.enabled }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.ceph.osd.readinessProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.ceph.osd.customStartupProbe }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.customStartupProbe "context" $) | nindent 8 }}
+      {{- else if .Values.ceph.osd.startupProbe.enabled }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.ceph.osd.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      volumeMounts:
+        - name: etc
+          mountPath: {{ .Values.persistence.mountPath.etc }}
+        {{- if .Values.ceph.config.enabled }}
+        - name: ceph_conf
+          mountPath: {{ .Values.ceph.config.path }}
+          subPath: {{ base .Values.ceph.config.path }}
+        {{- end }}
+        - name: var
+          mountPath: {{ .Values.persistence.mountPath.var }}
+      {{- if .Values.ceph.osd.extraVolumeMounts }}
+      {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.extraVolumeMounts "context" $) | nindent 8 }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.ceph.sidecars.enabled }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.ceph.osd.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
     - name: etc
