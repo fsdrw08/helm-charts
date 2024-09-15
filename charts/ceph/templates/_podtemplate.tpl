@@ -132,7 +132,7 @@ spec:
       {{- end }}
       env:
         - name: CEPH_DAEMON
-          value: MON
+          value: OSD
         {{- if .Values.ceph.osd.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
@@ -186,7 +186,7 @@ spec:
       {{- include "common.tplvalues.render" (dict "value" .Values.ceph.osd.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
     {{- end }}
-    {{- if .Values.ceph.sidecars.enabled }}
+    {{- if .Values.ceph.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.ceph.osd.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:

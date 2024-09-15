@@ -123,8 +123,8 @@ ceph:
     global:
       fsid: 12345
       # network
-      cluster_network: "192.168.255.0/24"
-      public_network: "10.244.0.0/16"
+      cluster_network: ""
+      public_network: ""
       # https://docs.ceph.com/en/latest/rados/configuration/auth-config-ref/#cephx-config-reference
       cephx: true
       cephx_require_signatures: false
@@ -347,7 +347,7 @@ ceph:
     extraVolumeMounts: []
   osd:
     ## @param ceph.osd.enabled enabled ceph osd daemon container
-    ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#deploy-a-monitor
+    ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#deploy-an-osd
     ##
     enabled: true
     ## @param ceph.osd.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
