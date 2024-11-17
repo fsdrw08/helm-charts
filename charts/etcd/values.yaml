@@ -1,0 +1,481 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param etcd.deployKind specify the deploy kind： Pod, or Deployment
+deployKind: Pod
+## @section %%MAIN_CONTAINER%% Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+etcd:
+  ## Bitnami %%MAIN_CONTAINER%% image
+  ## ref: https://quay.io/repository/coreos/etcd?tab=tags
+  ## @param etcd.image.registry %%MAIN_CONTAINER%% image registry
+  ## @param etcd.image.repository %%MAIN_CONTAINER%% image repository
+  ## @param etcd.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
+  ## @param etcd.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param etcd.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
+  ## @param etcd.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
+  ##
+  image:
+    registry: quay.io
+    repository: coreos/etcd
+    tag: v3.5.17
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param etcd.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param etcd.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param etcd.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts: {}
+  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param etcd.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param etcd.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param etcd.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param etcd.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param etcd.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param etcd.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param etcd.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param etcd.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param etcd.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param etcd.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param etcd.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param etcd.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param etcd.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param etcd.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param etcd.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param etcd.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param etcd.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param etcd.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param etcd.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param etcd.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param etcd.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param etcd.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if etcd.resources is set (etcd.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param etcd.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param etcd.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param etcd.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param etcd.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+  ## @param etcd.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+  ## @param etcd.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param etcd.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  ## @param etcd.configFile An etcd configuration file consists of a YAML map whose keys are command-line flag names and values are the flag values
+  ## ref:
+  ##  https://etcd.io/docs/v3.5/op-guide/configuration/
+  ##  https://github.com/etcd-io/etcd/blob/main/etcd.conf.yml.sample
+  configFile:
+    ## etcd.configFile.name Human-readable name for this member.
+    name: "default"
+    ## Path to the data directory.
+    data-dir:
+    ## Path to the dedicated wal directory.
+    wal-dir:
+    ## Number of committed transactions to trigger a snapshot to disk.
+    snapshot-count: 10000
+    ## Time (in milliseconds) of a heartbeat interval.
+    heartbeat-interval: 100
+    ## Time (in milliseconds) for an election to timeout.
+    election-timeout: 1000
+    ## Raise alarms when backend size exceeds the given quota. 0 means use the
+    ## default quota.
+    quota-backend-bytes: 0
+    ## List of comma separated URLs to listen on for peer traffic.
+    listen-peer-urls: http://localhost:2380
+    ## List of comma separated URLs to listen on for client traffic.
+    listen-client-urls: http://localhost:2379
+    ## Maximum number of snapshot files to retain (0 is unlimited).
+    max-snapshots: 5
+    ## Maximum number of wal files to retain (0 is unlimited).
+    max-wals: 5
+    ## Comma-separated white list of origins for CORS (cross-origin resource sharing).
+    cors:
+    ## List of this member's peer URLs to advertise to the rest of the cluster.
+    ## The URLs needed to be a comma-separated list.
+    initial-advertise-peer-urls: http://localhost:2380
+    ## List of this member's client URLs to advertise to the public.
+    ## The URLs needed to be a comma-separated list.
+    advertise-client-urls: http://localhost:2379
+    ## Discovery URL used to bootstrap the cluster.
+    discovery:
+    ## Valid values include 'exit', 'proxy'
+    discovery-fallback: "proxy"
+    ## HTTP proxy to use for traffic to discovery service.
+    discovery-proxy:
+    ## DNS domain used to bootstrap initial cluster.
+    discovery-srv:
+    ## Comma separated string of initial cluster configuration for bootstrapping.
+    ## Example: initial-cluster: "infra0=http://10.0.1.10:2380,infra1=http://10.0.1.11:2380,infra2=http://10.0.1.12:2380"
+    initial-cluster:
+    ## Initial cluster token for the etcd cluster during bootstrap.
+    initial-cluster-token: "etcd-cluster"
+    ## Initial cluster state ('new' or 'existing').
+    initial-cluster-state: "new"
+    ## Reject reconfiguration requests that would cause quorum loss.
+    strict-reconfig-check: false
+    ## Enable runtime profiling data via HTTP server
+    enable-pprof: true
+    ## Valid values include 'on', 'readonly', 'off'
+    proxy: "off"
+    ## Time (in milliseconds) an endpoint will be held in a failed state.
+    proxy-failure-wait: 5000
+    ## Time (in milliseconds) of the endpoints refresh interval.
+    proxy-refresh-interval: 30000
+    ## Time (in milliseconds) for a dial to timeout.
+    proxy-dial-timeout: 1000
+    ## Time (in milliseconds) for a write to timeout.
+    proxy-write-timeout: 5000
+    ## Time (in milliseconds) for a read to timeout.
+    proxy-read-timeout: 0
+    client-transport-security:
+      ## Path to the client server TLS cert file.
+      cert-file:
+      ## Path to the client server TLS key file.
+      key-file:
+      ## Enable client cert authentication.
+      client-cert-auth: false
+      ## Path to the client server TLS trusted CA cert file.
+      trusted-ca-file:
+      ## Client TLS using generated certificates
+      auto-tls: false
+    peer-transport-security:
+      ## Path to the peer server TLS cert file.
+      cert-file:
+      ## Path to the peer server TLS key file.
+      key-file:
+      ## Enable peer client cert authentication.
+      client-cert-auth: false
+      ## Path to the peer server TLS trusted CA cert file.
+      trusted-ca-file:
+      ## Peer TLS using generated certificates.
+      auto-tls: false
+      ## Allowed CN for inter peer authentication.
+      allowed-cn:
+      ## Allowed TLS hostname for inter peer authentication.
+      allowed-hostname:
+    ## The validity period of the self-signed certificate, the unit is year.
+    self-signed-cert-validity: 1
+    ## Enable debug-level logging for etcd.
+    log-level: debug
+    logger: zap
+    ## Specify 'stdout' or 'stderr' to skip journald logging even when running under systemd.
+    log-outputs: [stderr]
+    ## Force to create a new one member cluster.
+    force-new-cluster: false
+    auto-compaction-mode: periodic
+    auto-compaction-retention: "1"
+    ## Limit etcd to a specific set of tls cipher suites
+    cipher-suites:
+      [
+        TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+        TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+      ]
+    ## Limit etcd to specific TLS protocol versions
+    tls-min-version: "TLS1.2"
+    tls-max-version: "TLS1.3"
+
+  ## @param etcd.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ##
+  existingConfigmap:
+  ## @param etcd.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param etcd.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param etcd.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param etcd.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param etcd.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param etcd.autoscaling.enabled Enable autoscaling for etcd
+  ## @param etcd.autoscaling.minReplicas Minimum number of etcd replicas
+  ## @param etcd.autoscaling.maxReplicas Maximum number of etcd replicas
+  ## @param etcd.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param etcd.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param etcd.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param etcd.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param etcd.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param etcd.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param etcd.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param etcd.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param etcd.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /bitnami/etcd/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
