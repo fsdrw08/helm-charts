@@ -204,9 +204,9 @@ etcd:
     ## default quota.
     quota-backend-bytes: 0
     ## List of comma separated URLs to listen on for peer traffic.
-    listen-peer-urls: http://localhost:2380
+    listen-peer-urls: http://0.0.0.0:2380
     ## List of comma separated URLs to listen on for client traffic.
-    listen-client-urls: http://localhost:2379
+    listen-client-urls: http://0.0.0.0:2379
     ## Maximum number of snapshot files to retain (0 is unlimited).
     max-snapshots: 5
     ## Maximum number of wal files to retain (0 is unlimited).
@@ -215,10 +215,10 @@ etcd:
     cors:
     ## List of this member's peer URLs to advertise to the rest of the cluster.
     ## The URLs needed to be a comma-separated list.
-    initial-advertise-peer-urls: http://localhost:2380
+    initial-advertise-peer-urls: http://0.0.0.0:2380
     ## List of this member's client URLs to advertise to the public.
     ## The URLs needed to be a comma-separated list.
-    advertise-client-urls: http://localhost:2379
+    advertise-client-urls: http://0.0.0.0:2379
     ## Discovery URL used to bootstrap the cluster.
     discovery:
     ## Valid values include 'exit', 'proxy'
@@ -296,6 +296,23 @@ etcd:
     ## Limit etcd to specific TLS protocol versions
     tls-min-version: "TLS1.2"
     tls-max-version: "TLS1.3"
+
+  ## @param etcd.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param etcd.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /etc/etcd/pki # https://github.com/etcd-io/jetcd/blob/main/docs/SslConfig.md
+    ## @param etcd.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## content:
+    ##  ca.pem: ""
+    ##  server-1.pem: ""
+    ##  server-1-key.pem: ""
+    ##
+    contents: {}
 
   ## @param etcd.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
