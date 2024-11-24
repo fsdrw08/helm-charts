@@ -134,6 +134,7 @@ consul:
   ## @param consul.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
   ## @param consul.readinessProbe.failureThreshold Failure threshold for readinessProbe
   ## @param consul.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
   ##
   readinessProbe:
     enabled: true

@@ -100,15 +100,15 @@ spec:
           subPath: traefik.yml
         - name: dynamicConfigurationFileDir
           mountPath: {{ .Values.traefik.staticConfiguration.providers.file.directory }}/builtin
+        {{- if .Values.traefik.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.traefik.tls.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-        {{- if .Values.traefik.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.traefik.tls.mountPath }}
-        {{- end }}
       {{- if .Values.traefik.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.traefik.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}

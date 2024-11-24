@@ -119,6 +119,7 @@ traefik:
   ## @param traefik.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
   ## @param traefik.readinessProbe.failureThreshold Failure threshold for readinessProbe
   ## @param traefik.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
   ##
   readinessProbe:
     enabled: false

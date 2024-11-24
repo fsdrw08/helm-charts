@@ -102,15 +102,15 @@ spec:
       volumeMounts:
         - name: config
           mountPath: /consul/config
+        {{- if .Values.consul.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.consul.tls.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-        {{- if .Values.consul.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.consul.tls.mountPath }}
-        {{- end }}
       {{- if .Values.consul.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.consul.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
