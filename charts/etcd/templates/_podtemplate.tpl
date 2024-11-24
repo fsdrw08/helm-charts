@@ -1,31 +1,31 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "etcd.podTemplate" -}}
 metadata:
   {{- if eq .Values.deployKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations }}
-  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations "context" $) | nindent 4 }}
+  {{- if .Values.etcd.podAnnotations }}
+  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podLabels }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.podLabels "context" $) | nindent 4 }}
+    app.kubernetes.io/component: etcd
+    {{- if .Values.etcd.podLabels }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.etcd.podLabels "context" $) | nindent 4 }}
     {{- end }}
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases "context" $) | nindent 4 }}
+  {{- include "etcd.imagePullSecrets" . | nindent 2 }}
+  {{- if .Values.etcd.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.hostAliases "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled -}}
-  securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- if .Values.etcd.podSecurityContext.enabled -}}
+  securityContext: {{- omit .Values.etcd.podSecurityContext "enabled" | toYaml | nindent 4 }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "etcd.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -36,79 +36,100 @@ spec:
       resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
-    {{- end }}
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.initContainers }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.initContainers "context" $) | nindent 4 }}
-    {{- end }}
-  containers:
-    - name: %%MAIN_OBJECT_BLOCK%%
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
-      imagePullPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.image.pullPolicy }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext "enabled" | toYaml | nindent 8 }}
-      {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.command }}
-      command: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.command "context" $) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.args }}
-      args: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.args "context" $) | nindent 8 }}
-      {{- end }}
-      env:
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVars }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVars "context" $) | nindent 8 }}
-        {{- end }}
-      envFrom:
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM }}
-        - configMapRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM "context" $) }}
-        {{- end }}
-        - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret }}
-        - secretRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret "context" $) }}
-        {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.resources }}
-      resources: {{- toYaml .Values.%%MAIN_OBJECT_BLOCK%%.resources | nindent 8 }}
-      {{- else if ne .Values.%%MAIN_OBJECT_BLOCK%%.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.%%MAIN_OBJECT_BLOCK%%.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerPorts }}
-      ports: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.containerPorts "context" $) | nindent 8 -}}
-      {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customLivenessProbe }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customLivenessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.livenessProbe.enabled }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.livenessProbe "enabled") "context" $) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customReadinessProbe }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customReadinessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.readinessProbe.enabled }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.readinessProbe "enabled") "context" $) | nindent 8 }}
-      {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customStartupProbe }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customStartupProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe.enabled }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe "enabled") "context" $) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts "context" $) | nindent 8 }}
+    {{- end }}
+    {{- if .Values.etcd.initContainers }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.etcd.initContainers "context" $) | nindent 4 }}
+    {{- end }}
+  containers:
+    - name: etcd
+      image: {{ template "etcd.image" . }}
+      imagePullPolicy: {{ .Values.etcd.image.pullPolicy }}
+      {{- if .Values.etcd.containerSecurityContext.enabled }}
+      securityContext: {{- omit .Values.etcd.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.sidecars }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.sidecars "context" $) | nindent 4 }}
+      {{- if .Values.etcd.command }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.command "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.etcd.args }}
+      args: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.args "context" $) | nindent 8 }}
+      {{- else }}
+      args: 
+        - --config-file
+        - /etc/etcd/etcd.config.yaml
+      {{- end }}
+      env:
+        {{- if .Values.etcd.extraEnvVars }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVars "context" $) | nindent 8 }}
+        {{- end }}
+      envFrom:
+        {{- if .Values.etcd.extraEnvVarsCM }}
+        - configMapRef:
+            name: {{ include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVarsCM "context" $) }}
+        {{- end }}
+        {{- if .Values.etcd.extraEnvVarsSecret }}
+        - secretRef:
+            name: {{ template "common.names.fullname" . }}
+        {{- end }}
+        {{- if .Values.etcd.extraEnvVarsSecret }}
+        - secretRef:
+            name: {{ include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVarsSecret "context" $) }}
+        {{- end }}
+      {{- if .Values.etcd.resources }}
+      resources: {{- toYaml .Values.etcd.resources | nindent 8 }}
+      {{- else if ne .Values.etcd.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" .Values.etcd.resourcesPreset) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.etcd.containerPorts }}
+      ports: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.containerPorts "context" $) | nindent 8 -}}
+      {{- end }}
+      {{- if .Values.etcd.customLivenessProbe }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.customLivenessProbe "context" $) | nindent 8 }}
+      {{- else if .Values.etcd.livenessProbe.enabled }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.etcd.livenessProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.etcd.customReadinessProbe }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.customReadinessProbe "context" $) | nindent 8 }}
+      {{- else if .Values.etcd.readinessProbe.enabled }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.etcd.readinessProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.etcd.customStartupProbe }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.customStartupProbe "context" $) | nindent 8 }}
+      {{- else if .Values.etcd.startupProbe.enabled }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.etcd.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      volumeMounts:
+        - name: config
+          mountPath: /etc/etcd/etcd.config.yml
+          subPath: etcd.config.yml
+        {{- if .Values.etcd.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.etcd.tls.mountPath }}
+        {{- end }}
+        - name: data
+          mountPath: {{ .Values.persistence.mountPath }}
+          {{- if .Values.persistence.subPath }}
+          subPath: {{ .Values.persistence.subPath }}
+          {{- end }}
+      {{- if .Values.etcd.extraVolumeMounts }}
+      {{- include "common.tplvalues.render" (dict "value" .Values.etcd.extraVolumeMounts "context" $) | nindent 8 }}
+      {{- end }}
+    {{- if .Values.etcd.sidecars }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.etcd.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.etcd.tls.contents }}
+    - name: tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
@@ -116,12 +137,12 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes "context" $) | nindent 4 }}
+    {{- if .Values.etcd.extraVolumes }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.etcd.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
   {{ if eq .Values.deployKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
-  restartPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.podRestartPolicy }}
+  restartPolicy: {{ .Values.etcd.podRestartPolicy }}
   {{- end }}
 {{- end -}}

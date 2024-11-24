@@ -1,33 +1,27 @@
 annotations:
   # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
   # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
-  category: %%CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE%%
+  category: Database
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: %%UPSTREAM_PROJECT_VERSION%%
+appVersion: 3.5.17
 dependencies:
-  - condition: SUBCHART_NAME.enabled
-    name: SUBCHART_NAME
-    repository: oci://registry-1.docker.io/bitnamicharts
-    version: %%MAJOR_SUBCHART_VERSION_(A.X.X)%%
   - name: common
-    repository: oci://registry-1.docker.io/bitnamicharts
-    tags:
-      - bitnami-common
+    repository: file://../common
     version: 2.x.x
-description: %%DESCRIPTION%%
+description: etcd is a distributed key-value store designed to securely store data across a cluster. etcd is widely used in production on account of its reliability, fault-tolerance and ease of use.
 home: https://github.com/fsdrw08/helm-charts
-icon: https://bitnami.com/assets/stacks/%%IMAGE_NAME%%/img/%%IMAGE_NAME%%-stack-220x234.png
+icon: https://bitnami.com/assets/stacks/etcd/img/etcd-stack-220x234.png
 keywords:
-  - %%UPSTREAM_PROJECT_KEYWORD%%
-  - %%UPSTREAM_PROJECT_KEYWORD%%
-  - ...
+  - etcd
+  - cluster
+  - database
+  - cache
+  - key-value
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts
-name: %%CHART_NAME%%
+name: etcd
 sources:
-  - https://github.com/bitnami/containers/tree/main/bitnami/%%IMAGE_NAME%%
-  - %%UPSTREAM_PROJECT_SOURCE_CODE_URL%%
-  - ...
+  - https://github.com/fsdrw08/helm-charts/etcd
 version: 0.1.0

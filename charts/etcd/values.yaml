@@ -70,10 +70,10 @@ etcd:
   ## @param etcd.podRestartPolicy specify the pod restart policy if deployKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param etcd.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ## @param etcd.replicaCount Number of etcd replicas to deploy
   ##
   replicaCount: 1
-  ## @param etcd.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param etcd.containerPorts etcd container port to expose to host
   ## e.g.
   ## containerPorts:
   ##   - name: http
@@ -88,9 +88,9 @@ etcd:
   ##     protocol: TCP
   ##
   containerPorts: {}
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## Configure extra options for etcd containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param etcd.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param etcd.livenessProbe.enabled Enable livenessProbe on etcd containers
   ## @param etcd.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param etcd.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param etcd.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -99,12 +99,15 @@ etcd:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param etcd.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+    initialDelaySeconds: 180
+    periodSeconds: 300
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    httpGet:
+      path: /livez?verbose
+      port: 2379
+  ## @param etcd.readinessProbe.enabled Enable readinessProbe on etcd containers
   ## @param etcd.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param etcd.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param etcd.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
@@ -114,12 +117,15 @@ etcd:
   ##
   readinessProbe:
     enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param etcd.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+    initialDelaySeconds: 60
+    periodSeconds: 120
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    httpGet:
+      path: /readyz?verbose
+      port: 2379
+  ## @param etcd.startupProbe.enabled Enable startupProbe on etcd containers
   ## @param etcd.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param etcd.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param etcd.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -142,13 +148,13 @@ etcd:
   ## @param etcd.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## etcd resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param etcd.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if etcd.resources is set (etcd.resources is recommended for production).
+  ## @param etcd.resourcesPreset Set etcd container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if etcd.resources is set (etcd.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param etcd.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## @param etcd.resources Set etcd container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -161,8 +167,8 @@ etcd:
   resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param etcd.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param etcd.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param etcd.podSecurityContext.enabled Enabled etcd pods' Security Context
+  ## @param etcd.podSecurityContext.fsGroup Set etcd pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
@@ -170,10 +176,10 @@ etcd:
     # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param etcd.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param etcd.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param etcd.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param etcd.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param etcd.containerSecurityContext.enabled Enabled etcd containers' Security Context
+  ## @param etcd.containerSecurityContext.runAsUser Set etcd containers' Security Context runAsUser
+  ## @param etcd.containerSecurityContext.runAsNonRoot Set etcd containers' Security Context runAsNonRoot
+  ## @param etcd.containerSecurityContext.readOnlyRootFilesystem Set etcd containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
     enabled: true
@@ -304,7 +310,7 @@ etcd:
     mountPath: /etc/etcd/pki # https://github.com/etcd-io/jetcd/blob/main/docs/SslConfig.md
     ## @param etcd.tls.contents secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
+    ## But the tls set in configFile above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
     ## e.g.
     ## content:
@@ -314,7 +320,7 @@ etcd:
     ##
     contents: {}
 
-  ## @param etcd.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param etcd.existingConfigmap The name of an existing ConfigMap with your custom configuration for etcd
   ##
   existingConfigmap:
   ## @param etcd.command Override default container command (useful when using custom images)
@@ -323,15 +329,15 @@ etcd:
   ## @param etcd.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param etcd.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param etcd.hostAliases etcd pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param etcd.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param etcd.podLabels Extra labels for etcd pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param etcd.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param etcd.podAnnotations Annotations for etcd pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
@@ -350,26 +356,26 @@ etcd:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param etcd.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param etcd.extraEnvVars Array with extra environment variables to add to etcd nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param etcd.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param etcd.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for etcd nodes
   ##
   extraEnvVarsCM: ""
-  ## @param etcd.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param etcd.extraEnvVarsSecret Name of existing Secret containing extra env vars for etcd nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param etcd.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param etcd.extraVolumes Optionally specify extra list of additional volumes for the etcd pod(s)
   ##
   extraVolumes: []
-  ## @param etcd.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param etcd.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the etcd container(s)
   ##
   extraVolumeMounts: []
-  ## @param etcd.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param etcd.sidecars Add additional sidecar containers to the etcd pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -380,7 +386,7 @@ etcd:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param etcd.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param etcd.initContainers Add additional init containers to the etcd pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -403,7 +409,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/etcd/data
+  mountPath: /var/lib/etcd
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
