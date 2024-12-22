@@ -113,9 +113,13 @@ etcd:
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
-    httpGet:
-      path: /livez?verbose
-      port: 2379
+    # https://github.com/openshift/microshift/blob/80d5b311cf012acc0cb33b9178d148198a64c2d3/ansible/roles/install-microshift/files/etcd.service
+    exec:
+      command:
+        - etcdctl
+        - endpoint
+        - health
+        - --endpoints=unix://localhost:0
   ## @param etcd.readinessProbe.enabled Enable readinessProbe on etcd containers
   ## @param etcd.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param etcd.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -245,8 +249,9 @@ etcd:
     ## If an IP address is given as well as a port, etcd will listen on the given port and interface.
     ## Multiple URLs may be used to specify a number of addresses and ports to listen on.
     ## The etcd will respond to requests from any of the listed addresses and ports.
+    ## unixs means unix domain socket with ssl transfer, ref: https://github.com/openshift/microshift/blob/80d5b311cf012acc0cb33b9178d148198a64c2d3/ansible/roles/install-microshift/files/etcd.service
     ##
-    listen-client-urls: http://localhost:2379
+    listen-client-urls: http://localhost:2379,unix://localhost:0
     ## @param etcd.configFile.listen-client-http-urls List of URLs to listen on for http only client traffic.
     ## Enabling this flag removes http services from --listen-client-urls.
     ## Use this flag when you want to segregate HTTP traffic from other protocols.
