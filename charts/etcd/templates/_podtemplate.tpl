@@ -57,12 +57,16 @@ spec:
       {{- end }}
       {{- if .Values.etcd.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.args "context" $) | nindent 8 }}
+      {{/*
       {{- else }}
       args: 
         - --config-file
-        - /etc/etcd/etcd.config.yaml
+        - /etc/etcd/etcd.config.yml
+      */}}
       {{- end }}
       env:
+        - name: ETCD_CONFIG_FILE
+          value: /etc/etcd/etcd.config.yml
         {{- if .Values.etcd.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
@@ -125,6 +129,9 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+        items:
+          - key: etcd.config.yml
+            path: etcd.config.yml
     {{- if .Values.etcd.tls.contents }}
     - name: tls
       secret:
@@ -133,7 +140,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc
     {{- else }}
       emptyDir: {}
     {{- end }}

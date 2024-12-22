@@ -211,12 +211,13 @@ consul:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
-  ## @param consul.configFiles config file to start consul, the sub config block will convert to json and injected as ConfigMap
-  ## You can add whatever sub items under this block
+  ## @param consul.configFiles config files to start consul
+  ## The sub config block will convert to json and injected as ConfigMap and mount into /consul/config/***.json  ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#general-parameters
   configFiles:
     ## @param consul.configFiles.general General config for server and client agent
+    ## The config under this node will convert to json file and place in /consul/config/general.json
     ## https://developer.hashicorp.com/consul/tutorials/production-deploy/deployment-guide#configure-consul-agents
     general:
       ## @param consul.configFiles.general.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change.
@@ -257,6 +258,7 @@ consul:
       ##
       server: true
     ## @param consul.configFiles.acl ACL Parameters
+    ## The config under this node will convert to json file and place in /consul/config/acl.json
     ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#acl-parameters
     ##
     acl:
@@ -267,7 +269,7 @@ consul:
       acl:
         enabled: false
     ## @param consul.configFiles.bootstrap Bootstrap Parameters
-    ## ## the config under this node will convert to json file and place in /consul/config
+    ## The config under this node will convert to json file and place in /consul/config/bootstrap.json
     ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#bootstrap-parameters
     ##
     bootstrap:
@@ -277,6 +279,7 @@ consul:
       ##
       bootstrap_expect: 1
     ## @param consul.configFiles.encryption Encryption Parameters
+    ## The config under this node will convert to json file and place in /consul/config/encryption.json
     ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#encryption-parameters
     ##
     encryption:
@@ -290,7 +293,7 @@ consul:
       ##
       encrypt: ""
     ## @param consul.configFiles.ui UI Parameters
-    ## the config under this node will convert to json file and place in /consul/config
+    ## The config under this node will convert to json file and place in /consul/config/ui.json
     ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui-parameters
     ##
     ui:
@@ -308,6 +311,7 @@ consul:
         ##
         content_path: /ui/
     ## @param consul.configFiles.tls TLS Configuration Reference
+    ## The config under this node will convert to json file and place in /consul/config/tls.json
     ## This section documents all of the configuration settings that apply to Agent TLS.
     ## Agent TLS is used by the HTTP API, internal RPC, and gRPC/xDS interfaces
     ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#tls-configuration-reference
@@ -334,7 +338,7 @@ consul:
     ## But the tls set in configFiles above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
     ## e.g.
-    ## content:
+    ## contents:
     ##  consul-agent-ca.pem: ""
     ##  dc1-server-consul-1.pem: ""
     ##  dc1-server-consul-1-key.pem: ""
