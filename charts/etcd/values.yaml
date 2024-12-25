@@ -34,20 +34,20 @@ commonAnnotations: {}
 
 ## @param etcd.deployKind specify the deploy kind： Pod, or Deployment
 deployKind: Pod
-## @section %%MAIN_CONTAINER%% Parameters
+## @section etcd Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 etcd:
-  ## Bitnami %%MAIN_CONTAINER%% image
+  ## etcd image
   ## ref: https://quay.io/repository/coreos/etcd?tab=tags
-  ## @param etcd.image.registry %%MAIN_CONTAINER%% image registry
-  ## @param etcd.image.repository %%MAIN_CONTAINER%% image repository
-  ## @param etcd.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
-  ## @param etcd.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param etcd.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
-  ## @param etcd.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
+  ## @param etcd.image.registry etcd image registry
+  ## @param etcd.image.repository etcd image repository
+  ## @param etcd.image.tag etcd image tag (immutable tags are recommended)
+  ## @param etcd.image.digest etcd image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param etcd.image.pullPolicy etcd image pull policy
+  ## @param etcd.image.pullSecrets etcd image pull secrets
   ##
   image:
     registry: quay.io

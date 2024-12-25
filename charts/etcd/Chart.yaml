@@ -24,4 +24,5 @@ maintainers:
 name: etcd
 sources:
   - https://github.com/fsdrw08/helm-charts/etcd
+  - https://github.com/etcd-io/etcd
 version: 0.1.0
