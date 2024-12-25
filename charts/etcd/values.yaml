@@ -88,13 +88,13 @@ etcd:
   ##     protocol: TCP
   ##
   containerPorts:
-    - name: peer
-      containerPort: 2380
-      hostPort: 2380
-      protocol: TCP
     - name: client
       containerPort: 2379
       hostPort: 2379
+      protocol: TCP
+    - name: peer
+      containerPort: 2380
+      hostPort: 2380
       protocol: TCP
 
   ## Configure extra options for etcd containers' liveness and readiness probes
@@ -113,7 +113,9 @@ etcd:
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
-    # https://github.com/openshift/microshift/blob/80d5b311cf012acc0cb33b9178d148198a64c2d3/ansible/roles/install-microshift/files/etcd.service
+    ## https://github.com/openshift/microshift/blob/80d5b311cf012acc0cb33b9178d148198a64c2d3/ansible/roles/install-microshift/files/etcd.service
+    ## note: after enable auth ("etcdctl auth enable"), the `endpoint health` command will require credential,
+    ## use `etcdctl endpoint status` instead if you dont want to provide credential in the probe
     exec:
       command:
         - etcdctl
@@ -457,6 +459,7 @@ etcd:
     ## @param etcd.configFile.auth-token-ttl Time (in seconds) of the auth-token-ttl.
     ##
     auth-token-ttl: 300
+    ### Profiling and monitoring
     ## @param etcd.configFile.enable-pprof Profiling and monitoring Enable runtime profiling data via HTTP server. Address is at client URL + "/debug/pprof/"
     ##
     enable-pprof: false
