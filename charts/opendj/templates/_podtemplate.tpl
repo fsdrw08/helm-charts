@@ -69,8 +69,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.opendj.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{/*
         - secretRef:
             name: {{ template "common.names.fullname" . }}
+        */}}
         {{- if .Values.opendj.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.opendj.extraEnvVarsSecret "context" $) }}
@@ -99,6 +101,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.opendj.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        {{- if .Values.opendj.ssl.contents_b64 }}
+        - name: ssl
+          mountPath: {{ .Values.opendj.ssl.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -111,6 +117,11 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.opendj.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    {{- if .Values.opendj.ssl.contents_b64 }}
+    - name: ssl
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-ssl
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:

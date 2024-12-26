@@ -41,7 +41,7 @@ deployKind: Pod
 ##
 opendj:
   ## opendj image
-  ## ref: https://hub.docker.com/r/bitnami/%%IMAGE_NAME%%/tags/
+  ## ref: https://hub.docker.com/r/openidentityplatform/opendj/tags
   ## @param opendj.image.registry opendj image registry
   ## @param opendj.image.repository opendj image repository
   ## @param opendj.image.tag opendj image tag (immutable tags are recommended)
@@ -87,7 +87,15 @@ opendj:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts:
+    - name: LDAP
+      containerPort: 1389
+      hostPort: 389
+      protocol: TCP
+    - name: LDAPS
+      containerPort: 1636
+      hostPort: 636
+      protocol: TCP
   ## Configure extra options for opendj containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param opendj.livenessProbe.enabled Enable livenessProbe on opendj containers
@@ -244,12 +252,18 @@ opendj:
   ##       aci: (target="ldap:///dc=example,dc=com") (targetattr ="*")(version 3.0; acl "Allow apps proxied auth"; allow(all, proxy)(userdn = "ldap:///cn=*,ou=Services,dc=example,dc=com");)
   ##
   schema: []
+  ## @param opendj.ssl secret setting of cert and key or whatever ssl content will set in the container
+  ## @param opendj.ssl.mountPath secret mount path setting of keystore or whatever ssl content will set in the container
   ##
   ssl:
     mountPath: /opt/opendj/certs
-    contents_b64:
-      keystore.jks:
-      keystore.pfx:
+    ## @param opendj.ssl.contents_b64 base 64 encoded content of keystore object or whatever base 64 encoded ssl content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## e.g.
+    ## contents_b64:
+    ##   keystore.jks: ""
+    ##   keystore.pfx: ""
+    contents_b64: {}
   ## @param opendj.existingConfigmap The name of an existing ConfigMap with your custom configuration for opendj
   ##
   existingConfigmap:

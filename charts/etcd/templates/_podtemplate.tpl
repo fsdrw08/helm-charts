@@ -75,10 +75,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- if .Values.etcd.extraEnvVarsSecret }}
+        {{/*
         - secretRef:
             name: {{ template "common.names.fullname" . }}
-        {{- end }}
+        */}}
         {{- if .Values.etcd.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVarsSecret "context" $) }}
