@@ -106,7 +106,7 @@ opendj:
   ## @param opendj.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: foo
     periodSeconds: bar
     timeoutSeconds: foo
@@ -238,10 +238,10 @@ opendj:
     ## like : "--usePkcs12keyStore /opt/domain.pfx --keyStorePassword domain"
     ##
     OPENDJ_SSL_OPTIONS: --generateSelfSignedCertificate
-  ## @param opendj.schema ldif schema content to import into opendj during setup process
+  ## @param opendj.schemas ldif schema content to import into opendj during setup process
   ## ref: https://github.com/OpenIdentityPlatform/OpenDJ/blob/4.8.2/opendj-packages/opendj-docker/bootstrap/setup.sh#L39-L49
   ## Example::
-  ## schema:
+  ## schemas:
   ##   - name:
   ##     content: |
   ##       dn: dc=example,dc=com
@@ -251,7 +251,7 @@ opendj:
   ##       aci: (targetcontrol="1.2.840.113556.1.4.805") (version 3.0; acl "Tree delete for Admins"; allow(all) groupdn = "ldap:///cn=Directory Administrators,ou=Groups,dc=example,dc=com";)
   ##       aci: (target="ldap:///dc=example,dc=com") (targetattr ="*")(version 3.0; acl "Allow apps proxied auth"; allow(all, proxy)(userdn = "ldap:///cn=*,ou=Services,dc=example,dc=com");)
   ##
-  schema: []
+  schemas: {}
   ## @param opendj.ssl secret setting of cert and key or whatever ssl content will set in the container
   ## @param opendj.ssl.mountPath secret mount path setting of keystore or whatever ssl content will set in the container
   ##

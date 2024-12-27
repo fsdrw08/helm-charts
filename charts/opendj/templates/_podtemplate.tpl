@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.opendj.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.opendj.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -64,15 +64,15 @@ spec:
         {{- end }}
       envFrom:
         - configMapRef:
-            name: {{ template "common.names.fullname" . }}-cm
+            name: {{ template "common.names.fullname" . }}-cm-envvar
         {{- if .Values.opendj.extraEnvVarsCM }}
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.opendj.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{/*
+        {{- /*
         - secretRef:
             name: {{ template "common.names.fullname" . }}
-        */}}
+        */ -}}
         {{- if .Values.opendj.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.opendj.extraEnvVarsSecret "context" $) }}
@@ -105,6 +105,10 @@ spec:
         - name: ssl
           mountPath: {{ .Values.opendj.ssl.mountPath }}
         {{- end }}
+        {{- if .Values.opendj.schemas }}
+        - name: schemas
+          mountPath: /opt/opendj/bootstrap/schema
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -122,10 +126,15 @@ spec:
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-ssl
     {{- end }}
+    {{- if .Values.opendj.schemas }}
+    - name: schemas
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm-schemas
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc
     {{- else }}
       emptyDir: {}
     {{- end }}

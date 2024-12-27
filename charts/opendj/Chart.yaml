@@ -19,7 +19,7 @@ keywords:
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts
-name: OpenDJ
+name: opendj
 sources:
   - https://github.com/fsdrw08/helm-charts/opendj
   - https://github.com/OpenIdentityPlatform/OpenDJ

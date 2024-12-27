@@ -122,9 +122,11 @@ spec:
         items:
           - key: traefik.yml
             path: traefik.yml
+    {{- if .Values.traefik.dynamicConfigurationFiles }}
     - name: dynamicConfigurationFileDir
       configMap:
         name: {{ template "common.names.fullname" . }}-cm-dyn
+    {{- end -}}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
