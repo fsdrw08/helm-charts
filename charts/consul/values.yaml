@@ -212,7 +212,8 @@ consul:
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
   ## @param consul.configFiles config files to start consul
-  ## The sub config block will convert to json and injected as ConfigMap and mount into /consul/config/***.json  ## You can add whatever sub items under this block
+  ## The sub config block will convert to json and injected as ConfigMap and mount into /consul/config/***.json
+  ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#general-parameters
   configFiles:

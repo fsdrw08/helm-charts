@@ -45,7 +45,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 See <https://github.com/bitnami-labs/readme-generator-for-helm> to create the table
 
-The above parameters map to the env variables defined in [bitnami/OpenDJ](https://github.com/bitnami/containers/tree/main/bitnami/OpenDJ). For more information please refer to the [bitnami/OpenDJ](https://github.com/bitnami/containers/tree/main/bitnami/OpenDJ) image documentation.
+The above parameters map to the env variables defined in [fsdrw08/OpenDJ](https://github.com/bitnami/containers/tree/main/bitnami/OpenDJ). For more information please refer to the [bitnami/OpenDJ](https://github.com/bitnami/containers/tree/main/bitnami/OpenDJ) image documentation.
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
