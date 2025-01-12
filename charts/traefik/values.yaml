@@ -104,8 +104,8 @@ traefik:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 10
-    periodSeconds: 120
+    initialDelaySeconds: 30
+    periodSeconds: 600
     timeoutSeconds: 10
     failureThreshold: 5
     successThreshold: 1
