@@ -106,12 +106,18 @@ opendj:
   ## @param opendj.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - |
+          /opt/opendj/bin/ldapsearch --port 1389 --baseDN cn=monitor "(cn=userRoot backend)"
   ## @param opendj.readinessProbe.enabled Enable readinessProbe on opendj containers
   ## @param opendj.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param opendj.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -242,14 +248,13 @@ opendj:
   ## ref: https://github.com/OpenIdentityPlatform/OpenDJ/blob/4.8.2/opendj-packages/opendj-docker/bootstrap/setup.sh#L39-L49
   ## Example::
   ## schemas:
-  ##   - name:
-  ##     content: |
-  ##       dn: dc=example,dc=com
-  ##       changetype: modify
-  ##       add: aci
-  ##       aci: (target="ldap:///dc=example,dc=com") (targetattr = "*")(version 3.0; acl "allow all Admin group"; allow(all,export,import,proxy) groupdn = "ldap:///cn=Directory Administrators,ou=Groups,dc=example,dc=com";)
-  ##       aci: (targetcontrol="1.2.840.113556.1.4.805") (version 3.0; acl "Tree delete for Admins"; allow(all) groupdn = "ldap:///cn=Directory Administrators,ou=Groups,dc=example,dc=com";)
-  ##       aci: (target="ldap:///dc=example,dc=com") (targetattr ="*")(version 3.0; acl "Allow apps proxied auth"; allow(all, proxy)(userdn = "ldap:///cn=*,ou=Services,dc=example,dc=com");)
+  ##   44-domain_base.ldif: |
+  ##     dn: dc=example,dc=com
+  ##     changetype: modify
+  ##     add: aci
+  ##     aci: (target="ldap:///dc=example,dc=com") (targetattr = "*")(version 3.0; acl "allow all Admin group"; allow(all,export,import,proxy) groupdn = "ldap:///cn=Directory Administrators,ou=Groups,dc=example,dc=com";)
+  ##     aci: (targetcontrol="1.2.840.113556.1.4.805") (version 3.0; acl "Tree delete for Admins"; allow(all) groupdn = "ldap:///cn=Directory Administrators,ou=Groups,dc=example,dc=com";)
+  ##     aci: (target="ldap:///dc=example,dc=com") (targetattr ="*")(version 3.0; acl "Allow apps proxied auth"; allow(all, proxy)(userdn = "ldap:///cn=*,ou=Services,dc=example,dc=com");)
   ##
   schemas: {}
   ## @param opendj.ssl secret setting of cert and key or whatever ssl content will set in the container
