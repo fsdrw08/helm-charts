@@ -75,7 +75,7 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{/*
+        {{- /*
         - secretRef:
             name: {{ template "common.names.fullname" . }}
         */}}
