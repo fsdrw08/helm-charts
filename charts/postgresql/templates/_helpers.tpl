@@ -21,7 +21,7 @@ Return the proper image name (for the init container volume-permissions image)
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "postgresql.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.postgresql.image .Values.%%SECONDARY_OBJECT_BLOCK%%.image .Values.volumePermissions.image) "context" $) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.postgresql.image .Values.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
 {{/*

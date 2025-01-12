@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.postgresql.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.postgresql.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -101,10 +101,15 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.postgresql.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        {{- range $key, $val := .Values.postgresql.extending }}
+        {{- if $val }}
+        - name: config-extending-{{ $key }}
+          mountPath: /opt/app-root/src/postgresql-{{ $key }}
+        {{- end }}
+        {{- end }}
         {{- if .Values.postgresql.ssl.contents }}
         - name: ssl
-          {{/* https://github.com/containers/podman/issues/20956 */}}
-          mountPath: {{ .Values.postgresql.ssl.mountPath }}:U
+          mountPath: {{ .Values.postgresql.ssl.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -118,16 +123,23 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.postgresql.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    {{- range $key, $val := .Values.postgresql.extending }}
+    {{- if $val }}
+    - name: config-extending-{{ $key }}
+      configMap: 
+        name: {{ template "common.names.fullname" $ }}-cm-extending-{{ $key }}
+    {{- end }}
+    {{- end }}
     {{- if .Values.postgresql.ssl.contents }}
-    - name: tls
+    - name: ssl
       secret:
-        secretName: {{ template "common.names.fullname" . }}-sec-tls
+        secretName: {{ template "common.names.fullname" . }}-sec-ssl
         defaultMode: 0600
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc
     {{- else }}
       emptyDir: {}
     {{- end }}

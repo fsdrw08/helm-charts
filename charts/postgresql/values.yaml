@@ -52,7 +52,7 @@ postgresql:
   image:
     registry: quay.io
     repository: sclorg/postgresql-16-c10s
-    tag: 20250108
+    tag: "20250108"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -100,10 +100,16 @@ postgresql:
   livenessProbe:
     enabled: true
     initialDelaySeconds: 30
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 6
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
     successThreshold: 1
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - |
+          pg_isready
   ## @param postgresql.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
   ## @param postgresql.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param postgresql.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -238,55 +244,54 @@ postgresql:
   ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#extending-image
   ##
   extending:
-    ## @param postgresql.extending.preStart This directory postgresql-pre-start/ should contain *.sh files that will be sourced during the early start of the container.
+    ## @param postgresql.extending.preStart This directory (postgresql-pre-start/) should contain *.sh files that will be sourced during the early start of the container.
     ## At this point, there is no PostgreSQL daemon running in the background.
     ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#postgresql-pre-start
     ## e.g.
-    ## preStart:
-    ##  - name: enable_ssl.sh
-    ##    content: |
-    ##      #!/bin/bash
-    ##      # Postgresql server will reject key files with liberal permissions
-    ##      # This might fail in OpenShift when using a restricted SCC
-    ##      # Make sure to run this deployment with an OpenShift service account using  the anyuid SCC
-    ##      chmod og-rwx certs/tls.key
+    ## pre-start:
+    ##   enable_ssl.sh: |
+    ##     #!/bin/bash
+    ##     # Postgresql server will reject key files with liberal permissions
+    ##     # This might fail in OpenShift when using a restricted SCC
+    ##     # Make sure to run this deployment with an OpenShift service account using  the anyuid SCC
+    ##     chmod og-rwx certs/tls.key
     ##
-    preStart: []
+    pre-start: {}
     ## @param postgresql.extending.cfg Configuration files (`*.conf`) contained in this directory (postgresql-cfg/) will be included at the end of the image's postgresql.conf file.
     ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#postgresql-cfg
     ## e.g.
     ## cfg:
-    ##  - name: ssl.conf
-    ##    content: |
-    ##      ssl = on
-    ##      ssl_cert_file = '/opt/app-root/src/certs/tls.crt' # server certificate
-    ##      ssl_key_file =  '/opt/app-root/src/certs/tls.key' # server private key
-    ##      #ssl_ca_file                                   # trusted certificate authorities
-    ##      #ssl_crl_file                                  # certificates revoked by certificate authorities
+    ##   ssl.conf: |
+    ##     ssl = on
+    ##     ssl_cert_file = '/opt/app-root/src/certs/tls.crt' # server certificate
+    ##     ssl_key_file =  '/opt/app-root/src/certs/tls.key' # server private key
+    ##     #ssl_ca_file                                   # trusted certificate authorities
+    ##     #ssl_crl_file                                  # certificates revoked by certificate authorities
     ##
-    cfg: []
-    ## @param postgresql.extending.init This directory postgresql-init/ should contain shell scripts (*.sh) that are sourced when the database is freshly initialized
+    cfg: {}
+    ## @param postgresql.extending.init This directory (postgresql-init/) should contain shell scripts (*.sh) that are sourced when the database is freshly initialized
     ## (after a successful initdb run, which makes the data directory non-empty).
     ## At the time of sourcing these scripts, the local PostgreSQL server is running.
     ## For re-deployment scenarios with a persistent data directory, the scripts are not sourced (no-op).
     ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#postgresql-init
     ##  e.g.
     ## init:
-    ##   - name: createPgStatStatements
-    ##     content: |
-    ##      #!/bin/bash
-    ##      echo "CREATE EXTENSION pg_stat_statements;" | psql
+    ##   createPgStatStatements.sh: |
+    ##     #!/bin/bash
+    ##     echo "CREATE EXTENSION pg_stat_statements;" | psql
     ##
-    init: []
-    ## @param postgresql.extending.start This directory postgresql-start/ has the same semantics as postgresql-init/,
+    init: {}
+    ## @param postgresql.extending.start This directory (postgresql-start/) has the same semantics as postgresql-init/,
     ## except that these scripts are always sourced (after postgresql-init/ scripts, if they exist).
     ##
-    start: []
+    start: {}
   ## @param postgresql.ssl secret setting of cert and key or whatever ssl content will set in the container
-  ## @param postgresql.ssl.mountPath secret mount path setting of whatever ssl content will set in the container
   ##
   ssl:
-    mountPath: /opt/app-root/src/certs
+    ## @param postgresql.ssl.mountPath secret mount path setting of whatever ssl content will set in the container
+    ## ref: https://github.com/containers/podman/issues/20956
+    ##
+    mountPath: /opt/app-root/src/certs:U
     ## @param postgresql.ssl.contents secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here

@@ -14,23 +14,32 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
+  {{- /*
   {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.config "context" $) | nindent 2 -}}
+  */}}
+  {{- range $env, $var := .Values.postgresql.config -}}
+  {{- if $var }}
+  {{ $env }}: {{ $var }}
+  {{- end }}
+  {{- end }}
 {{- range $key, $val := .Values.postgresql.extending }}
 {{- if $val }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "common.names.fullname" . }}-cm-extending-{{ $key }}
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  {{- /*https://github.com/bitnami/charts/blob/c816b8ac783cafc7664953245ab26f2c1c84b687/bitnami/clickhouse/templates/pdb.yaml#L9*/}}
+  name: {{ template "common.names.fullname" $ }}-cm-extending-{{$key}}
+  namespace: {{ include "common.names.namespace" $ | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $.Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: postgresql
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- if $.Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
   {{- range $name, $content := $val }}
   {{ $name }}: |
-{{ $content | indent 4 }}
+    {{- include "common.tplvalues.render" (dict "value" $content "context" $) | nindent 4 -}}
+  {{- end }}
 {{- end }}
 {{- end }}
