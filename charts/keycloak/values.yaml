@@ -1,0 +1,441 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param keycloak.deployKind specify the deploy kind： Pod, or Deployment
+deployKind: Pod
+## @section keycloak Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+keycloak:
+  ## Official keycloak image
+  ## ref: https://quay.io/repository/keycloak/keycloak?tab=tags
+  ## @param keycloak.image.registry keycloak image registry
+  ## @param keycloak.image.repository keycloak image repository
+  ## @param keycloak.image.tag keycloak image tag (immutable tags are recommended)
+  ## @param keycloak.image.digest keycloak image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param keycloak.image.pullPolicy keycloak image pull policy
+  ## @param keycloak.image.pullSecrets keycloak image pull secrets
+  ##
+  image:
+    registry: quay.io
+    repository: keycloak/keycloak
+    tag: 26.0
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param keycloak.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param keycloak.replicaCount Number of keycloak replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param keycloak.containerPorts keycloak container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts: {}
+  ## Configure extra options for keycloak containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param keycloak.livenessProbe.enabled Enable livenessProbe on keycloak containers
+  ## @param keycloak.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param keycloak.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param keycloak.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param keycloak.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param keycloak.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    httpGet:
+      path: /health
+      port: 9000
+  ## @param keycloak.readinessProbe.enabled Enable readinessProbe on keycloak containers
+  ## @param keycloak.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param keycloak.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param keycloak.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param keycloak.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param keycloak.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param keycloak.startupProbe.enabled Enable startupProbe on keycloak containers
+  ## @param keycloak.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param keycloak.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param keycloak.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param keycloak.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param keycloak.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param keycloak.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param keycloak.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param keycloak.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## keycloak resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param keycloak.resourcesPreset Set keycloak container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if keycloak.resources is set (keycloak.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "small"
+  ## @param keycloak.resources Set keycloak container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param keycloak.podSecurityContext.enabled Enabled keycloak pods' Security Context
+  ## @param keycloak.podSecurityContext.fsGroup Set keycloak pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param keycloak.containerSecurityContext.enabled Enabled keycloak containers' Security Context
+  ## @param keycloak.containerSecurityContext.runAsUser Set keycloak containers' Security Context runAsUser
+  ## @param keycloak.containerSecurityContext.runAsNonRoot Set keycloak containers' Security Context runAsNonRoot
+  ## @param keycloak.containerSecurityContext.readOnlyRootFilesystem Set keycloak containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param keycloak.configuration keycloak configure which will place into conf/keycloak.conf
+  ## you can add additional configure properties in to this block if not exist
+  ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/dist/src/main/content/conf/keycloak.conf
+  ## ref: https://www.keycloak.org/server/all-config
+  ##
+  configuration:
+    ## Database
+    ## @param keycloak.configuration.db The database vendor. CLI: --db, Env: KC_DB
+    ##
+    db: dev-file
+    ## @param keycloak.configuration.db-url-host Sets the hostname of the default JDBC URL of the chosen vendor.
+    ## If the db-url option is set, this option is ignored.
+    ##
+    db-url-host:
+    ## @param keycloak.configuration.db-url-port Sets the port of the default JDBC URL of the chosen vendor.
+    ## If the db-url option is set, this option is ignored.
+    ##
+    db-url-port:
+    ## @param keycloak.configuration.db-url-database Sets the database name of the default JDBC URL of the chosen vendor.
+    ## If the db-url option is set, this option is ignored.
+    ##
+    db-url-database:
+    ## @param keycloak.configuration.db-url The full database JDBC URL.
+    ## If not provided, a default URL is set based on the selected database vendor.
+    ##
+    db-url:
+    ## @param keycloak.configuration.db-username The username of the database user.
+    ##
+    db-username:
+    ## @param keycloak.configuration.db-password The password of the database user.
+    ##
+    db-password:
+    ## Feature
+    ## @param keycloak.configuration.features Enables a set of one or more features
+    ## ref: https://www.keycloak.org/server/features#_supported_features
+    ##
+    features:
+    ## @param keycloak.configuration.features-disabled Disables a set of one or more features
+    ##
+    features-disabled:
+    ## Health
+    ## @param keycloak.configuration.health-enabled If the server should expose health check endpoints.
+    ##
+    health-enabled: true
+    ## Metrics
+    ## @param keycloak.configuration.metrics-enabled If the server should expose metrics.
+    ##
+    metrics-enabled: false
+    ## HTTP(S)
+    ## @param keycloak.configuration.http-enabled Enables the HTTP listener
+    ##
+    http-enabled: true
+    ## @param keycloak.configuration.http-port The used HTTP port
+    ##
+    http-port: 8080
+    ## @param keycloak.configuration.https-port The used HTTPS port.
+    ## ref: https://www.keycloak.org/server/enabletls#_switching_the_https_port
+    ##
+    https-port: 8443
+    ## @param keycloak.configuration.https-certificate-file The file path to a server certificate or certificate chain in PEM format.
+    ## ref: https://www.keycloak.org/server/enabletls
+    ##
+    https-certificate-file:
+    ## @param keycloak.configuration.https-certificate-key-file The file path to a private key in PEM format.
+    ##
+    https-certificate-key-file:
+    ## Truststore
+    ## @param keycloak.configuration.truststore-paths List of pkcs12 (p12 or pfx file extensions), PEM files, or directories containing those files that will be used as a system truststore.
+    ## If in PKCS12, the certs must be unencrypted - meaning no password is expected.
+    ## ref: https://www.keycloak.org/server/keycloak-truststore
+    ##
+    truststore-paths:
+  ## @param keycloak.existingConfigmap The name of an existing ConfigMap with your custom configuration for keycloak
+  ##
+  existingConfigmap:
+  ## @param keycloak.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param keycloak.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param keycloak.hostAliases keycloak pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param keycloak.podLabels Extra labels for keycloak pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param keycloak.podAnnotations Annotations for keycloak pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param keycloak.autoscaling.enabled Enable autoscaling for keycloak
+  ## @param keycloak.autoscaling.minReplicas Minimum number of keycloak replicas
+  ## @param keycloak.autoscaling.maxReplicas Maximum number of keycloak replicas
+  ## @param keycloak.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param keycloak.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param keycloak.extraEnvVars Array with extra environment variables to add to keycloak nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param keycloak.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for keycloak nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param keycloak.extraEnvVarsSecret Name of existing Secret containing extra env vars for keycloak nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param keycloak.extraVolumes Optionally specify extra list of additional volumes for the keycloak pod(s)
+  ##
+  extraVolumes: []
+  ## @param keycloak.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the keycloak container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param keycloak.sidecars Add additional sidecar containers to the keycloak pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param keycloak.initContainers Add additional init containers to the keycloak pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /bitnami/keycloak/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
