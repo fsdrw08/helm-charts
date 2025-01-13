@@ -187,8 +187,8 @@ keycloak:
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param keycloak.configuration keycloak configure which will place into conf/keycloak.conf
   ## you can add additional configure properties in to this block if not exist
-  ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/dist/src/main/content/conf/keycloak.conf
   ## ref: https://www.keycloak.org/server/all-config
+  ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/dist/src/main/content/conf/keycloak.conf
   ##
   configuration:
     ## Database
@@ -257,6 +257,27 @@ keycloak:
     ## ref: https://www.keycloak.org/server/keycloak-truststore
     ##
     truststore-paths:
+
+  ## @param keycloak.tls secret setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    ## @param keycloak.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/container/Dockerfile#L40
+    ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/dist/src/main/content/conf/keycloak.conf#L28C27-L28C38
+    ##
+    mountPath: /opt/keycloak/certs
+    ## @param keycloak.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFile above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## contents:
+    ##  rootCA.crt.pem: ""
+    ##  server.crt.pem: ""
+    ##  server.key.pem: ""
+    ##
+    contents: {}
+
   ## @param keycloak.existingConfigmap The name of an existing ConfigMap with your custom configuration for keycloak
   ##
   existingConfigmap:
@@ -343,10 +364,10 @@ keycloak:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/keycloak/data
+  mountPath: /opt/keycloak/data/h2
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
