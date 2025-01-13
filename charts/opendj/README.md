@@ -7,7 +7,7 @@ OpenDJ is an LDAP v3 compliant high performance directory service
 ## TL;DR
 
 ```console
-helm template .\charts\opendj --name-template=OpenDJ | podman kube play -
+helm template .\charts\opendj --name-template=opendj | podman kube play -
 ```
 
 ## Introduction

@@ -21,7 +21,7 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: opendj
 sources:
-  - https://github.com/fsdrw08/helm-charts/opendj
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/opendj
   - https://github.com/OpenIdentityPlatform/OpenDJ
   - ...
 version: 0.1.0
