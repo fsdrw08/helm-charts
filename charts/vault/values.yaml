@@ -329,7 +329,7 @@ vault:
   ##
   extraVolumeMounts: []
 
-  ## @param vault.autoUnseal run auto unseal process in a sidecar container
+  ## @param vault.autoUnseal run auto unseal process in startupProbe
   autoUnseal:
     ## @param vault.autoUnseal.enabled enabled the auto unseal process
     ## the auto unseal process will take place in startup probe
