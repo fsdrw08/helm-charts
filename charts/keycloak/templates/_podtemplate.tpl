@@ -1,4 +1,4 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "keycloak.podTemplate" -}}
 metadata:
   {{- if eq .Values.deployKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
@@ -7,7 +7,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.keycloak.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: keycloak
     {{- if .Values.keycloak.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.keycloak.podLabels "context" $) | nindent 4 }}
     {{- end }}
@@ -15,7 +15,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "keycloak.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.keycloak.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.keycloak.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -25,7 +25,7 @@ spec:
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "keycloak.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -47,7 +47,7 @@ spec:
     {{- end }}
   containers:
     - name: keycloak
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+      image: {{ template "keycloak.image" . }}
       imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
       {{- if .Values.keycloak.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.keycloak.containerSecurityContext "enabled" | toYaml | nindent 8 }}

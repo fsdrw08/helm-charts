@@ -185,74 +185,74 @@ keycloak:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## @param keycloak.configuration keycloak configure which will place into conf/keycloak.conf
+  ## @param keycloak.configFile keycloak configure which will place into file conf/keycloak.conf
   ## you can add additional configure properties in to this block if not exist
   ## ref: https://www.keycloak.org/server/all-config
   ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/dist/src/main/content/conf/keycloak.conf
   ##
-  configuration:
+  configFile:
     ## Database
-    ## @param keycloak.configuration.db The database vendor. CLI: --db, Env: KC_DB
+    ## @param keycloak.configFile.db The database vendor. CLI: --db, Env: KC_DB
     ##
     db: dev-file
-    ## @param keycloak.configuration.db-url-host Sets the hostname of the default JDBC URL of the chosen vendor.
+    ## @param keycloak.configFile.db-url-host Sets the hostname of the default JDBC URL of the chosen vendor.
     ## If the db-url option is set, this option is ignored.
     ##
     db-url-host:
-    ## @param keycloak.configuration.db-url-port Sets the port of the default JDBC URL of the chosen vendor.
+    ## @param keycloak.configFile.db-url-port Sets the port of the default JDBC URL of the chosen vendor.
     ## If the db-url option is set, this option is ignored.
     ##
     db-url-port:
-    ## @param keycloak.configuration.db-url-database Sets the database name of the default JDBC URL of the chosen vendor.
+    ## @param keycloak.configFile.db-url-database Sets the database name of the default JDBC URL of the chosen vendor.
     ## If the db-url option is set, this option is ignored.
     ##
     db-url-database:
-    ## @param keycloak.configuration.db-url The full database JDBC URL.
+    ## @param keycloak.configFile.db-url The full database JDBC URL.
     ## If not provided, a default URL is set based on the selected database vendor.
     ##
     db-url:
-    ## @param keycloak.configuration.db-username The username of the database user.
+    ## @param keycloak.configFile.db-username The username of the database user.
     ##
     db-username:
-    ## @param keycloak.configuration.db-password The password of the database user.
+    ## @param keycloak.configFile.db-password The password of the database user.
     ##
     db-password:
     ## Feature
-    ## @param keycloak.configuration.features Enables a set of one or more features
+    ## @param keycloak.configFile.features Enables a set of one or more features
     ## ref: https://www.keycloak.org/server/features#_supported_features
     ##
     features:
-    ## @param keycloak.configuration.features-disabled Disables a set of one or more features
+    ## @param keycloak.configFile.features-disabled Disables a set of one or more features
     ##
     features-disabled:
     ## Health
-    ## @param keycloak.configuration.health-enabled If the server should expose health check endpoints.
+    ## @param keycloak.configFile.health-enabled If the server should expose health check endpoints.
     ##
     health-enabled: true
     ## Metrics
-    ## @param keycloak.configuration.metrics-enabled If the server should expose metrics.
+    ## @param keycloak.configFile.metrics-enabled If the server should expose metrics.
     ##
     metrics-enabled: false
     ## HTTP(S)
-    ## @param keycloak.configuration.http-enabled Enables the HTTP listener
+    ## @param keycloak.configFile.http-enabled Enables the HTTP listener
     ##
     http-enabled: true
-    ## @param keycloak.configuration.http-port The used HTTP port
+    ## @param keycloak.configFile.http-port The used HTTP port
     ##
     http-port: 8080
-    ## @param keycloak.configuration.https-port The used HTTPS port.
+    ## @param keycloak.configFile.https-port The used HTTPS port.
     ## ref: https://www.keycloak.org/server/enabletls#_switching_the_https_port
     ##
     https-port: 8443
-    ## @param keycloak.configuration.https-certificate-file The file path to a server certificate or certificate chain in PEM format.
+    ## @param keycloak.configFile.https-certificate-file The file path to a server certificate or certificate chain in PEM format.
     ## ref: https://www.keycloak.org/server/enabletls
     ##
     https-certificate-file:
-    ## @param keycloak.configuration.https-certificate-key-file The file path to a private key in PEM format.
+    ## @param keycloak.configFile.https-certificate-key-file The file path to a private key in PEM format.
     ##
     https-certificate-key-file:
     ## Truststore
-    ## @param keycloak.configuration.truststore-paths List of pkcs12 (p12 or pfx file extensions), PEM files, or directories containing those files that will be used as a system truststore.
+    ## @param keycloak.configFile.truststore-paths List of pkcs12 (p12 or pfx file extensions), PEM files, or directories containing those files that will be used as a system truststore.
     ## If in PKCS12, the certs must be unencrypted - meaning no password is expected.
     ## ref: https://www.keycloak.org/server/keycloak-truststore
     ##
