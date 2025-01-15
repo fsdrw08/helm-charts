@@ -48,7 +48,7 @@ spec:
   containers:
     - name: keycloak
       image: {{ template "keycloak.image" . }}
-      imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.keycloak.image.pullPolicy | quote }}
       {{- if .Values.keycloak.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.keycloak.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -112,7 +112,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

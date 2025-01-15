@@ -51,7 +51,7 @@ spec:
   containers:
     - name: freeipa
       image: {{ template "freeipa.image" . }}
-      imagePullPolicy: {{ .Values.freeipa.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.freeipa.image.pullPolicy | quote }}
       {{- if .Values.freeipa.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.freeipa.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -122,7 +122,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" . ) "-pvc" ) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

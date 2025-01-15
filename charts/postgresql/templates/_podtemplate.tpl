@@ -48,7 +48,7 @@ spec:
   containers:
     - name: postgresql
       image: {{ template "postgresql.image" . }}
-      imagePullPolicy: {{ .Values.postgresql.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.postgresql.image.pullPolicy | quote }}
       {{- if .Values.postgresql.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.postgresql.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -139,7 +139,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

@@ -47,7 +47,7 @@ spec:
     {{- end }}
     - name: provision
       image: {{ template "jenkins.image" . }}
-      imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
       {{- if .Values.controller.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.controller.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -100,7 +100,7 @@ spec:
   containers:
     - name: controller
       image: {{ template "jenkins.image" . }}
-      imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
       {{- if .Values.controller.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.controller.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}

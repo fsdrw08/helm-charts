@@ -47,7 +47,7 @@ spec:
           securityContext:
             {{- toYaml .Values.directoryServer.securityContext | nindent 12 }}
           image: "{{ .Values.directoryServer.image.repository }}:{{ .Values.directoryServer.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.directoryServer.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.directoryServer.image.pullPolicy | quote }}
           env:
           ## Set `cn=Directory Manager`'s password
           {{- if .Values.directoryServer.appConfEnvVars.DS_DM_PASSWORD }}

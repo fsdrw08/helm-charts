@@ -46,7 +46,7 @@ spec:
   containers:
     - name: socat
       image: {{ template "socat.image" . }}
-      imagePullPolicy: {{ .Values.socat.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.socat.image.pullPolicy | quote }}
       {{- if .Values.socat.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.socat.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}

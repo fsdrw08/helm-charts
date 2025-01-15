@@ -48,7 +48,7 @@ spec:
   containers:
     - name: traefik
       image: {{ template "traefik.image" . }}
-      imagePullPolicy: {{ .Values.traefik.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.traefik.image.pullPolicy | quote }}
       {{- if .Values.traefik.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.traefik.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -130,7 +130,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" . ) "-pvc" ) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

@@ -51,7 +51,7 @@ spec:
     {{- if .Values.ceph.mon.enabled }}
     - name: mon
       image: {{ template "ceph.image" . }}
-      imagePullPolicy: {{ .Values.ceph.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.ceph.image.pullPolicy | quote }}
       {{- if .Values.ceph.mon.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.ceph.mon.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -120,7 +120,7 @@ spec:
     {{- if .Values.ceph.osd.enabled }}
     - name: osd
       image: {{ template "ceph.image" . }}
-      imagePullPolicy: {{ .Values.ceph.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.ceph.image.pullPolicy | quote }}
       {{- if .Values.ceph.osd.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.ceph.osd.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -192,7 +192,7 @@ spec:
   volumes:
     - name: etc
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc-etc
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}-etc
     {{- if .Values.ceph.config.enabled }}
     - name: ceph_conf
       configMap:
@@ -201,7 +201,7 @@ spec:
     - name: var
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc-var
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}-var
     {{- else }}
       emptyDir: {}
     {{- end }}

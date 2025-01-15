@@ -48,7 +48,7 @@ spec:
   containers:
     - name: coredns
       image: {{ template "coredns.image" . }}
-      imagePullPolicy: {{ .Values.coredns.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.coredns.image.pullPolicy | quote }}
       {{- if .Values.coredns.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.coredns.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}

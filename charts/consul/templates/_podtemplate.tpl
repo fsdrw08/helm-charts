@@ -48,7 +48,7 @@ spec:
   containers:
     - name: consul
       image: {{ template "consul.image" . }}
-      imagePullPolicy: {{ .Values.consul.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.consul.image.pullPolicy | quote }}
       {{- if .Values.consul.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.consul.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -129,7 +129,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

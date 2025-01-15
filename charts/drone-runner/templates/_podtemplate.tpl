@@ -48,7 +48,7 @@ spec:
   containers:
     - name: podman
       image: {{ template "runner.image" . }}
-      imagePullPolicy: {{ .Values.droneRunnerDocker.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.droneRunnerDocker.image.pullPolicy | quote }}
       {{- if .Values.droneRunnerDocker.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.droneRunnerDocker.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -129,7 +129,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

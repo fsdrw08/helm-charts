@@ -48,7 +48,7 @@ spec:
   containers:
     - name: server
       image: {{ template "server.image" . }}
-      imagePullPolicy: {{ .Values.droneServer.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.droneServer.image.pullPolicy | quote }}
       {{- if .Values.droneServer.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.droneServer.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -115,7 +115,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

@@ -48,7 +48,7 @@ spec:
   containers:
     - name: opendj
       image: {{ template "opendj.image" . }}
-      imagePullPolicy: {{ .Values.opendj.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.opendj.image.pullPolicy | quote }}
       {{- if .Values.opendj.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.opendj.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -134,7 +134,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

@@ -48,7 +48,7 @@ spec:
   containers:
     - name: %%MAIN_OBJECT_BLOCK%%
       image: {{ template "%%TEMPLATE_NAME%%.image" . }}
-      imagePullPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.image.pullPolicy | quote }}
       {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}

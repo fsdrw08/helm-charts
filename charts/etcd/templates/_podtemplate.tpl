@@ -48,7 +48,7 @@ spec:
   containers:
     - name: etcd
       image: {{ template "etcd.image" . }}
-      imagePullPolicy: {{ .Values.etcd.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.etcd.image.pullPolicy | quote }}
       {{- if .Values.etcd.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.etcd.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -140,7 +140,7 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}-pvc
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}
