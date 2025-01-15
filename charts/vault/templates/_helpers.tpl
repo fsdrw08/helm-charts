@@ -6,6 +6,13 @@ Return the proper vault image name
 {{- end -}}
 
 {{/*
+Return the proper auth proxy image name
+*/}}
+{{- define "vault.autoUnseal.image" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.vault.autoUnseal.image "global" .Values.global) -}}
+{{- end -}}
+
+{{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
 {{- define "vault.volumePermissions.image" -}}

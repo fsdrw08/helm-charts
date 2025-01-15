@@ -53,7 +53,7 @@ spec:
   containers:
     - name: vault
       image: {{ template "vault.image" . }}
-      imagePullPolicy: {{ .Values.vault.image.pullPolicy }}
+      imagePullPolicy: {{ .Values.vault.image.pullPolicy | quote }}
       {{- if .Values.vault.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.vault.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -130,6 +130,31 @@ spec:
     {{- if .Values.vault.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.vault.sidecars "context" $) | nindent 4 }}
     {{- end }}
+    {{- if .Values.vault.autoUnseal.enabled }}
+    - name: unseal
+      image: {{ template "vault.autoUnseal.image" . }}
+      imagePullPolicy: {{ .Values.vault.autoUnseal.pullPolicy | quote }}
+      {{- if .Values.vault.autoUnseal.containerSecurityContext.enabled -}}
+      securityContext: {{- omit .Values.autoUnseal.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      command: 
+        - /bin/sh
+        - -c
+        - "chmod +x /vault/unseal/Unseal-Vault.sh && . /vault/unseal/Unseal-Vault.sh"
+      env:
+        {{- if .Values.vault.autoUnseal.env }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.env "context" $) | nindent 8 }}
+        {{- end }}
+      volumeMounts:
+        - name: config
+          mountPath: /vault/unseal/Unseal-Vault.sh
+          subPath: Unseal-Vault.sh
+        - name: unseal
+          mountPath: {{ .Values.persistence.mountPath.unseal }}
+    {{- end }}
+    {{- if .Values.vault.sidecars }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.vault.sidecars "context" $) | nindent 4 }}
+    {{- end }}
   volumes:
     - name: config
       configMap:
@@ -152,6 +177,15 @@ spec:
     - name: tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    {{- if .Values.vault.autoUnseal.enabled }}
+    - name: unseal
+    {{- if .Values.persistence.enabled }}
+      persistentVolumeClaim:
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-unseal" ) .Values.persistence.existingClaim }}
+    {{- end }}
+    {{- else }}
+      emptyDir: {}
     {{- end }}
     {{- if .Values.vault.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumes "context" $) | nindent 4 }}

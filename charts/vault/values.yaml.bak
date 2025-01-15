@@ -329,153 +329,95 @@ vault:
   ##
   extraVolumeMounts: []
 
-  ## @param vault.autoUnseal run auto unseal process in a sidecar container
-  ## ref: https://hub.docker.com/r/apteno/alpine-jq/tags/
+  ## @param vault.autoUnseal run auto unseal process in startupProbe
   autoUnseal:
-    ## @param vault.autoUnseal.enabled Specifies whether run auto unseal for vault
-    ##
-    enabled: true
-    ## @param vault.autoUnseal.image.registry [default: REGISTRY_NAME] vault auto unseal image registry
-    ## @param vault.autoUnseal.image.repository [default: REPOSITORY_NAME/postgres-exporter] vault auto unseal image repository
-    ## @param vault.autoUnseal.image.tag vault auto unseal image tag
-    ## @param vault.autoUnseal.image.digest vault auto unseal image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-    ## @param vault.autoUnseal.image.pullPolicy vault auto unseal image pull policy
-    ## @param vault.autoUnseal.image.pullSecrets Specify docker-registry secret names as an array
-    ##
-    image:
-      registry: docker.io
-      repository: apteno/alpine-jq
-      tag: latest
-      digest: ""
-      ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
-      ##
-      pullPolicy: IfNotPresent
-      ## Optionally specify an array of imagePullSecrets.
-      ## Secrets must be manually created in the namespace.
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-      ## Example:
-      ## pullSecrets:
-      ##   - myRegistryKeySecretName
-      ##
-      pullSecrets: []
-    ## Configure Container Security Context for Auth Proxy
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-    ## @param authProxy.containerSecurityContext.enabled Enabled containers' Security Context
-    ## @param authProxy.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in container
-    ## @param authProxy.containerSecurityContext.runAsUser Set containers' Security Context runAsUser
-    ## @param authProxy.containerSecurityContext.runAsGroup Set containers' Security Context runAsGroup
-    ## @param authProxy.containerSecurityContext.runAsNonRoot Set container's Security Context runAsNonRoot
-    ## @param authProxy.containerSecurityContext.privileged Set container's Security Context privileged
-    ## @param authProxy.containerSecurityContext.readOnlyRootFilesystem Set container's Security Context readOnlyRootFilesystem
-    ## @param authProxy.containerSecurityContext.allowPrivilegeEscalation Set container's Security Context allowPrivilegeEscalation
-    ## @param authProxy.containerSecurityContext.capabilities.drop List of capabilities to be dropped
-    ## @param authProxy.containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
-    ##
-    containerSecurityContext:
-      enabled: false
-      seLinuxOptions: {}
-      runAsUser: 1001
-      runAsGroup: 1001
-      runAsNonRoot: true
-      privileged: false
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-      capabilities:
-        drop: ["ALL"]
-      seccompProfile:
-        type: "RuntimeDefault"
-    ## @param vault.autoUnseal.env Array with environment variables to add to unseal container
+    ## @param vault.autoUnseal.enabled enabled the auto unseal process
+    ## the auto unseal process will take place in startup probe
+    enabled: false
+    # ## @param vault.autoUnseal.env Array with environment variables to add to unseal container
     env:
-      - name: VAULT_ADDR
-        value: http://127.0.0.1:8200
-      - name: VAULT_OPERATOR_SECRETS_JSON_PATH
-        value: "/vault/unseal/vault_operator_secrets"
+      - name: VAULT_OPERATOR_SECRETS_PATH
+        value: /vault/file/vault_operator_secret
     ## @param vault.autoUnseal.script script to implement the unseal process
     script: |
       #!/bin/sh
 
       function wait_started {
-        counter=0
-        until STATUS=$(curl -k -X GET "$VAULT_ADDR/v1/sys/health" 2>&1); [ $? -ne 1 ]
-        do
-          if [ $counter -lt 20 ]; then
-            echo "Waiting for vault to come up, $(($counter*5))s passed"
-            sleep 5
-            ((counter++))
-          else
-            echo "check vault stauts manually"
-            exit 1
-          fi
-        done
-        echo "Vault is started"
+          counter=0
+          until STATUS=$(vault status -format=json 2>&1); [ $? -ne 1 ]
+          do
+              if [ $counter -lt 20 ]; then
+                  echo "Waiting for vault to come up, $(($counter*5))s passed"
+                  sleep 5
+                  ((counter++))
+              else
+                  echo "check vault stauts manually"
+                  exit 1
+              fi
+          done
+          echo "Vault is started"
       }
 
       function is_inited {
-        curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .initialized
+        # https://unix.stackexchange.com/questions/109835/how-do-i-use-cut-to-separate-by-multiple-whitespace/109894#109894
+        vault status | grep Initialized | awk '{print $NF}'
       }
 
       function init {
-        # Initialize Vault
-        printf "Initializing Vault...\n"
-        VAULT_OPERATOR_SECRETS=$(curl -s -k -X POST \
-          -H "Content-Type: application/json" \
-          -d '{ "secret_shares": 1, "secret_threshold": 1 }' \
-          "$VAULT_ADDR/v1/sys/init")
-        # Export Vault operator keys (root_token and unseal keys)
-        echo $VAULT_OPERATOR_SECRETS | jq . >$VAULT_OPERATOR_SECRETS_JSON_PATH
-        printf "Vault initialized.\n"
+          # Initialize Vault
+          printf "Initializing Vault...\n"
+          vault operator init > $VAULT_OPERATOR_SECRETS_PATH
+          printf "Vault initialized.\n"
       }
 
       function is_sealed {
-        curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .sealed
+        vault status | grep Sealed | awk '{print $NF}'
       }
 
       function unseal {
-        # Unseal Vault
-        printf "Unsealing Vault...\n"
-        VAULT_OPERATOR_SECRETS=$(cat $VAULT_OPERATOR_SECRETS_JSON_PATH)
-        VAULT_UNSEAL_KEYS=$(echo $VAULT_OPERATOR_SECRETS | jq -r .keys[])
-        for VAULT_UNSEAL_KEY in $VAULT_UNSEAL_KEYS; do
-            # https://developer.hashicorp.com/vault/api-docs/system/unseal
-            curl -s -k --request POST \
-              --data "{ \"key\": \"$VAULT_UNSEAL_KEY\" }" \
-              "$VAULT_ADDR/v1/sys/unseal"
-        done
+          # Unseal Vault
+          printf "Unsealing Vault...\n"
+          VAULT_UNSEAL_KEYS=$(cat $VAULT_OPERATOR_SECRETS_PATH | grep Unseal | cut -d " " -f4 | head -n 3)
+          for VAULT_UNSEAL_KEY in $VAULT_UNSEAL_KEYS; do
+              vault operator unseal $VAULT_UNSEAL_KEY > /dev/null
+          done
       }
 
-      wait_started
+      function authenticate {
+          # Authenticate Vault
+          printf "Authenticating Vault...\n"
+          VAULT_TOKEN=$(grep 'Initial Root Token' $VAULT_OPERATOR_SECRETS_PATH | cut -d ':' -f2 | tr -d ' ')
+          export VAULT_TOKEN=$VAULT_TOKEN
+      }
 
-      sleep 5s 
-      echo "is_inited"
-      is_inited
+      function unauthenticated {
+          # Unauthenticated Vault
+          printf "Unauthenticating Vault...\n"
+          unset VAULT_TOKEN
+          printf "Unauthenticated Vault.\n"
+      }
 
-      # init
-      if [[ $(is_inited) != "true" ]]; then
-        init
-      else
-        printf "Vault is already initialized.\n"
+      # Helper functions
+
+      function vault_status {
+          printf "Vault status:\n"
+          vault status
+      }
+
+      if [[ $(is_inited) == "false" ]]; then
+          # Vault is not initialized
+          printf "Vault is not initialized.\nStarting the initialization..\n"
+          wait_started
+          init
+          unseal
       fi
 
-      while true
-      do
-        sleep 5s 
-
-        echo "is_sealed"
-        is_sealed
-
-        # unseal
-        if [[ $(is_inited) == "true" && $(is_sealed) == "true" ]]; then
-          if [[ -f "$VAULT_OPERATOR_SECRETS_JSON_PATH" && $(stat -c%s "$VAULT_OPERATOR_SECRETS_JSON_PATH") -gt 1 ]]; then
-            unseal
-            exit 0
-          else
-            echo "no keys in file, please check"
-            exit 1
-          fi
-        fi
-
-        sleep 600
-      done
+      if [[ $(is_inited) == "true" && $(is_sealed) == "true" ]]; then
+          # Vault is already initialized
+          printf "Vault is already initialized.\n"
+          wait_started
+          unseal
+      fi
 
   ## @param vault.sidecars Add additional sidecar containers to the vault pod(s)
   ## e.g:
@@ -515,7 +457,6 @@ persistence:
   mountPath:
     storage: /vault/file
     logs: /vault/logs
-    unseal: /vault/unseal
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
