@@ -97,6 +97,7 @@ spec:
       {{- else if .Values.vault.readinessProbe.enabled }}
       readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.vault.readinessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
+      {{/*
       {{- if .Values.vault.autoUnseal.enabled }}
       startupProbe:
         initialDelaySeconds: 5
@@ -109,6 +110,8 @@ spec:
             - /bin/sh
             - /vault/config/Unseal-Vault.sh
       {{- else if .Values.vault.customStartupProbe }}
+      */}}
+      {{- if .Values.vault.customStartupProbe }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.vault.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.vault.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.vault.startupProbe "enabled") "context" $) | nindent 8 }}

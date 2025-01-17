@@ -334,7 +334,7 @@ vault:
   autoUnseal:
     ## @param vault.autoUnseal.enabled Specifies whether run auto unseal for vault
     ##
-    enabled: true
+    enabled: false
     ## @param vault.autoUnseal.image.registry [default: REGISTRY_NAME] vault auto unseal image registry
     ## @param vault.autoUnseal.image.repository [default: REPOSITORY_NAME/postgres-exporter] vault auto unseal image repository
     ## @param vault.autoUnseal.image.tag vault auto unseal image tag
@@ -441,6 +441,7 @@ vault:
               --data "{ \"key\": \"$VAULT_UNSEAL_KEY\" }" \
               "$VAULT_ADDR/v1/sys/unseal"
         done
+        printf "Unseal Done\n"
       }
 
       wait_started
@@ -467,7 +468,6 @@ vault:
         if [[ $(is_inited) == "true" && $(is_sealed) == "true" ]]; then
           if [[ -f "$VAULT_OPERATOR_SECRETS_JSON_PATH" && $(stat -c%s "$VAULT_OPERATOR_SECRETS_JSON_PATH") -gt 1 ]]; then
             unseal
-            exit 0
           else
             echo "no keys in file, please check"
             exit 1
