@@ -52,7 +52,7 @@ vault:
   image:
     registry: docker.io
     repository: hashicorp/vault
-    tag: latest
+    tag: 1.18
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -280,13 +280,15 @@ vault:
   ##
   podLabels: {}
   ## @param vault.podAnnotations Annotations for vault pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/containers/podman/discussions/22378
-  ## ref: https://github.com/hashicorp/vault/blob/main/Dockerfile#L112
   ## to keep container user as same permission as host user, set keep-id point to the container user and group id
   ## the userns annotation only work podman v4.9+
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/containers/podman/discussions/22378
+  ## ref: https://github.com/hashicorp/vault/blob/v1.18.3/Dockerfile#L121-L123
+  ## e.g.
   ## podAnnotations:
   ##   io.podman.annotations.userns: keep-id:uid=100,gid=1000
+  ##
   podAnnotations: {}
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
