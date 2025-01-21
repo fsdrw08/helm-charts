@@ -1,0 +1,441 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param coredns.deployKind specify the deploy kind： Pod, or Deployment
+deployKind: Pod
+## @section coredns Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+coredns:
+  ## Bitnami coredns image
+  ## ref: https://hub.docker.com/r/coredns/coredns/tags/
+  ## @param coredns.image.registry coredns image registry
+  ## @param coredns.image.repository coredns image repository
+  ## @param coredns.image.tag coredns image tag (immutable tags are recommended)
+  ## @param coredns.image.digest coredns image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param coredns.image.pullPolicy coredns image pull policy
+  ## @param coredns.image.pullSecrets coredns image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: coredns/coredns
+    tag: latest
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param coredns.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param coredns.replicaCount Number of coredns replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param coredns.containerPorts coredns container port to expose to host
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts:
+    - name: dns_tcp
+      containerPort: 53
+      hostPort: 53
+      protocol: TCP
+    - name: dns_udp
+      containerPort: 53
+      hostPort: 53
+      protocol: UDP
+  ## Configure extra options for coredns containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## ref: https://github.com/coredns/helm/blob/master/charts/coredns/values.yaml#L360
+  ## ref: https://github.com/coredns/helm/blob/master/charts/coredns/templates/deployment.yaml#L112
+  ## @param coredns.livenessProbe.enabled Enable livenessProbe on coredns containers
+  ## @param coredns.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param coredns.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param coredns.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param coredns.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param coredns.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+    successThreshold: 1
+    httpGet:
+      path: /health
+      port: 8080
+      scheme: HTTP
+  ## @param coredns.readinessProbe.enabled Enable readinessProbe on coredns containers
+  ## @param coredns.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param coredns.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param coredns.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param coredns.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param coredns.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param coredns.startupProbe.enabled Enable startupProbe on coredns containers
+  ## @param coredns.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param coredns.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param coredns.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param coredns.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param coredns.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param coredns.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param coredns.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param coredns.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## coredns resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param coredns.resourcesPreset Set coredns container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if coredns.resources is set (coredns.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param coredns.resources Set coredns container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param coredns.podSecurityContext.enabled Enabled coredns pods' Security Context
+  ## @param coredns.podSecurityContext.fsGroup Set coredns pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param coredns.containerSecurityContext.enabled Enabled coredns containers' Security Context
+  ## @param coredns.containerSecurityContext.runAsUser Set coredns containers' Security Context runAsUser
+  ## @param coredns.containerSecurityContext.runAsNonRoot Set coredns containers' Security Context runAsNonRoot
+  ## @param coredns.containerSecurityContext.readOnlyRootFilesystem Set coredns containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param coredns.hostIP
+  ##
+  hostIP: ""
+  ## @param coredns.servers
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/#coredns-configmap-options
+  ## e.g.
+  ## servers:
+  ##  - zones:                 # the `zones` block can be left out entirely, defaults to "."
+  ##    - zone: hello.world.   # optional, defaults to "."
+  ##      scheme: tls://       # optional, defaults to "" (which equals "dns://" in CoreDNS)
+  ##    - zone: foo.bar.
+  ##      scheme: dns://
+  ##      use_tcp: true        # set this parameter to optionally expose the port on tcp as well as udp for the DNS protocol
+  ##                          # Note that this will not work if you are also exposing tls or grpc on the same server
+  ##    port: 12345            # optional, defaults to "" (which equals 53 in CoreDNS)
+  ##    plugins:               # the plugins to use for this server block
+  ##      - name: kubernetes     # name of plugin, if used multiple times ensure that the plugin supports it!
+  ##        parameters: foo bar  # list of parameters after the plugin
+  ##        configBlock: |-      # if the plugin supports extra block style config, supply it here
+  ##          hello world
+  ##          foo bar
+  servers:
+    - zones:
+        - zone: .
+      port: 53
+      plugins:
+        - name: errors
+        # Serves a /health endpoint on :8080, required for livenessProbe
+        - name: health
+          configBlock: |-
+            lameduck 5s
+        - name: forward
+          parameters: . /etc/resolv.conf
+        - name: cache
+          parameters: 30
+        # The loop plugin will send a random probe query to ourselves and will then keep track of how many times we see it.
+        # If we see it more than twice, we assume CoreDNS has seen a forwarding loop and we halt the process.
+        - name: loop
+        # This plugin allows automatic reload of a changed Corefile.
+        # To enable automatic reloading of zone file changes, use the auto plugin.
+        - name: reload
+  ## @param coredns.extraConfig
+  ## Extra configuration that is applied outside of the default zone block.
+  ## Example to include additional config files, which may come from extraVolumes:
+  ## e.g.
+  ## extraConfig:
+  ##   import:
+  ##     parameters: /opt/coredns/*.conf
+  ##
+  extraConfig: {}
+  ## @param coredns.zoneFiles
+  ## configure custom zone files as per https://coredns.io/2017/05/08/custom-dns-entries-for-kubernetes/
+  ##
+  zoneFiles: []
+  ## @param coredns.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param coredns.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ## possible use case: need for secure connection with etcd backend
+  ##
+  tls:
+    mountPath: /etc/coredns/tls
+    ## @param coredns.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## content:
+    ##  etcd-client-cert.crt: ""
+    ##  etcd-client-cert.key: ""
+    ##
+    contents: {}
+  ## @param coredns.existingConfigmap The name of an existing ConfigMap with your custom configuration for coredns
+  ##
+  existingConfigmap:
+  ## @param coredns.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param coredns.args Override default container args (useful when using custom images)
+  ##
+  args: ["-conf", "/etc/coredns/Corefile"]
+  ## @param coredns.hostAliases coredns pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param coredns.podLabels Extra labels for coredns pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param coredns.podAnnotations Annotations for coredns pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param coredns.autoscaling.enabled Enable autoscaling for coredns
+  ## @param coredns.autoscaling.minReplicas Minimum number of coredns replicas
+  ## @param coredns.autoscaling.maxReplicas Maximum number of coredns replicas
+  ## @param coredns.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param coredns.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param coredns.extraEnvVars Array with extra environment variables to add to coredns nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param coredns.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for coredns nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param coredns.extraEnvVarsSecret Name of existing Secret containing extra env vars for coredns nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param coredns.extraVolumes Optionally specify extra list of additional volumes for the coredns pod(s)
+  ##
+  extraVolumes: []
+  ## @param coredns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the coredns container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param coredns.sidecars Add additional sidecar containers to the coredns pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param coredns.initContainers Add additional init containers to the coredns pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: false
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: ""
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources.limits The resources limits for the init container
+  ## @param volumePermissions.resources.requests The requested resources for the init container
+  ##
+  resources:
+    limits: {}
+    requests: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

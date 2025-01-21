@@ -1,0 +1,5 @@
+{{- if eq .Values.instanceKind "Pod" -}}
+apiVersion: v1
+kind: Pod
+{{ template "jenkins.podTemplate" . }}
+{{- end }}

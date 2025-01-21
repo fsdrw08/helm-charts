@@ -1,0 +1,486 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param postgresql.deployKind specify the deploy kind： Pod, or Deployment
+deployKind: Pod
+## @section %%MAIN_CONTAINER%% Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+postgresql:
+  ## sclorg postgresql-16-c10s image
+  ## ref: https://quay.io/repository/sclorg/postgresql-16-c10s?tab=tags
+  ## @param postgresql.image.registry %%MAIN_CONTAINER%% image registry
+  ## @param postgresql.image.repository %%MAIN_CONTAINER%% image repository
+  ## @param postgresql.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
+  ## @param postgresql.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param postgresql.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
+  ## @param postgresql.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
+  ##
+  image:
+    registry: quay.io
+    repository: sclorg/postgresql-16-c10s
+    tag: "20250108"
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param postgresql.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param postgresql.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param postgresql.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts: {}
+  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param postgresql.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param postgresql.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param postgresql.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param postgresql.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param postgresql.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param postgresql.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - |
+          pg_isready
+  ## @param postgresql.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param postgresql.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param postgresql.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param postgresql.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param postgresql.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param postgresql.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  ## @param postgresql.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param postgresql.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param postgresql.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param postgresql.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param postgresql.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param postgresql.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 15
+    successThreshold: 1
+  ## @param postgresql.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param postgresql.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param postgresql.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param postgresql.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if postgresql.resources is set (postgresql.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param postgresql.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param postgresql.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param postgresql.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param postgresql.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+  ## @param postgresql.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+  ## @param postgresql.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param postgresql.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 26
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param postgresql.config environment variable config for postgresql
+  config:
+    ## @param postgresql.config.POSTGRESQL_USER User name for PostgreSQL account to be created
+    ##
+    POSTGRESQL_USER: user
+    ## @param postgresql.config.POSTGRESQL_PASSWORD Password for the user account
+    ##
+    POSTGRESQL_PASSWORD: password
+    ## @param postgresql.config.POSTGRESQL_DATABASE Database name
+    ##
+    POSTGRESQL_DATABASE: database
+    ## @param postgresql.config.POSTGRESQL_ADMIN_PASSWORD Password for the postgres admin account (optional)
+    ##
+    POSTGRESQL_ADMIN_PASSWORD: password
+    ## Alternatively, the following options are related to migration scenario:
+    ## @param postgresql.config.POSTGRESQL_MIGRATION_REMOTE_HOST Hostname/IP to migrate from
+    ##
+    POSTGRESQL_MIGRATION_REMOTE_HOST:
+    ## @param postgresql.config.POSTGRESQL_MIGRATION_ADMIN_PASSWORD Password for the remote 'postgres' admin user
+    ##
+    POSTGRESQL_MIGRATION_ADMIN_PASSWORD:
+    ## @param postgresql.config.POSTGRESQL_MIGRATION_IGNORE_ERRORS Set to 'yes' to ignore sql import errors, optional, default 'no'
+    ##
+    POSTGRESQL_MIGRATION_IGNORE_ERRORS: no
+    ## The following environment variables influence the PostgreSQL configuration file. They are all optional.
+    ## @param postgresql.config.POSTGRESQL_MAX_CONNECTIONS The maximum number of client connections allowed
+    ## default: 100
+    ##
+    POSTGRESQL_MAX_CONNECTIONS: 100
+    ## @param postgresql.config.POSTGRESQL_MAX_PREPARED_TRANSACTIONS Sets the maximum number of transactions that can be in the "prepared" state. If you are using prepared transactions, you will probably want this to be at least as large as max_connections
+    ## default: 0
+    ##
+    POSTGRESQL_MAX_PREPARED_TRANSACTIONS: 0
+    ## @param postgresql.config.POSTGRESQL_SHARED_BUFFERS Sets how much memory is dedicated to PostgreSQL to use for caching data
+    ## default: 1/4 of memory limit or 32M
+    ##
+    POSTGRESQL_SHARED_BUFFERS: 32M
+    ## @param postgresql.config.POSTGRESQL_EFFECTIVE_CACHE_SIZE Set to an estimate of how much memory is available for disk caching by the operating system and within the database itself
+    ## default: 1/2 of memory limit or 128M
+    ##
+    POSTGRESQL_EFFECTIVE_CACHE_SIZE: 128M
+    ## @param postgresql.config.POSTGRESQL_LOG_DESTINATION Where to log errors,
+    ## the default is /var/lib/pgsql/data/userdata/log/postgresql-*.log and this file is rotated; it can be changed to /dev/stderr to make debugging easier
+    ##
+    POSTGRESQL_LOG_DESTINATION: /var/lib/pgsql/data/userdata/log/postgresql-*.log
+    ## The following environment variables deal with extensions. They are all optional, and if not set, no extensions will be enabled.
+    ## @param postgresql.config.POSTGRESQL_LIBRARIES A comma-separated list of libraries that Postgres will preload using sharedpreloadlibraries.
+    ##
+    POSTGRESQL_LIBRARIES:
+    ## @param postgresql.config.POSTGRESQL_EXTENSIONS A space-separated list of extensions to create when the server start. Once created, the extensions will stay even if the variable is cleared.
+    ##
+    POSTGRESQL_EXTENSIONS:
+  ## @param postgresql.extending directories to config extend feature for the image
+  ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#extending-image
+  ##
+  extending:
+    ## @param postgresql.extending.preStart This directory (postgresql-pre-start/) should contain *.sh files that will be sourced during the early start of the container.
+    ## At this point, there is no PostgreSQL daemon running in the background.
+    ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#postgresql-pre-start
+    ## e.g.
+    ## pre-start:
+    ##   enable_ssl.sh: |
+    ##     #!/bin/bash
+    ##     # Postgresql server will reject key files with liberal permissions
+    ##     # This might fail in OpenShift when using a restricted SCC
+    ##     # Make sure to run this deployment with an OpenShift service account using  the anyuid SCC
+    ##     chmod og-rwx certs/tls.key
+    ##
+    pre-start: {}
+    ## @param postgresql.extending.cfg Configuration files (`*.conf`) contained in this directory (postgresql-cfg/) will be included at the end of the image's postgresql.conf file.
+    ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#postgresql-cfg
+    ## e.g.
+    ## cfg:
+    ##   ssl.conf: |
+    ##     ssl = on
+    ##     ssl_cert_file = '/opt/app-root/src/certs/tls.crt' # server certificate
+    ##     ssl_key_file =  '/opt/app-root/src/certs/tls.key' # server private key
+    ##     #ssl_ca_file                                   # trusted certificate authorities
+    ##     #ssl_crl_file                                  # certificates revoked by certificate authorities
+    ##
+    cfg: {}
+    ## @param postgresql.extending.init This directory (postgresql-init/) should contain shell scripts (*.sh) that are sourced when the database is freshly initialized
+    ## (after a successful initdb run, which makes the data directory non-empty).
+    ## At the time of sourcing these scripts, the local PostgreSQL server is running.
+    ## For re-deployment scenarios with a persistent data directory, the scripts are not sourced (no-op).
+    ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#postgresql-init
+    ##  e.g.
+    ## init:
+    ##   createPgStatStatements.sh: |
+    ##     #!/bin/bash
+    ##     echo "CREATE EXTENSION pg_stat_statements;" | psql
+    ##
+    init: {}
+    ## @param postgresql.extending.start This directory (postgresql-start/) has the same semantics as postgresql-init/,
+    ## except that these scripts are always sourced (after postgresql-init/ scripts, if they exist).
+    ##
+    start: {}
+  ## @param postgresql.ssl secret setting of cert and key or whatever ssl content will set in the container
+  ##
+  ssl:
+    ## @param postgresql.ssl.mountPath secret mount path setting of whatever ssl content will set in the container
+    ## ref: https://github.com/containers/podman/issues/20956
+    ##
+    mountPath: /opt/app-root/src/certs:U
+    ## @param postgresql.ssl.contents secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## contents:
+    ##  tls.crt: ""
+    ##  tls.key: ""
+    ##
+    contents: {}
+  ## @param postgresql.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ##
+  existingConfigmap:
+  ## @param postgresql.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param postgresql.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param postgresql.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param postgresql.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param postgresql.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param postgresql.autoscaling.enabled Enable autoscaling for postgresql
+  ## @param postgresql.autoscaling.minReplicas Minimum number of postgresql replicas
+  ## @param postgresql.autoscaling.maxReplicas Maximum number of postgresql replicas
+  ## @param postgresql.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param postgresql.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param postgresql.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param postgresql.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param postgresql.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param postgresql.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param postgresql.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param postgresql.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param postgresql.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /var/lib/pgsql/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

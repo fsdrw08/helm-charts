@@ -1,0 +1,20 @@
+{{- if .Values.controller.initScripts -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm-init-scripts
+  namespace: {{ template "common.names.namespace" . }}
+  labels:
+    app.kubernetes.io/component: jenkins-controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+{{- range $key, $val := .Values.controller.initScripts }}
+  init{{ $key }}.groovy: |-
+{{ tpl $val $ | indent 4 }}
+{{- end }}
+{{- end }}

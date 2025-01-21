@@ -1,0 +1,90 @@
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "common.names.fullname" . }}-pvc-home
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: jenkins-controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.persistence.pvcHomeAnnotations .Values.commonAnnotations }}
+  annotations:
+    {{- if .Values.persistence.pvcHomeAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.persistence.pvcHomeAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- range .Values.persistence.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+  {{- include "common.storage.class" (dict "persistence" .Values.persistence "global" .Values.global) | nindent 2 }}
+{{- end }}
+{{- if .Values.controller.installPlugins }}
+{{- if .Values.controller.overwritePluginsFromImage }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "common.names.fullname" . }}-pvc-plugins-loading
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: jenkins-controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.persistence.pvcPluginsLoadingAnnotations .Values.commonAnnotations }}
+  annotations:
+    {{- if .Values.persistence.pvcPluginsLoadingAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.persistence.pvcPluginsLoadingAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- range .Values.persistence.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+  {{- include "common.storage.class" (dict "persistence" .Values.persistence "global" .Values.global) | nindent 2 }}
+{{- end }}
+{{- end }}
+{{- if .Values.controller.installPlugins }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "common.names.fullname" . }}-pvc-plugins-storage
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: jenkins-controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if or .Values.persistence.pvcPluginsStorageAnnotations .Values.commonAnnotations }}
+  annotations:
+    {{- if .Values.persistence.pvcPluginsStorageAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.persistence.pvcPluginsStorageAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  accessModes:
+  {{- range .Values.persistence.accessModes }}
+    - {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+  {{- end }}

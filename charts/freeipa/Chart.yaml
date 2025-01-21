@@ -1,0 +1,26 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+# https://quay.io/repository/freeipa/freeipa-server?tab=tags
+appVersion: "4.10.2"
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: freeipa helm chart for podman kube play
+home: https://github.com/fsdrw08/helm-charts
+icon: https://raw.githubusercontent.com/freeipa/freeipa.github.io/main/src/_static/freeipa-logo-small.png
+keywords:
+  - podman kube play
+  - freeipa
+  - idp
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: freeipa
+sources:
+  - https://github.com/fsdrw08/helm-charts/freeipa
+version: 0.1.0

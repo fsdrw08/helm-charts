@@ -1,0 +1,5 @@
+{{- if eq .Values.deployKind "Pod"  -}}
+apiVersion: v1
+kind: Pod
+{{ template "postgresql.podTemplate" . }}
+{{- end }}

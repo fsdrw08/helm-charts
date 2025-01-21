@@ -1,0 +1,42 @@
+{{- if .Values.controller.JCasC.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm-jcasc
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: jenkins-controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  jcasc-default-config.yaml: |-
+    {{- include "common.tplvalues.render" (dict "value" .Values.controller.JCasC.default "context" $) | nindent 4 -}}
+    {{/*
+    jenkins:
+      {{- if .Values.controller.JCasC.default.jenkins.authorizationStrategy }}
+      authorizationStrategy: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.default.jenkins.authorizationStrategy "context" $ ) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.JCasC.default.jenkins.securityRealm }}
+      securityRealm: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.default.jenkins.securityRealm "context" $ ) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.JCasC.default.jenkins.crumbIssuer }}
+      crumbIssuer: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.default.jenkins.crumbIssuer "context" $ ) | nindent 8 }}
+      {{- end }}
+    {{- if .Values.controller.JCasC.default.security }}
+    security: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.default.security "context" $ ) | nindent 6 }}
+    {{- end }}
+    unclassified: {{ include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.default.unclassified "context" $ ) | nindent 8 }}
+    {{- if  .Values.controller.JCasC.extraConfig }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.controller.JCasC.default.extraConfig "context" $ ) | nindent 4 }}
+    {{- end }}
+    */}}
+  {{- range $key, $val := .Values.controller.JCasC.extraConfigFiles }}
+  {{- if $val }}
+  {{ $key }}: |- 
+    {{- include "common.tplvalues.render" ( dict "value" $val "context" $ ) | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}

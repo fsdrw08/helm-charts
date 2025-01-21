@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: jenkins-controller
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  apply_config.sh: |-
+    set -e
+    {{- if .Values.controller.initializeOnce }}
+    if [ -f {{ .Values.controller.jenkinsHome }}/initialization-completed ]; then
+      echo "controller was previously initialized, refusing to re-initialize"
+      exit 0
+    fi
+    {{- end }}
+    
+    {{- if .Values.controller.JCasC.enabled }}
+    # Prevent Setup Wizard when JCasC is enabled
+    echo "disable Setup Wizard"
+    echo $JENKINS_VERSION > {{ .Values.controller.jenkinsHome }}/jenkins.install.UpgradeWizard.state
+    echo $JENKINS_VERSION > {{ .Values.controller.jenkinsHome }}/jenkins.install.InstallUtil.lastExecVersion
+    echo "prepare casc_configs dir"
+    mkdir -p {{ .Values.controller.jenkinsHome }}/casc_configs
+    {{- end }}
+
+    {{- if .Values.controller.overwritePlugins }}
+    # remove all plugins from shared volume
+    echo "remove all plugins from shared volume"
+    rm -rf {{ .Values.controller.jenkinsHome }}/plugins/*
+    {{- end }}
+
+    {{- if .Values.controller.installPlugins }}
+    # Install missing plugins
+    echo "download plugins"
+    echo "cp"
+    cp /var/jenkins_config/plugins.txt {{ .Values.controller.jenkinsHome }};
+    echo "rm"
+    rm -rf {{ .Values.controller.jenkinsRef }}/plugins/*.lock
+    echo "version"
+    version () { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+    echo "plugin-cli"
+    if [ -f "{{ .Values.controller.jenkinsWar }}" ] && [ -n "$(command -v jenkins-plugin-cli)" 2>/dev/null ] && [ $(version $(jenkins-plugin-cli --version)) -ge $(version "2.1.1") ]; then
+      jenkins-plugin-cli --verbose \
+        --war "{{ .Values.controller.jenkinsWar }}" \
+        --plugin-file "{{ .Values.controller.jenkinsHome }}/plugins.txt" \
+        --latest {{ .Values.controller.installLatestPlugins }}{{- if .Values.controller.installLatestSpecifiedPlugins }} \
+        --latest-specified{{- end }};
+    else
+      /usr/local/bin/install-plugins.sh `echo $(cat {{ .Values.controller.jenkinsHome }}/plugins.txt)`;
+    fi
+
+    # Copy plugins to shared volume
+    echo "copy plugins to shared volume"
+    yes n | cp -i {{ .Values.controller.jenkinsRef }}/plugins/* /var/jenkins_plugins/;
+    {{- end }}
+
+    # finished initialization
+    echo "finished initialization"
+    {{- if .Values.controller.initializeOnce }}
+    touch {{ .Values.controller.jenkinsHome }}/initialization-completed
+    {{- end }}
+
+  plugins.txt: |-
+{{- if .Values.controller.installPlugins }}
+  {{- range $installPlugin := .Values.controller.installPlugins }}
+    {{- $installPlugin | nindent 4 }}
+  {{- end }}
+  {{- range $addlPlugin := .Values.controller.additionalPlugins }}
+    {{- /* duplicate plugin check */}}
+    {{- range $installPlugin := $.Values.controller.installPlugins }}
+      {{- if eq (splitList ":" $addlPlugin | first) (splitList ":" $installPlugin | first) }}
+        {{- $message := print "[PLUGIN CONFLICT] controller.additionalPlugins contains '" $addlPlugin "'" }}
+        {{- $message := print $message " but controller.installPlugins already contains '" $installPlugin "'." }}
+        {{- $message := print $message " Override controller.installPlugins to use '" $addlPlugin "' plugin." }}
+        {{- fail $message }}
+      {{- end }}
+    {{- end }}
+    {{- $addlPlugin | nindent 4 }}
+  {{- end }}
+{{- end }}

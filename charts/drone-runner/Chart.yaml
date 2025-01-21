@@ -1,0 +1,27 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+# https://hub.docker.com/r/drone/drone/tags
+appVersion: v2.18
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: Drone runner helm chart for podman, deploy drone runner in podman with podman kube play. Drone is a self-service Continuous Integration platform for busy development teams.
+home: https://www.drone.io/
+keywords:
+  - podman kube play
+  - drone
+  - ci
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: drone-runner
+sources:
+  - https://github.com/fsdrw08/helm-charts/Drone
+  - https://github.com/harness/drone/tree/master
+  - ...
+version: 0.1.0

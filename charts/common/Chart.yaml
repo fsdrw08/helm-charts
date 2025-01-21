@@ -1,0 +1,25 @@
+annotations:
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+# Please make sure that version and appVersion are always the same.
+appVersion: 2.20.1
+description: A Library Helm Chart for grouping common logic between bitnami charts. This chart is not deployable by itself.
+home: https://github.com/fsdrw08/helm-charts
+icon: https://bitnami.com/downloads/logos/bitnami-mark.png
+keywords:
+  - common
+  - helper
+  - template
+  - function
+  - bitnami
+maintainers:
+  - name: Broadcom, Inc. All Rights Reserved.
+    url: https://github.com/bitnami/charts
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: common
+sources:
+  - https://github.com/fsdrw08/helm-charts/tree/main/common
+type: library
+version: 2.20.2

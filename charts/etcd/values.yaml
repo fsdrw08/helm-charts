@@ -1,0 +1,710 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param etcd.deployKind specify the deploy kind： Pod, or Deployment
+deployKind: Pod
+## @section etcd Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+etcd:
+  ## etcd image
+  ## ref: https://quay.io/repository/coreos/etcd?tab=tags
+  ## @param etcd.image.registry etcd image registry
+  ## @param etcd.image.repository etcd image repository
+  ## @param etcd.image.tag etcd image tag (immutable tags are recommended)
+  ## @param etcd.image.digest etcd image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param etcd.image.pullPolicy etcd image pull policy
+  ## @param etcd.image.pullSecrets etcd image pull secrets
+  ##
+  image:
+    registry: quay.io
+    repository: coreos/etcd
+    tag: v3.5.17
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param etcd.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param etcd.replicaCount Number of etcd replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param etcd.containerPorts etcd container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts:
+    - name: client
+      containerPort: 2379
+      hostPort: 2379
+      protocol: TCP
+    - name: peer
+      containerPort: 2380
+      hostPort: 2380
+      protocol: TCP
+
+  ## Configure extra options for etcd containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param etcd.livenessProbe.enabled Enable livenessProbe on etcd containers
+  ## @param etcd.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param etcd.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param etcd.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param etcd.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param etcd.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 180
+    periodSeconds: 300
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    ## https://github.com/openshift/microshift/blob/80d5b311cf012acc0cb33b9178d148198a64c2d3/ansible/roles/install-microshift/files/etcd.service
+    ## note: after enable auth ("etcdctl auth enable"), the `endpoint health` command will require credential,
+    ## use `etcdctl endpoint status` instead if you dont want to provide credential in the probe
+    exec:
+      command:
+        - etcdctl
+        - endpoint
+        - health
+        - --endpoints=unix://localhost:0
+  ## @param etcd.readinessProbe.enabled Enable readinessProbe on etcd containers
+  ## @param etcd.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param etcd.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param etcd.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param etcd.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param etcd.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 60
+    periodSeconds: 120
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    httpGet:
+      path: /readyz?verbose
+      port: 2379
+  ## @param etcd.startupProbe.enabled Enable startupProbe on etcd containers
+  ## @param etcd.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param etcd.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param etcd.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param etcd.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param etcd.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param etcd.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param etcd.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param etcd.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## etcd resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param etcd.resourcesPreset Set etcd container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge).
+  ## This is ignored if etcd.resources is set (etcd.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param etcd.resources Set etcd container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param etcd.podSecurityContext.enabled Enabled etcd pods' Security Context
+  ## @param etcd.podSecurityContext.fsGroup Set etcd pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param etcd.containerSecurityContext.enabled Enabled etcd containers' Security Context
+  ## @param etcd.containerSecurityContext.runAsUser Set etcd containers' Security Context runAsUser
+  ## @param etcd.containerSecurityContext.runAsNonRoot Set etcd containers' Security Context runAsNonRoot
+  ## @param etcd.containerSecurityContext.readOnlyRootFilesystem Set etcd containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    # runAsUser: 1001
+    # runAsNonRoot: true
+    # readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  ## @param etcd.configFile An etcd configuration file consists of a YAML map whose keys are command-line flag names and values are the flag values
+  ## ref:
+  ##  https://etcd.io/docs/v3.5/op-guide/configuration/
+  ##  https://github.com/etcd-io/etcd/blob/main/etcd.conf.yml.sample
+  ##
+  configFile:
+    ## Member
+    ## @param etcd.configFile.name Human-readable name for this member.
+    ##
+    name: default
+    ## @param etcd.configFile.data-dir Path to the data directory. Default: "${name}.etcd"
+    ## According to the official Dockerfile https://github.com/etcd-io/etcd/blob/main/Dockerfile#L9
+    ## the entrypoint command will run under WORKDIR /var/lib/etcd/,
+    ## which means, by default, the data-dir path will be /var/lib/etcd/default.etcd
+    ##
+    data-dir:
+    ## @param etcd.configFile.wal-dir Path to the dedicated wal directory.
+    ##
+    wal-dir:
+    ## @param etcd.configFile.snapshot-count Number of committed transactions to trigger a snapshot to disk.
+    ##
+    snapshot-count: 100000
+    ## @param etcd.configFile.heartbeat-interval Time (in milliseconds) of a heartbeat interval.
+    ##
+    heartbeat-interval: 100
+    ## @param etcd.configFile.election-timeout Time (in milliseconds) for an election to timeout. See tuning documentation for details.
+    ##
+    election-timeout: 1000
+    ## @param etcd.configFile.initial-election-tick-advance  Whether to fast-forward initial election ticks on boot for faster election.
+    ##
+    initial-election-tick-advance: true
+    ## @param etcd.configFile.listen-peer-urls List of URLs to listen on for peer traffic.
+    ## This flag tells the etcd to accept incoming requests from its peers on the specified scheme://IP:port combinations.
+    ## Scheme can be http or https. Alternatively, use unix://<file-path> or unixs://<file-path> for unix sockets.
+    ## If 0.0.0.0 is specified as the IP, etcd listens to the given port on all interfaces.
+    ## If an IP address is given as well as a port, etcd will listen on the given port and interface.
+    ## Multiple URLs may be used to specify a number of addresses and ports to listen on.
+    ## The etcd will respond to requests from any of the listed addresses and ports.
+    ##
+    listen-peer-urls: http://localhost:2380
+    ## @param etcd.configFile.listen-client-urls List of URLs to listen on for client grpc traffic and http as long as --listen-client-http-urls is not specified.
+    ## Scheme can be either http or https. Alternatively, use unix://<file-path> or unixs://<file-path> for unix sockets.
+    ## If 0.0.0.0 is specified as the IP, etcd listens to the given port on all interfaces.
+    ## If an IP address is given as well as a port, etcd will listen on the given port and interface.
+    ## Multiple URLs may be used to specify a number of addresses and ports to listen on.
+    ## The etcd will respond to requests from any of the listed addresses and ports.
+    ## unixs means unix domain socket with ssl transfer, ref: https://github.com/openshift/microshift/blob/80d5b311cf012acc0cb33b9178d148198a64c2d3/ansible/roles/install-microshift/files/etcd.service
+    ##
+    listen-client-urls: http://localhost:2379,unix://localhost:0
+    ## @param etcd.configFile.listen-client-http-urls List of URLs to listen on for http only client traffic.
+    ## Enabling this flag removes http services from --listen-client-urls.
+    ## Use this flag when you want to segregate HTTP traffic from other protocols.
+    ## If 0.0.0.0 is specified as the IP, etcd listens to the given port on all interfaces.
+    ## If an IP address is given as well as a port, etcd will listen on the given port and interface.
+    ## Multiple URLs may be used to specify a number of addresses and ports to listen on.
+    ## The etcd will respond to requests from any of the listed addresses and ports.
+    ##
+    listen-client-http-urls:
+    ## @param etcd.configFile.max-snapshots Maximum number of snapshot files to retain (0 is unlimited).
+    ##
+    max-snapshots: 5
+    ## @param etcd.configFile.max-wals Maximum number of wal files to retain (0 is unlimited).
+    ##
+    max-wals: 5
+    ## @param etcd.configFile.quota-backend-bytes Raise alarms when backend size exceeds the given quota (0 defaults to low space quota).
+    ##
+    quota-backend-bytes: 0
+    ## @param etcd.configFile.backend-bbolt-freelist-type BackendFreelistType specifies the type of freelist that boltdb backend uses(array and map are supported types).
+    ##
+    backend-bbolt-freelist-type: map
+    ## @param etcd.configFile.backend-batch-interval BackendBatchInterval is the maximum time before commit the backend transaction.
+    ##
+    backend-batch-interval:
+    ## @param etcd.configFile.backend-batch-limit BackendBatchLimit is the maximum operations before commit the backend transaction.
+    ##
+    backend-batch-limit: 0
+    ## @param etcd.configFile.max-txn-ops Maximum number of operations permitted in a transaction.
+    ##
+    max-txn-ops: 128
+    ## @param etcd.configFile.max-request-bytes Maximum client request size in bytes the server will accept.
+    ##
+    max-request-bytes: 1572864
+    ## @param etcd.configFile.grpc-keepalive-min-time Minimum duration interval that a client should wait before pinging server.
+    ##
+    grpc-keepalive-min-time: 5000
+    ## @param etcd.configFile.grpc-keepalive-interval Frequency duration of server-to-client ping to check if a connection is alive (0 to disable).
+    ##
+    # grpc-keepalive-interval: "2h"
+    ## @param etcd.configFile.grpc-keepalive-timeout Additional duration of wait before closing a non-responsive connection (0 to disable).
+    ##
+    grpc-keepalive-timeout: 20000
+    ## @param etcd.configFile.socket-reuse-port Enable to set socket option SO_REUSEPORT on listeners allowing rebinding of a port already in use.
+    ##
+    socket-reuse-port: false
+    ## @param etcd.configFile.socket-reuse-address Enable to set socket option SO_REUSEADDR on listeners allowing binding to an address in TIME_WAIT state.
+    ##
+    socket-reuse-address: false
+    ### Clustering
+    ## @param etcd.configFile.initial-advertise-peer-urls List of this member's peer URLs to advertise to the rest of the cluster.
+    ##
+    initial-advertise-peer-urls: http://localhost:2380
+    ## @param etcd.configFile.initial-cluster Initial cluster configuration for bootstrapping.
+    ##
+    initial-cluster: default=http://localhost:2380
+    ## @param etcd.configFile.initial-cluster-state Initial cluster state ('new' or 'existing').
+    ##
+    initial-cluster-state: new
+    ## @param etcd.configFile.initial-cluster-token Initial cluster token for the etcd cluster during bootstrap.
+    ## Specifying this can protect you from unintended cross-cluster interaction when running multiple clusters.
+    initial-cluster-token: etcd-cluster
+    ## @param etcd.configFile.advertise-client-urls List of this member's client URLs to advertise to the public.
+    ## The client URLs advertised should be accessible to machines that talk to etcd cluster. etcd client libraries parse these URLs to connect to the cluster.
+    ##
+    advertise-client-urls: http://localhost:2379
+    ## @param etcd.configFile.discovery Discovery URL used to bootstrap the cluster.
+    ##
+    discovery:
+    ## @param etcd.configFile.discovery-fallback Expected behavior ('exit' or 'proxy') when discovery services fails.
+    ## "proxy" supports v2 API only.
+    ##
+    discovery-fallback: proxy
+    ## @param etcd.configFile.discovery-proxy HTTP proxy to use for traffic to discovery service.
+    ##
+    discovery-proxy:
+    ## @param etcd.configFile.discovery-srv DNS srv domain used to bootstrap the cluster.
+    ##
+    discovery-srv:
+    ## @param etcd.configFile.discovery-srv-name Suffix to the dns srv name queried when bootstrapping.
+    ##
+    discovery-srv-name:
+    ## @param etcd.configFile.strict-reconfig-check Reject reconfiguration requests that would cause quorum loss.
+    ##
+    strict-reconfig-check: true
+    ## @param etcd.configFile.pre-vote Enable the raft Pre-Vote algorithm to prevent disruption when a node that has been partitioned away rejoins the cluster.
+    ##
+    pre-vote: true
+    ## @param etcd.configFile.auto-compaction-retention Auto compaction retention length. 0 means disable auto compaction.
+    ##
+    auto-compaction-retention: "1"
+    ## @param etcd.configFile.auto-compaction-mode Interpret 'auto-compaction-retention' one of: periodic|revision. 'periodic' for duration based retention, defaulting to hours if no time unit is provided (e.g. '5m'). 'revision' for revision number based retention.
+    ##
+    auto-compaction-mode: periodic
+    ## @param etcd.configFile.enable-v2 Accept etcd V2 client requests. Deprecated and to be decommissioned in v3.6.
+    ##
+    enable-v2: false
+    ## @param etcd.configFile.v2-deprecation Phase of v2store deprecation. Allows to opt-in for higher compatibility mode.
+    ## Supported values:
+    ##  'not-yet'                // Issues a warning if v2store have meaningful content (default in v3.5)
+    ##  'write-only'             // Custom v2 state is not allowed (planned default in v3.6)
+    ##  'write-only-drop-data'   // Custom v2 state will get DELETED !
+    ##  'gone'                   // v2store is not maintained any longer. (planned default in v3.7)
+    ##
+    v2-deprecation: not-yet
+    ### Security
+    ## @param etcd.configFile.client-transport-security Block to config the client transport security
+    client-transport-security:
+      ## @param etcd.configFile.client-transport-security.cert-file Path to the client server TLS cert file.
+      ## aka --cert-file
+      ##
+      cert-file:
+      ## @param etcd.configFile.client-transport-security.key-file Path to the client server TLS key file.
+      ## aka --key-file
+      ##
+      key-file:
+      ## @param etcd.configFile.client-transport-security.client-cert-auth Enable client cert authentication.
+      ## It's recommended to enable client cert authentication to prevent attacks from unauthenticated clients (e.g. CVE-2023-44487), especially when running etcd as a public service.
+      ## aka --client-cert-auth
+      ##
+      client-cert-auth: false
+      ## @param etcd.configFile.client-transport-security.trusted-ca-file Path to the client server TLS trusted CA cert file.
+      ## Note setting this parameter will also automatically enable client cert authentication no matter what value is set for `--client-cert-auth`.
+      ## aka --trusted-ca-file
+      ##
+      trusted-ca-file:
+      ## @param etcd.configFile.client-transport-security.allowed-hostname Allowed TLS hostname for client cert authentication.
+      ## aka --client-cert-allowed-hostname
+      ##
+      allowed-hostname:
+      ## @param etcd.configFile.client-transport-security.auto-tls Client TLS using generated certificates.
+      ## aka --auto-tls
+      ##
+      auto-tls: false
+      ## @param etcd.configFile.client-transport-security.crl-file Path to the client certificate revocation list file, aka --client-crl-file.
+      ## aka --client-crl-file
+      ##
+      # crl-file:
+    ## @param etcd.configFile.peer-transport-security Block to config the peer transport security
+    peer-transport-security:
+      ## @param etcd.configFile.peer-transport-security.cert-file Path to the peer server TLS cert file.
+      ## Certificate used for SSL/TLS connections between peers.
+      ## This will be used both for listening on the peer address as well as sending requests to other peers.
+      ## aka --peer-cert-file
+      ##
+      cert-file:
+      ## @param etcd.configFile.peer-transport-security.key-file Path to the peer server TLS key file. Must be unencrypted.
+      ## aka --peer-key-file
+      ##
+      key-file:
+      ## @param etcd.configFile.peer-transport-security.client-cert-auth Enable peer client cert authentication.
+      ## It's recommended to enable peer client cert authentication to prevent attacks from unauthenticated forged peers (e.g. CVE-2023-44487).
+      ## aka -peer-client-cert-auth
+      ##
+      client-cert-auth: false
+      ## @param etcd.configFile.peer-transport-security.trusted-ca-file Path to the peer server TLS trusted CA file.
+      ## aka --peer-trusted-ca-file
+      ##
+      trusted-ca-file:
+      ## @param etcd.configFile.peer-transport-security.cert-allowed-cn Required CN for client certs connecting to the peer endpoint.
+      ## aka --peer-cert-allowed-cn
+      ##
+      allowed-cn:
+      ## @param etcd.configFile.peer-transport-security.cert-allowed-hostname Allowed TLS hostname for inter peer authentication.
+      ## aka --peer-cert-allowed-hostname
+      ##
+      allowed-hostname:
+      ## @param etcd.configFile.peer-transport-security.auto-tls Peer TLS using self-generated certificates if --peer-key-file and --peer-cert-file are not provided.
+      ## aka --peer-auto-tls
+      ##
+      auto-tls: false
+      ## @param etcd.configFile.peer-transport-security.crl-file Path to the peer certificate revocation list file.
+      ## aka --peer-crl-file
+      ##
+      # crl-file:
+    ## @param etcd.configFile.self-signed-cert-validity The validity period of the client and peer certificates that are automatically generated by etcd when you specify ClientAutoTLS and PeerAutoTLS, the unit is year, and the default is 1.
+    ##
+    self-signed-cert-validity: 1
+    ## @param etcd.configFile.cipher-suites Comma-separated list of supported TLS cipher suites between client/server and peers (empty will be auto-populated by Go).
+    ##
+    cipher-suites:
+    ## @param etcd.configFile.cors Comma-separated whitelist of origins for CORS, or cross-origin resource sharing, (empty or * means allow all).
+    ##
+    cors: "*"
+    ## @param etcd.configFile.host-whitelist Acceptable hostnames from HTTP client requests, if server is not secure (empty or * means allow all).
+    ##
+    host-whitelist: "*"
+    ## @param etcd.configFile.tls-min-version Minimum TLS version supported by etcd.
+    ##
+    tls-min-version: TLS1.2
+    ## @param etcd.configFile.tls-max-version Maximum TLS version supported by etcd (empty will be auto-populated by Go).
+    ##
+    tls-max-version:
+    ### Auth
+    ## @param etcd.configFile.auth-token Specify a v3 authentication token type and token specific options, especially for JWT.
+    ## Its format is "type,var1=val1,var2=val2,...". Possible type is 'simple' or 'jwt'.
+    ## Possible variables are 'sign-method' for specifying a sign method of jwt (its possible values are 'ES256', 'ES384', 'ES512', 'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'PS256', 'PS384', or 'PS512'),
+    ## 'pub-key' for specifying a path to a public key for verifying jwt, 'priv-key' for specifying a path to a private key for signing jwt, and 'ttl' for specifying TTL of jwt tokens.
+    ##
+    auth-token: simple
+    ## @param etcd.configFile.bcrypt-cost Specify the cost / strength of the bcrypt algorithm for hashing auth passwords. Valid values are between 4 and 31.
+    ##
+    bcrypt-cost: 10
+    ## @param etcd.configFile.auth-token-ttl Time (in seconds) of the auth-token-ttl.
+    ##
+    auth-token-ttl: 300
+    ### Profiling and monitoring
+    ## @param etcd.configFile.enable-pprof Profiling and monitoring Enable runtime profiling data via HTTP server. Address is at client URL + "/debug/pprof/"
+    ##
+    enable-pprof: false
+    ## @param etcd.configFile.metrics Set level of detail for exported metrics, specify 'extensive' to include server side grpc histogram metrics.
+    ##
+    metrics: basic
+    ## @param etcd.configFile.listen-metrics-urls List of URLs to listen on for the metrics and health endpoints.
+    ##
+    listen-metrics-urls:
+    ### Logging
+    ## @param etcd.configFile.logger Currently only supports 'zap' for structured logging.
+    ##
+    logger: zap
+    ## @param etcd.configFile.log-outputs Specify 'stdout' or 'stderr' to skip journald logging even when running under systemd, or list of comma separated output targets.
+    ##
+    log-outputs: [stderr]
+    ## @param etcd.configFile.log-level Configures log level. Only supports debug, info, warn, error, panic, or fatal.
+    ##
+    log-level: info
+    ## @param etcd.configFile.enable-log-rotation Enable log rotation of a single log-outputs file target.
+    ##
+    enable-log-rotation: false
+    ## @param etcd.configFile.log-rotation-config-json Configures log rotation if enabled with a JSON logger config. MaxSize(MB), MaxAge(days,0=no limit), MaxBackups(0=no limit), LocalTime(use computers local time), Compress(gzip)".
+    ##
+    log-rotation-config-json: '{"maxsize": 100, "maxage": 0, "maxbackups": 0, "localtime": false, "compress": false}'
+    ### Experimental distributed tracing
+    ## Enable experimental distributed tracing.
+    ##
+    # experimental-enable-distributed-tracing: 'false'
+    ## Distributed tracing collector address.
+    ##
+    # experimental-distributed-tracing-address: 'localhost:4317'
+    ## Distributed tracing service name, must be same across all etcd instances.
+    ##
+    # experimental-distributed-tracing-service-name: 'etcd'
+    ## Distributed tracing instance ID, must be unique per each etcd instance.
+    ##
+    # experimental-distributed-tracing-instance-id: ''
+    ## Number of samples to collect per million spans for OpenTelemetry Tracing (if enabled with experimental-enable-distributed-tracing flag).
+    ##
+    # experimental-distributed-tracing-sampling-rate: '0'
+    ### Unsafe features
+    ## Force to create a new one-member cluster.
+    ##
+    # force-new-cluster: 'false'
+    ## Disables fsync, unsafe, will cause data loss.
+    ##
+    # unsafe-no-fsync: 'false'
+
+  ## @param etcd.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param etcd.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /etc/etcd/pki # https://github.com/etcd-io/jetcd/blob/main/docs/SslConfig.md
+    ## @param etcd.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFile above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## contents:
+    ##  ca.pem: ""
+    ##  server-1.pem: ""
+    ##  server-1-key.pem: ""
+    ##
+    contents: {}
+
+  ## @param etcd.existingConfigmap The name of an existing ConfigMap with your custom configuration for etcd
+  ##
+  existingConfigmap:
+  ## @param etcd.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param etcd.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param etcd.hostAliases etcd pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param etcd.podLabels Extra labels for etcd pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param etcd.podAnnotations Annotations for etcd pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param etcd.autoscaling.enabled Enable autoscaling for etcd
+  ## @param etcd.autoscaling.minReplicas Minimum number of etcd replicas
+  ## @param etcd.autoscaling.maxReplicas Maximum number of etcd replicas
+  ## @param etcd.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param etcd.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param etcd.extraEnvVars Array with extra environment variables to add to etcd nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param etcd.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for etcd nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param etcd.extraEnvVarsSecret Name of existing Secret containing extra env vars for etcd nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param etcd.extraVolumes Optionally specify extra list of additional volumes for the etcd pod(s)
+  ##
+  extraVolumes: []
+  ## @param etcd.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the etcd container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param etcd.sidecars Add additional sidecar containers to the etcd pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param etcd.initContainers Add additional init containers to the etcd pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /var/lib/etcd
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-{{ include "389ds.fullname" . }}
+  labels:
+    {{- include "389ds.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  {{- range $name, $content := .Values.service.ports }}
+  {{- if .enabled }}
+    - port: {{ $content.port }}
+      targetPort: {{ $content.targetPort }}
+      protocol: {{ $content.protocol }}
+      name: {{ $name }}
+  {{- end }}
+  {{- end }}
+  selector:
+    {{- include "389ds.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: coredns
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  Corefile: |-
+    {{- range $name, $conf := .Values.coredns.extraConfig }}
+    {{ $name }}{{ if $conf.parameters }} {{ $conf.parameters }}{{ end }}
+    {{- end }}
+    {{ range .Values.coredns.servers }}
+    {{- range $idx, $zone := .zones }}{{ if $idx }} {{ else }}{{ end }}{{ default "" $zone.scheme }}{{ default "." $zone.zone }}{{ else }}.{{ end -}}
+    {{- if .port }}:{{ .port }} {{ end -}}
+    {
+      {{- range .plugins }}
+        {{ .name }}{{ if .parameters }} {{ .parameters }}{{ end }}{{ if .configBlock }} {
+            {{ .configBlock }}
+        }{{ end }}
+      {{- end }}
+    }
+    {{ end }}
+  {{- range .Values.coredns.zoneFiles }}
+  {{ .filename }}: |
+{{ include "common.tplvalues.render" (dict "value" .contents "context" $) | indent 4 }}
+  {{- end }}

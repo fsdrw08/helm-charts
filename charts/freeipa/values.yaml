@@ -1,0 +1,480 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param freeipa.deployKind specify the deploy kind： Pod, or Deployment
+deployKind: Pod
+## @section freeipa Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+freeipa:
+  ## freeipa image
+  ## ref: https://quay.io/repository/freeipa/freeipa-server?tab=tags
+  ## @param freeipa.image.registry freeipa image registry
+  ## @param freeipa.image.repository freeipa image repository
+  ## @param freeipa.image.tag freeipa image tag (immutable tags are recommended)
+  ## @param freeipa.image.digest freeipa image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param freeipa.image.pullPolicy freeipa image pull policy
+  ## @param freeipa.image.pullSecrets freeipa image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: freeipa/freeipa-server
+    tag: centos-9-stream
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param freeipa.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param freeipa.replicaCount Number of freeipa replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param freeipa.containerPorts freeipa container port to expose to host
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts:
+    - name: dns_tcp
+      containerPort: 53
+      hostPort: 53
+      protocol: TCP
+    - name: dns_udp
+      containerPort: 53
+      hostPort: 53
+      protocol: UDP
+
+    - name: http
+      containerPort: 80
+      hostPort: 80
+    - name: https
+      containerPort: 443
+      hostPort: 443
+    - name: http_pki
+      containerPort: 8080
+      hostPort: 8080
+    - name: https_pki
+      containerPort: 8443
+      hostPort: 8443
+
+    - name: ldap
+      containerPort: 389
+      hostPort: 389
+    - name: ldaps
+      containerPort: 636
+      hostPort: 636
+
+    - name: kerberos_kdc_tcp
+      containerPort: 88
+      hostPort: 88
+      protocol: TCP
+    - name: kerberos_kdc_udp
+      containerPort: 88
+      hostPort: 88
+      protocol: UDP
+    - name: kerberos_password_tcp
+      containerPort: 464
+      hostPort: 464
+      protocol: TCP
+    - name: kerberos_password_udp
+      containerPort: 464
+      hostPort: 464
+      protocol: UDP
+
+    - name: ntp
+      containerPort: 123
+      hostPort: 123
+      protocol: UDP
+  ## Configure extra options for freeipa containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param freeipa.livenessProbe.enabled Enable livenessProbe on freeipa containers
+  ## @param freeipa.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param freeipa.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param freeipa.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param freeipa.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param freeipa.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 180
+    periodSeconds: 300
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    httpGet:
+      path: /
+      port: 80
+  ## @param freeipa.readinessProbe.enabled Enable readinessProbe on freeipa containers
+  ## @param freeipa.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param freeipa.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param freeipa.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param freeipa.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param freeipa.readinessProbe.successThreshold Success threshold for readinessProbe
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param freeipa.startupProbe.enabled Enable startupProbe on freeipa containers
+  ## @param freeipa.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param freeipa.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param freeipa.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param freeipa.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param freeipa.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param freeipa.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param freeipa.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param freeipa.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## freeipa resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param freeipa.resourcesPreset Set freeipa container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if freeipa.resources is set (freeipa.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param freeipa.resources Set freeipa container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param freeipa.podSecurityContext.enabled Enabled freeipa pods' Security Context
+  ## @param freeipa.podSecurityContext.fsGroup Set freeipa pod's Security Context fsGroup
+  ##
+  podSecurityContext:
+    enabled: false
+    fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param freeipa.containerSecurityContext.enabled Enabled freeipa containers' Security Context
+  ## @param freeipa.containerSecurityContext.runAsUser Set freeipa containers' Security Context runAsUser
+  ## @param freeipa.containerSecurityContext.runAsNonRoot Set freeipa containers' Security Context runAsNonRoot
+  ## @param freeipa.containerSecurityContext.readOnlyRootFilesystem Set freeipa containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  ## @param freeipa.dnsConfig config pod dns
+  ## ref: https://github.com/freeipa/freeipa-container#running-freeipa-server-container
+  dnsConfig:
+    nameservers:
+      - 127.0.0.1
+  ## @param freeipa.hostName
+  hostName: freeipa
+  ## @param freeipa.hostIP
+  hostIP: 192.168.255.10
+  ## @param freeipa.dsPassword
+  ## The password to be used by the Directory Server for the Directory Manager user.
+  dsPassword: P@ssw0rd
+  ## @param freeipa.adminPassword
+  ## The password for the IPA admin user.
+  adminPassword: P@ssw0rd
+  ## @param freeipa.domain
+  ## The primary DNS domain of the IPA deployment, e.g. example.com.
+  ## This DNS domain should contain the SRV records generated by the IPA server installer.
+  ## The specified DNS domain must not contain DNS records of any other LDAP or Kerberos based management system (like Active Directory or MIT Kerberos).
+  domain: example.org
+  ## @param freeipa.realm
+  ## The Kerberos realm name for the new IPA deployment.
+  ## It is strongly recommended to use an upper-cased name of the primary DNS domain name of your IPA deployment.
+  ## You will not be able to establish trust with Active Directory unless the realm name is the upper-cased domain name.
+  ## The realm name cannot be changed after the installation.
+  realm: example.org
+  ## @param freeipa.existingConfigmap The name of an existing ConfigMap with your custom configuration for freeipa
+  ##
+  existingConfigmap:
+  ## @param freeipa.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param freeipa.args Override default container args (useful when using custom images)
+  ##
+  args:
+  ## @param freeipa.serverInstallOptions ipa server install options
+  ## ref: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/installing_identity_management/index#installing-an-ipa-server-with-integrated-dns-non-interactive-installation_install-server-with-dns
+  ## ref: https://manpages.ubuntu.com/manpages/focal/man1/ipa-server-install.1.html
+  serverInstallOptions: |
+    --unattended
+    --domain={{ .Values.freeipa.domain }}
+    --realm={{ .Values.freeipa.realm }}
+    --ds-password={{ .Values.freeipa.dsPassword }}
+    --admin-password={{ .Values.freeipa.adminPassword }}
+
+    --no-ntp
+    --no_hbac_allow
+
+    --setup-dns
+    --no-host-dns
+    --forwarder=8.8.8.8
+    --auto-reverse
+    --ip-address="{{ .Values.freeipa.hostIP }}"
+
+    --debug
+    --skip-mem-check
+  ## @param freeipa.hostAliases freeipa pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param freeipa.podLabels Extra labels for freeipa pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param freeipa.podAnnotations Annotations for freeipa pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param freeipa.autoscaling.enabled Enable autoscaling for freeipa
+  ## @param freeipa.autoscaling.minReplicas Minimum number of freeipa replicas
+  ## @param freeipa.autoscaling.maxReplicas Maximum number of freeipa replicas
+  ## @param freeipa.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param freeipa.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param freeipa.extraEnvVars Array with extra environment variables to add to freeipa nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  # value: '{{ default null .Values.freeipa.hostIP }}'
+  extraEnvVars:
+    - name: IPA_SERVER_IP
+      value: '{{ default "" .Values.freeipa.hostIP }}'
+    - name: IPA_SERVER_HOSTNAME
+      value: '{{ default "" .Values.freeipa.hostIP }}'
+    - name: DEBUG_TRACE
+      value: 1
+  ## @param freeipa.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for freeipa nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param freeipa.extraEnvVarsSecret Name of existing Secret containing extra env vars for freeipa nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param freeipa.extraVolumes Optionally specify extra list of additional volumes for the freeipa pod(s)
+  ##
+  extraVolumes: []
+  ## @param freeipa.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the freeipa container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param freeipa.additionalSecrets Add additional secret data to freeipa
+  ## e.g.
+  ## additionalSecrets:
+  ##   ipa-ext.conf: |
+  ##     key "tsig_key_name" {
+  ##          algorithm hmac-sha256;
+  ##          secret "j/2DR2zkVAyDHL2XjE731sMt9s6cmRhXE6niScAgHA0=";
+  ##  };
+  additionalSecrets: {}
+  ## @param freeipa.sidecars Add additional sidecar containers to the freeipa pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param freeipa.initContainers Add additional init containers to the freeipa pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: true
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

@@ -1,0 +1,17 @@
+{{- if .Values.bringYourOwnCert.fromCertMan.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.bringYourOwnCert.fromCertMan.certificate.commonName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "389ds.labels" . | nindent 4 }}
+spec:
+  commonName: {{ .Values.bringYourOwnCert.fromCertMan.certificate.commonName }}
+  dnsNames:
+  {{- .Values.bringYourOwnCert.fromCertMan.certificate.dnsNames | toYaml | nindent 4 }}
+  issuerRef:
+    name:  {{ .Values.bringYourOwnCert.fromCertMan.certificate.issuerRef.name }}
+    kind:  {{ .Values.bringYourOwnCert.fromCertMan.certificate.issuerRef.kind }}
+  secretName:  {{ .Values.bringYourOwnCert.fromCertMan.certificate.secretName }}
+{{- end }}

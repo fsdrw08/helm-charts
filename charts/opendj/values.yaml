@@ -1,0 +1,454 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param opendj.deployKind specify the deploy kind： Pod, or Deployment
+deployKind: Pod
+## @section opendj Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+opendj:
+  ## opendj image
+  ## ref: https://hub.docker.com/r/openidentityplatform/opendj/tags
+  ## @param opendj.image.registry opendj image registry
+  ## @param opendj.image.repository opendj image repository
+  ## @param opendj.image.tag opendj image tag (immutable tags are recommended)
+  ## @param opendj.image.digest opendj image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param opendj.image.pullPolicy opendj image pull policy
+  ## @param opendj.image.pullSecrets opendj image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: openidentityplatform/opendj
+    tag: 4.8.2
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param opendj.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param opendj.replicaCount Number of opendj replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param opendj.containerPorts opendj container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts:
+    - name: LDAP
+      containerPort: 1389
+      hostPort: 389
+      protocol: TCP
+    - name: LDAPS
+      containerPort: 1636
+      hostPort: 636
+      protocol: TCP
+  ## Configure extra options for opendj containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param opendj.livenessProbe.enabled Enable livenessProbe on opendj containers
+  ## @param opendj.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param opendj.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param opendj.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param opendj.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param opendj.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 60
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - |
+          /opt/opendj/bin/ldapsearch --port 1389 --baseDN cn=monitor "(cn=userRoot backend)"
+  ## @param opendj.readinessProbe.enabled Enable readinessProbe on opendj containers
+  ## @param opendj.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param opendj.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param opendj.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param opendj.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param opendj.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param opendj.startupProbe.enabled Enable startupProbe on opendj containers
+  ## @param opendj.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param opendj.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param opendj.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param opendj.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param opendj.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param opendj.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param opendj.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param opendj.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## opendj resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param opendj.resourcesPreset Set opendj container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if opendj.resources is set (opendj.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "small"
+  ## @param opendj.resources Set opendj container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param opendj.podSecurityContext.enabled Enabled opendj pods' Security Context
+  ## @param opendj.podSecurityContext.fsGroup Set opendj pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param opendj.containerSecurityContext.enabled Enabled opendj containers' Security Context
+  ## @param opendj.containerSecurityContext.runAsUser Set opendj containers' Security Context runAsUser
+  ## @param opendj.containerSecurityContext.runAsNonRoot Set opendj containers' Security Context runAsNonRoot
+  ## @param opendj.containerSecurityContext.readOnlyRootFilesystem Set opendj containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param opendj.setupProperties properties config when opendj setup
+  ## aka environment variable for the opendj image
+  ## ref: https://github.com/OpenIdentityPlatform/OpenDJ/blob/master/opendj-packages/opendj-docker/README.md
+  ##
+  setupProperties:
+    ## @param opendj.setupProperties.ADD_BASE_ENTRY if set, creates base DN entry
+    ##
+    ADD_BASE_ENTRY: --addBaseEntry
+    ## @param opendj.setupProperties.PORT LDAP Listener Port
+    ##
+    PORT: 1389
+    ## @param opendj.setupProperties.LDAPS_PORT LDAPS Listener Port
+    ##
+    LDAPS_PORT: 1636
+    ## @param opendj.setupProperties.BASE_DN OpenDJ Base DN
+    ##
+    BASE_DN: dc=example,dc=com
+    ## @param opendj.setupProperties.ROOT_USER_DN Initial root user DN
+    ##
+    ROOT_USER_DN: cn=Directory Manager
+    ## @param opendj.setupProperties.ROOT_PASSWORD Initial root user password
+    ##
+    ROOT_PASSWORD: password
+    ## @param opendj.setupProperties.SECRET_VOLUME Mounted keystore volume, if present copies keystore over
+    ##
+    SECRET_VOLUME:
+    ## @param opendj.setupProperties.MASTER_SERVER Replication master server
+    ##
+    MASTER_SERVER:
+    ## @param opendj.setupProperties.VERSION OpenDJ version
+    ##
+    VERSION:
+    ## @param opendj.setupProperties.OPENDJ_USER user which runs OpenDJ
+    ##
+    OPENDJ_USER:
+    ## @param opendj.setupProperties.OPENDJ_REPLICATION_TYPE OpenDJ Replication type
+    ## valid values are
+    ## simple: - standart replication
+    ## srs: - standalone replication servers
+    ## sdsr: - Standalone Directory Server Replicas
+    ## rg: - Replication Groups
+    ## Other: values will be ignored
+    ##
+    OPENDJ_REPLICATION_TYPE:
+    ## @param opendj.setupProperties.OPENDJ_SSL_OPTIONS you can replace ssl options at here,
+    ## like : "--usePkcs12keyStore /opt/domain.pfx --keyStorePassword domain"
+    ##
+    OPENDJ_SSL_OPTIONS: --generateSelfSignedCertificate
+  ## @param opendj.schemas ldif schema content to import into opendj during setup process
+  ## ref: https://github.com/OpenIdentityPlatform/OpenDJ/blob/4.8.2/opendj-packages/opendj-docker/bootstrap/setup.sh#L39-L49
+  ## Example::
+  ## schemas:
+  ##   44-domain_base.ldif: |
+  ##     dn: dc=example,dc=com
+  ##     changetype: modify
+  ##     add: aci
+  ##     aci: (target="ldap:///dc=example,dc=com") (targetattr = "*")(version 3.0; acl "allow all Admin group"; allow(all,export,import,proxy) groupdn = "ldap:///cn=Directory Administrators,ou=Groups,dc=example,dc=com";)
+  ##     aci: (targetcontrol="1.2.840.113556.1.4.805") (version 3.0; acl "Tree delete for Admins"; allow(all) groupdn = "ldap:///cn=Directory Administrators,ou=Groups,dc=example,dc=com";)
+  ##     aci: (target="ldap:///dc=example,dc=com") (targetattr ="*")(version 3.0; acl "Allow apps proxied auth"; allow(all, proxy)(userdn = "ldap:///cn=*,ou=Services,dc=example,dc=com");)
+  ##
+  schemas: {}
+  ## @param opendj.ssl secret setting of cert and key or whatever ssl content will set in the container
+  ## @param opendj.ssl.mountPath secret mount path setting of keystore or whatever ssl content will set in the container
+  ##
+  ssl:
+    mountPath: /opt/opendj/certs
+    ## @param opendj.ssl.contents_b64 base 64 encoded content of keystore object or whatever base 64 encoded ssl content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## e.g.
+    ## contents_b64:
+    ##   keystore.jks: ""
+    ##   keystore.pfx: ""
+    contents_b64: {}
+  ## @param opendj.existingConfigmap The name of an existing ConfigMap with your custom configuration for opendj
+  ##
+  existingConfigmap:
+  ## @param opendj.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param opendj.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param opendj.hostAliases opendj pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param opendj.podLabels Extra labels for opendj pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param opendj.podAnnotations Annotations for opendj pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param opendj.autoscaling.enabled Enable autoscaling for opendj
+  ## @param opendj.autoscaling.minReplicas Minimum number of opendj replicas
+  ## @param opendj.autoscaling.maxReplicas Maximum number of opendj replicas
+  ## @param opendj.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param opendj.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param opendj.extraEnvVars Array with extra environment variables to add to opendj nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param opendj.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for opendj nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param opendj.extraEnvVarsSecret Name of existing Secret containing extra env vars for opendj nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param opendj.extraVolumes Optionally specify extra list of additional volumes for the opendj pod(s)
+  ##
+  extraVolumes: []
+  ## @param opendj.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the opendj container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param opendj.sidecars Add additional sidecar containers to the opendj pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param opendj.initContainers Add additional init containers to the opendj pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ## ref: https://github.com/OpenIdentityPlatform/OpenDJ/wiki/TIP:-How-to-Persist-OpenDJ-Docker-Container-Data-Between-Restarts
+  ##
+  mountPath: /opt/opendj/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

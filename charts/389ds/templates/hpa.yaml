@@ -1,0 +1,28 @@
+{{- if .Values.directoryServer.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "389ds.fullname" . }}
+  labels:
+    {{- include "389ds.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: {{ include "389ds.fullname" . }}
+  minReplicas: {{ .Values.directoryServer.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.directoryServer.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.directoryServer.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.directoryServer.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.directoryServer.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.directoryServer.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
