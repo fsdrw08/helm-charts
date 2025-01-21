@@ -5,13 +5,12 @@ on:
     # https://github.com/askcloudarchitech/go-rest-api-kubernetes-example/blob/main/.github/workflows/release.yml
     # https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases
     branches:
-      - "main"
+      - "release"
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-including-and-excluding-paths
     paths:
-      - '.github/workflows/**'
-      - 'charts/**'
-      - '!charts/**/README.md'
-
+      - ".github/workflows/**"
+      - "charts/**"
+      - "!charts/**/README.md"
 
 jobs:
   # https://github.com/helm/chart-releaser-action
@@ -44,5 +43,7 @@ jobs:
       # https://github.com/helm/chart-releaser-action
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.0
+        with:
+          charts_dir: charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
