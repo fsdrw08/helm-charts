@@ -52,7 +52,7 @@ opendj:
   image:
     registry: docker.io
     repository: openidentityplatform/opendj
-    tag: 4.8.2
+    tag: 4.9.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -219,18 +219,20 @@ opendj:
     ## @param opendj.setupProperties.ROOT_PASSWORD Initial root user password
     ##
     ROOT_PASSWORD: password
-    ## @param opendj.setupProperties.SECRET_VOLUME Mounted keystore volume, if present copies keystore over
+    ## @param opendj.setupProperties.SECRET_VOLUME Path to a directory containing keystores. Defaults to /var/secrets/opendj.
+    ## This is used to setup OpenDJ with known keystore values. Mounted keystore volume, if present copies keystore over
+    ## ref: https://github.com/OpenIdentityPlatform/OpenDJ/blob/4.9.1/opendj-packages/opendj-docker/run.sh#L45-L51
     ##
-    SECRET_VOLUME:
+    SECRET_VOLUME: /var/secrets/opendj
     ## @param opendj.setupProperties.MASTER_SERVER Replication master server
     ##
     MASTER_SERVER:
     ## @param opendj.setupProperties.VERSION OpenDJ version
     ##
     VERSION:
-    ## @param opendj.setupProperties.OPENDJ_USER user which runs OpenDJ
+    ## @param opendj.setupProperties.OPENDJ_USER user which runs OpenDJ, default: opendj
     ##
-    OPENDJ_USER:
+    OPENDJ_USER: opendj
     ## @param opendj.setupProperties.OPENDJ_REPLICATION_TYPE OpenDJ Replication type
     ## valid values are
     ## simple: - standart replication
@@ -261,13 +263,13 @@ opendj:
   ## @param opendj.ssl.mountPath secret mount path setting of keystore or whatever ssl content will set in the container
   ##
   ssl:
-    mountPath: /opt/opendj/certs
+    mountPath: /var/secrets/opendj
     ## @param opendj.ssl.contents_b64 base 64 encoded content of keystore object or whatever base 64 encoded ssl content will set in the container
     ## You can set the content key as whatever file name you like
     ## e.g.
     ## contents_b64:
-    ##   keystore.jks: ""
-    ##   keystore.pfx: ""
+    ##   keystore.pkcs12: ""
+    ##   keystore.pin: ""
     contents_b64: {}
   ## @param opendj.existingConfigmap The name of an existing ConfigMap with your custom configuration for opendj
   ##
@@ -287,7 +289,14 @@ opendj:
   ##
   podLabels: {}
   ## @param opendj.podAnnotations Annotations for opendj pods
+  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/containers/podman/discussions/22378
+  ## ref: https://github.com/OpenIdentityPlatform/OpenDJ/blob/4.9.1/opendj-packages/opendj-docker/Dockerfile#L31
+  ## e.g.
+  ## podAnnotations:
+  ##   io.podman.annotations.userns: keep-id:uid=1001,gid=1000
   ##
   podAnnotations: {}
   ## Autoscaling configuration
