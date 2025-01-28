@@ -52,7 +52,7 @@ consul:
   image:
     registry: docker.io
     repository: hashicorp/consul
-    tag: latest
+    tag: "1.20"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
