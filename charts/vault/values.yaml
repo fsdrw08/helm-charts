@@ -175,11 +175,13 @@ vault:
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param vault.podSecurityContext.enabled Enabled vault pods' Security Context
-  ## @param vault.podSecurityContext.fsGroup Set vault pod's Security Context fsGroup
+  ## @param vault.podSecurityContext.runAsUser Set vault pods' Security Context runAsUser
+  ## @param vault.podSecurityContext.runAsNonRoot Set vault pods' Security Context runAsNonRoot
   ##
   podSecurityContext:
-    enabled: true
-    fsGroup: 1000
+    enabled: false
+    runAsUser: 100
+    runAsGroup: 1000
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## ref: https://github.com/hashicorp/vault/blob/main/Dockerfile
@@ -204,22 +206,27 @@ vault:
   ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/vault/docs/configuration
   ## ref: https://developer.hashicorp.com/vault/tutorials/operations/configure-vault#config
+  ##
   configFiles:
     ## @param vault.configFiles.main main config for server
+    ##
     main:
       disable_mlock: true
       log_level: info
     ## @param vault.configFiles.storage storage config for server
+    ##
     storage:
       ## @param vault.configFiles.storage
       ## The storage stanza configures the storage backend, which represents the location for the durable storage of Vault's information
       ## if the storage file changed, do forget also change it in persistence.mountPath.storage
       ## https://developer.hashicorp.com/vault/docs/configuration/storage
       ## https://github.com/kirubasankars/bedrock/blob/b2037fb394d149a9fed560cc60d284b28b4585fb/src/main/agent/vault/config/vault.json#L3
+      ##
       storage:
         file:
           path: /vault/file
     ## @param vault.configFiles.listeners listeners config for server
+    ##
     listeners:
       ## @param vault.configFiles.listeners.ui
       ## Enables the built-in web UI, which is available on all listeners (address + port) at the /ui path.
@@ -227,12 +234,14 @@ vault:
       ## This can also be provided via the environment variable VAULT_UI.
       ## The UI runs on the same port as the Vault listener. As such, you must configure at least one listener stanza in order to access the UI.
       ## For more information, please see the https://developer.hashicorp.com/vault/docs/configuration/ui.
+      ##
       ui: true
       ## @param vault.configFiles.listeners.listener
       ## Configures how Vault is listening for API requests.
       ## https://developer.hashicorp.com/vault/docs/configuration/listener/tcp
       ## https://github.com/hashicorp/vault/blob/aaf59a7705bb6c1d6ba2f6c2400787d5da872817/command/server/test-fixtures/config4.hcl.json#L6
       ## https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L931
+      ##
       listener:
         - tcp:
             tls_disable: true
@@ -333,6 +342,7 @@ vault:
 
   ## @param vault.autoUnseal run auto unseal process in a sidecar container
   ## ref: https://hub.docker.com/r/apteno/alpine-jq/tags/
+  ##
   autoUnseal:
     ## @param vault.autoUnseal.enabled Specifies whether run auto unseal for vault
     ##
@@ -360,18 +370,27 @@ vault:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
+    ## Configure Pods Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+    ## @param vault.autoUnseal.podSecurityContext.enabled Enabled vault pods' Security Context
+    ## @param vault.autoUnseal.podSecurityContext.fsGroup Set vault pod's Security Context fsGroup
+    ##
+    podSecurityContext:
+      enabled: false
+      runAsUser: 100
+      runAsGroup: 1000
     ## Configure Container Security Context for Auth Proxy
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-    ## @param authProxy.containerSecurityContext.enabled Enabled containers' Security Context
-    ## @param authProxy.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in container
-    ## @param authProxy.containerSecurityContext.runAsUser Set containers' Security Context runAsUser
-    ## @param authProxy.containerSecurityContext.runAsGroup Set containers' Security Context runAsGroup
-    ## @param authProxy.containerSecurityContext.runAsNonRoot Set container's Security Context runAsNonRoot
-    ## @param authProxy.containerSecurityContext.privileged Set container's Security Context privileged
-    ## @param authProxy.containerSecurityContext.readOnlyRootFilesystem Set container's Security Context readOnlyRootFilesystem
-    ## @param authProxy.containerSecurityContext.allowPrivilegeEscalation Set container's Security Context allowPrivilegeEscalation
-    ## @param authProxy.containerSecurityContext.capabilities.drop List of capabilities to be dropped
-    ## @param authProxy.containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
+    ## @param vault.autoUnseal.containerSecurityContext.enabled Enabled containers' Security Context
+    ## @param vault.autoUnseal.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in container
+    ## @param vault.autoUnseal.containerSecurityContext.runAsUser Set containers' Security Context runAsUser
+    ## @param vault.autoUnseal.containerSecurityContext.runAsGroup Set containers' Security Context runAsGroup
+    ## @param vault.autoUnseal.containerSecurityContext.runAsNonRoot Set container's Security Context runAsNonRoot
+    ## @param vault.autoUnseal.containerSecurityContext.privileged Set container's Security Context privileged
+    ## @param vault.autoUnseal.containerSecurityContext.readOnlyRootFilesystem Set container's Security Context readOnlyRootFilesystem
+    ## @param vault.autoUnseal.containerSecurityContext.allowPrivilegeEscalation Set container's Security Context allowPrivilegeEscalation
+    ## @param vault.autoUnseal.containerSecurityContext.capabilities.drop List of capabilities to be dropped
+    ## @param vault.autoUnseal.containerSecurityContext.seccompProfile.type Set container's Security Context seccomp profile
     ##
     containerSecurityContext:
       enabled: false
@@ -387,97 +406,98 @@ vault:
       seccompProfile:
         type: "RuntimeDefault"
     ## @param vault.autoUnseal.env Array with environment variables to add to unseal container
+    ##
     env:
       - name: VAULT_ADDR
-        value: http://127.0.0.1:8200
+        value: http://vault:8200
       - name: VAULT_OPERATOR_SECRETS_JSON_PATH
         value: "/vault/unseal/vault_operator_secrets"
     ## @param vault.autoUnseal.script script to implement the unseal process
-    script: |
-      #!/bin/sh
+    # script: |
+    #   #!/bin/sh
 
-      function wait_started {
-        counter=0
-        until STATUS=$(curl -k -X GET "$VAULT_ADDR/v1/sys/health" 2>&1); [ $? -ne 1 ]
-        do
-          if [ $counter -lt 20 ]; then
-            echo "Waiting for vault to come up, $(($counter*5))s passed"
-            sleep 5
-            ((counter++))
-          else
-            echo "check vault stauts manually"
-            exit 1
-          fi
-        done
-        echo "Vault is started"
-      }
+    #   function wait_started {
+    #     counter=0
+    #     until STATUS=$(curl -k -X GET "$VAULT_ADDR/v1/sys/health" 2>&1); [ $? -ne 1 ]
+    #     do
+    #       if [ $counter -lt 20 ]; then
+    #         echo "Waiting for vault to come up, $(($counter*5))s passed"
+    #         sleep 5
+    #         ((counter++))
+    #       else
+    #         echo "check vault stauts manually"
+    #         exit 1
+    #       fi
+    #     done
+    #     echo "Vault is started"
+    #   }
 
-      function is_inited {
-        curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .initialized
-      }
+    #   function is_inited {
+    #     curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .initialized
+    #   }
 
-      function init {
-        # Initialize Vault
-        printf "Initializing Vault...\n"
-        VAULT_OPERATOR_SECRETS=$(curl -s -k -X POST \
-          -H "Content-Type: application/json" \
-          -d '{ "secret_shares": 1, "secret_threshold": 1 }' \
-          "$VAULT_ADDR/v1/sys/init")
-        # Export Vault operator keys (root_token and unseal keys)
-        echo $VAULT_OPERATOR_SECRETS | jq . >$VAULT_OPERATOR_SECRETS_JSON_PATH
-        printf "Vault initialized.\n"
-      }
+    #   function init {
+    #     # Initialize Vault
+    #     printf "Initializing Vault...\n"
+    #     VAULT_OPERATOR_SECRETS=$(curl -s -k -X POST \
+    #       -H "Content-Type: application/json" \
+    #       -d '{ "secret_shares": 1, "secret_threshold": 1 }' \
+    #       "$VAULT_ADDR/v1/sys/init")
+    #     # Export Vault operator keys (root_token and unseal keys)
+    #     echo $VAULT_OPERATOR_SECRETS | jq . >$VAULT_OPERATOR_SECRETS_JSON_PATH
+    #     printf "Vault initialized.\n"
+    #   }
 
-      function is_sealed {
-        curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .sealed
-      }
+    #   function is_sealed {
+    #     curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .sealed
+    #   }
 
-      function unseal {
-        # Unseal Vault
-        printf "Unsealing Vault...\n"
-        VAULT_OPERATOR_SECRETS=$(cat $VAULT_OPERATOR_SECRETS_JSON_PATH)
-        VAULT_UNSEAL_KEYS=$(echo $VAULT_OPERATOR_SECRETS | jq -r .keys[])
-        for VAULT_UNSEAL_KEY in $VAULT_UNSEAL_KEYS; do
-            # https://developer.hashicorp.com/vault/api-docs/system/unseal
-            curl -s -k --request POST \
-              --data "{ \"key\": \"$VAULT_UNSEAL_KEY\" }" \
-              "$VAULT_ADDR/v1/sys/unseal"
-        done
-        printf "Unseal Done\n"
-      }
+    #   function unseal {
+    #     # Unseal Vault
+    #     printf "Unsealing Vault...\n"
+    #     VAULT_OPERATOR_SECRETS=$(cat $VAULT_OPERATOR_SECRETS_JSON_PATH)
+    #     VAULT_UNSEAL_KEYS=$(echo $VAULT_OPERATOR_SECRETS | jq -r .keys[])
+    #     for VAULT_UNSEAL_KEY in $VAULT_UNSEAL_KEYS; do
+    #         # https://developer.hashicorp.com/vault/api-docs/system/unseal
+    #         curl -s -k --request POST \
+    #           --data "{ \"key\": \"$VAULT_UNSEAL_KEY\" }" \
+    #           "$VAULT_ADDR/v1/sys/unseal"
+    #     done
+    #     printf "Unseal Done\n"
+    #   }
 
-      wait_started
+    #   wait_started
 
-      sleep 5s 
-      echo "is_inited"
-      is_inited
+    #   sleep 5s
+    #   echo "is_inited"
+    #   is_inited
 
-      # init
-      if [[ $(is_inited) != "true" ]]; then
-        init
-      else
-        printf "Vault is already initialized.\n"
-      fi
+    #   # init
+    #   if [[ $(is_inited) != "true" ]]; then
+    #     init
+    #   else
+    #     printf "Vault is already initialized.\n"
+    #   fi
 
-      while true
-      do
-        sleep 5s 
+    #   while true
+    #   do
+    #     sleep 5s
 
-        echo "is_sealed"
-        is_sealed
+    #     echo "is_sealed"
+    #     is_sealed
 
-        # unseal
-        if [[ $(is_inited) == "true" && $(is_sealed) == "true" ]]; then
-          if [[ -f "$VAULT_OPERATOR_SECRETS_JSON_PATH" && $(stat -c%s "$VAULT_OPERATOR_SECRETS_JSON_PATH") -gt 1 ]]; then
-            unseal
-          else
-            echo "no keys in file, please check"
-            exit 1
-          fi
-        fi
+    #     # unseal
+    #     if [[ $(is_inited) == "true" && $(is_sealed) == "true" ]]; then
+    #       if [[ -f "$VAULT_OPERATOR_SECRETS_JSON_PATH" && $(stat -c%s "$VAULT_OPERATOR_SECRETS_JSON_PATH") -gt 1 ]]; then
+    #         unseal
+    #       else
+    #         echo "no keys in file, please check"
+    #         exit 1
+    #       fi
+    #     fi
 
-        sleep 600
-      done
+    #     sleep 600
+    #   done
 
   ## @param vault.sidecars Add additional sidecar containers to the vault pod(s)
   ## e.g:
@@ -514,6 +534,8 @@ persistence:
   ## @param persistence.mountPath Path to mount the vault volumes at.
   ## @param persistence.mountPath.storage Path to mount the vault storage volumes at.
   ## @param persistence.mountPath.logs Path to mount the vault logs volumes at.
+  ## @param persistence.mountPath.unseal Path to mount the vault unseal file at.
+  ##
   mountPath:
     storage: /vault/file
     logs: /vault/logs

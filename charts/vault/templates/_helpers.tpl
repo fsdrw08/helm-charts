@@ -23,7 +23,7 @@ Return the proper image name (for the init container volume-permissions image)
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "vault.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.vault.image .Values.volumePermissions.image) "context" $) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.vault.image .Values.vault.autoUnseal.image .Values.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
 {{/*

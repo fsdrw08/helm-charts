@@ -1,0 +1,55 @@
+{{- if .Values.vault.autoUnseal.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "common.names.fullname" . }}-job
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: vault
+spec:
+  template:
+    metadata: 
+      labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: vault
+    spec:
+      {{- include "vault.imagePullSecrets" . | nindent 2 }}
+      restartPolicy: OnFailure
+      {{- if .Values.vault.autoUnseal.podSecurityContext.enabled }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.vault.autoUnseal.podSecurityContext "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.vault.autoUnseal.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: unseal
+          image: {{ template "vault.autoUnseal.image" . }}
+          imagePullPolicy: {{ .Values.vault.autoUnseal.image.pullPolicy | quote }}
+          {{- if .Values.vault.autoUnseal.containerSecurityContext.enabled -}}
+          securityContext: {{- omit .Values.autoUnseal.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+          {{- end }}
+          command: 
+            - /bin/sh
+          args:
+            - -c
+            - "chmod +x /vault/unseal/Unseal-Vault.sh && . /vault/unseal/Unseal-Vault.sh"
+          env:
+            {{- if .Values.vault.autoUnseal.env }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.env "context" $) | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: unseal-process
+              mountPath: /vault/unseal/Unseal-Vault.sh
+              subPath: Unseal-Vault.sh
+            - name: unseal-data
+              mountPath: {{ .Values.persistence.mountPath.unseal }}
+      volumes:
+        - name: unseal-process
+          configMap:
+            name: {{ template "common.names.fullname" . }}-cm
+        - name: unseal-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-unseal" ) .Values.persistence.existingClaim }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}

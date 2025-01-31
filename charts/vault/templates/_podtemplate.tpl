@@ -67,9 +67,11 @@ spec:
         {{- if .Values.vault.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
+        {{/*
         {{- if .Values.vault.autoUnseal.enabled }}
         {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.env "context" $) | nindent 8 }}
         {{- end }}
+        */}}
       envFrom:
         {{- if .Values.vault.extraEnvVarsCM }}
         - configMapRef:
@@ -133,6 +135,7 @@ spec:
     {{- if .Values.vault.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.vault.sidecars "context" $) | nindent 4 }}
     {{- end }}
+    {{/*
     {{- if .Values.vault.autoUnseal.enabled }}
     - name: unseal
       image: {{ template "vault.autoUnseal.image" . }}
@@ -155,6 +158,7 @@ spec:
         - name: unseal
           mountPath: {{ .Values.persistence.mountPath.unseal }}
     {{- end }}
+    */}}
     {{- if .Values.vault.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.vault.sidecars "context" $) | nindent 4 }}
     {{- end }}
@@ -181,6 +185,7 @@ spec:
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
+    {{/*
     {{- if .Values.vault.autoUnseal.enabled }}
     - name: unseal
     {{- if .Values.persistence.enabled }}
@@ -190,6 +195,7 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
+    */}}
     {{- if .Values.vault.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
