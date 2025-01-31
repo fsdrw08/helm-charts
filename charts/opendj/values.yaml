@@ -268,7 +268,7 @@ opendj:
     ## You can set the content key as whatever file name you like
     ## e.g.
     ## contents_b64:
-    ##   keystore.pkcs12: ""
+    ##   keystore.p12: ""
     ##   keystore.pin: ""
     contents_b64: {}
   ## @param opendj.existingConfigmap The name of an existing ConfigMap with your custom configuration for opendj

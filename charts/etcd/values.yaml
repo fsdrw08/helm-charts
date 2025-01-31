@@ -360,6 +360,7 @@ etcd:
     v2-deprecation: not-yet
     ### Security
     ## @param etcd.configFile.client-transport-security Block to config the client transport security
+    ##
     client-transport-security:
       ## @param etcd.configFile.client-transport-security.cert-file Path to the client server TLS cert file.
       ## aka --cert-file

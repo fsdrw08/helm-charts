@@ -230,10 +230,12 @@ consul:
       ## By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
       ## If there are multiple private IPv4 addresses available, Consul will exit with an error at startup.
       ## ref:https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bind
+      ##
       bind_addr: "0.0.0.0"
       ## @param consul.configFiles.general.client_addr The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
       ## By default, this is "127.0.0.1", allowing only loopback connections.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_client
+      ##
       client_addr: "0.0.0.0"
       ## @param consul.configFiles.general.datacenter This flag controls the datacenter in which the agent is running.
       ## If not provided, it defaults to "dc1".
@@ -249,6 +251,7 @@ consul:
       ## The retry_join parameter allows you to configure all Consul agents to automatically form a datacenter using a common Consul server accessed via DNS address,
       ## IP address or using Cloud Auto-join.
       ## Suggest to set to the host fqdn resolve by dns, e.g. SvcDisc.Infra.Sololab
+      ##
       retry_join: null
       ## @param consul.configFiles.general.ports This is a nested object that allows setting the bind ports for the following keys
       ##
@@ -364,7 +367,14 @@ consul:
   ##
   podLabels: {}
   ## @param consul.podAnnotations Annotations for consul pods
+  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/containers/podman/discussions/22378
+  ## ref: https://github.com/hashicorp/consul/blob/v1.20.2/Dockerfile#L271-L273
+  ## e.g.
+  ## podAnnotations:
+  ##   io.podman.annotations.userns: keep-id:uid=100,gid=1000
   ##
   podAnnotations: {}
   ## Autoscaling configuration
