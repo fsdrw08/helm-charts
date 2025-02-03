@@ -50,6 +50,18 @@ data:
       echo $VAULT_OPERATOR_SECRETS | jq . >$VAULT_OPERATOR_SECRETS_JSON_PATH
       printf "Vault initialized.\n"
     }
+    
+    function init_b64 {
+      # Initialize Vault
+      printf "Initializing Vault...\n"
+      VAULT_OPERATOR_SECRETS=$(curl -s -k -X POST \
+        -H "Content-Type: application/json" \
+        -d '{ "secret_shares": 1, "secret_threshold": 1 }' \
+        "$VAULT_ADDR/v1/sys/init")
+      # Export Vault operator keys (root_token and unseal keys)
+      echo $VAULT_OPERATOR_SECRETS | base64 >$VAULT_OPERATOR_SECRETS_JSON_PATH
+      printf "Vault initialized.\n"
+    }
 
     function is_sealed {
       curl -s -k --request GET "$VAULT_ADDR/v1/sys/health" | jq -r .sealed
@@ -68,6 +80,19 @@ data:
       done
       printf "Unseal Done\n"
     }
+    
+    function unseal_b64 {
+      # Unseal Vault
+      printf "Unsealing Vault...\n"
+      VAULT_UNSEAL_KEYS=$(base64 -d $VAULT_OPERATOR_SECRETS_JSON_PATH | jq -r .keys[])
+      for VAULT_UNSEAL_KEY in $VAULT_UNSEAL_KEYS; do
+          # https://developer.hashicorp.com/vault/api-docs/system/unseal
+          curl -s -k --request POST \
+            --data "{ \"key\": \"$VAULT_UNSEAL_KEY\" }" \
+            "$VAULT_ADDR/v1/sys/unseal"
+      done
+      printf "Unseal Done\n"
+    }
 
     wait_started
 
@@ -77,7 +102,7 @@ data:
 
     # init
     if [[ $(is_inited) != "true" ]]; then
-      init
+      init_b64
     else
       printf "Vault is already initialized.\n"
     fi
@@ -90,7 +115,7 @@ data:
     # unseal
     if [[ $(is_inited) == "true" && $(is_sealed) == "true" ]]; then
       if [[ -f "$VAULT_OPERATOR_SECRETS_JSON_PATH" && $(stat -c%s "$VAULT_OPERATOR_SECRETS_JSON_PATH") -gt 1 ]]; then
-        unseal
+        unseal_b64
         exit 0
       else
         echo "no keys in file, please check"

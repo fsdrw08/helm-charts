@@ -30,14 +30,14 @@ spec:
             - /bin/sh
           args:
             - -c
-            - "chmod +x /vault/unseal/Unseal-Vault.sh && . /vault/unseal/Unseal-Vault.sh"
+            - "chmod +x /tmp/Unseal-Vault.sh && . /tmp/Unseal-Vault.sh"
           env:
             {{- if .Values.vault.autoUnseal.env }}
             {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.env "context" $) | nindent 12 }}
             {{- end }}
           volumeMounts:
             - name: unseal-process
-              mountPath: /vault/unseal/Unseal-Vault.sh
+              mountPath: /tmp/Unseal-Vault.sh
               subPath: Unseal-Vault.sh
             - name: unseal-data
               mountPath: {{ .Values.persistence.mountPath.unseal }}
