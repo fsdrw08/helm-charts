@@ -137,7 +137,7 @@ consul:
   ## note: podman not support readinessProbe currently
   ##
   readinessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: 180
     periodSeconds: 300
     timeoutSeconds: 5
@@ -216,14 +216,17 @@ consul:
   ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files
   ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#general-parameters
+  ##
   configFiles:
     ## @param consul.configFiles.general General config for server and client agent
     ## The config under this node will convert to json file and place in /consul/config/general.json
     ## https://developer.hashicorp.com/consul/tutorials/production-deploy/deployment-guide#configure-consul-agents
+    ##
     general:
       ## @param consul.configFiles.general.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change.
       ## Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_auto_reload_config
+      ##
       auto_reload_config: true
       ## @param consul.configFiles.general.bind_addr The address that should be bound to for internal cluster communications.
       ## This is an IP address that should be reachable by all other nodes in the cluster.
