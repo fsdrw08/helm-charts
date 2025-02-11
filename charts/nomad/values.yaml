@@ -110,9 +110,11 @@ nomad:
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
-    httpGet:
-      path: /v1/status/leader
-      port: 4646
+    exec:
+      command:
+        - nomad
+        - server
+        - members
   ## @param nomad.readinessProbe.enabled Enable readinessProbe on nomad containers
   ## @param nomad.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param nomad.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -180,15 +182,13 @@ nomad:
     enabled: false
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## ref: https://github.com/hashicorp/nomad/blob/main/Dockerfile
-  ## ref: https://github.com/hashicorp/nomad-k8s/blob/main/charts/nomad/values.yaml#L1126
   ## @param nomad.containerSecurityContext.enabled Enabled nomad containers' Security Context
   ## @param nomad.containerSecurityContext.runAsUser Set nomad containers' Security Context runAsUser
   ## @param nomad.containerSecurityContext.runAsNonRoot Set nomad containers' Security Context runAsNonRoot
   ## @param nomad.containerSecurityContext.readOnlyRootFilesystem Set nomad containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
-    enabled: true
+    enabled: false
     runAsGroup: 1000
     runAsUser: 100
     runAsNonRoot: true
@@ -207,11 +207,6 @@ nomad:
     ## https://developer.hashicorp.com/nomad/docs/configuration#general-parameters
     ##
     main:
-      ## @param nomad.configFiles.main.auto_reload_config This option directs nomad to automatically reload the reloadable configuration options when configuration files change.
-      ## nomad also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
-      ## ref: https://developer.hashicorp.com/nomad/docs/configuration#configuration-reload
-      ##
-      auto_reload_config: true
       ## @param nomad.configFiles.main.bind_addr The address that should be bound to for internal cluster communications.
       ## This is an IP address that should be reachable by all other nodes in the cluster.
       ## By default, this is "0.0.0.0", meaning nomad will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
@@ -257,6 +252,7 @@ nomad:
       ## @param nomad.configFiles.main.acl
       ## This object allows a number of sub-keys to be set which controls the ACL system.
       ## Configuring the ACL system within the ACL stanza was added in nomad 1.4.0
+      ## ref: https://developer.hashicorp.com/nomad/docs/configuration/acl
       ##
       acl:
         ## @param nomad.configFile.main.enabled Specifies if ACL enforcement is enabled. All other ACL configuration options depend on this value.
@@ -354,7 +350,6 @@ nomad:
   ## the userns annotation only work podman v4.9+
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ## ref: https://github.com/containers/podman/discussions/22378
-  ## ref: https://github.com/hashicorp/nomad/blob/v1.20.2/Dockerfile#L271-L273
   ## e.g.
   ## podAnnotations:
   ##   io.podman.annotations.userns: keep-id:uid=100,gid=1000

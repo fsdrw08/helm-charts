@@ -62,7 +62,7 @@ spec:
       {{- else }}
       args:
         - agent
-        - -config /nomad/config
+        - -config=/nomad/config
       {{- end }}
       env:
         {{- if .Values.nomad.extraEnvVars }}
