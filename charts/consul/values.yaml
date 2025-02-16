@@ -250,6 +250,10 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
       ##
       # data_dir: /consul/data
+      ## @param consul.configFiles.main.disable_update_check Disables automatic checking for security bulletins and new version releases. This is disabled in Consul Enterprise
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#disable_update_check
+      ##
+      disable_update_check: true
       ## @param consul.configFiles.main.retry_join Address of another agent to join upon starting up
       ## The retry_join parameter allows you to configure all Consul agents to automatically form a datacenter using a common Consul server accessed via DNS address,
       ## IP address or using Cloud Auto-join.
