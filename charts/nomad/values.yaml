@@ -240,6 +240,10 @@ nomad:
       ## ref: https://developer.hashicorp.com/nomad/docs/configuration#data_dir
       ##
       data_dir: /nomad/data
+      ## @param nomad.configFiles.main.disable_update_check Specifies if Nomad should not check for updates and security bulletins.
+      ## ref: https://developer.hashicorp.com/nomad/docs/configuration#disable_update_check
+      ##
+      disable_update_check: true
       ## @param nomad.configFiles.main.name Specifies the name of the local node.
       ## This value is used to identify individual agents. When specified on a server, the name must be unique within the region.
       ## ref: https://developer.hashicorp.com/nomad/docs/configuration#name
@@ -257,6 +261,7 @@ nomad:
       acl:
         ## @param nomad.configFile.main.enabled Specifies if ACL enforcement is enabled. All other ACL configuration options depend on this value.
         ## All agents should have the same value for this parameter.
+        ## ref: https://developer.hashicorp.com/nomad/docs/configuration/acl
         ##
         enabled: false
       ## @param nomad.configFiles.main.server Nomad agent server mode in the server block of a Nomad agent configuration
@@ -336,7 +341,9 @@ nomad:
   command: []
   ## @param nomad.args Override default container args (useful when using custom images)
   ##
-  args: []
+  args:
+    - agent
+    - -config=/nomad/config
   ## @param nomad.hostAliases nomad pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
