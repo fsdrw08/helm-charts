@@ -383,6 +383,7 @@ nomad:
   ##   - name: FOO
   ##     value: "bar"
   ##
+  extraEnvVars: []
   ## @param nomad.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for nomad nodes
   ##
   extraEnvVarsCM: ""
