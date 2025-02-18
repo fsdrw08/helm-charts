@@ -44,7 +44,7 @@ data:
       printf "Initializing Vault...\n"
       VAULT_OPERATOR_SECRETS=$(curl -s -k -X POST \
         -H "Content-Type: application/json" \
-        -d '{ "secret_shares": 1, "secret_threshold": 1 }' \
+        --data "{ \"secret_shares\": $SECRET_SHARES, \"secret_threshold\": $SECRET_THRESHOLD }" \
         "$VAULT_ADDR/v1/sys/init")
       # Export Vault operator keys (root_token and unseal keys)
       echo $VAULT_OPERATOR_SECRETS | jq . >$VAULT_OPERATOR_SECRETS_JSON_PATH
@@ -56,7 +56,7 @@ data:
       printf "Initializing Vault...\n"
       VAULT_OPERATOR_SECRETS=$(curl -s -k -X POST \
         -H "Content-Type: application/json" \
-        -d '{ "secret_shares": 1, "secret_threshold": 1 }' \
+        --data "{ \"secret_shares\": $SECRET_SHARES, \"secret_threshold\": $SECRET_THRESHOLD }" \
         "$VAULT_ADDR/v1/sys/init")
       # Export Vault operator keys (root_token and unseal keys)
       echo $VAULT_OPERATOR_SECRETS | base64 >$VAULT_OPERATOR_SECRETS_JSON_PATH

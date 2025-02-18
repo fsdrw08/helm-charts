@@ -412,6 +412,10 @@ vault:
         value: http://{{ template "common.names.fullname" . }}:8200
       - name: VAULT_OPERATOR_SECRETS_JSON_PATH
         value: "/vault/unseal/vault_operator_secrets"
+      - name: SECRET_SHARES
+        value: 5
+      - name: SECRET_THRESHOLD
+        value: 3
 
   ## @param vault.sidecars Add additional sidecar containers to the vault pod(s)
   ## e.g:
