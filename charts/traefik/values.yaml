@@ -52,7 +52,7 @@ traefik:
   image:
     registry: docker.io
     repository: library/traefik
-    tag: latest
+    tag: v3.3
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -92,6 +92,10 @@ traefik:
     - name: https
       containerPort: 443
       hostPort: 443
+      protocol: TCP
+    - name: ping
+      containerPort: 8080
+      hostPort: 8080
       protocol: TCP
   ## Configure extra options for traefik containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -234,13 +238,13 @@ traefik:
     ##   checkNewVersion: false
     ##   sendAnonymousUsage: false
     ##
-    globalArguments: {}
+    global: {}
     ## @param traefik.staticConfiguration.entryPoints
     ## ref: https://doc.traefik.io/traefik/routing/overview/
     ##
     entryPoints:
       traefik:
-        address: ":9000"
+        address: ":8080"
       web:
         address: ":80"
         forwardedHeaders:

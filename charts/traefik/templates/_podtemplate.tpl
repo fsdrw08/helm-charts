@@ -126,7 +126,7 @@ spec:
     - name: dynamicConfigurationFileDir
       configMap:
         name: {{ template "common.names.fullname" . }}-cm-dyn
-    {{- end -}}
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
