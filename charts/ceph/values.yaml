@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section %%MAIN_CONTAINER%% Parameters
 ##
 
@@ -103,7 +103,7 @@ ceph:
   podSecurityContext:
     enabled: false
     fsGroup: 1001
-  ## @param ceph.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param ceph.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   ##
   podRestartPolicy: Never

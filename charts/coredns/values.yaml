@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param coredns.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param coredns.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section coredns Parameters
 ##
 
@@ -67,7 +67,7 @@ coredns:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param coredns.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param coredns.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param coredns.replicaCount Number of coredns replicas to deploy

@@ -1,6 +1,6 @@
 {{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
 metadata:
-  {{- if eq .Values.deployKind "Pod" }}
+  {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations }}
@@ -119,7 +119,7 @@ spec:
     {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.deployKind "Deployment" }}
+  {{ if eq .Values.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.podRestartPolicy }}

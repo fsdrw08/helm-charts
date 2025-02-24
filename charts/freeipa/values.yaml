@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param freeipa.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param freeipa.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section freeipa Parameters
 ##
 
@@ -67,7 +67,7 @@ freeipa:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param freeipa.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param freeipa.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param freeipa.replicaCount Number of freeipa replicas to deploy

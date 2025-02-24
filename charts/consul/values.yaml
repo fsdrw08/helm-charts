@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param consul.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param consul.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section consul Parameters
 ##
 
@@ -68,7 +68,7 @@ consul:
     ##
     pullSecrets: []
 
-  ## @param consul.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param consul.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param consul.replicaCount Number of consul replicas to deploy

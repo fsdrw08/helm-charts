@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param etcd.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param etcd.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section etcd Parameters
 ##
 
@@ -67,7 +67,7 @@ etcd:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param etcd.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param etcd.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param etcd.replicaCount Number of etcd replicas to deploy

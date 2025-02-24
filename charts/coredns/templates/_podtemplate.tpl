@@ -1,6 +1,6 @@
 {{- define "coredns.podTemplate" -}}
 metadata:
-  {{- if eq .Values.deployKind "Pod" }}
+  {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.coredns.podAnnotations }}
@@ -126,7 +126,7 @@ spec:
   {{- if .Values.coredns.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.coredns.extraVolumes "context" $) | nindent 4 }}
   {{- end }}
-  {{ if eq .Values.deployKind "Deployment" }}
+  {{ if eq .Values.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.coredns.podRestartPolicy }}

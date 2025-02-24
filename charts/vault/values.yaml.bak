@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param vault.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param vault.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section vault Parameters
 ##
 
@@ -67,7 +67,7 @@ vault:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param vault.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param vault.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param vault.replicaCount Number of vault replicas to deploy

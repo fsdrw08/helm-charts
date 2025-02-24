@@ -1,6 +1,6 @@
 {{- define "consul.podTemplate" -}}
 metadata:
-  {{- if eq .Values.deployKind "Pod" }}
+  {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.consul.podAnnotations }}
@@ -136,7 +136,7 @@ spec:
     {{- if .Values.consul.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.consul.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.deployKind "Deployment" }}
+  {{ if eq .Values.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.consul.podRestartPolicy }}

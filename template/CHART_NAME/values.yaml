@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param %%MAIN_OBJECT_BLOCK%%.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param %%MAIN_OBJECT_BLOCK%%.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section %%MAIN_CONTAINER%% Parameters
 ##
 
@@ -67,7 +67,7 @@ deployKind: Pod
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param %%MAIN_OBJECT_BLOCK%%.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param %%MAIN_OBJECT_BLOCK%%.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param %%MAIN_OBJECT_BLOCK%%.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy

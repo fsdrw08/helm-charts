@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param keycloak.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param keycloak.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section keycloak Parameters
 ##
 
@@ -67,7 +67,7 @@ keycloak:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param keycloak.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param keycloak.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param keycloak.replicaCount Number of keycloak replicas to deploy

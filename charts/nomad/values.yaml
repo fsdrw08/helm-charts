@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param nomad.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param nomad.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section nomad Parameters
 ##
 
@@ -68,7 +68,7 @@ nomad:
     ##
     pullSecrets: []
 
-  ## @param nomad.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param nomad.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param nomad.replicaCount Number of nomad replicas to deploy

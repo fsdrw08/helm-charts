@@ -1,4 +1,4 @@
-{{- if eq .Values.deployKind "Pod"  -}}
+{{- if eq .Values.workloadKind "Pod"  -}}
 apiVersion: v1
 kind: Pod
 {{ template "opendj.podTemplate" . }}

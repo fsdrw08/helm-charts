@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param postgresql.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param postgresql.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section %%MAIN_CONTAINER%% Parameters
 ##
 
@@ -67,7 +67,7 @@ postgresql:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param postgresql.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param postgresql.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param postgresql.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy

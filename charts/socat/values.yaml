@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param socat.deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param socat.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section socat Parameters
 ##
 
@@ -67,7 +67,7 @@ socat:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param socat.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param socat.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param socat.replicaCount Number of socat replicas to deploy

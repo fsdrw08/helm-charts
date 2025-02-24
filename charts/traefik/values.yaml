@@ -32,8 +32,8 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param deployKind specify the deploy kind： Pod, or Deployment
-deployKind: Pod
+## @param workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
 ## @section traefik Parameters
 ##
 
@@ -67,7 +67,7 @@ traefik:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param traefik.podRestartPolicy specify the pod restart policy if deployKind set to Pod
+  ## @param traefik.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## @param traefik.replicaCount Number of traefik replicas to deploy

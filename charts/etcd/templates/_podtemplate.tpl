@@ -1,6 +1,6 @@
 {{- define "etcd.podTemplate" -}}
 metadata:
-  {{- if eq .Values.deployKind "Pod" }}
+  {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.etcd.podAnnotations }}
@@ -147,7 +147,7 @@ spec:
     {{- if .Values.etcd.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.etcd.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.deployKind "Deployment" }}
+  {{ if eq .Values.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.etcd.podRestartPolicy }}

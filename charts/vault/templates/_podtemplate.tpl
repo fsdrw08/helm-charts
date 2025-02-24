@@ -1,6 +1,6 @@
 {{- define "vault.podTemplate" -}}
 metadata:
-  {{- if eq .Values.deployKind "Pod" }}
+  {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.vault.podAnnotations }}
@@ -199,7 +199,7 @@ spec:
     {{- if .Values.vault.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.deployKind "Deployment" }}
+  {{ if eq .Values.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.vault.podRestartPolicy }}
