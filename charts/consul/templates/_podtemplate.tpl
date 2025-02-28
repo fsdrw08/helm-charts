@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.consul.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: consul
+    - name: agent
       image: {{ template "consul.image" . }}
       imagePullPolicy: {{ .Values.consul.image.pullPolicy | quote }}
       {{- if .Values.consul.containerSecurityContext.enabled }}
