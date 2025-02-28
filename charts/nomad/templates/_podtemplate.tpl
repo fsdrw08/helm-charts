@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.nomad.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: nomad
+    - name: agent
       image: {{ template "nomad.image" . }}
       imagePullPolicy: {{ .Values.nomad.image.pullPolicy | quote }}
       {{- if .Values.nomad.containerSecurityContext.enabled }}
