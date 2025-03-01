@@ -51,7 +51,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: vault
+    - name: server
       image: {{ template "vault.image" . }}
       imagePullPolicy: {{ .Values.vault.image.pullPolicy | quote }}
       {{- if .Values.vault.containerSecurityContext.enabled }}
