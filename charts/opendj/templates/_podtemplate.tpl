@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.opendj.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: opendj
+    - name: server
       image: {{ template "opendj.image" . }}
       imagePullPolicy: {{ .Values.opendj.image.pullPolicy | quote }}
       {{- if .Values.opendj.containerSecurityContext.enabled }}
