@@ -99,11 +99,13 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.powerdns.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: pdns.conf
+        - name: settings
           mountPath: /etc/powerdns
           subPath: pdns.conf
-        - name: pdns.d
-          mountPath: /etc/powerdns/pdns.d
+        {{- if index .Values "powerdns" "configFiles" "pdns" "include-dir" }}
+        - name: include-dir
+          mountPath: {{ index .Values "powerdns" "configFiles" "pdns" "include-dir" }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -116,19 +118,21 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.powerdns.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: pdns.conf
+    - name: settings
       configMap:
-        name: {{ template "common.names.fullname" . }}-cm
+        name: {{ template "common.names.fullname" . }}-cm-main
         items:
           - key: pdns.conf
             path: pdns.conf
-    - name: pdns.d
+    {{- if index .Values "powerdns" "configFiles" "pdns" "include-dir" }}
+    - name: include-dir
       configMap: 
-        name: {{ template "common.names.fullname" . }}-cm
+        name: {{ template "common.names.fullname" . }}-cm-include
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}

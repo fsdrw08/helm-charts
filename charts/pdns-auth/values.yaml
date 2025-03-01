@@ -349,6 +349,9 @@ powerdns:
         - -c
         - |
           [ ! -f "/var/lib/powerdns/pdns.sqlite3" ] && sqlite3 /var/lib/powerdns/pdns.sqlite3 < /usr/local/share/doc/pdns/schema.sqlite3.sql
+      volumeMounts:
+        - name: data
+          mountPath: /var/lib/powerdns
 
 ## @section Persistence Parameters
 ##

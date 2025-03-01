@@ -18,11 +18,12 @@ data:
 {{- range $key, $val := .Values.powerdns.configFiles.pdns }}
     {{ $key }}={{ $val }}
 {{- end }}
+{{- if index .Values "powerdns" "configFiles" "pdns" "include-dir" }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "common.names.fullname" . }}-cm-others
+  name: {{ template "common.names.fullname" . }}-cm-include
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: powerdns
@@ -36,5 +37,6 @@ data:
 {{- range $key, $val := $content }}
     {{ $key }}={{ $val }}
 {{- end}}
+{{- end }}
 {{- end }}
 {{- end }}
