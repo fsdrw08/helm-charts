@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.traefik.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: traefik
+    - name: proxy
       image: {{ template "traefik.image" . }}
       imagePullPolicy: {{ .Values.traefik.image.pullPolicy | quote }}
       {{- if .Values.traefik.containerSecurityContext.enabled }}
