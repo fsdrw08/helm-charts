@@ -100,7 +100,7 @@ spec:
       {{- end }}
       volumeMounts:
         - name: settings
-          mountPath: /etc/powerdns
+          mountPath: /etc/powerdns/pdns.conf
           subPath: pdns.conf
         {{- if index .Values "powerdns" "configFiles" "pdns" "include-dir" }}
         - name: include-dir
