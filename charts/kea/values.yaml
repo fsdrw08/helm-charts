@@ -191,7 +191,14 @@ kea:
         ## ref: https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#interface-configuration
         ##
         interfaces-config:
+          ## @param kea.configFiles.dhcp4.interfaces-config.interfaces The interfaces-config map specifies the network interfaces on which the server should listen to DHCP messages.
+          ## It is recommended to specify the actual interface you want to listen on, but it is possible to bind to all present.
+          ##
           interfaces: ["*"]
+          ## @param kea.configFiles.dhcp4.interfaces-config.dhcp-socket-type By default Kea listens using raw sockets.
+          ## This ensures all packets, including those sent by directly connected clients that traffic is always relayed,
+          ## it is often better to use regular UDP sockets. If you want to do that, set this to "udp".
+          ##
           dhcp-socket-type: raw
         ## @param kea.configFiles.dhcp4.control-socket Kea supports control channel, which is a way to receive management commands while the server is running.
         ## This is a Unix domain socket that receives commands formatted in JSON, e.g. config-set (which sets new configuration), config-reload (which tells Kea to reload its configuration from file), statistic-get (to retrieve statistics)
@@ -202,7 +209,16 @@ kea:
         control-socket:
           socket-type: unix
           socket-name: /kea/sockets/dhcp4.socket
-
+        ## Specifies credentials to access lease database.
+        lease-database:
+          ## Lease database backend type, i.e. "memfile", "mysql", "postgresql" or "cql".
+          type: memfile
+          ## Name of the lease file. In case of database it specifies the database name.
+          ##
+          name: /kea/leases/dhcp4.csv
+          ## memfile backend specific parameter specifying the interval in seconds at which lease file should be cleaned up.
+          ##
+          lfc-interval: 3600
   ## @param kea.existingConfigmap The name of an existing ConfigMap with your custom configuration for kea
   ##
   existingConfigmap:
