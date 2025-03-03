@@ -74,7 +74,7 @@ kea:
   ##
   replicaCount: 1
   ## @param kea.containerPorts kea container port to expose to host
-  ## e.g. 
+  ## e.g.
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
@@ -182,18 +182,26 @@ kea:
     readOnlyRootFilesystem: false
 
   configFiles:
+    ## @param kea.configFiles.dhcp4.dhcp4 dhcp4 config file
     dhcp4:
-      ## @param kea.configFiles.dhcp4.interfaces-config The interfaces-config map specifies the network interfaces on which the server should listen to DHCP messages.
-      ## The interfaces parameter specifies a list of network interfaces on which the server should listen.
-      ## ref: https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#interface-configuration
-      ##
-      interfaces-config:
-        interfaces: ["*"]
-        dhcp-socket-type: raw
-      ## @param kea.configFiles.dhcp4.control-socket
-      ## ref: https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#management-api-for-the-dhcpv4-server
-      ##
-      control-socket:
+      ## @param kea.configFiles.dhcp4.dhcp4.dhcp dhcp4 config block in dhcp 4 config file
+      dhcp4:
+        ## @param kea.configFiles.dhcp4.interfaces-config The interfaces-config map specifies the network interfaces on which the server should listen to DHCP messages.
+        ## The interfaces parameter specifies a list of network interfaces on which the server should listen.
+        ## ref: https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#interface-configuration
+        ##
+        interfaces-config:
+          interfaces: ["*"]
+          dhcp-socket-type: raw
+        ## @param kea.configFiles.dhcp4.control-socket Kea supports control channel, which is a way to receive management commands while the server is running.
+        ## This is a Unix domain socket that receives commands formatted in JSON, e.g. config-set (which sets new configuration), config-reload (which tells Kea to reload its configuration from file), statistic-get (to retrieve statistics)
+        ## and many more.
+        ## ref: https://kea.readthedocs.io/en/latest/arm/dhcp4-srv.html#management-api-for-the-dhcpv4-server
+        ## ref: https://github.com/JonasAlfredsson/docker-kea/blob/main/examples/advanced/config/dhcp4.json
+        ##
+        control-socket:
+          socket-type: unix
+          socket-name: /kea/sockets/dhcp4.socket
 
   ## @param kea.existingConfigmap The name of an existing ConfigMap with your custom configuration for kea
   ##
@@ -376,4 +384,4 @@ volumePermissions:
 # %%SUBCHART_NAME%%:
 SUBCHART_NAME:
   enabled: false
-  %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
