@@ -24,4 +24,5 @@ maintainers:
 name: nomad
 sources:
   - https://github.com/fsdrw08/helm-charts/nomad
+  - https://github.com/hashicorp/nomad
 version: 0.1.0

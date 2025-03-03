@@ -13,15 +13,15 @@ description: HashiCorp Consul helm chart for podman kube play
 home: https://github.com/fsdrw08/helm-charts
 icon: https://bitnami.com/assets/stacks/consul/img/consul-stack-220x234.png
 keywords:
-  - podman kube play
   - consul
-  - discovering
   - configuring
-  - services
+  - services discovering
+  - podman kube play
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts
 name: consul
 sources:
   - https://github.com/fsdrw08/helm-charts/consul
+  - https://github.com/hashicorp/consul
 version: 0.1.0

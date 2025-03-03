@@ -13,15 +13,16 @@ description: vault is a tool for securely accessing secrets.
 home: https://github.com/fsdrw08/helm-charts
 icon: https://www.gravatar.com/avatar/f7304a610df968cef5badc9e9dcd40e0?s=120&r=g&d=404
 keywords:
-  - podman kube play
   - vault
   - pki
   - ca
   - secret management
+  - podman kube play
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts
 name: vault
 sources:
   - https://github.com/fsdrw08/helm-charts/vault
+  - https://github.com/hashicorp/vault/
 version: 0.1.0
