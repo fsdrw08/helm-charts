@@ -4,30 +4,30 @@ SPDX-License-Identifier: APACHE-2.0
 */}}
 
 {{/*
-Return the proper %%MAIN_OBJECT_BLOCK%% image name
-*/}}
-{{- define "%%TEMPLATE_NAME%%.image" -}}
+Return the proper kea image name
+{{- define "kea.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.%%MAIN_OBJECT_BLOCK%%.image "global" .Values.global) }}
 {{- end -}}
+*/}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "%%TEMPLATE_NAME%%.volumePermissions.image" -}}
+{{- define "kea.volumePermissions.image" -}}
 {{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
-*/}}
-{{- define "%%TEMPLATE_NAME%%.imagePullSecrets" -}}
+{{- define "kea.imagePullSecrets" -}}
 {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.%%MAIN_OBJECT_BLOCK%%.image .Values.%%SECONDARY_OBJECT_BLOCK%%.image .Values.volumePermissions.image) "context" $) -}}
 {{- end -}}
+*/}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "%%TEMPLATE_NAME%%.serviceAccountName" -}}
+{{- define "kea.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
     {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
@@ -39,7 +39,7 @@ Create the name of the service account to use
 Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
 Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
 */}}
-{{- define "%%TEMPLATE_NAME%%.ingress.certManagerRequest" -}}
+{{- define "kea.ingress.certManagerRequest" -}}
 {{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
     {{- true -}}
 {{- end -}}
@@ -48,10 +48,10 @@ Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
 {{/*
 Compile all warnings into a single message.
 */}}
-{{- define "%%TEMPLATE_NAME%%.validateValues" -}}
+{{- define "kea.validateValues" -}}
 {{- $messages := list -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.foo" .) -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.bar" .) -}}
+{{- $messages := append $messages (include "kea.validateValues.foo" .) -}}
+{{- $messages := append $messages (include "kea.validateValues.bar" .) -}}
 {{- $messages := without $messages "" -}}
 {{- $message := join "\n" $messages -}}
 

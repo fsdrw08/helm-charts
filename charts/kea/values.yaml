@@ -14,7 +14,7 @@ global:
   ## imagePullSecrets:
   ##   - myRegistryKeySecretName
   ##
-  imagePullSecrets: []
+  # imagePullSecrets: []
   storageClass: ""
 
 ## @section Common parameters
@@ -32,221 +32,48 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param dhcp4.workloadKind specify the deploy kind： Pod, or Deployment
+## @param workloadKind specify the deploy kind： Pod, or Deployment
 workloadKind: Pod
 ## @section kea Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
-dhcp4:
-  enabled: true
-  ## ISC kea image
-  ## ref: https://hub.docker.com/r/bitnami/%%IMAGE_NAME%%/tags/
-  ## @param dhcp4.image.registry kea image registry
-  ## @param dhcp4.image.repository kea image repository
-  ## @param dhcp4.image.tag kea image tag (immutable tags are recommended)
-  ## @param dhcp4.image.digest kea image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param dhcp4.image.pullPolicy kea image pull policy
-  ## @param dhcp4.image.pullSecrets kea image pull secrets
-  ##
-  image:
-    registry: docker.cloudsmith.io
-    repository: isc/docker/kea-dhcp4
-    tag: 2.7.6-20250129
-    digest: ""
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    ##
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    ##
-    pullSecrets: []
-  ## @param dhcp4.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+kea:
+  ## @param kea.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param dhcp4.replicaCount Number of kea replicas to deploy
+  ## @param kea.replicaCount Number of kea replicas to deploy
   ##
   replicaCount: 1
-  ## @param dhcp4.containerPorts kea container port to expose to host
-  ## e.g.
-  ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##
-  containerPorts: {}
-  ## Configure extra options for kea containers' liveness and readiness probes
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param dhcp4.livenessProbe.enabled Enable livenessProbe on kea containers
-  ## @param dhcp4.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
-  ## @param dhcp4.livenessProbe.periodSeconds Period seconds for livenessProbe
-  ## @param dhcp4.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
-  ## @param dhcp4.livenessProbe.failureThreshold Failure threshold for livenessProbe
-  ## @param dhcp4.livenessProbe.successThreshold Success threshold for livenessProbe
-  ##
-  livenessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param dhcp4.readinessProbe.enabled Enable readinessProbe on kea containers
-  ## @param dhcp4.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  ## @param dhcp4.readinessProbe.periodSeconds Period seconds for readinessProbe
-  ## @param dhcp4.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-  ## @param dhcp4.readinessProbe.failureThreshold Failure threshold for readinessProbe
-  ## @param dhcp4.readinessProbe.successThreshold Success threshold for readinessProbe
-  ## note: podman not support readinessProbe currently
-  ##
-  readinessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param dhcp4.startupProbe.enabled Enable startupProbe on kea containers
-  ## @param dhcp4.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
-  ## @param dhcp4.startupProbe.periodSeconds Period seconds for startupProbe
-  ## @param dhcp4.startupProbe.timeoutSeconds Timeout seconds for startupProbe
-  ## @param dhcp4.startupProbe.failureThreshold Failure threshold for startupProbe
-  ## @param dhcp4.startupProbe.successThreshold Success threshold for startupProbe
-  ##
-  startupProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param dhcp4.customLivenessProbe Custom livenessProbe that overrides the default one
-  ##
-  customLivenessProbe: {}
-  ## @param dhcp4.customReadinessProbe Custom readinessProbe that overrides the default one
-  ##
-  customReadinessProbe: {}
-  ## @param dhcp4.customStartupProbe Custom startupProbe that overrides the default one
-  ##
-  customStartupProbe: {}
-  ## kea resource requests and limits
-  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param dhcp4.resourcesPreset Set kea container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if dhcp4.resources is set (kea.resources is recommended for production).
-  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
-  ##
-  resourcesPreset: "nano"
-  ## @param dhcp4.resources Set kea container requests and limits for different resources like CPU or memory (essential for production workloads)
-  ## Example:
-  ## resources:
-  ##   requests:
-  ##     cpu: 2
-  ##     memory: 512Mi
-  ##   limits:
-  ##     cpu: 3
-  ##     memory: 1024Mi
-  ##
-  resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param dhcp4.podSecurityContext.enabled Enabled kea pods' Security Context
-  ## @param dhcp4.podSecurityContext.fsGroup Set kea pod's Security Context fsGroup
+  ## @param kea.podSecurityContext.enabled Enabled kea pods' Security Context
+  ## @param kea.podSecurityContext.fsGroup Set kea pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
     enabled: false
     # fsGroup: 1001
-  ## Configure Container Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param dhcp4.containerSecurityContext.enabled Enabled kea containers' Security Context
-  ## @param dhcp4.containerSecurityContext.runAsUser Set kea containers' Security Context runAsUser
-  ## @param dhcp4.containerSecurityContext.runAsNonRoot Set kea containers' Security Context runAsNonRoot
-  ## @param dhcp4.containerSecurityContext.readOnlyRootFilesystem Set kea containers' Security Context runAsNonRoot
-  ##
-  containerSecurityContext:
-    enabled: false
-    runAsUser: 1001
-    runAsNonRoot: true
-    readOnlyRootFilesystem: false
-
-  configFiles:
-    ## @param dhcp4.configFiles.kea-dhcp4 dhcp4 config file which will place in /etc/kea/kea-dhcp4.conf
-    ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/master/kea-dhcp4/kea-dhcp4.conf
-    ##
-    kea-dhcp4:
-      ## @param dhcp4.configFiles.kea-dhcp4.Dhcp4 Kea DHCPv4 server configuration begins here.
-      ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea4/all-keys.json
-      ##
-      Dhcp4:
-        subnet4:
-          - subnet: 192.168.50.0/24
-            pools:
-              - pool: 192.168.50.1-192.168.50.100
-            id: 1
-            interface: eth0
-        interfaces-config:
-          interfaces:
-            - eth0
-          service-sockets-max-retries: 5
-          service-sockets-require-all: true
-        control-sockets:
-          - socket-type: unix
-            socket-name: /run/kea/control_socket_4
-          - socket-type: http
-            socket-address: 0.0.0.0
-            socket-port: 8000
-        renew-timer: 1000
-        rebind-timer: 2000
-        valid-lifetime: 4000
-        loggers:
-          - name: kea-dhcp4
-            output_options:
-              - output: stdout
-            severity: INFO
-        lease-database:
-          type: memfile
-
-  ## @param dhcp4.existingConfigmap The name of an existing ConfigMap with your custom configuration for kea
-  ##
-  existingConfigmap:
-  ## @param dhcp4.command Override default container command (useful when using custom images)
-  ##
-  command: []
-  ## @param dhcp4.args Override default container args (useful when using custom images)
-  ##
-  args: []
-  ## @param dhcp4.hostAliases kea pods host aliases
+  ## @param kea.hostAliases kea pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param dhcp4.podLabels Extra labels for kea pods
+  ## @param kea.podLabels Extra labels for kea pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param dhcp4.podAnnotations Annotations for kea pods
+  ## @param kea.podAnnotations Annotations for kea pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param dhcp4.autoscaling.enabled Enable autoscaling for kea
-  ## @param dhcp4.autoscaling.minReplicas Minimum number of kea replicas
-  ## @param dhcp4.autoscaling.maxReplicas Maximum number of kea replicas
-  ## @param dhcp4.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param dhcp4.autoscaling.targetMemory Target Memory utilization percentage
+  ## @param kea.autoscaling.enabled Enable autoscaling for kea
+  ## @param kea.autoscaling.minReplicas Minimum number of kea replicas
+  ## @param kea.autoscaling.maxReplicas Maximum number of kea replicas
+  ## @param kea.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param kea.autoscaling.targetMemory Target Memory utilization percentage
   ##
   autoscaling:
     enabled: false
@@ -254,27 +81,7 @@ dhcp4:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-
-  ## @param dhcp4.extraEnvVars Array with extra environment variables to add to kea nodes
-  ## e.g:
-  ## extraEnvVars:
-  ##   - name: FOO
-  ##     value: "bar"
-  ##
-  extraEnvVars: []
-  ## @param dhcp4.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for kea nodes
-  ##
-  extraEnvVarsCM: ""
-  ## @param dhcp4.extraEnvVarsSecret Name of existing Secret containing extra env vars for kea nodes
-  ##
-  extraEnvVarsSecret: ""
-  ## @param dhcp4.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
-  ##
-  extraVolumes: []
-  ## @param dhcp4.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the kea container(s)
-  ##
-  extraVolumeMounts: []
-  ## @param dhcp4.sidecars Add additional sidecar containers to the kea pod(s)
+  ## @param kea.sidecars Add additional sidecar containers to the kea pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -285,7 +92,7 @@ dhcp4:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param dhcp4.initContainers Add additional init containers to the kea pod(s)
+  ## @param kea.initContainers Add additional init containers to the kea pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -295,6 +102,201 @@ dhcp4:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
+  containers:
+    dhcp4:
+      ## @param kea.containers.dhcp4.enabled present this container in the pod
+      enabled: true
+      ## ISC kea dhcp4 image
+      ## ref: https://cloudsmith.io/~isc/repos/docker/packages/detail/docker/kea-dhcp4/#versions
+      ## @param kea.containers.dhcp4.image.registry kea image registry
+      ## @param kea.containers.dhcp4.image.repository kea image repository
+      ## @param kea.containers.dhcp4.image.tag kea image tag (immutable tags are recommended)
+      ## @param kea.containers.dhcp4.image.digest kea image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+      ## @param kea.containers.dhcp4.image.pullPolicy kea image pull policy
+      ## @param kea.containers.dhcp4.image.pullSecrets kea image pull secrets
+      ##
+      image:
+        registry: docker.cloudsmith.io
+        repository: isc/docker/kea-dhcp4
+        tag: 2.7.6-20250129
+        digest: ""
+        ## Specify a imagePullPolicy
+        ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+        ##
+        pullPolicy: IfNotPresent
+        ## Optionally specify an array of imagePullSecrets.
+        ## Secrets must be manually created in the namespace.
+        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        ## e.g:
+        ## pullSecrets:
+        ##   - myRegistryKeySecretName
+        ##
+        pullSecrets: []
+      ## @param kea.containers.dhcp4.containerPorts kea container port to expose to host
+      ## e.g.
+      ## containerPorts:
+      ##   - name: http
+      ##     containerPort: 80
+      ##     hostPort: 80
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##   - name: https
+      ##     containerPort: 443
+      ##     hostPort: 443
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##
+      containerPorts: {}
+      ## Configure extra options for kea containers' liveness and readiness probes
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+      ## @param kea.containers.dhcp4.livenessProbe.enabled Enable livenessProbe on kea containers
+      ## @param kea.containers.dhcp4.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+      ## @param kea.containers.dhcp4.livenessProbe.periodSeconds Period seconds for livenessProbe
+      ## @param kea.containers.dhcp4.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+      ## @param kea.containers.dhcp4.livenessProbe.failureThreshold Failure threshold for livenessProbe
+      ## @param kea.containers.dhcp4.livenessProbe.successThreshold Success threshold for livenessProbe
+      ##
+      livenessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param kea.containers.dhcp4.readinessProbe.enabled Enable readinessProbe on kea containers
+      ## @param kea.containers.dhcp4.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+      ## @param kea.containers.dhcp4.readinessProbe.periodSeconds Period seconds for readinessProbe
+      ## @param kea.containers.dhcp4.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+      ## @param kea.containers.dhcp4.readinessProbe.failureThreshold Failure threshold for readinessProbe
+      ## @param kea.containers.dhcp4.readinessProbe.successThreshold Success threshold for readinessProbe
+      ## note: podman not support readinessProbe currently
+      ##
+      readinessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param kea.containers.dhcp4.startupProbe.enabled Enable startupProbe on kea containers
+      ## @param kea.containers.dhcp4.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+      ## @param kea.containers.dhcp4.startupProbe.periodSeconds Period seconds for startupProbe
+      ## @param kea.containers.dhcp4.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+      ## @param kea.containers.dhcp4.startupProbe.failureThreshold Failure threshold for startupProbe
+      ## @param kea.containers.dhcp4.startupProbe.successThreshold Success threshold for startupProbe
+      ##
+      startupProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param kea.containers.dhcp4.customLivenessProbe Custom livenessProbe that overrides the default one
+      ##
+      customLivenessProbe: {}
+      ## @param kea.containers.dhcp4.customReadinessProbe Custom readinessProbe that overrides the default one
+      ##
+      customReadinessProbe: {}
+      ## @param kea.containers.dhcp4.customStartupProbe Custom startupProbe that overrides the default one
+      ##
+      customStartupProbe: {}
+      ## kea resource requests and limits
+      ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+      ## @param kea.containers.dhcp4.resourcesPreset Set kea container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if dhcp4.resources is set (kea.resources is recommended for production).
+      ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+      ##
+      resourcesPreset: "nano"
+      ## @param kea.containers.dhcp4.resources Set kea container requests and limits for different resources like CPU or memory (essential for production workloads)
+      ## Example:
+      ## resources:
+      ##   requests:
+      ##     cpu: 2
+      ##     memory: 512Mi
+      ##   limits:
+      ##     cpu: 3
+      ##     memory: 1024Mi
+      ##
+      resources: {}
+
+      ## Configure Container Security Context
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      ## @param kea.containers.dhcp4.containerSecurityContext.enabled Enabled kea containers' Security Context
+      ## @param kea.containers.dhcp4.containerSecurityContext.runAsUser Set kea containers' Security Context runAsUser
+      ## @param kea.containers.dhcp4.containerSecurityContext.runAsNonRoot Set kea containers' Security Context runAsNonRoot
+      ## @param kea.containers.dhcp4.containerSecurityContext.readOnlyRootFilesystem Set kea containers' Security Context runAsNonRoot
+      ##
+      containerSecurityContext:
+        enabled: false
+        runAsUser: 1001
+        runAsNonRoot: true
+        readOnlyRootFilesystem: false
+
+      ## @param kea.containers.dhcp4.config dhcp4 config file which will place in /etc/kea/kea-dhcp4.conf
+      ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/master/kea-dhcp4/kea-dhcp4.conf
+      config:
+        ## @param kea.containers.dhcp4.config.kea-dhcp4.Dhcp4 Kea DHCPv4 server configuration begins here.
+        ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea4/all-keys.json
+        ##
+        Dhcp4:
+          subnet4:
+            - subnet: 192.168.50.0/24
+              pools:
+                - pool: 192.168.50.1-192.168.50.100
+              id: 1
+              interface: eth0
+          interfaces-config:
+            interfaces:
+              - eth0
+            service-sockets-max-retries: 5
+            service-sockets-require-all: true
+          control-sockets:
+            - socket-type: unix
+              socket-name: /run/kea/control_socket_4
+            - socket-type: http
+              socket-address: 0.0.0.0
+              socket-port: 8000
+          renew-timer: 1000
+          rebind-timer: 2000
+          valid-lifetime: 4000
+          loggers:
+            - name: kea-dhcp4
+              output_options:
+                - output: stdout
+              severity: INFO
+          lease-database:
+            type: memfile
+
+      ## @param kea.containers.dhcp4.existingConfigmap The name of an existing ConfigMap with your custom configuration for kea
+      ##
+      existingConfigmap:
+      ## @param kea.containers.dhcp4.command Override default container command (useful when using custom images)
+      ##
+      command: []
+      ## @param kea.containers.dhcp4.args Override default container args (useful when using custom images)
+      ##
+      args: []
+
+      ## @param kea.containers.dhcp4.extraEnvVars Array with extra environment variables to add to kea nodes
+      ## e.g:
+      ## extraEnvVars:
+      ##   - name: FOO
+      ##     value: "bar"
+      ##
+      extraEnvVars: []
+      ## @param kea.containers.dhcp4.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for kea nodes
+      ##
+      extraEnvVarsCM: ""
+      ## @param kea.containers.dhcp4.extraEnvVarsSecret Name of existing Secret containing extra env vars for kea nodes
+      ##
+      extraEnvVarsSecret: ""
+      ## @param kea.containers.dhcp4.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
+      ##
+      extraVolumes: []
+      ## @param kea.containers.dhcp4.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the kea container(s)
+      ##
+      extraVolumeMounts: []
 
 ## @section Persistence Parameters
 ##

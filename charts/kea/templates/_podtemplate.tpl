@@ -1,31 +1,33 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "kea.podTemplate" -}}
 metadata:
   {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations }}
-  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations "context" $) | nindent 4 }}
+  {{- if .Values.kea.podAnnotations }}
+  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.kea.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podLabels }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.podLabels "context" $) | nindent 4 }}
+    app.kubernetes.io/component: kea
+    {{- if .Values.kea.podLabels }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.kea.podLabels "context" $) | nindent 4 }}
     {{- end }}
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases "context" $) | nindent 4 }}
+  {{/*
+  {{- include "kea.imagePullSecrets" . | nindent 2 }}
+  */}}
+  {{- if .Values.kea.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.kea.hostAliases "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled -}}
-  securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext "enabled" | toYaml | nindent 4 }}
+  {{- if .Values.kea.podSecurityContext.enabled -}}
+  securityContext: {{- omit .Values.kea.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "kea.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -42,13 +44,18 @@ spec:
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
     {{- end }}
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.initContainers }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.initContainers "context" $) | nindent 4 }}
+    {{- if .Values.kea.initContainers }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.kea.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: %%MAIN_OBJECT_BLOCK%%
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
-      imagePullPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.image.pullPolicy | quote }}
+  {{- range $key, $val := .Values.kea.containers }}
+    - name: {{ $key }}
+      {{/*
+      image: {{ template "kea.image" . }}
+      */}}
+      image: {{ include "common.images.image" (dict "imageRoot" $val.image) }}
+      imagePullPolicy: {{ $val.image.pullPolicy | quote }}
+      {{/*
       {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -108,6 +115,8 @@ spec:
     {{- if .Values.%%MAIN_OBJECT_BLOCK%%.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.sidecars "context" $) | nindent 4 }}
     {{- end }}
+      */}}
+  {{- end }}
   volumes:
     - name: data
     {{- if .Values.persistence.enabled }}
@@ -116,12 +125,14 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
+    {{/*
     {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
+    */}}
   {{ if eq .Values.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
-  restartPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.podRestartPolicy }}
+  restartPolicy: {{ .Values.kea.podRestartPolicy }}
   {{- end }}
 {{- end -}}
