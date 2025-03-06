@@ -23,7 +23,7 @@ spec:
   {{- end }}
   {{- if .Values.kea.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.kea.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -49,75 +49,79 @@ spec:
     {{- end }}
   containers:
   {{- range $key, $val := .Values.kea.containers }}
+  {{- if $val.enabled }}
     - name: {{ $key }}
-      {{/*
-      image: {{ template "kea.image" . }}
-      */}}
       image: {{ include "common.images.image" (dict "imageRoot" $val.image) }}
       imagePullPolicy: {{ $val.image.pullPolicy | quote }}
-      {{/*
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- if $val.containerSecurityContext.enabled }}
+      securityContext: {{- omit $val.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.command }}
-      command: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.command "context" $) | nindent 8 }}
+      {{- if $val.command }}
+      command: {{- include "common.tplvalues.render" (dict "value" $val.command "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.args }}
-      args: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.args "context" $) | nindent 8 }}
+      {{- if $val.args }}
+      args: {{- include "common.tplvalues.render" (dict "value" $val.args "context" $) | nindent 8 }}
       {{- end }}
       env:
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVars }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVars "context" $) | nindent 8 }}
+        {{- if $val.extraEnvVars }}
+        {{- include "common.tplvalues.render" (dict "value" $val.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
       envFrom:
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM }}
+        {{- if $val.extraEnvVarsCM }}
         - configMapRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM "context" $) }}
+            name: {{ include "common.tplvalues.render" (dict "value" $val.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{- /*
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret }}
+            name: {{ template "common.names.fullname" $ }}
+        */ -}}
+        {{- if $val.extraEnvVarsSecret }}
         - secretRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret "context" $) }}
+            name: {{ include "common.tplvalues.render" (dict "value" $val.extraEnvVarsSecret "context" $) }}
         {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.resources }}
-      resources: {{- toYaml .Values.%%MAIN_OBJECT_BLOCK%%.resources | nindent 8 }}
-      {{- else if ne .Values.%%MAIN_OBJECT_BLOCK%%.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.%%MAIN_OBJECT_BLOCK%%.resourcesPreset) | nindent 8 }}
+      {{- if $val.resources }}
+      resources: {{- toYaml $val.resources | nindent 8 }}
+      {{- else if ne $val.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" $val.resourcesPreset) | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.containerPorts }}
-      ports: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.containerPorts "context" $) | nindent 8 -}}
+      {{- if $val.containerPorts }}
+      ports: {{- include "common.tplvalues.render" (dict "value" $val.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customLivenessProbe }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customLivenessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.livenessProbe.enabled }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.livenessProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customLivenessProbe }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" $val.customLivenessProbe "context" $) | nindent 8 }}
+      {{- else if $val.livenessProbe.enabled }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.livenessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customReadinessProbe }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customReadinessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.readinessProbe.enabled }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.readinessProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customReadinessProbe }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" $val.customReadinessProbe "context" $) | nindent 8 }}
+      {{- else if $val.readinessProbe.enabled }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.readinessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.customStartupProbe }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.customStartupProbe "context" $) | nindent 8 }}
-      {{- else if .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe.enabled }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.%%MAIN_OBJECT_BLOCK%%.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customStartupProbe }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" $val.customStartupProbe "context" $) | nindent 8 }}
+      {{- else if $val.startupProbe.enabled }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /etc/kea
         - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
+          mountPath: {{ $.Values.persistence.mountPath }}
+          {{- if $.Values.persistence.subPath }}
+          subPath: {{ $.Values.persistence.subPath }}
           {{- end }}
-      {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumeMounts "context" $) | nindent 8 }}
+      {{- if $val.extraVolumeMounts }}
+      {{- include "common.tplvalues.render" (dict "value" $val.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.sidecars }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.sidecars "context" $) | nindent 4 }}
-    {{- end }}
-      */}}
   {{- end }}
+  {{- end }}
+    {{- if .Values.kea.sidecars }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.kea.sidecars "context" $) | nindent 4 }}
+    {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" $ }}-cm
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:

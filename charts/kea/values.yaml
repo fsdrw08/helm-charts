@@ -147,7 +147,14 @@ kea:
       ##     hostIP: 192.168.255.10
       ##     protocol: TCP
       ##
-      containerPorts: {}
+      containerPorts:
+        - name: dhcp4
+          containerPort: 67
+          hostPort: 67
+          protocol: UDP
+        - name: control-agent
+          containerPort: 8004
+          protocol: TCP
       ## Configure extra options for kea containers' liveness and readiness probes
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
       ## @param kea.containers.dhcp4.livenessProbe.enabled Enable livenessProbe on kea containers
@@ -238,6 +245,7 @@ kea:
       config:
         ## @param kea.containers.dhcp4.config.kea-dhcp4.Dhcp4 Kea DHCPv4 server configuration begins here.
         ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea4/all-keys.json
+        ## ref: https://kea.readthedocs.io/en/kea-2.2.0/arm/dhcp4-srv.html#dhcpv4-server-configuration
         ##
         Dhcp4:
           subnet4:
@@ -256,7 +264,7 @@ kea:
               socket-name: /run/kea/control_socket_4
             - socket-type: http
               socket-address: 0.0.0.0
-              socket-port: 8000
+              socket-port: 8004
           renew-timer: 1000
           rebind-timer: 2000
           valid-lifetime: 4000
@@ -297,7 +305,214 @@ kea:
       ## @param kea.containers.dhcp4.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the kea container(s)
       ##
       extraVolumeMounts: []
+    dhcp6:
+      ## @param kea.containers.dhcp6.enabled present this container in the pod
+      enabled: false
+      ## ISC kea dhcp6 image
+      ## ref: https://cloudsmith.io/~isc/repos/docker/packages/detail/docker/kea-dhcp6/#versions
+      ## @param kea.containers.dhcp6.image.registry kea image registry
+      ## @param kea.containers.dhcp6.image.repository kea image repository
+      ## @param kea.containers.dhcp6.image.tag kea image tag (immutable tags are recommended)
+      ## @param kea.containers.dhcp6.image.digest kea image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+      ## @param kea.containers.dhcp6.image.pullPolicy kea image pull policy
+      ## @param kea.containers.dhcp6.image.pullSecrets kea image pull secrets
+      ##
+      image:
+        registry: docker.cloudsmith.io
+        repository: isc/docker/kea-dhcp6
+        tag: 2.7.6-20250129
+        digest: ""
+        ## Specify a imagePullPolicy
+        ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+        ##
+        pullPolicy: IfNotPresent
+        ## Optionally specify an array of imagePullSecrets.
+        ## Secrets must be manually created in the namespace.
+        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        ## e.g:
+        ## pullSecrets:
+        ##   - myRegistryKeySecretName
+        ##
+        pullSecrets: []
+      ## @param kea.containers.dhcp6.containerPorts kea container port to expose to host
+      ## e.g.
+      ## containerPorts:
+      ##   - name: http
+      ##     containerPort: 80
+      ##     hostPort: 80
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##   - name: https
+      ##     containerPort: 443
+      ##     hostPort: 443
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##
+      containerPorts:
+        - name: dhcp6
+          containerPort: 547
+          hostPort: 547
+          protocol: UDP
+        - name: control-agent
+          containerPort: 8006
+          protocol: TCP
+      ## Configure extra options for kea containers' liveness and readiness probes
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+      ## @param kea.containers.dhcp6.livenessProbe.enabled Enable livenessProbe on kea containers
+      ## @param kea.containers.dhcp6.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+      ## @param kea.containers.dhcp6.livenessProbe.periodSeconds Period seconds for livenessProbe
+      ## @param kea.containers.dhcp6.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+      ## @param kea.containers.dhcp6.livenessProbe.failureThreshold Failure threshold for livenessProbe
+      ## @param kea.containers.dhcp6.livenessProbe.successThreshold Success threshold for livenessProbe
+      ##
+      livenessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param kea.containers.dhcp6.readinessProbe.enabled Enable readinessProbe on kea containers
+      ## @param kea.containers.dhcp6.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+      ## @param kea.containers.dhcp6.readinessProbe.periodSeconds Period seconds for readinessProbe
+      ## @param kea.containers.dhcp6.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+      ## @param kea.containers.dhcp6.readinessProbe.failureThreshold Failure threshold for readinessProbe
+      ## @param kea.containers.dhcp6.readinessProbe.successThreshold Success threshold for readinessProbe
+      ## note: podman not support readinessProbe currently
+      ##
+      readinessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param kea.containers.dhcp6.startupProbe.enabled Enable startupProbe on kea containers
+      ## @param kea.containers.dhcp6.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+      ## @param kea.containers.dhcp6.startupProbe.periodSeconds Period seconds for startupProbe
+      ## @param kea.containers.dhcp6.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+      ## @param kea.containers.dhcp6.startupProbe.failureThreshold Failure threshold for startupProbe
+      ## @param kea.containers.dhcp6.startupProbe.successThreshold Success threshold for startupProbe
+      ##
+      startupProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param kea.containers.dhcp6.customLivenessProbe Custom livenessProbe that overrides the default one
+      ##
+      customLivenessProbe: {}
+      ## @param kea.containers.dhcp6.customReadinessProbe Custom readinessProbe that overrides the default one
+      ##
+      customReadinessProbe: {}
+      ## @param kea.containers.dhcp6.customStartupProbe Custom startupProbe that overrides the default one
+      ##
+      customStartupProbe: {}
+      ## kea resource requests and limits
+      ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+      ## @param kea.containers.dhcp6.resourcesPreset Set kea container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if dhcp4.resources is set (kea.resources is recommended for production).
+      ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+      ##
+      resourcesPreset: "nano"
+      ## @param kea.containers.dhcp6.resources Set kea container requests and limits for different resources like CPU or memory (essential for production workloads)
+      ## Example:
+      ## resources:
+      ##   requests:
+      ##     cpu: 2
+      ##     memory: 512Mi
+      ##   limits:
+      ##     cpu: 3
+      ##     memory: 1024Mi
+      ##
+      resources: {}
 
+      ## Configure Container Security Context
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      ## @param kea.containers.dhcp6.containerSecurityContext.enabled Enabled kea containers' Security Context
+      ## @param kea.containers.dhcp6.containerSecurityContext.runAsUser Set kea containers' Security Context runAsUser
+      ## @param kea.containers.dhcp6.containerSecurityContext.runAsNonRoot Set kea containers' Security Context runAsNonRoot
+      ## @param kea.containers.dhcp6.containerSecurityContext.readOnlyRootFilesystem Set kea containers' Security Context runAsNonRoot
+      ##
+      containerSecurityContext:
+        enabled: false
+        runAsUser: 1001
+        runAsNonRoot: true
+        readOnlyRootFilesystem: false
+
+      ## @param kea.containers.dhcp6.config dhcp4 config file which will place in /etc/kea/kea-dhcp4.conf
+      ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/master/kea-dhcp4/kea-dhcp4.conf
+      config:
+        ## @param kea.containers.dhcp6.config.kea-dhcp4.Dhcp4 Kea DHCPv4 server configuration begins here.
+        ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea4/all-keys.json
+        ## ref: https://kea.readthedocs.io/en/kea-2.2.0/arm/dhcp6-srv.html#dhcpv6-server-configuration
+        ##
+        Dhcp6:
+          subnet6:
+            - subnet: "2001:db8:1::/64"
+              pools:
+                - pool: "2001:db8:1::1-2001:db8:1::100"
+              id: 1
+              interface: eth0
+          interfaces-config:
+            interfaces:
+              - eth0
+            service-sockets-max-retries: 5
+            service-sockets-require-all: true
+          control-sockets:
+            - socket-type: unix
+              socket-name: /run/kea/control_socket_6
+            - socket-address: 0.0.0.0
+              socket-port: 8006
+              socket-type: http
+          renew-timer: 1000
+          rebind-timer: 2000
+          preferred-lifetime: 3000
+          valid-lifetime: 4000
+          loggers:
+            - name: kea-dhcp6
+              output_options:
+                - output: stdout
+              severity: INFO
+          lease-database:
+            type: memfile
+
+      ## @param kea.containers.dhcp6.existingConfigmap The name of an existing ConfigMap with your custom configuration for kea
+      ##
+      existingConfigmap:
+      ## @param kea.containers.dhcp6.command Override default container command (useful when using custom images)
+      ##
+      command: []
+      ## @param kea.containers.dhcp6.args Override default container args (useful when using custom images)
+      ##
+      args: []
+
+      ## @param kea.containers.dhcp6.extraEnvVars Array with extra environment variables to add to kea nodes
+      ## e.g:
+      ## extraEnvVars:
+      ##   - name: FOO
+      ##     value: "bar"
+      ##
+      extraEnvVars: []
+      ## @param kea.containers.dhcp6.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for kea nodes
+      ##
+      extraEnvVarsCM: ""
+      ## @param kea.containers.dhcp6.extraEnvVarsSecret Name of existing Secret containing extra env vars for kea nodes
+      ##
+      extraEnvVarsSecret: ""
+      ## @param kea.containers.dhcp6.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
+      ##
+      extraVolumes: []
+      ## @param kea.containers.dhcp6.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the kea container(s)
+      ##
+      extraVolumeMounts: []
+  ## @param kea.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param kea.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /consul/config/certs
 ## @section Persistence Parameters
 ##
 
@@ -310,7 +525,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/kea/data
+  mountPath: /var/lib/kea
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
