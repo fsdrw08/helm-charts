@@ -51,7 +51,7 @@ spec:
   {{- range $key, $val := .Values.kea.containers }}
   {{- if $val.enabled }}
     - name: {{ $key }}
-      image: {{ include "common.images.image" (dict "imageRoot" $val.image) }}
+      image: {{ include "common.images.image" (dict "imageRoot" $val.image "global" $.Values.global) }}
       imagePullPolicy: {{ $val.image.pullPolicy | quote }}
       {{- if $val.containerSecurityContext.enabled }}
       securityContext: {{- omit $val.containerSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -104,7 +104,11 @@ spec:
       {{- end }}
       volumeMounts:
         - name: config
-          mountPath: /etc/kea
+          mountPath: /etc/kea/kea-{{ $key }}.conf
+          subPath: {{ $key }}-kea-{{ $key }}.conf
+        - name: config
+          mountPath: /etc/kea/kea-ctrl-agent.conf
+          subPath: {{ $key }}-kea-ctrl-agent.conf
         - name: data
           mountPath: {{ $.Values.persistence.mountPath }}
           {{- if $.Values.persistence.subPath }}
@@ -122,6 +126,15 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" $ }}-cm
+        {{/*-
+        items:
+        {{- range $key, $val := .Values.kea.containers }}
+        {{- if $val.enabled }}
+          - key: kea-{{ $key }}.conf
+            path: kea-{{ $key }}.conf
+        {{- end }}
+        {{- end }}
+        -*/}}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
