@@ -16,9 +16,7 @@ metadata:
 data:
 {{- range $key, $val := .Values.kea.containers }}
 {{- if $val.enabled }}
-{{- range $file, $content := $val.configFiles }}
-  {{ $key }}-{{ $file }}.conf: |-
-{{ toJson $content | indent 4 }}
-{{- end }}
+  kea-{{ $key }}.conf: |-
+{{ toJson $val.config | indent 4 }}
 {{- end }}
 {{- end }}

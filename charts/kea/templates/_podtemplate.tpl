@@ -105,10 +105,7 @@ spec:
       volumeMounts:
         - name: config
           mountPath: /etc/kea/kea-{{ $key }}.conf
-          subPath: {{ $key }}-kea-{{ $key }}.conf
-        - name: config
-          mountPath: /etc/kea/kea-ctrl-agent.conf
-          subPath: {{ $key }}-kea-ctrl-agent.conf
+          subPath: kea-{{ $key }}.conf
         - name: data
           mountPath: {{ $.Values.persistence.mountPath }}
           {{- if $.Values.persistence.subPath }}
@@ -126,15 +123,6 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" $ }}-cm
-        {{/*-
-        items:
-        {{- range $key, $val := .Values.kea.containers }}
-        {{- if $val.enabled }}
-          - key: kea-{{ $key }}.conf
-            path: kea-{{ $key }}.conf
-        {{- end }}
-        {{- end }}
-        -*/}}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
@@ -142,11 +130,9 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{/*
-    {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraVolumes "context" $) | nindent 4 }}
+    {{- if .Values.kea.extraVolumes }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.kea.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-    */}}
   {{ if eq .Values.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}

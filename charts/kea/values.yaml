@@ -82,6 +82,9 @@ kea:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
+  ## @param kea.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
+  ##
+  extraVolumes: []
   ## @param kea.sidecars Add additional sidecar containers to the kea pod(s)
   ## e.g:
   ## sidecars:
@@ -247,63 +250,39 @@ kea:
         capabilities:
           add:
             - CAP_NET_RAW
-      ## @param kea.containers.dhcp4.configFiles config files which will place in /etc/kea/
-      ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp4/Dockerfile#L85-86
+      ## @param kea.containers.dhcp4.config config file which will place in /etc/kea/kea-dhcp4.conf
+      ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/b7e5a750862146c579604e53a9434f212f36d183/kea-dhcp4/Dockerfile#L77
       ##
-      configFiles:
-        ## @param kea.containers.dhcp4.configFiles.kea-dhcp4 config file which will place in /etc/kea/kea-dhcp4.conf
-        ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp4/kea-dhcp4.conf
+      config:
+        ## @param kea.containers.dhcp4.config.Dhcp4 Kea DHCPv4 server configuration block begins here.
+        ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea4/all-keys.json
+        ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/dhcp4-srv.html#dhcpv4-server-configuration
         ##
-        kea-dhcp4:
-          ## @param kea.containers.dhcp4.configFiles.kea-dhcp4.Dhcp4 Kea DHCPv4 server configuration block begins here.
-          ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea4/all-keys.json
-          ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/dhcp4-srv.html#dhcpv4-server-configuration
-          ##
-          Dhcp4:
-            subnet4:
-              - subnet: 192.168.50.0/24
-                pools:
-                  - pool: 192.168.50.1-192.168.50.100
-                id: 1
-                interface: eth0
-            interfaces-config:
-              interfaces:
-                - eth0
-              service-sockets-max-retries: 5
-              service-sockets-require-all: true
-            control-sockets:
-              - socket-type: unix
-                socket-name: /run/kea/control_socket_4
-            renew-timer: 1000
-            rebind-timer: 2000
-            valid-lifetime: 4000
-            loggers:
-              - name: kea-dhcp4
-                output_options:
-                  - output: stdout
-                severity: INFO
-            lease-database:
-              type: memfile
-        ## @param kea.containers.dhcp4.configFiles.kea-ctrl-agent config files which will place in /etc/kea/kea-ctrl-agent.conf
-        ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp4/kea-ctrl-agent.conf
-        ##
-        kea-ctrl-agent:
-          ## @param kea.containers.dhcp4.configFiles.kea-ctrl-agent.Control-agent Kea Control Agent configuration block begins here.
-          ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/agent/simple.json
-          ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/agent.html#configuration
-          ##
-          Control-agent:
-            http-host: 0.0.0.0
-            http-port: 8004
-            control-sockets:
-              dhcp4:
-                socket-type: unix
-                socket-name: /run/kea/control_socket_4
-            loggers:
-              - name: kea-ctrl-agent
-                output_options:
-                  - output: stdout
-                severity: INFO
+        Dhcp4:
+          subnet4:
+            - subnet: 192.168.50.0/24
+              pools:
+                - pool: 192.168.50.1-192.168.50.100
+              id: 1
+              interface: eth0
+          interfaces-config:
+            interfaces:
+              - eth0
+            service-sockets-max-retries: 5
+            service-sockets-require-all: true
+          control-sockets:
+            - socket-type: unix
+              socket-name: /run/kea/control_socket_4
+          renew-timer: 1000
+          rebind-timer: 2000
+          valid-lifetime: 4000
+          loggers:
+            - name: kea-dhcp4
+              output_options:
+                - output: stdout
+              severity: INFO
+          lease-database:
+            type: memfile
 
       ## @param kea.containers.dhcp4.existingConfigmap The name of an existing ConfigMap with your custom configuration for kea
       ##
@@ -328,9 +307,6 @@ kea:
       ## @param kea.containers.dhcp4.extraEnvVarsSecret Name of existing Secret containing extra env vars for kea nodes
       ##
       extraEnvVarsSecret: ""
-      ## @param kea.containers.dhcp4.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
-      ##
-      extraVolumes: []
       ## @param kea.containers.dhcp4.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the kea container(s)
       ##
       extraVolumeMounts: []
@@ -473,65 +449,40 @@ kea:
         runAsNonRoot: true
         readOnlyRootFilesystem: false
 
-      ## @param kea.containers.dhcp6.configFiles config files which will place in /etc/kea/
-      ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp6/Dockerfile#L82-83
+      ## @param kea.containers.dhcp6.config config file which will place in /etc/kea/kea-dhcp6.conf
+      ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/b7e5a750862146c579604e53a9434f212f36d183/kea-dhcp6/Dockerfile#L72
       ##
-      configFiles:
-        ## @param kea.containers.dhcp6.configFiles.kea-dhcp6 config file which will place in /etc/kea/kea-dhcp6.conf
-        ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp6/kea-dhcp6.conf
+      config:
+        ## @param kea.containers.dhcp6.config.Dhcp6 Kea DHCPv6 server configuration block begins here.
+        ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea6/all-keys.json
+        ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/dhcp6-srv.html#dhcpv6-server-configuration
         ##
-        kea-dhcp6:
-          ## @param kea.containers.dhcp6.configFiles.Dhcp6 Kea DHCPv6 server configuration block begins here.
-          ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea6/all-keys.json
-          ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/dhcp6-srv.html#dhcpv6-server-configuration
-          ##
-          Dhcp6:
-            subnet6:
-              - subnet: "2001:db8:1::/64"
-                pools:
-                  - pool: "2001:db8:1::1-2001:db8:1::100"
-                id: 1
-                interface: eth0
-            interfaces-config:
-              interfaces:
-                - eth0
-              service-sockets-max-retries: 5
-              service-sockets-require-all: true
-            control-sockets:
-              - socket-type: unix
-                socket-name: /run/kea/control_socket_6
-            renew-timer: 1000
-            rebind-timer: 2000
-            preferred-lifetime: 3000
-            valid-lifetime: 4000
-            loggers:
-              - name: kea-dhcp6
-                output_options:
-                  - output: stdout
-                severity: INFO
-            lease-database:
-              type: memfile
-        ## @param kea.containers.dhcp6.configFiles.kea-ctrl-agent config files which will place in /etc/kea/kea-ctrl-agent.conf
-        ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp4/kea-ctrl-agent.conf
-        ##
-        kea-ctrl-agent:
-          ## @param kea.containers.dhcp6.configFiles.kea-ctrl-agent.Control-agent Kea Control Agent configuration block begins here.
-          ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp6/kea-ctrl-agent.conf
-          ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/agent/simple.json
-          ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/agent.html#configuration
-          ##
-          Control-agent:
-            http-host: 0.0.0.0
-            http-port: 8006
-            control-sockets:
-              dhcp6:
-                socket-type: unix
-                socket-name: /run/kea/control_socket_6
-            loggers:
-              - name: kea-ctrl-agent
-                output_options:
-                  - output: stdout
-                severity: INFO
+        Dhcp6:
+          subnet6:
+            - subnet: "2001:db8:1::/64"
+              pools:
+                - pool: "2001:db8:1::1-2001:db8:1::100"
+              id: 1
+              interface: eth0
+          interfaces-config:
+            interfaces:
+              - eth0
+            service-sockets-max-retries: 5
+            service-sockets-require-all: true
+          control-sockets:
+            - socket-type: unix
+              socket-name: /run/kea/control_socket_6
+          renew-timer: 1000
+          rebind-timer: 2000
+          preferred-lifetime: 3000
+          valid-lifetime: 4000
+          loggers:
+            - name: kea-dhcp6
+              output_options:
+                - output: stdout
+              severity: INFO
+          lease-database:
+            type: memfile
 
       ## @param kea.containers.dhcp6.existingConfigmap The name of an existing ConfigMap with your custom configuration for kea
       ##
@@ -556,9 +507,6 @@ kea:
       ## @param kea.containers.dhcp6.extraEnvVarsSecret Name of existing Secret containing extra env vars for kea nodes
       ##
       extraEnvVarsSecret: ""
-      ## @param kea.containers.dhcp6.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
-      ##
-      extraVolumes: []
       ## @param kea.containers.dhcp6.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the kea container(s)
       ##
       extraVolumeMounts: []
@@ -566,7 +514,7 @@ kea:
     ##
     dhcp-ddns:
       ## @param kea.containers.dhcp-ddns.enabled present this container in the pod
-      enabled: true
+      enabled: false
       ## ISC kea dhcp ddns image
       ## ref: https://cloudsmith.io/~isc/repos/docker/packages/detail/docker/kea-dhcp-ddns/#versions
       ## @param kea.containers.dhcp-ddns.image.registry kea image registry
@@ -701,67 +649,42 @@ kea:
         runAsNonRoot: false
         readOnlyRootFilesystem: false
 
-      ## @param kea.containers.dhcp-ddns.configFiles config files which will place in /etc/kea/
-      ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp-ddns/Dockerfile#L52-53
+      ## @param kea.containers.dhcp-ddns.config config file which will place in /etc/kea/kea-dhcp-ddns.conf
+      ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/b7e5a750862146c579604e53a9434f212f36d183/kea-dhcp-ddns/Dockerfile#L44
       ##
-      configFiles:
-        ## @param kea.containers.dhcp-ddns.configFiles.kea-dhcp-ddns config file which will place in /etc/kea/kea-dhcp-ddns.conf
-        ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp-ddns/kea-dhcp-ddns.conf
+      config:
+        ## @param kea.containers.dhcp-ddns.config.DhcpDdns Kea Dhcp-Ddns server configuration block begins here.
+        ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/ddns/all-keys.json
+        ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/ddns.html#configuring-the-dhcp-ddns-server
         ##
-        kea-dhcp-ddns:
-          ## @param kea.containers.dhcp-ddns.configFiles.DhcpDdns Kea Dhcp-Ddns server configuration block begins here.
-          ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/ddns/all-keys.json
-          ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/ddns.html#configuring-the-dhcp-ddns-server
-          ##
-          DhcpDdns:
-            ip-address: 127.0.0.1
-            port: 53001
-            dns-server-timeout: 2000
-            control-socket:
-              socket-type: unix
-              socket-name: /run/kea/control_socket_d2
-            reverse-ddns:
-              ddns-domains:
-                - name: 50.168.192.in-addr.arpa.
-                  dns-servers:
-                    - hostname: ""
-                      ip-address: 192.168.50.252
-                      port: 53
-            forward-ddns:
-              ddns-domains:
-                - name: four.example.com.
-                  dns-servers:
-                    - hostname: ""
-                      ip-address: 192.168.50.252
-                      port: 53
-            ncr-format: JSON
-            ncr-protocol: UDP
-            loggers:
-              - name: kea-dhcp-ddns
-                output_options:
-                  - output: stdout
-                severity: INFO
-        ## @param kea.containers.dhcp-ddns.configFiles.kea-ctrl-agent config files which will place in /etc/kea/kea-ctrl-agent.conf
-        ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp4/kea-ctrl-agent.conf
-        ##
-        kea-ctrl-agent:
-          ## @param kea.containers.dhcp-ddns.configFiles.kea-ctrl-agent.Control-agent Kea Control Agent configuration block begins here.
-          ## ref: https://gitlab.isc.org/isc-projects/kea-docker/-/blob/move-v2-6-to-newest-alpine/kea-dhcp-ddns/kea-ctrl-agent.conf
-          ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/agent/simple.json
-          ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/agent.html#configuration
-          ##
-          Control-agent:
-            http-host: 0.0.0.0
-            http-port: 8000
-            control-sockets:
-              d2:
-                socket-type: unix
-                socket-name: /run/kea/control_socket_d2
-            loggers:
-              - name: kea-ctrl-agent
-                output_options:
-                  - output: stdout
-                severity: INFO
+        DhcpDdns:
+          ip-address: 127.0.0.1
+          port: 53001
+          dns-server-timeout: 2000
+          control-socket:
+            socket-type: unix
+            socket-name: /run/kea/control_socket_d2
+          reverse-ddns:
+            ddns-domains:
+              - name: 50.168.192.in-addr.arpa.
+                dns-servers:
+                  - hostname: ""
+                    ip-address: 192.168.50.252
+                    port: 53
+          forward-ddns:
+            ddns-domains:
+              - name: four.example.com.
+                dns-servers:
+                  - hostname: ""
+                    ip-address: 192.168.50.252
+                    port: 53
+          ncr-format: JSON
+          ncr-protocol: UDP
+          loggers:
+            - name: kea-dhcp-ddns
+              output_options:
+                - output: stdout
+              severity: INFO
 
       ## @param kea.containers.dhcp-ddns.existingConfigmap The name of an existing ConfigMap with your custom configuration for kea
       ##
@@ -786,9 +709,6 @@ kea:
       ## @param kea.containers.dhcp-ddns.extraEnvVarsSecret Name of existing Secret containing extra env vars for kea nodes
       ##
       extraEnvVarsSecret: ""
-      ## @param kea.containers.dhcp-ddns.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
-      ##
-      extraVolumes: []
       ## @param kea.containers.dhcp-ddns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the kea container(s)
       ##
       extraVolumeMounts: []
