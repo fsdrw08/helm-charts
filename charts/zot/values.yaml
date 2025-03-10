@@ -1,0 +1,435 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
+## @section zot Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+zot:
+  ## zot image
+  ## ref: https://github.com/project-zot/zot/pkgs/container/zot-linux-amd64
+  ## @param zot.image.registry zot image registry
+  ## @param zot.image.repository zot image repository
+  ## @param zot.image.tag zot image tag (immutable tags are recommended)
+  ## @param zot.image.digest zot image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param zot.image.pullPolicy zot image pull policy
+  ## @param zot.image.pullSecrets zot image pull secrets
+  ##
+  image:
+    registry: ghcr.io
+    repository: project-zot/zot-linux-amd64
+    tag: v2.1.2
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param zot.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param zot.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param zot.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## e.g. 
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts: {}
+  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param zot.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param zot.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param zot.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param zot.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param zot.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param zot.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param zot.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param zot.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param zot.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param zot.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param zot.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param zot.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param zot.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param zot.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param zot.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param zot.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param zot.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param zot.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param zot.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param zot.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param zot.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param zot.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if zot.resources is set (zot.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param zot.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param zot.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param zot.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param zot.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+  ## @param zot.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+  ## @param zot.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param zot.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  ## @param zot.config config file for zot, content under this block will convert to json file place in /etc/zot/config.json
+  ## ref: https://zotregistry.dev/v2.1.2/admin-guide/admin-configuration/
+  ##
+  config:
+    ## @param zot.config.extensions Additional registry features that are not a part of the Distribution Specification are allowed to be added as Extensions.
+    ## The following features are configured under the extensions attribute: 
+    ## Metrics, Sync, Search, Scrub, Lint, ImageTrust, UI
+    ## ref: https://zotregistry.dev/v2.1.2/admin-guide/admin-configuration/#extensions
+    ##
+    extensions:
+      # https://zotregistry.dev/v2.1.0/admin-guide/admin-configuration/#enhanced-searching-and-querying-images
+      search:
+        enable: true
+        cve:
+          updateInterval: "168h"
+          # https://github.com/project-zot/zot/issues/2298#issuecomment-1978312708
+          trivy:
+            javadbrepository: "zot.day0.sololab/aquasecurity/trivy-java-db" # ghcr.io/aquasecurity/trivy-java-db
+            dbrepository: "zot.day0.sololab/aquasecurity/trivy-db" # ghcr.io/aquasecurity/trivy-db
+      # Mgmt is enabled when the Search extension is enabled
+      mgmt:
+        enable: true
+      ui:
+        enable: true
+      scrub:
+        enable: true
+        interval: "24h"
+    # Network configuration
+    # https://zotregistry.dev/v2.1.0/admin-guide/admin-configuration/#network-configuration
+    http:
+      address: "0.0.0.0"
+      port: "5000"
+      realm: "zot"
+      tls:
+        cert: "/etc/zot/certs/server.crt"
+        key: "/etc/zot/certs/server.key"
+        cacert: "/etc/zot/certs/ca.crt"
+      # https://zotregistry.dev/v2.1.0/admin-guide/admin-configuration/#authentication
+      auth:
+        # https://zotregistry.dev/v2.1.0/articles/authn-authz/#htpasswd
+        htpasswd:
+          path: "/etc/zot/htpasswd"
+        failDelay: 5
+      # https://zotregistry.dev/v2.0.4/articles/authn-authz/#example-access-control-configuration
+      accessControl:
+        repositories:
+          "**":
+            defaultPolicy: ["read"]
+            # https://github.com/project-zot/zot/blob/main/examples/README.md#identity-based-authorization
+            anonymousPolicy: ["read"]
+        adminPolicy:
+          users: ["admin"]
+          actions: ["read", "create", "update", "delete"]
+
+    # https://zotregistry.dev/v2.0.4/articles/storage/#configuring-zot-storage
+    storage:
+      rootDirectory: "/var/lib/registry"
+      # https://zotregistry.dev/v2.0.4/articles/storage/#commit
+      # make data to be written to disk immediately
+      commit: true
+      # https://zotregistry.dev/v2.0.4/articles/storage/#garbage-collection
+      # Garbage collection (gc) is enabled by default to reclaim this space
+      gc: true
+
+    log:
+      level: "info"
+
+
+  ## @param zot.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ##
+  existingConfigmap:
+  ## @param zot.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param zot.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param zot.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param zot.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param zot.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param zot.autoscaling.enabled Enable autoscaling for zot
+  ## @param zot.autoscaling.minReplicas Minimum number of zot replicas
+  ## @param zot.autoscaling.maxReplicas Maximum number of zot replicas
+  ## @param zot.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param zot.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param zot.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param zot.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param zot.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param zot.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param zot.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param zot.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param zot.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /bitnami/zot/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
