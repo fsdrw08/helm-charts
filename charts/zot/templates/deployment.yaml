@@ -10,21 +10,21 @@ metadata:
   name: {{ template "common.names.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
-  {{- if or .Values.%%MAIN_OBJECT_BLOCK%%.deploymentAnnotations .Values.commonAnnotations }}
-  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.%%MAIN_OBJECT_BLOCK%%.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
+    app.kubernetes.io/component: zot
+  {{- if or .Values.zot.deploymentAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.zot.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.%%MAIN_OBJECT_BLOCK%%.autoscaling.hpa.enabled }}
-  replicas: {{ .Values.%%MAIN_OBJECT_BLOCK%%.replicaCount }}
+  {{- if not .Values.zot.autoscaling.hpa.enabled }}
+  replicas: {{ .Values.zot.replicaCount }}
   {{- end }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.updateStrategy }}
-  strategy: {{- toYaml .Values.%%MAIN_OBJECT_BLOCK%%.updateStrategy | nindent 4 }}
+  {{- if .Values.zot.updateStrategy }}
+  strategy: {{- toYaml .Values.zot.updateStrategy | nindent 4 }}
   {{- end }}
-  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.%%MAIN_OBJECT_BLOCK%%.podLabels .Values.commonLabels) "context" .) }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.zot.podLabels .Values.commonLabels) "context" .) }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
-      app.kubernetes.io/component: %%COMPONENT_NAME%%
+      app.kubernetes.io/component: zot
   template:
 {{- end }}
