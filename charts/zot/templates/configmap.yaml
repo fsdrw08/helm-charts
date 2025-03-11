@@ -16,9 +16,3 @@ metadata:
 data:
   config.json: |
 {{ toJson .Values.zot.config | indent 4 }}
-{{- if .Values.zot.htpasswdCredentials }}
-  htpasswd: |
-{{- range $i, $credential := .Values.zot.htpasswdCredentials }}
-    {{ htpasswd $credential.username $credential.password }}
-{{ end -}}
-{{- end }}

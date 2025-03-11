@@ -206,15 +206,14 @@ zot:
     log:
       level: "debug"
 
-  ## @param zot.htpasswdCredentials username and password content which will encrypt by htpasswd
+  ## @param zot.htpasswd username and password content which will encrypt by htpasswd
   ## and set in to the path which config in .Values.zot.config.http.auth.htpasswd.path
   ## ref: https://zotregistry.dev/v2.1.2/articles/authn-authz/#htpasswd
   ## e.g.
-  ## htpasswdCredentials:
-  ##   - username: admin
-  ##     password: P@ssw0rd
+  ## htpasswd: |
+  ##   admin:$apr1$Ad/Ru9UV$aBawAEqXbpVq6ivznqFu0.
   ##
-  htpasswdCredentials: []
+  htpasswd: ""
   ## @param zot.tls secret setting of cert and key or whatever tls content will set in the container
   ## @param zot.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
   ##

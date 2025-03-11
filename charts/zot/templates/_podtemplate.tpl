@@ -102,8 +102,8 @@ spec:
         - name: config
           mountPath: /etc/zot/config.json
           subPath: config.json
-        {{- if .Values.zot.htpasswdCredentials }}
-        - name: config
+        {{- if .Values.zot.htpasswd }}
+        - name: htpasswd
           mountPath: {{ .Values.zot.config.http.auth.htpasswd.path }}
           subPath: htpasswd
         {{- end }}
@@ -133,10 +133,21 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    - name: htpasswd
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec
+        items:
+          - key: htpasswd
+            path: htpasswd
     {{- if .Values.zot.tls.contents }}
     - name: tls
       secret:
-        secretName: {{ template "common.names.fullname" . }}-sec-tls
+        secretName: {{ template "common.names.fullname" . }}-sec
+        items:
+        {{- range $key, $val := .Values.zot.tls.contents }}
+         - key: {{ $key }}
+           path: {{ $key }}
+        {{- end }}
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
