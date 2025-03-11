@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -67,8 +67,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{/*
         - secretRef:
             name: {{ template "common.names.fullname" . }}
+        */}}
         {{- if .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsSecret "context" $) }}

@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.zot.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.zot.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end }}
+  {{- end -}}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
@@ -67,8 +67,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.zot.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{/*
         - secretRef:
             name: {{ template "common.names.fullname" . }}
+        */}}
         {{- if .Values.zot.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.zot.extraEnvVarsSecret "context" $) }}
@@ -105,6 +107,13 @@ spec:
           mountPath: {{ .Values.zot.config.http.auth.htpasswd.path }}
           subPath: htpasswd
         {{- end }}
+        {{- /*
+        https://stackoverflow.com/questions/59795596/how-to-make-nested-variables-optional-in-helm/68807258#68807258
+        */ -}}
+        {{- if ((((.Values.zot.config).extensions).search).cve) }}
+        - name: tmp
+          mountPath: /tmp
+        {{- end }}
         {{- if .Values.zot.tls.contents }}
         - name: tls
           mountPath: {{ .Values.zot.tls.mountPath }}
@@ -132,9 +141,21 @@ spec:
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-data" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
+    {{- end }}
+    {{- /*
+    https://stackoverflow.com/questions/59795596/how-to-make-nested-variables-optional-in-helm/68807258#68807258
+    */ -}}
+    {{- if ((((.Values.zot.config).extensions).search).cve) }}
+    - name: tmp
+    {{- if .Values.persistence.enabled }}
+      persistentVolumeClaim:
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-tmp" ) .Values.persistence.existingClaim }}
+    {{- else }}
+      emptyDir: {}
+    {{- end }}
     {{- end }}
     {{- if .Values.zot.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.zot.extraVolumes "context" $) | nindent 4 }}
