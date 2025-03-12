@@ -23,7 +23,6 @@ spec:
   securityContext: {{- omit .Values.cockpit.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end -}}
   initContainers:
-    {{- /*
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
       image: {{ include "cockpit.volumePermissions.image" . }}
@@ -43,7 +42,6 @@ spec:
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
     {{- end }}
-    */}}
     {{- if .Values.cockpit.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.initContainers "context" $) | nindent 4 }}
     {{- end }}
@@ -108,13 +106,11 @@ spec:
         - name: tls
           mountPath: {{ .Values.cockpit.tls.mountPath }}
         {{- end }}
-      {{- /*
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
-      */}}
       {{- if .Values.cockpit.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -130,15 +126,13 @@ spec:
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
-    {{- /*
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default (include "common.names.fullname" .) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
     {{- end }}
-    */}}
     {{- if .Values.cockpit.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.extraVolumes "context" $) | nindent 4 }}
     {{- end }}

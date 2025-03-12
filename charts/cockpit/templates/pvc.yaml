@@ -1,9 +1,8 @@
-{{/*
 {{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) -}}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ include "common.names.fullname" . }}
+  name: {{ include "common.names.fullname" . }}-pvc
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: cockpit
     {{- if .Values.commonLabels }}
@@ -28,4 +27,3 @@ spec:
       storage: {{ .Values.persistence.size | quote }}
   {{- include "common.storage.class" (dict "persistence" .Values.persistence "global" .Values.global) | nindent 2 }}
 {{- end -}}
-*/}}
