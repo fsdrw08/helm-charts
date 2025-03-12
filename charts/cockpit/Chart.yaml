@@ -1,0 +1,26 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: DeveloperTools
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 333
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: Cockpit is a web-based graphical interface for servers.
+home: https://github.com/fsdrw08/helm-charts
+icon: https://cockpit-project.org/images/site/cockpit-logo.svg
+keywords:
+  - cockpit
+  - linux web ui
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: cockpit
+sources:
+  - https://github.com/fsdrw08/helm-charts/cockpit
+  - https://github.com/cockpit-project/cockpit
+version: 0.1.0

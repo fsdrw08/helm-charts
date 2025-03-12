@@ -1,0 +1,401 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param cockpit.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
+## @section cockpit Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+cockpit:
+  ## cockpit image
+  ## ref: https://quay.io/repository/cockpit/ws?tab=tags
+  ## @param cockpit.image.registry cockpit image registry
+  ## @param cockpit.image.repository cockpit image repository
+  ## @param cockpit.image.tag cockpit image tag (immutable tags are recommended)
+  ## @param cockpit.image.digest cockpit image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param cockpit.image.pullPolicy cockpit image pull policy
+  ## @param cockpit.image.pullSecrets cockpit image pull secrets
+  ##
+  image:
+    registry: quay.io
+    repository: cockpit/ws
+    tag: 333
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param cockpit.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param cockpit.replicaCount Number of cockpit replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param cockpit.containerPorts cockpit container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts: {}
+  ## Configure extra options for cockpit containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param cockpit.livenessProbe.enabled Enable livenessProbe on cockpit containers
+  ## @param cockpit.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param cockpit.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param cockpit.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param cockpit.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param cockpit.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param cockpit.readinessProbe.enabled Enable readinessProbe on cockpit containers
+  ## @param cockpit.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param cockpit.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param cockpit.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param cockpit.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param cockpit.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param cockpit.startupProbe.enabled Enable startupProbe on cockpit containers
+  ## @param cockpit.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param cockpit.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param cockpit.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param cockpit.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param cockpit.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param cockpit.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param cockpit.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param cockpit.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## cockpit resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param cockpit.resourcesPreset Set cockpit container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if cockpit.resources is set (cockpit.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param cockpit.resources Set cockpit container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param cockpit.podSecurityContext.enabled Enabled cockpit pods' Security Context
+  ## @param cockpit.podSecurityContext.fsGroup Set cockpit pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param cockpit.containerSecurityContext.enabled Enabled cockpit containers' Security Context
+  ## @param cockpit.containerSecurityContext.runAsUser Set cockpit containers' Security Context runAsUser
+  ## @param cockpit.containerSecurityContext.runAsNonRoot Set cockpit containers' Security Context runAsNonRoot
+  ## @param cockpit.containerSecurityContext.readOnlyRootFilesystem Set cockpit containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param cockpit.config the cockpit web server config, which will place in /etc/cockpit/cockpit.conf
+  ## ref: https://github.com/cockpit-project/cockpit/blob/333/containers/ws/default-bastion.conf
+  ## ref: https://cockpit-project.org/guide/latest/cockpit.conf.5.html
+  ## ref: https://github.com/cockpit-project/cockpit/blob/333/doc/authentication.md
+  ##
+  config: |
+    [WebService]
+    ProtocolHeader = X-Forwarded-Proto
+    LoginTitle = Cockpit Bastion
+    RequireHost = true
+
+    [Negotiate]
+    action = none
+
+    [Basic]
+    Command = /container/cockpit-auth-ssh-key
+
+    [Ssh-Login]
+    Command = /container/cockpit-auth-ssh-key
+  ## @param cockpit.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param cockpit.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /etc/cockpit/ws-certs.d
+    ## @param cockpit.tls.content secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## contents:
+    ##  ca.crt: ""
+    ##  tls.crt: ""
+    ##  tls.key: ""
+    ##
+    contents: {}
+  ## @param cockpit.existingConfigmap The name of an existing ConfigMap with your custom configuration for cockpit
+  ##
+  existingConfigmap:
+  ## @param cockpit.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param cockpit.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param cockpit.hostAliases cockpit pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param cockpit.podLabels Extra labels for cockpit pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param cockpit.podAnnotations Annotations for cockpit pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param cockpit.autoscaling.enabled Enable autoscaling for cockpit
+  ## @param cockpit.autoscaling.minReplicas Minimum number of cockpit replicas
+  ## @param cockpit.autoscaling.maxReplicas Maximum number of cockpit replicas
+  ## @param cockpit.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param cockpit.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param cockpit.extraEnvVars Array with extra environment variables to add to cockpit nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param cockpit.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for cockpit nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param cockpit.extraEnvVarsSecret Name of existing Secret containing extra env vars for cockpit nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param cockpit.extraVolumes Optionally specify extra list of additional volumes for the cockpit pod(s)
+  ##
+  extraVolumes: []
+  ## @param cockpit.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the cockpit container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param cockpit.sidecars Add additional sidecar containers to the cockpit pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param cockpit.initContainers Add additional init containers to the cockpit pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+# persistence:
+#   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+#   ##
+#   enabled: false
+#   ## @param persistence.mountPath Path to mount the volume at.
+#   ##
+#   mountPath: /bitnami/cockpit/data
+#   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+#   ##
+#   subPath: ""
+#   ## @param persistence.storageClass Storage class of backing PVC
+#   ## If defined, storageClassName: <storageClass>
+#   ## If set to "-", storageClassName: "", which disables dynamic provisioning
+#   ## If undefined (the default) or set to null, no storageClassName spec is
+#   ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+#   ##   GKE, AWS & OpenStack)
+#   ##
+#   storageClass: ""
+#   ## @param persistence.annotations Persistent Volume Claim annotations
+#   ##
+#   annotations: {}
+#   ## @param persistence.accessModes Persistent Volume Access Modes
+#   ##
+#   accessModes:
+#     - ReadWriteOnce
+#   ## @param persistence.size Size of data volume
+#   ##
+#   size: 8Gi
+#   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+#   ##
+#   existingClaim: ""
+# ## @section Init Container Parameters
+# ##
+
+# ## 'volumePermissions' init container parameters
+# ## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+# ##   based on the *podSecurityContext/*containerSecurityContext parameters
+# ##
+# volumePermissions:
+#   ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+#   ##
+#   enabled: false
+#   ## OS Shell + Utility image
+#   ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+#   ## @param volumePermissions.image.registry OS Shell + Utility image registry
+#   ## @param volumePermissions.image.repository OS Shell + Utility image repository
+#   ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+#   ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+#   ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+#   ##
+#   image:
+#     registry: docker.io
+#     repository: bitnami/os-shell
+#     tag: 11-debian-11-r%%IMAGE_REVISION%%
+#     pullPolicy: IfNotPresent
+#     ## Optionally specify an array of imagePullSecrets.
+#     ## Secrets must be manually created in the namespace.
+#     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+#     ## e.g:
+#     ## pullSecrets:
+#     ##   - myRegistryKeySecretName
+#     ##
+#     pullSecrets: []
+#   ## Init container's resource requests and limits
+#   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+#   ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+#   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+#   ##
+#   resourcesPreset: "nano"
+#   ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+#   ## Example:
+#   ## resources:
+#   ##   requests:
+#   ##     cpu: 2
+#   ##     memory: 512Mi
+#   ##   limits:
+#   ##     cpu: 3
+#   ##     memory: 1024Mi
+#   ##
+#   resources: {}
+#   ## Init container Container Security Context
+#   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+#   ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+#   ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+#   ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+#   ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+#   ##
+#   containerSecurityContext:
+#     runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
