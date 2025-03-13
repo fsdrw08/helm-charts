@@ -87,7 +87,11 @@ cockpit:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts:
+    - name: web
+      containerPort: 9090
+      hostPort: 9090
+      protocol: TCP
   ## Configure extra options for cockpit containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param cockpit.livenessProbe.enabled Enable livenessProbe on cockpit containers
