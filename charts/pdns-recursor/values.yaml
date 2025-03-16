@@ -1,0 +1,440 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param powerdns.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
+## @section pnds-recursor Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+powerdns:
+  ## powerdns pnds-recursor image
+  ## ref: https://hub.docker.com/r/powerdns/pnds-recursor-49/tags/
+  ## @param powerdns.image.registry pnds-recursor image registry
+  ## @param powerdns.image.repository pnds-recursor image repository
+  ## @param powerdns.image.tag pnds-recursor image tag (immutable tags are recommended)
+  ## @param powerdns.image.digest pnds-recursor image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param powerdns.image.pullPolicy pnds-recursor image pull policy
+  ## @param powerdns.image.pullSecrets pnds-recursor image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: powerdns/pnds-recursor-52
+    tag: 5.2.0
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param powerdns.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param powerdns.replicaCount Number of powerdns replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param powerdns.containerPorts powerdns container port to expose to host
+  ## the dns related ports must match with the config in @param powerdns.configFiles.pdns.local-port
+  ##
+  containerPorts:
+    - name: dns-tcp
+      containerPort: 1053
+      hostPort: 53
+      protocol: TCP
+    - name: dns-udp
+      containerPort: 1053
+      hostPort: 53
+      protocol: UDP
+    - name: web
+      containerPort: 8082
+      hostPort: 8082
+      protocol: TCP
+  ## Configure extra options for powerdns containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param powerdns.livenessProbe.enabled Enable livenessProbe on powerdns containers
+  ## @param powerdns.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param powerdns.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param powerdns.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param powerdns.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param powerdns.livenessProbe.successThreshold Success threshold for livenessProbe
+  ## ref: https://doc.powerdns.com/authoritative/manpages/pdns_control.1.html#ping-rping
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 300
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    exec:
+      command:
+        - pdns_control
+        - rping
+  ## @param powerdns.readinessProbe.enabled Enable readinessProbe on powerdns containers
+  ## @param powerdns.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param powerdns.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param powerdns.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param powerdns.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param powerdns.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param powerdns.startupProbe.enabled Enable startupProbe on powerdns containers
+  ## @param powerdns.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param powerdns.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param powerdns.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param powerdns.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param powerdns.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param powerdns.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param powerdns.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param powerdns.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## powerdns resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param powerdns.resourcesPreset Set powerdns container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if powerdns.resources is set (powerdns.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param powerdns.resources Set powerdns container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param powerdns.podSecurityContext.enabled Enabled powerdns pods' Security Context
+  ## @param powerdns.podSecurityContext.fsGroup Set powerdns pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param powerdns.containerSecurityContext.enabled Enabled powerdns containers' Security Context
+  ## @param powerdns.containerSecurityContext.runAsUser Set powerdns containers' Security Context runAsUser
+  ## @param powerdns.containerSecurityContext.runAsNonRoot Set powerdns containers' Security Context runAsNonRoot
+  ## @param powerdns.containerSecurityContext.readOnlyRootFilesystem Set powerdns containers' Security Context runAsNonRoot
+  ## ref: https://github.com/PowerDNS/pdns/blob/rec-5.2.0/Dockerfile-recursor#L105
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 953
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param powerdns.configFiles powerDNS application config
+  ##
+  configFiles:
+    ## @param powerdns.configFiles.recursor powerdns recursor image builtin config file
+    ## which will place in /etc/powerdns/recursor.conf
+    ## ref: https://github.com/PowerDNS/pdns/blob/rec-5.2.0/dockerdata/recursor.conf
+    ##
+    recursor:
+      recursor:
+        ## @param powerdns.configFiles.recursor.recursor.include_dir recursor block config
+        ## Directory to scan for additional config files. All files that end with .yml are loaded in order using POSIX as locale.
+        ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#recursor-include-dir
+        ##
+        include_dir: /etc/powerdns/recursor.d
+      incoming:
+        ## @param powerdns.configFiles.recursor.incoming.listen Local IP addresses to which we bind.
+        ## Each address specified can include a port number; if no port is included then the incoming.port port will be used for that address.
+        ## If a port number is specified, it must be separated from the address with a ‘:’; for an IPv6 address the address must be enclosed in square brackets.
+        ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#incoming-listen
+        ##
+        listen:
+          - 0.0.0.0
+          - "::"
+    ## @param powerdns.configFiles._aipConf powerdns image builtin config file
+    ## which will place in /etc/powerdns/recursor.d/_api.conf
+    ## ref: https://github.com/PowerDNS/pdns/blob/rec-5.2.0/dockerdata/startup.py#L29-L33
+    ##
+    _api:
+      webservice:
+        ## @param powerdns.configFiles._api.webservice.api_key Static pre-shared authentication key for access to the REST API.
+        ## Since 4.6.0 the key can be hashed and salted using rec_control hash-password instead of being stored in the configuration in plaintext, but the plaintext version is still supported.
+        ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#webservice-api-key
+        ##
+        api_key: powerdns
+        ## @param powerdns.configFiles._api.webservice.address IP Address for webserver/API to listen on.
+        ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#webservice-address
+        ##
+        address: 0.0.0.0
+        ## @param powerdns.configFiles._api.webservice.port TCP port where the webserver should listen on.
+        ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#webservice-port
+        ##
+        port: 8082
+        ## @param powerdns.configFiles._api.webservice.allow_from These IPs and subnets are allowed to access the webserver.
+        ## Note that specifying an IP address without a netmask uses an implicit netmask of /32 or /128.
+        ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#webservice-allow-from
+        ##
+        allow_from: 0.0.0.0/0
+        ## @param powerdns.configFiles._api.webservice.password Password required to access the webserver.
+        ## Since 4.6.0 the password can be hashed and salted using rec_control hash-password instead of being present in the configuration in plaintext, but the plaintext version is still supported.
+        ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#webservice-password
+        ##
+        password: powerdns
+  ## @param powerdns.existingConfigmap The name of an existing ConfigMap with your custom configuration for powerdns
+  ##
+  existingConfigmap:
+  ## @param powerdns.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param powerdns.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param powerdns.hostAliases powerdns pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param powerdns.podLabels Extra labels for powerdns pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param powerdns.podAnnotations Annotations for powerdns pods
+  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/containers/podman/discussions/22378
+  ## ref: https://github.com/PowerDNS/pdns/blob/rec-5.2.0/Dockerfile-recursor#L93
+  ## e.g.
+  ## podAnnotations:
+  ##   io.podman.annotations.userns: keep-id:uid=953,gid=953
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param powerdns.autoscaling.enabled Enable autoscaling for powerdns
+  ## @param powerdns.autoscaling.minReplicas Minimum number of powerdns replicas
+  ## @param powerdns.autoscaling.maxReplicas Maximum number of powerdns replicas
+  ## @param powerdns.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param powerdns.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param powerdns.extraEnvVars Array with extra environment variables to add to powerdns nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param powerdns.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for powerdns nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param powerdns.extraEnvVarsSecret Name of existing Secret containing extra env vars for powerdns nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param powerdns.extraVolumes Optionally specify extra list of additional volumes for the powerdns pod(s)
+  ##
+  extraVolumes: []
+  ## @param powerdns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the powerdns container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param powerdns.sidecars Add additional sidecar containers to the powerdns pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param powerdns.initContainers Add additional init containers to the powerdns pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## - name: init-sqlite-db
+  ##   image: '{{ template "powerdns.image" . }}'
+  ##   imagePullPolicy: "{{ .Values.powerdns.image.pullPolicy }}"
+  ##   command:
+  ##     - sh
+  ##     - -c
+  ##     - |
+  ##       if [ ! -f /var/lib/powerdns/pdns.sqlite3 ]; then
+  ##         sqlite3 /var/lib/powerdns/pdns.sqlite3 < /usr/local/share/doc/pdns/schema.sqlite3.sql
+  ##       fi
+  ##   volumeMounts:
+  ##     - name: data
+  ##       mountPath: /var/lib/powerdns
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /var/lib/powerdns
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
