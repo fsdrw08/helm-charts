@@ -1,0 +1,46 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm-main
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: powerdns
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+{{- range $key, $val := .Values.powerdns.containers }}
+{{- if $val.enabled }}
+{{- range $setting, $value := $val.configFiles.main }}
+  {{ $key }}.conf: |-
+    {{ $setting }}={{ $value }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if index .Values "powerdns" "containers" "auth" "configFiles" "pdns" "include-dir" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm-include
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: powerdns
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+{{- range $file, $content := .Values.powerdns.containers.auth.configFiles }}
+{{- if ne $file "pdns"}}
+  {{ $file }}.conf: |-
+{{- range $key, $val := $content }}
+    {{ $key }}={{ $val }}
+{{- end}}
+{{- end }}
+{{- end }}
+{{- end }}
