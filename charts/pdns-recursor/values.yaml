@@ -97,10 +97,10 @@ powerdns:
   ## @param powerdns.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
   ## @param powerdns.livenessProbe.failureThreshold Failure threshold for livenessProbe
   ## @param powerdns.livenessProbe.successThreshold Success threshold for livenessProbe
-  ## ref: https://doc.powerdns.com/authoritative/manpages/pdns_control.1.html#ping-rping
+  ## ref: https://doc.powerdns.com/recursor/metrics.html#getting-metrics-from-the-recursor
   ##
   livenessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: 30
     periodSeconds: 300
     timeoutSeconds: 5
