@@ -1,0 +1,819 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  # imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
+## @section powerdns Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+powerdns:
+  ## @param powerdns.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param powerdns.replicaCount Number of powerdns replicas to deploy
+  ##
+  replicaCount: 1
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param powerdns.podSecurityContext.enabled Enabled powerdns pods' Security Context
+  ## @param powerdns.podSecurityContext.fsGroup Set powerdns pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param powerdns.hostAliases powerdns pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param powerdns.podLabels Extra labels for powerdns pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param powerdns.podAnnotations Annotations for powerdns pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=100,gid=101
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param powerdns.autoscaling.enabled Enable autoscaling for powerdns
+  ## @param powerdns.autoscaling.minReplicas Minimum number of powerdns replicas
+  ## @param powerdns.autoscaling.maxReplicas Maximum number of powerdns replicas
+  ## @param powerdns.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param powerdns.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param powerdns.extraVolumes Optionally specify extra list of additional volumes for the powerdns pod(s)
+  ##
+  extraVolumes: []
+  ## @param powerdns.sidecars Add additional sidecar containers to the powerdns pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param powerdns.initContainers Add additional init containers to the powerdns pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  containers:
+    recursor:
+      ## @param powerdns.containers.recursor.enabled present this container in the pod
+      enabled: true
+      ## ISC powerdns recursor image
+      ## ref: https://cloudsmith.io/~isc/repos/docker/packages/detail/docker/powerdns-recursor/#versions
+      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/master/powerdns-recursor/Dockerfile
+      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/move-v2-6-to-newest-alpine/powerdns-recursor/Dockerfile
+      ## @param powerdns.containers.recursor.image.registry powerdns image registry
+      ## @param powerdns.containers.recursor.image.repository powerdns image repository
+      ## @param powerdns.containers.recursor.image.tag powerdns image tag (immutable tags are recommended)
+      ## @param powerdns.containers.recursor.image.digest powerdns image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+      ## @param powerdns.containers.recursor.image.pullPolicy powerdns image pull policy
+      ## @param powerdns.containers.recursor.image.pullSecrets powerdns image pull secrets
+      ##
+      image:
+        registry: docker.io
+        repository: powerdns/pdns-recursor-52
+        tag: 5.2.0
+        digest: ""
+        ## Specify a imagePullPolicy
+        ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+        ##
+        pullPolicy: IfNotPresent
+        ## Optionally specify an array of imagePullSecrets.
+        ## Secrets must be manually created in the namespace.
+        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        ## e.g:
+        ## pullSecrets:
+        ##   - myRegistryKeySecretName
+        ##
+        pullSecrets: []
+      ## @param powerdns.containers.recursor.containerPorts powerdns container port to expose to host
+      ## e.g.
+      ## containerPorts:
+      ##   - name: http
+      ##     containerPort: 80
+      ##     hostPort: 80
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##   - name: https
+      ##     containerPort: 443
+      ##     hostPort: 443
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##
+      containerPorts:
+        - name: dns-tcp
+          containerPort: 1053
+          hostPort: 53
+          protocol: TCP
+        - name: dns-udp
+          containerPort: 1053
+          hostPort: 53
+          protocol: UDP
+        - name: web
+          containerPort: 8082
+          hostPort: 8082
+          protocol: TCP
+      ## Configure extra options for powerdns containers' liveness and readiness probes
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+      ## @param powerdns.containers.recursor.livenessProbe.enabled Enable livenessProbe on powerdns containers
+      ## @param powerdns.containers.recursor.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+      ## @param powerdns.containers.recursor.livenessProbe.periodSeconds Period seconds for livenessProbe
+      ## @param powerdns.containers.recursor.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+      ## @param powerdns.containers.recursor.livenessProbe.failureThreshold Failure threshold for livenessProbe
+      ## @param powerdns.containers.recursor.livenessProbe.successThreshold Success threshold for livenessProbe
+      ##
+      livenessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.recursor.readinessProbe.enabled Enable readinessProbe on powerdns containers
+      ## @param powerdns.containers.recursor.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+      ## @param powerdns.containers.recursor.readinessProbe.periodSeconds Period seconds for readinessProbe
+      ## @param powerdns.containers.recursor.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+      ## @param powerdns.containers.recursor.readinessProbe.failureThreshold Failure threshold for readinessProbe
+      ## @param powerdns.containers.recursor.readinessProbe.successThreshold Success threshold for readinessProbe
+      ## note: podman not support readinessProbe currently
+      ##
+      readinessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.recursor.startupProbe.enabled Enable startupProbe on powerdns containers
+      ## @param powerdns.containers.recursor.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+      ## @param powerdns.containers.recursor.startupProbe.periodSeconds Period seconds for startupProbe
+      ## @param powerdns.containers.recursor.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+      ## @param powerdns.containers.recursor.startupProbe.failureThreshold Failure threshold for startupProbe
+      ## @param powerdns.containers.recursor.startupProbe.successThreshold Success threshold for startupProbe
+      ##
+      startupProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.recursor.customLivenessProbe Custom livenessProbe that overrides the default one
+      ##
+      customLivenessProbe: {}
+      ## @param powerdns.containers.recursor.customReadinessProbe Custom readinessProbe that overrides the default one
+      ##
+      customReadinessProbe: {}
+      ## @param powerdns.containers.recursor.customStartupProbe Custom startupProbe that overrides the default one
+      ##
+      customStartupProbe: {}
+      ## powerdns resource requests and limits
+      ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+      ## @param powerdns.containers.recursor.resourcesPreset Set powerdns container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if recursor.resources is set (powerdns.resources is recommended for production).
+      ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+      ##
+      resourcesPreset: "nano"
+      ## @param powerdns.containers.recursor.resources Set powerdns container requests and limits for different resources like CPU or memory (essential for production workloads)
+      ## Example:
+      ## resources:
+      ##   requests:
+      ##     cpu: 2
+      ##     memory: 512Mi
+      ##   limits:
+      ##     cpu: 3
+      ##     memory: 1024Mi
+      ##
+      resources: {}
+
+      ## Configure Container Security Context
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      ## @param powerdns.containers.recursor.containerSecurityContext.enabled Enabled powerdns containers' Security Context
+      ## @param powerdns.containers.recursor.containerSecurityContext.runAsUser Set powerdns containers' Security Context runAsUser
+      ## @param powerdns.containers.recursor.containerSecurityContext.runAsNonRoot Set powerdns containers' Security Context runAsNonRoot
+      ## @param powerdns.containers.recursor.containerSecurityContext.readOnlyRootFilesystem Set powerdns containers' Security Context runAsNonRoot
+      ## ref: https://gitlab.alpinelinux.org/alpine/aports/-/issues/12214
+      ## this container must run as root user inside, as the official container image use supervisord to run powerdns-dhcp server
+      ##
+      containerSecurityContext:
+        enabled: true
+        runAsUser: 0
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+        capabilities:
+          add:
+            - CAP_NET_RAW
+      ## @param powerdns.containers.recursor.config config file which will place in /etc/powerdns/powerdns-recursor.conf
+      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/b7e5a750862146c579604e53a9434f212f36d183/powerdns-recursor/Dockerfile#L77
+      ##
+      config:
+        ## @param powerdns.configFiles.recursor powerdns recursor image builtin config file
+        ## which will place in /etc/powerdns/recursor.conf
+        ## ref: https://github.com/PowerDNS/pdns/blob/rec-5.2.0/dockerdata/recursor.conf
+        ##
+        recursor:
+          ## @param powerdns.configFiles.recursor.recursor.include_dir recursor block config
+          ## Directory to scan for additional config files. All files that end with .yml are loaded in order using POSIX as locale.
+          ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#recursor-include-dir
+          ##
+          include_dir: /etc/powerdns/recursor.d
+        incoming:
+          ## @param powerdns.configFiles.recursor.incoming.listen Local IP addresses to which we bind.
+          ## Each address specified can include a port number; if no port is included then the incoming.port port will be used for that address.
+          ## If a port number is specified, it must be separated from the address with a ‘:’; for an IPv6 address the address must be enclosed in square brackets.
+          ## ref: https://doc.powerdns.com/recursor/yamlsettings.html#incoming-listen
+          ##
+          listen:
+            - 0.0.0.0
+            - "::"
+
+      ## @param powerdns.containers.recursor.existingConfigmap The name of an existing ConfigMap with your custom configuration for powerdns
+      ##
+      existingConfigmap:
+      ## @param powerdns.containers.recursor.command Override default container command (useful when using custom images)
+      ##
+      command: []
+      ## @param powerdns.containers.recursor.args Override default container args (useful when using custom images)
+      ##
+      args: []
+
+      ## @param powerdns.containers.recursor.extraEnvVars Array with extra environment variables to add to powerdns nodes
+      ## e.g:
+      ## extraEnvVars:
+      ##   - name: FOO
+      ##     value: "bar"
+      ##
+      extraEnvVars: []
+      ## @param powerdns.containers.recursor.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for powerdns nodes
+      ##
+      extraEnvVarsCM: ""
+      ## @param powerdns.containers.recursor.extraEnvVarsSecret Name of existing Secret containing extra env vars for powerdns nodes
+      ##
+      extraEnvVarsSecret: ""
+      ## @param powerdns.containers.recursor.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the powerdns container(s)
+      ##
+      extraVolumeMounts: []
+    dhcp6:
+      ## @param powerdns.containers.dhcp6.enabled present this container in the pod
+      enabled: false
+      ## ISC powerdns dhcp6 image
+      ## ref: https://cloudsmith.io/~isc/repos/docker/packages/detail/docker/powerdns-dhcp6/#versions
+      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/master/powerdns-recursor/Dockerfile?ref_type=heads
+      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/move-v2-6-to-newest-alpine/powerdns-recursor/Dockerfile?ref_type=heads
+      ## @param powerdns.containers.dhcp6.image.registry powerdns image registry
+      ## @param powerdns.containers.dhcp6.image.repository powerdns image repository
+      ## @param powerdns.containers.dhcp6.image.tag powerdns image tag (immutable tags are recommended)
+      ## @param powerdns.containers.dhcp6.image.digest powerdns image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+      ## @param powerdns.containers.dhcp6.image.pullPolicy powerdns image pull policy
+      ## @param powerdns.containers.dhcp6.image.pullSecrets powerdns image pull secrets
+      ##
+      image:
+        registry: docker.cloudsmith.io
+        repository: isc/docker/powerdns-dhcp6
+        tag: 2.7.6-20250129
+        digest: ""
+        ## Specify a imagePullPolicy
+        ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+        ##
+        pullPolicy: IfNotPresent
+        ## Optionally specify an array of imagePullSecrets.
+        ## Secrets must be manually created in the namespace.
+        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        ## e.g:
+        ## pullSecrets:
+        ##   - myRegistryKeySecretName
+        ##
+        pullSecrets: []
+      ## @param powerdns.containers.dhcp6.containerPorts powerdns container port to expose to host
+      ## e.g.
+      ## containerPorts:
+      ##   - name: http
+      ##     containerPort: 80
+      ##     hostPort: 80
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##   - name: https
+      ##     containerPort: 443
+      ##     hostPort: 443
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##
+      containerPorts:
+        - name: dhcp6
+          containerPort: 547
+          hostPort: 547
+          protocol: UDP
+        - name: control-agent
+          containerPort: 8006
+          protocol: TCP
+      ## Configure extra options for powerdns containers' liveness and readiness probes
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+      ## @param powerdns.containers.dhcp6.livenessProbe.enabled Enable livenessProbe on powerdns containers
+      ## @param powerdns.containers.dhcp6.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+      ## @param powerdns.containers.dhcp6.livenessProbe.periodSeconds Period seconds for livenessProbe
+      ## @param powerdns.containers.dhcp6.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+      ## @param powerdns.containers.dhcp6.livenessProbe.failureThreshold Failure threshold for livenessProbe
+      ## @param powerdns.containers.dhcp6.livenessProbe.successThreshold Success threshold for livenessProbe
+      ##
+      livenessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.dhcp6.readinessProbe.enabled Enable readinessProbe on powerdns containers
+      ## @param powerdns.containers.dhcp6.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+      ## @param powerdns.containers.dhcp6.readinessProbe.periodSeconds Period seconds for readinessProbe
+      ## @param powerdns.containers.dhcp6.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+      ## @param powerdns.containers.dhcp6.readinessProbe.failureThreshold Failure threshold for readinessProbe
+      ## @param powerdns.containers.dhcp6.readinessProbe.successThreshold Success threshold for readinessProbe
+      ## note: podman not support readinessProbe currently
+      ##
+      readinessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.dhcp6.startupProbe.enabled Enable startupProbe on powerdns containers
+      ## @param powerdns.containers.dhcp6.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+      ## @param powerdns.containers.dhcp6.startupProbe.periodSeconds Period seconds for startupProbe
+      ## @param powerdns.containers.dhcp6.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+      ## @param powerdns.containers.dhcp6.startupProbe.failureThreshold Failure threshold for startupProbe
+      ## @param powerdns.containers.dhcp6.startupProbe.successThreshold Success threshold for startupProbe
+      ##
+      startupProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.dhcp6.customLivenessProbe Custom livenessProbe that overrides the default one
+      ##
+      customLivenessProbe: {}
+      ## @param powerdns.containers.dhcp6.customReadinessProbe Custom readinessProbe that overrides the default one
+      ##
+      customReadinessProbe: {}
+      ## @param powerdns.containers.dhcp6.customStartupProbe Custom startupProbe that overrides the default one
+      ##
+      customStartupProbe: {}
+      ## powerdns resource requests and limits
+      ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+      ## @param powerdns.containers.dhcp6.resourcesPreset Set powerdns container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if recursor.resources is set (powerdns.resources is recommended for production).
+      ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+      ##
+      resourcesPreset: "nano"
+      ## @param powerdns.containers.dhcp6.resources Set powerdns container requests and limits for different resources like CPU or memory (essential for production workloads)
+      ## Example:
+      ## resources:
+      ##   requests:
+      ##     cpu: 2
+      ##     memory: 512Mi
+      ##   limits:
+      ##     cpu: 3
+      ##     memory: 1024Mi
+      ##
+      resources: {}
+
+      ## Configure Container Security Context
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      ## @param powerdns.containers.dhcp6.containerSecurityContext.enabled Enabled powerdns containers' Security Context
+      ## @param powerdns.containers.dhcp6.containerSecurityContext.runAsUser Set powerdns containers' Security Context runAsUser
+      ## @param powerdns.containers.dhcp6.containerSecurityContext.runAsNonRoot Set powerdns containers' Security Context runAsNonRoot
+      ## @param powerdns.containers.dhcp6.containerSecurityContext.readOnlyRootFilesystem Set powerdns containers' Security Context runAsNonRoot
+      ##
+      containerSecurityContext:
+        enabled: false
+        runAsUser: 1001
+        runAsNonRoot: true
+        readOnlyRootFilesystem: false
+
+      ## @param powerdns.containers.dhcp6.config config file which will place in /etc/powerdns/powerdns-dhcp6.conf
+      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/b7e5a750862146c579604e53a9434f212f36d183/powerdns-dhcp6/Dockerfile#L72
+      ##
+      config:
+        ## @param powerdns.containers.dhcp6.config.Dhcp6 powerdns DHCPv6 server configuration block begins here.
+        ## ref: https://github.com/isc-projects/powerdns/blob/master/doc/examples/powerdns6/all-keys.json
+        ## ref: https://powerdns.readthedocs.io/en/powerdns-2.7.6/arm/dhcp6-srv.html#dhcpv6-server-configuration
+        ##
+        Dhcp6:
+          subnet6:
+            - subnet: "2001:db8:1::/64"
+              pools:
+                - pool: "2001:db8:1::1-2001:db8:1::100"
+              id: 1
+              interface: eth0
+          interfaces-config:
+            interfaces:
+              - eth0
+            service-sockets-max-retries: 5
+            service-sockets-require-all: true
+          control-sockets:
+            - socket-type: unix
+              socket-name: /run/powerdns/control_socket_6
+          renew-timer: 1000
+          rebind-timer: 2000
+          preferred-lifetime: 3000
+          valid-lifetime: 4000
+          loggers:
+            - name: powerdns-dhcp6
+              output_options:
+                - output: stdout
+              severity: INFO
+          lease-database:
+            type: memfile
+
+      ## @param powerdns.containers.dhcp6.existingConfigmap The name of an existing ConfigMap with your custom configuration for powerdns
+      ##
+      existingConfigmap:
+      ## @param powerdns.containers.dhcp6.command Override default container command (useful when using custom images)
+      ##
+      command: []
+      ## @param powerdns.containers.dhcp6.args Override default container args (useful when using custom images)
+      ##
+      args: []
+
+      ## @param powerdns.containers.dhcp6.extraEnvVars Array with extra environment variables to add to powerdns nodes
+      ## e.g:
+      ## extraEnvVars:
+      ##   - name: FOO
+      ##     value: "bar"
+      ##
+      extraEnvVars: []
+      ## @param powerdns.containers.dhcp6.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for powerdns nodes
+      ##
+      extraEnvVarsCM: ""
+      ## @param powerdns.containers.dhcp6.extraEnvVarsSecret Name of existing Secret containing extra env vars for powerdns nodes
+      ##
+      extraEnvVarsSecret: ""
+      ## @param powerdns.containers.dhcp6.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the powerdns container(s)
+      ##
+      extraVolumeMounts: []
+    ## @param powerdns.containers.dhcp-ddns powerdns dhcp-ddns container
+    ##
+    dhcp-ddns:
+      ## @param powerdns.containers.dhcp-ddns.enabled present this container in the pod
+      enabled: false
+      ## ISC powerdns dhcp ddns image
+      ## ref: https://cloudsmith.io/~isc/repos/docker/packages/detail/docker/powerdns-dhcp-ddns/#versions
+      ## @param powerdns.containers.dhcp-ddns.image.registry powerdns image registry
+      ## @param powerdns.containers.dhcp-ddns.image.repository powerdns image repository
+      ## @param powerdns.containers.dhcp-ddns.image.tag powerdns image tag (immutable tags are recommended)
+      ## @param powerdns.containers.dhcp-ddns.image.digest powerdns image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+      ## @param powerdns.containers.dhcp-ddns.image.pullPolicy powerdns image pull policy
+      ## @param powerdns.containers.dhcp-ddns.image.pullSecrets powerdns image pull secrets
+      ##
+      image:
+        registry: docker.cloudsmith.io
+        repository: isc/docker/powerdns-dhcp-ddns
+        tag: 2.7.6-20250129
+        digest: ""
+        ## Specify a imagePullPolicy
+        ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+        ##
+        pullPolicy: IfNotPresent
+        ## Optionally specify an array of imagePullSecrets.
+        ## Secrets must be manually created in the namespace.
+        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        ## e.g:
+        ## pullSecrets:
+        ##   - myRegistryKeySecretName
+        ##
+        pullSecrets: []
+      ## @param powerdns.containers.dhcp-ddns.containerPorts powerdns container port to expose to host
+      ## e.g.
+      ## containerPorts:
+      ##   - name: http
+      ##     containerPort: 80
+      ##     hostPort: 80
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##   - name: https
+      ##     containerPort: 443
+      ##     hostPort: 443
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##
+      containerPorts:
+        - name: ddns
+          containerPort: 53001
+          hostPort: 53001
+          protocol: UDP
+        - name: control-agent
+          containerPort: 8000
+          protocol: TCP
+      ## Configure extra options for powerdns containers' liveness and readiness probes
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+      ## @param powerdns.containers.dhcp-ddns.livenessProbe.enabled Enable livenessProbe on powerdns containers
+      ## @param powerdns.containers.dhcp-ddns.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+      ## @param powerdns.containers.dhcp-ddns.livenessProbe.periodSeconds Period seconds for livenessProbe
+      ## @param powerdns.containers.dhcp-ddns.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+      ## @param powerdns.containers.dhcp-ddns.livenessProbe.failureThreshold Failure threshold for livenessProbe
+      ## @param powerdns.containers.dhcp-ddns.livenessProbe.successThreshold Success threshold for livenessProbe
+      ##
+      livenessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.dhcp-ddns.readinessProbe.enabled Enable readinessProbe on powerdns containers
+      ## @param powerdns.containers.dhcp-ddns.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+      ## @param powerdns.containers.dhcp-ddns.readinessProbe.periodSeconds Period seconds for readinessProbe
+      ## @param powerdns.containers.dhcp-ddns.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+      ## @param powerdns.containers.dhcp-ddns.readinessProbe.failureThreshold Failure threshold for readinessProbe
+      ## @param powerdns.containers.dhcp-ddns.readinessProbe.successThreshold Success threshold for readinessProbe
+      ## note: podman not support readinessProbe currently
+      ##
+      readinessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.dhcp-ddns.startupProbe.enabled Enable startupProbe on powerdns containers
+      ## @param powerdns.containers.dhcp-ddns.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+      ## @param powerdns.containers.dhcp-ddns.startupProbe.periodSeconds Period seconds for startupProbe
+      ## @param powerdns.containers.dhcp-ddns.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+      ## @param powerdns.containers.dhcp-ddns.startupProbe.failureThreshold Failure threshold for startupProbe
+      ## @param powerdns.containers.dhcp-ddns.startupProbe.successThreshold Success threshold for startupProbe
+      ##
+      startupProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param powerdns.containers.dhcp-ddns.customLivenessProbe Custom livenessProbe that overrides the default one
+      ##
+      customLivenessProbe: {}
+      ## @param powerdns.containers.dhcp-ddns.customReadinessProbe Custom readinessProbe that overrides the default one
+      ##
+      customReadinessProbe: {}
+      ## @param powerdns.containers.dhcp-ddns.customStartupProbe Custom startupProbe that overrides the default one
+      ##
+      customStartupProbe: {}
+      ## powerdns resource requests and limits
+      ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+      ## @param powerdns.containers.dhcp-ddns.resourcesPreset Set powerdns container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if recursor.resources is set (powerdns.resources is recommended for production).
+      ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+      ##
+      resourcesPreset: "nano"
+      ## @param powerdns.containers.dhcp-ddns.resources Set powerdns container requests and limits for different resources like CPU or memory (essential for production workloads)
+      ## Example:
+      ## resources:
+      ##   requests:
+      ##     cpu: 2
+      ##     memory: 512Mi
+      ##   limits:
+      ##     cpu: 3
+      ##     memory: 1024Mi
+      ##
+      resources: {}
+
+      ## Configure Container Security Context
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      ## @param powerdns.containers.dhcp-ddns.containerSecurityContext.enabled Enabled powerdns containers' Security Context
+      ## @param powerdns.containers.dhcp-ddns.containerSecurityContext.runAsUser Set powerdns containers' Security Context runAsUser
+      ## @param powerdns.containers.dhcp-ddns.containerSecurityContext.runAsNonRoot Set powerdns containers' Security Context runAsNonRoot
+      ## @param powerdns.containers.dhcp-ddns.containerSecurityContext.readOnlyRootFilesystem Set powerdns containers' Security Context runAsNonRoot
+      ##
+      containerSecurityContext:
+        enabled: true
+        runAsUser: 0
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+
+      ## @param powerdns.containers.dhcp-ddns.config config file which will place in /etc/powerdns/powerdns-dhcp-ddns.conf
+      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/b7e5a750862146c579604e53a9434f212f36d183/powerdns-dhcp-ddns/Dockerfile#L44
+      ##
+      config:
+        ## @param powerdns.containers.dhcp-ddns.config.DhcpDdns powerdns Dhcp-Ddns server configuration block begins here.
+        ## ref: https://github.com/isc-projects/powerdns/blob/master/doc/examples/ddns/all-keys.json
+        ## ref: https://powerdns.readthedocs.io/en/powerdns-2.7.6/arm/ddns.html#configuring-the-dhcp-ddns-server
+        ##
+        DhcpDdns:
+          ip-address: 127.0.0.1
+          port: 53001
+          dns-server-timeout: 2000
+          control-socket:
+            socket-type: unix
+            socket-name: /run/powerdns/control_socket_d2
+          reverse-ddns:
+            ddns-domains:
+              - name: 50.168.192.in-addr.arpa.
+                dns-servers:
+                  - hostname: ""
+                    ip-address: 192.168.50.252
+                    port: 53
+          forward-ddns:
+            ddns-domains:
+              - name: four.example.com.
+                dns-servers:
+                  - hostname: ""
+                    ip-address: 192.168.50.252
+                    port: 53
+          ncr-format: JSON
+          ncr-protocol: UDP
+          loggers:
+            - name: powerdns-dhcp-ddns
+              output_options:
+                - output: stdout
+              severity: INFO
+
+      ## @param powerdns.containers.dhcp-ddns.existingConfigmap The name of an existing ConfigMap with your custom configuration for powerdns
+      ##
+      existingConfigmap:
+      ## @param powerdns.containers.dhcp-ddns.command Override default container command (useful when using custom images)
+      ##
+      command: []
+      ## @param powerdns.containers.dhcp-ddns.args Override default container args (useful when using custom images)
+      ##
+      args: []
+
+      ## @param powerdns.containers.dhcp-ddns.extraEnvVars Array with extra environment variables to add to powerdns nodes
+      ## e.g:
+      ## extraEnvVars:
+      ##   - name: FOO
+      ##     value: "bar"
+      ##
+      extraEnvVars: []
+      ## @param powerdns.containers.dhcp-ddns.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for powerdns nodes
+      ##
+      extraEnvVarsCM: ""
+      ## @param powerdns.containers.dhcp-ddns.extraEnvVarsSecret Name of existing Secret containing extra env vars for powerdns nodes
+      ##
+      extraEnvVarsSecret: ""
+      ## @param powerdns.containers.dhcp-ddns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the powerdns container(s)
+      ##
+      extraVolumeMounts: []
+  ## @param powerdns.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param powerdns.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /consul/config/certs
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /var/lib/powerdns
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
