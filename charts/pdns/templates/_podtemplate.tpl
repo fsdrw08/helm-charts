@@ -104,11 +104,11 @@ spec:
       {{- end }}
       volumeMounts:
         - name: config
-          {{- if eq $key "auth" -}}
+          {{- if eq $key "auth" }}
           mountPath: /etc/powerdns/pdns.conf
-          {{- else -}}
+          {{- else }}
           mountPath: /etc/powerdns/{{ $key }}.conf
-          {{- end -}}
+          {{- end }}
           subPath: {{ $key }}.conf
         - name: data
           mountPath: {{ $.Values.persistence.mountPath }}

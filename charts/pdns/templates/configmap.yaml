@@ -16,8 +16,8 @@ metadata:
 data:
 {{- range $key, $val := .Values.powerdns.containers }}
 {{- if $val.enabled }}
-{{- range $setting, $value := $val.config }}
   {{ $key }}.conf: |-
+{{- range $setting, $value := $val.config }}
     {{ $setting }}={{ $value }}
 {{- end }}
 {{- end }}
