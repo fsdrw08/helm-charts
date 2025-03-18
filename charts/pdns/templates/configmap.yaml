@@ -9,10 +9,16 @@ metadata:
   name: {{ template "common.names.fullname" . }}-cm
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: powerdns
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  %%CONFIG_FILE_NAME%%: |
-  # Config file
+{{- range $key, $val := .Values.powerdns.containers }}
+{{- if $val.enabled }}
+{{- range $setting, $value := $val.config }}
+  {{ $key }}.conf: |-
+    {{ $setting }}={{ $value }}
+{{- end }}
+{{- end }}
+{{- end }}
