@@ -166,12 +166,16 @@ powerdns:
       ## @param powerdns.containers.auth.livenessProbe.successThreshold Success threshold for livenessProbe
       ##
       livenessProbe:
-        enabled: false
-        initialDelaySeconds: foo
-        periodSeconds: bar
-        timeoutSeconds: foo
-        failureThreshold: bar
-        successThreshold: foo
+        enabled: true
+        initialDelaySeconds: 30
+        periodSeconds: 300
+        timeoutSeconds: 5
+        failureThreshold: 3
+        successThreshold: 1
+        exec:
+          command:
+            - pdns_control
+            - rping
       ## @param powerdns.containers.auth.readinessProbe.enabled Enable readinessProbe on powerdns containers
       ## @param powerdns.containers.auth.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
       ## @param powerdns.containers.auth.readinessProbe.periodSeconds Period seconds for readinessProbe
