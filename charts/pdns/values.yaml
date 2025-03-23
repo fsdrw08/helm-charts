@@ -261,6 +261,11 @@ powerdns:
         ## ref: https://doc.powerdns.com/authoritative/settings.html#local-port
         ##
         local-port: 1053
+        ## @param powerdns.containers.auth.config.security-poll-suffix Zone name from which to query security update notifications.
+        ## Setting this to an empty string disables secpoll
+        ## ref: https://doc.powerdns.com/authoritative/settings.html#security-poll-suffix
+        ##
+        security-poll-suffix: ""
         ## @param powerdns.containers.auth.config.launch
         ## Which backends to launch and order to query them in. Launches backends.
         ## In its most simple form, supply all backends that need to be launched
