@@ -124,7 +124,7 @@ kea:
       image:
         registry: docker.cloudsmith.io
         repository: isc/docker/kea-dhcp4
-        tag: 2.7.6-20250129
+        tag: 2.7.7-20250326
         digest: ""
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -256,7 +256,7 @@ kea:
       config:
         ## @param kea.containers.dhcp4.config.Dhcp4 Kea DHCPv4 server configuration block begins here.
         ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea4/all-keys.json
-        ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/dhcp4-srv.html#dhcpv4-server-configuration
+        ## ref: https://kea.readthedocs.io/en/kea-2.7.7/arm/dhcp4-srv.html#dhcpv4-server-configuration
         ##
         Dhcp4:
           subnet4:
@@ -327,7 +327,7 @@ kea:
       image:
         registry: docker.cloudsmith.io
         repository: isc/docker/kea-dhcp6
-        tag: 2.7.6-20250129
+        tag: 2.7.7-20250326
         digest: ""
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -455,7 +455,7 @@ kea:
       config:
         ## @param kea.containers.dhcp6.config.Dhcp6 Kea DHCPv6 server configuration block begins here.
         ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/kea6/all-keys.json
-        ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/dhcp6-srv.html#dhcpv6-server-configuration
+        ## ref: https://kea.readthedocs.io/en/kea-2.7.7/arm/dhcp6-srv.html#dhcpv6-server-configuration
         ##
         Dhcp6:
           subnet6:
@@ -527,7 +527,7 @@ kea:
       image:
         registry: docker.cloudsmith.io
         repository: isc/docker/kea-dhcp-ddns
-        tag: 2.7.6-20250129
+        tag: 2.7.7-20250326
         digest: ""
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -655,7 +655,7 @@ kea:
       config:
         ## @param kea.containers.dhcp-ddns.config.DhcpDdns Kea Dhcp-Ddns server configuration block begins here.
         ## ref: https://github.com/isc-projects/kea/blob/master/doc/examples/ddns/all-keys.json
-        ## ref: https://kea.readthedocs.io/en/kea-2.7.6/arm/ddns.html#configuring-the-dhcp-ddns-server
+        ## ref: https://kea.readthedocs.io/en/kea-2.7.7/arm/ddns.html#configuring-the-dhcp-ddns-server
         ##
         DhcpDdns:
           ip-address: 127.0.0.1
@@ -716,7 +716,7 @@ kea:
   ## @param kea.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
   ##
   tls:
-    mountPath: /consul/config/certs
+    mountPath: /etc/kea/certs
 ## @section Persistence Parameters
 ##
 
