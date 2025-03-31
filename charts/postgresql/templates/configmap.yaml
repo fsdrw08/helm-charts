@@ -14,14 +14,11 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.config "context" $) | nindent 2 -}}
-  {{- /*
   {{- range $env, $var := .Values.postgresql.config -}}
   {{- if $var }}
   {{ $env }}: {{ $var }}
   {{- end }}
   {{- end }}
-  */}}
 {{- range $key, $val := .Values.postgresql.extending }}
 {{- if $val }}
 ---

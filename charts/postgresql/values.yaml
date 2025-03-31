@@ -189,6 +189,7 @@ postgresql:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param postgresql.config environment variable config for postgresql
+  ##
   config:
     ## @param postgresql.config.POSTGRESQL_USER User name for PostgreSQL account to be created
     ##
@@ -216,19 +217,19 @@ postgresql:
     ## @param postgresql.config.POSTGRESQL_MAX_CONNECTIONS The maximum number of client connections allowed
     ## default: 100
     ##
-    POSTGRESQL_MAX_CONNECTIONS: 100
+    POSTGRESQL_MAX_CONNECTIONS:
     ## @param postgresql.config.POSTGRESQL_MAX_PREPARED_TRANSACTIONS Sets the maximum number of transactions that can be in the "prepared" state. If you are using prepared transactions, you will probably want this to be at least as large as max_connections
     ## default: 0
     ##
-    POSTGRESQL_MAX_PREPARED_TRANSACTIONS: 0
+    POSTGRESQL_MAX_PREPARED_TRANSACTIONS:
     ## @param postgresql.config.POSTGRESQL_SHARED_BUFFERS Sets how much memory is dedicated to PostgreSQL to use for caching data
-    ## default: 1/4 of memory limit or 32M
+    ## default: 1/4 of memory limit or 32MB
     ##
-    POSTGRESQL_SHARED_BUFFERS: 32M
+    POSTGRESQL_SHARED_BUFFERS:
     ## @param postgresql.config.POSTGRESQL_EFFECTIVE_CACHE_SIZE Set to an estimate of how much memory is available for disk caching by the operating system and within the database itself
-    ## default: 1/2 of memory limit or 128M
+    ## default: 1/2 of memory limit or 128MB
     ##
-    POSTGRESQL_EFFECTIVE_CACHE_SIZE: 128M
+    POSTGRESQL_EFFECTIVE_CACHE_SIZE:
     ## @param postgresql.config.POSTGRESQL_LOG_DESTINATION Where to log errors,
     ## the default is /var/lib/pgsql/data/userdata/log/postgresql-*.log and this file is rotated; it can be changed to /dev/stderr to make debugging easier
     ##
