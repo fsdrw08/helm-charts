@@ -1,0 +1,27 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: V6.5
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: NFS-Ganesha is an NFSv3,v4,v4.1 fileserver that runs in user mode on most UNIX/Linux systems
+home: https://github.com/fsdrw08/helm-charts
+icon: https://avatars.githubusercontent.com/u/999981?s=200&v=4
+keywords:
+  - nfs
+  - FUSE
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: nfs-ganesha
+sources:
+  - https://github.com/fsdrw08/helm-charts/nfs-ganesha
+  - https://github.com/hectorm/docker-nfs-ganesha
+  - https://github.com/nfs-ganesha/nfs-ganesha
+version: 0.1.0

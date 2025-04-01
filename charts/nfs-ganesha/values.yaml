@@ -1,0 +1,411 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param nfs.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
+## @section nfs-ganesha Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+nfs:
+  ## nfs-ganesha image
+  ## ref: https://hub.docker.com/r/hectorm/nfs-ganesha/tags
+  ## @param nfs.image.registry nfs-ganesha image registry
+  ## @param nfs.image.repository nfs-ganesha image repository
+  ## @param nfs.image.tag nfs-ganesha image tag (immutable tags are recommended)
+  ## @param nfs.image.digest nfs-ganesha image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param nfs.image.pullPolicy nfs-ganesha image pull policy
+  ## @param nfs.image.pullSecrets nfs-ganesha image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: hectorm/nfs-ganesha
+    tag: v9
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param nfs.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param nfs.replicaCount Number of nfs-ganesha replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param nfs.containerPorts nfs-ganesha container port to expose to host
+  ##
+  containerPorts:
+    - name: nfs
+      containerPort: 2049
+      hostPort: 2049
+      protocol: TCP
+  ## Configure extra options for nfs-ganesha containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param nfs.livenessProbe.enabled Enable livenessProbe on nfs-ganesha containers
+  ## @param nfs.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param nfs.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param nfs.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param nfs.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param nfs.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param nfs.readinessProbe.enabled Enable readinessProbe on nfs-ganesha containers
+  ## @param nfs.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param nfs.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param nfs.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param nfs.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param nfs.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param nfs.startupProbe.enabled Enable startupProbe on nfs-ganesha containers
+  ## @param nfs.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param nfs.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param nfs.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param nfs.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param nfs.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param nfs.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param nfs.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param nfs.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## nfs-ganesha resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param nfs.resourcesPreset Set nfs-ganesha container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if nfs.resources is set (nfs.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param nfs.resources Set nfs-ganesha container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param nfs.podSecurityContext.enabled Enabled nfs-ganesha pods' Security Context
+  ## @param nfs.podSecurityContext.fsGroup Set nfs-ganesha pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param nfs.containerSecurityContext.enabled Enabled nfs-ganesha containers' Security Context
+  ## @param nfs.containerSecurityContext.runAsUser Set nfs-ganesha containers' Security Context runAsUser
+  ## @param nfs.containerSecurityContext.runAsNonRoot Set nfs-ganesha containers' Security Context runAsNonRoot
+  ## @param nfs.containerSecurityContext.readOnlyRootFilesystem Set nfs-ganesha containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param nfs.config
+  ## ref: https://github.com/hectorm/docker-nfs-ganesha/blob/master/config/ganesha/ganesha.conf
+  ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/config_samples/config.txt
+  ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-config.rst
+  ##
+  config:
+    ## @param nfs.config.NFS_Core_Param NFS related core config options
+    ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-core-config.rst
+    ##
+    NFS_Core_Param:
+      NFS_Port: 2049
+      Protocols: NFSv4
+      Fsid_Device: true
+    ## @param nfs.config.NFSV4
+    ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-core-config.rst#nfsv4-
+    ##
+    NFSV4:
+      RecoveryBackend: fs_ng
+      RecoveryRoot: /recovery
+      Lease_Lifetime: 40
+      Grace_Period: 50
+    ## #param nfs.config.VFS VFS specific config options
+    ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-vfs-config.rst
+    ##
+    VFS:
+      Link_Support: true
+      Symlink_Support: true
+      CanSetTime: true
+      umask: 0000
+    ## @param nfs.config.EXPORT NFS-Ganesha Export block config options
+    ## These options are all "export permissions" options, and are available in EXPORT_DEFAULTS {}, EXPORT {} and CLIENT {} blocks.
+    ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-export-config.rst
+    ##
+    EXPORT:
+      Export_Id: 0
+      Path: /export
+      Pseudo: /
+      SecType: sys
+      Protocols: NFSv4
+      FSAL:
+        Name: VFS
+      CLIENT:
+        Clients: "*"
+        Access_Type: RW
+        Squash: No_Root_Squash
+        Protocols: NFSv4
+    ## @param nfs.config.LOG NFS-Ganesha Log config options.
+    ## These options may be dynamically updated by issuing a SIGHUP to the ganesha.nfsd process
+    ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-log-config.rst
+    ##
+    LOG:
+      Default_Log_Level: INFO
+
+  ## @param nfs.existingConfigmap The name of an existing ConfigMap with your custom configuration for nfs-ganesha
+  ##
+  existingConfigmap:
+  ## @param nfs.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param nfs.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param nfs.hostAliases nfs-ganesha pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param nfs.podLabels Extra labels for nfs-ganesha pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param nfs.podAnnotations Annotations for nfs-ganesha pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param nfs.autoscaling.enabled Enable autoscaling for nfs
+  ## @param nfs.autoscaling.minReplicas Minimum number of nfs replicas
+  ## @param nfs.autoscaling.maxReplicas Maximum number of nfs replicas
+  ## @param nfs.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param nfs.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param nfs.extraEnvVars Array with extra environment variables to add to nfs-ganesha nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param nfs.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for nfs-ganesha nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param nfs.extraEnvVarsSecret Name of existing Secret containing extra env vars for nfs-ganesha nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param nfs.extraVolumes Optionally specify extra list of additional volumes for the nfs-ganesha pod(s)
+  ##
+  extraVolumes: []
+  ## @param nfs.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the nfs-ganesha container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param nfs.sidecars Add additional sidecar containers to the nfs-ganesha pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param nfs.initContainers Add additional init containers to the nfs-ganesha pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /bitnami/nfs/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
