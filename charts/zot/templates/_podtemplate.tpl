@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.zot.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: zot
+    - name: registry
       image: {{ template "zot.image" . }}
       imagePullPolicy: {{ .Values.zot.image.pullPolicy | quote }}
       {{- if .Values.zot.containerSecurityContext.enabled }}
