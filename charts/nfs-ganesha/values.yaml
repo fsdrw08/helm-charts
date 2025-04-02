@@ -168,14 +168,27 @@ nfs:
   ## @param nfs.containerSecurityContext.readOnlyRootFilesystem Set nfs-ganesha containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
-    enabled: false
-    runAsUser: 1001
-    runAsNonRoot: true
+    enabled: true
+    runAsUser: 0
+    runAsNonRoot: false
     readOnlyRootFilesystem: false
+    capabilities:
+      add:
+        - CHOWN
+        - DAC_OVERRIDE
+        - DAC_READ_SEARCH
+        - FOWNER
+        - FSETID
+        - SETGID
+        - SETUID
+        - SETPCAP
+        - SYS_RESOURCE
+        - SYS_ADMIN
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## @param nfs.config
-  ## ref: https://github.com/hectorm/docker-nfs-ganesha/blob/master/config/ganesha/ganesha.conf
+  ## @param nfs.config nfs-ganesha config file content which will host in /etc/ganesha/ganesha.conf
+  ## config under this block will convert to nfs-ganesha specified conf file syntax
+  ## below config is copy from https://github.com/hectorm/docker-nfs-ganesha/blob/master/config/ganesha/ganesha.conf
   ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/config_samples/config.txt
   ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-config.rst
   ##
@@ -187,6 +200,10 @@ nfs:
       NFS_Port: 2049
       Protocols: NFSv4
       Fsid_Device: true
+      ## This is necessary for ganesha 6.1 running in a container to start up without hitting a permission failure
+      ## without this setting, we having to run the container as --privileged
+      ## ref: https://github.com/ceph/ceph/commit/3e3b7fa8ea22a2dd7f5d5c97d6e096a5e30585f4
+      Allow_Set_Io_Flusher_Fail: true
     ## @param nfs.config.NFSV4
     ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-core-config.rst#nfsv4-
     ##
@@ -205,6 +222,7 @@ nfs:
       umask: 0000
     ## @param nfs.config.EXPORT NFS-Ganesha Export block config options
     ## These options are all "export permissions" options, and are available in EXPORT_DEFAULTS {}, EXPORT {} and CLIENT {} blocks.
+    ## the value in nfs.config.EXPORT.path should match with persistence.mountPath
     ## ref: https://github.com/nfs-ganesha/nfs-ganesha/blob/next/src/doc/man/ganesha-export-config.rst
     ##
     EXPORT:
@@ -315,8 +333,9 @@ persistence:
   ##
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
+  ## the value should match with nfs.config.EXPORT.path
   ##
-  mountPath: /bitnami/nfs/data
+  mountPath: /export
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

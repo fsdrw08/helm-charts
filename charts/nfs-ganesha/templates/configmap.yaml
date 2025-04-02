@@ -15,20 +15,20 @@ metadata:
   {{- end }}
 data:
   ganesha.conf: |
-{{- range $section, $values := $config -}}
+{{- range $section, $values := .Values.nfs.config }}
     {{ $section }} {
 {{- range $key, $value := $values }}
     {{- if kindIs "map" $value }}
-    {{ $key }} {
-        {{- range $subKey, $subValue := $value }}
-        {{ $subKey }} = {{ $subValue | quote }};
-        {{- end }}
-    }
+            {{ $key }} {
+                    {{- range $subKey, $subValue := $value }}
+                    {{ $subKey }} = {{ $subValue }};
+                    {{- end }}
+            }
     {{- else if kindIs "slice" $value }}
-    {{ $key }} = {{ $value | join ", " }};
+            {{ $key }} = {{ $value | join ", " }};
     {{- else }}
-    {{ $key }} = {{ $value | quote }};
+            {{ $key }} = {{ $value }};
     {{- end }}
 {{- end }}
-}
+    }
 {{ end -}}

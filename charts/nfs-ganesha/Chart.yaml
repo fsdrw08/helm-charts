@@ -19,7 +19,7 @@ keywords:
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts
-name: nfs-ganesha
+name: nfs
 sources:
   - https://github.com/fsdrw08/helm-charts/nfs-ganesha
   - https://github.com/hectorm/docker-nfs-ganesha

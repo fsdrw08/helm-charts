@@ -67,7 +67,7 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{/*
+        {{- /*
         - secretRef:
             name: {{ template "common.names.fullname" . }}
         */}}
