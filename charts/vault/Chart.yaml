@@ -23,6 +23,6 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: vault
 sources:
-  - https://github.com/fsdrw08/helm-charts/vault
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/vault
   - https://github.com/hashicorp/vault/
 version: 0.1.0

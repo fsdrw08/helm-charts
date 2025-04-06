@@ -25,5 +25,5 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: jenkins
 sources:
-  - https://github.com/fsdrw08/helm-charts/jenkins-server
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/jenkins-server
 version: 0.1.0

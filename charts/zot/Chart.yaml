@@ -23,6 +23,6 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: zot
 sources:
-  - https://github.com/fsdrw08/helm-charts/zot
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/zot
   - https://github.com/project-zot/zot
 version: 0.1.0

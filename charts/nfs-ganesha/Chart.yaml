@@ -21,7 +21,7 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: nfs
 sources:
-  - https://github.com/fsdrw08/helm-charts/nfs-ganesha
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/nfs-ganesha
   - https://github.com/hectorm/docker-nfs-ganesha
   - https://github.com/nfs-ganesha/nfs-ganesha
 version: 0.1.0

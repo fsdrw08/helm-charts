@@ -22,5 +22,5 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: coredns
 sources:
-  - https://github.com/fsdrw08/helm-charts/vault
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/coredns
 version: 0.1.0

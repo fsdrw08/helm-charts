@@ -21,5 +21,5 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: traefik
 sources:
-  - https://github.com/fsdrw08/helm-charts/traefik
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/traefik
 version: 0.1.0

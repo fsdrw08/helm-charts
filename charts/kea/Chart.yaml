@@ -21,7 +21,7 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: kea
 sources:
-  - https://github.com/fsdrw08/helm-charts/kea
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/kea
   - https://gitlab.isc.org/isc-projects/kea-docker
   - https://github.com/JonasAlfredsson/docker-kea/tree/main
   - https://gitlab.isc.org/isc-projects/kea

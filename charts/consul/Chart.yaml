@@ -22,6 +22,6 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: consul
 sources:
-  - https://github.com/fsdrw08/helm-charts/consul
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/consul
   - https://github.com/hashicorp/consul
 version: 0.1.0

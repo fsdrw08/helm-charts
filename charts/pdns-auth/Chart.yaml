@@ -22,6 +22,6 @@ maintainers:
     url: https://github.com/fsdrw08/helm-charts
 name: powerdns
 sources:
-  - https://github.com/fsdrw08/helm-charts/pdns-auth
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/pdns-auth
   - https://github.com/PowerDNS/pdns/tree/master
 version: 0.1.0
