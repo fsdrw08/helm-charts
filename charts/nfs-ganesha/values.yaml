@@ -172,18 +172,19 @@ nfs:
     runAsUser: 0
     runAsNonRoot: false
     readOnlyRootFilesystem: false
-    capabilities:
-      add:
-        - CHOWN
-        - DAC_OVERRIDE
-        - DAC_READ_SEARCH
-        - FOWNER
-        - FSETID
-        - SETGID
-        - SETUID
-        - SETPCAP
-        - SYS_RESOURCE
-        - SYS_ADMIN
+    privileged: true
+    # capabilities:
+    #   add:
+    #     - CHOWN
+    #     - DAC_OVERRIDE
+    #     - DAC_READ_SEARCH
+    #     - FOWNER
+    #     - FSETID
+    #     - SETGID
+    #     - SETUID
+    #     - SETPCAP
+    #     - SYS_RESOURCE
+    #     - SYS_ADMIN
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param nfs.config nfs-ganesha config file content which will host in /etc/ganesha/ganesha.conf
