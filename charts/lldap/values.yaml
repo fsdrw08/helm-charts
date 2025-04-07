@@ -208,21 +208,21 @@ lldap:
     ## @param lldap.config.ldaps_options Options to configure LDAPS.
     ##
     # ldaps_options:
-    #   cert_file: /data/cert/cert.pem
-    #   key_file: /data/cert/key.pem
+    #   cert_file: /data/certs/cert.pem
+    #   key_file: /data/certs/key.pem
   ## @param lldap.ssl secret setting of cert and key or whatever ssl content will set in the container
   ##
   ssl:
     ## @param lldap.ssl.mountPath secret mount path setting of keystore or whatever ssl content will set in the container
     ## the path should also match with the ldaps_options in lldap.config.ldaps_options
-    mountPath: /data/cert
+    mountPath: /data/certs
     ## @param lldap.ssl.contents_b64 base 64 encoded content of keystore object or whatever base 64 encoded ssl content will set in the container
     ## You can set the content key as whatever file name you like
     ## e.g.
-    ## contents_b64:
+    ## contents:
     ##   cert.pem: ""
     ##   key.pem: ""
-    contents_b64: {}
+    contents: {}
   ## @param lldap.existingConfigmap The name of an existing ConfigMap with your custom configuration for lldap
   ##
   existingConfigmap:
