@@ -34,20 +34,20 @@ commonAnnotations: {}
 
 ## @param lldap.workloadKind specify the deploy kind： Pod, or Deployment
 workloadKind: Pod
-## @section %%MAIN_CONTAINER%% Parameters
+## @section lldap Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 lldap:
-  ## Bitnami %%MAIN_CONTAINER%% image
-  ## ref: https://hub.docker.com/r/bitnami/%%IMAGE_NAME%%/tags/
-  ## @param lldap.image.registry %%MAIN_CONTAINER%% image registry
-  ## @param lldap.image.repository %%MAIN_CONTAINER%% image repository
-  ## @param lldap.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
-  ## @param lldap.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param lldap.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
-  ## @param lldap.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
+  ## lldap image
+  ## ref: https://hub.docker.com/r/lldap/lldap/tags/
+  ## @param lldap.image.registry lldap image registry
+  ## @param lldap.image.repository lldap image repository
+  ## @param lldap.image.tag lldap image tag (immutable tags are recommended)
+  ## @param lldap.image.digest lldap image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param lldap.image.pullPolicy lldap image pull policy
+  ## @param lldap.image.pullSecrets lldap image pull secrets
   ##
   image:
     registry: docker.io
@@ -70,10 +70,10 @@ lldap:
   ## @param lldap.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param lldap.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ## @param lldap.replicaCount Number of lldap replicas to deploy
   ##
   replicaCount: 1
-  ## @param lldap.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param lldap.containerPorts lldap container port to expose to host
   ## e.g.
   ## containerPorts:
   ##   - name: http
@@ -88,9 +88,9 @@ lldap:
   ##     protocol: TCP
   ##
   containerPorts: {}
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## Configure extra options for lldap containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param lldap.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param lldap.livenessProbe.enabled Enable livenessProbe on lldap containers
   ## @param lldap.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param lldap.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param lldap.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -104,7 +104,7 @@ lldap:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param lldap.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param lldap.readinessProbe.enabled Enable readinessProbe on lldap containers
   ## @param lldap.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param lldap.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param lldap.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
@@ -119,7 +119,7 @@ lldap:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param lldap.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param lldap.startupProbe.enabled Enable startupProbe on lldap containers
   ## @param lldap.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param lldap.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param lldap.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -142,13 +142,13 @@ lldap:
   ## @param lldap.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## lldap resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param lldap.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if lldap.resources is set (lldap.resources is recommended for production).
+  ## @param lldap.resourcesPreset Set lldap container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if lldap.resources is set (lldap.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param lldap.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## @param lldap.resources Set lldap container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -161,8 +161,8 @@ lldap:
   resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param lldap.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param lldap.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param lldap.podSecurityContext.enabled Enabled lldap pods' Security Context
+  ## @param lldap.podSecurityContext.fsGroup Set lldap pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
@@ -170,14 +170,14 @@ lldap:
     # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param lldap.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param lldap.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param lldap.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param lldap.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param lldap.containerSecurityContext.enabled Enabled lldap containers' Security Context
+  ## @param lldap.containerSecurityContext.runAsUser Set lldap containers' Security Context runAsUser
+  ## @param lldap.containerSecurityContext.runAsNonRoot Set lldap containers' Security Context runAsNonRoot
+  ## @param lldap.containerSecurityContext.readOnlyRootFilesystem Set lldap containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
-    enabled: false
-    runAsUser: 1001
+    enabled: true
+    runAsUser: 10001
     runAsNonRoot: true
     readOnlyRootFilesystem: false
 
@@ -205,7 +205,25 @@ lldap:
     ## Env variable: LLDAP_KEY_SEED
     ##
     key_seed: "RanD0m STR1ng"
-  ## @param lldap.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+    ## @param lldap.config.ldaps_options Options to configure LDAPS.
+    ##
+    # ldaps_options:
+    #   cert_file: /data/cert/cert.pem
+    #   key_file: /data/cert/key.pem
+  ## @param lldap.ssl secret setting of cert and key or whatever ssl content will set in the container
+  ##
+  ssl:
+    ## @param lldap.ssl.mountPath secret mount path setting of keystore or whatever ssl content will set in the container
+    ## the path should also match with the ldaps_options in lldap.config.ldaps_options
+    mountPath: /data/cert
+    ## @param lldap.ssl.contents_b64 base 64 encoded content of keystore object or whatever base 64 encoded ssl content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## e.g.
+    ## contents_b64:
+    ##   cert.pem: ""
+    ##   key.pem: ""
+    contents_b64: {}
+  ## @param lldap.existingConfigmap The name of an existing ConfigMap with your custom configuration for lldap
   ##
   existingConfigmap:
   ## @param lldap.command Override default container command (useful when using custom images)
@@ -214,15 +232,15 @@ lldap:
   ## @param lldap.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param lldap.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param lldap.hostAliases lldap pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param lldap.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param lldap.podLabels Extra labels for lldap pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param lldap.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param lldap.podAnnotations Annotations for lldap pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
@@ -241,26 +259,26 @@ lldap:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param lldap.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param lldap.extraEnvVars Array with extra environment variables to add to lldap nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param lldap.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param lldap.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for lldap nodes
   ##
   extraEnvVarsCM: ""
-  ## @param lldap.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param lldap.extraEnvVarsSecret Name of existing Secret containing extra env vars for lldap nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param lldap.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param lldap.extraVolumes Optionally specify extra list of additional volumes for the lldap pod(s)
   ##
   extraVolumes: []
-  ## @param lldap.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param lldap.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the lldap container(s)
   ##
   extraVolumeMounts: []
-  ## @param lldap.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param lldap.sidecars Add additional sidecar containers to the lldap pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -271,7 +289,7 @@ lldap:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param lldap.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param lldap.initContainers Add additional init containers to the lldap pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:

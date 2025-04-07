@@ -99,6 +99,13 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.lldap.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /data/lldap_config.toml
+          subPath: lldap_config.toml
+        {{- if .Values.lldap.ssl.contents_b64 }}
+        - name: ssl
+          mountPath: {{ .Values.lldap.ssl.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -111,6 +118,14 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.lldap.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec
+    {{- if .Values.lldap.ssl.contents_b64 }}
+    - name: ssl
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-ssl
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
