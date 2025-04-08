@@ -102,7 +102,7 @@ spec:
         - name: config
           mountPath: /data/lldap_config.toml
           subPath: lldap_config.toml
-        {{- if .Values.lldap.ssl.contents_b64 }}
+        {{- if .Values.lldap.ssl.contents }}
         - name: ssl
           mountPath: {{ .Values.lldap.ssl.mountPath }}
         {{- end }}
@@ -121,7 +121,7 @@ spec:
     - name: config
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec
-    {{- if .Values.lldap.ssl.contents_b64 }}
+    {{- if .Values.lldap.ssl.contents }}
     - name: ssl
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-ssl
