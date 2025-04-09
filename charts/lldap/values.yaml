@@ -52,7 +52,7 @@ lldap:
   image:
     registry: docker.io
     repository: lldap/lldap
-    tag: 2025-04-04-alpine-rootless
+    tag: 2025-04-09-alpine-rootless
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'

@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.lldap.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: lldap
+    - name: server
       image: {{ template "lldap.image" . }}
       imagePullPolicy: {{ .Values.lldap.image.pullPolicy | quote }}
       {{- if .Values.lldap.containerSecurityContext.enabled }}
