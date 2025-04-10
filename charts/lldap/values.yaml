@@ -96,14 +96,21 @@ lldap:
   ## @param lldap.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
   ## @param lldap.livenessProbe.failureThreshold Failure threshold for livenessProbe
   ## @param lldap.livenessProbe.successThreshold Success threshold for livenessProbe
+  ## ref: https://github.com/lldap/lldap/blob/main/Dockerfile#L98
   ##
   livenessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - |
+          /app/lldap healthcheck --config-file /data/lldap_config.toml
   ## @param lldap.readinessProbe.enabled Enable readinessProbe on lldap containers
   ## @param lldap.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param lldap.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -178,6 +185,7 @@ lldap:
   containerSecurityContext:
     enabled: true
     runAsUser: 10001
+    runAsGroup: 10001
     runAsNonRoot: true
     readOnlyRootFilesystem: false
 
@@ -198,6 +206,9 @@ lldap:
     ## This can be overridden with the LLDAP_DATABASE_URL env variable.
     ##
     database_url: "sqlite:///data/persistence/users.db?mode=rwc"
+    ## @param lldap.config.key_file set this to empty to empty string to silence the warning message when lldap server start
+    ##
+    key_file: ""
     ## @param lldap.config.key_seed Seed to generate the server private key, see key_file above.
     ## Contains the secret private key used to store the passwords safely.
     ## Note that even with a database dump and the private key, an attacker would still have to perform an (expensive) brute force attack to find each password.
@@ -241,9 +252,12 @@ lldap:
   ##
   podLabels: {}
   ## @param lldap.podAnnotations Annotations for lldap pods
+  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=10001,gid=10001
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param lldap.autoscaling.enabled Enable autoscaling for lldap
