@@ -1,0 +1,29 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: RELEASE.2025-04-08T15-41-24Z
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: MinIO(R) is an object storage server, compatible with Amazon S3 cloud storage service, mainly used for storing unstructured data (such as photos, videos, log files, etc.).
+home: https://github.com/fsdrw08/helm-charts
+icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/minio/img/minio-stack-220x234.png
+keywords:
+  - minio
+  - storage
+  - object-storage
+  - s3
+  - cluster
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: minio
+sources:
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/minio
+  - https://github.com/minio/minio
+version: 0.1.0
