@@ -52,7 +52,7 @@ vault:
   image:
     registry: docker.io
     repository: hashicorp/vault
-    tag: 1.18
+    tag: 1.19
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
