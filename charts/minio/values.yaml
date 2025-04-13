@@ -209,34 +209,39 @@ minio:
   ## @param minio.tls secret setting of cert and key or whatever tls content will set in the container
   ##
   tls:
-    ## @param minio.tls.rootPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ## @param minio.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
     ## ref: https://github.com/minio/minio/blob/master/helm/minio/values.yaml#L109
     ## ref: https://min.io/docs/minio/linux/operations/network-encryption.html#enabling-tls
     ##
-    rootPath: /etc/minio/certs
+    mountPath: /etc/minio/certs
     ## @param minio.tls.contents secret content of default domain cert/key and additional domain cert/key and custom CAs tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
     ## e.g.
     ## contents:
-    ##   public.crt: ""
-    ##   private.key: ""
+    ##   public.crt: "xxx"
+    ##   private.key: "xxx"
     ##   additionalDomains:
-    ##     - name:
-    ##       public.crt: ""
-    ##       private.key: ""
+    ##     - name: test
+    ##       public.crt: "xxx"
+    ##       private.key: "xxx"
     ##   CAs:
-    ##     sololab.crt:
+    ##     test.crt: test
     ##
     contents:
-      ## default domain cert and key
-      public.crt: ""
-      private.key: ""
-      ## additional domain certs and keys
-      additionalDomains: []
-      ## custom CAs
-      CAs: {}
+      {}
+      # ## default domain cert and key
+      # public.crt: "xxx"
+      # private.key: "xxx"
+      # ## additional domain certs and keys
+      # additionalDomains:
+      #   - name: test
+      #     public.crt: "xxx"
+      #     private.key: "xxx"
+      # ## custom CAs
+      # CAs:
+      #   test.crt: "xxx"
   ## @param minio.existingConfigmap The name of an existing ConfigMap with your custom configuration for minio
   ##
   existingConfigmap:

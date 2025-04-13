@@ -1,4 +1,4 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "minio.podTemplate" -}}
 metadata:
   {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
@@ -7,7 +7,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.minio.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: minio
     {{- if .Values.minio.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.minio.podLabels "context" $) | nindent 4 }}
     {{- end }}
@@ -15,7 +15,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "minio.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.minio.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.minio.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -25,7 +25,7 @@ spec:
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "minio.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -47,7 +47,7 @@ spec:
     {{- end }}
   containers:
     - name: minio
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+      image: {{ template "minio.image" . }}
       imagePullPolicy: {{ .Values.minio.image.pullPolicy | quote }}
       {{- if .Values.minio.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.minio.containerSecurityContext "enabled" | toYaml | nindent 8 }}
