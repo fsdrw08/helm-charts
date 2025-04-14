@@ -287,6 +287,7 @@ minio:
   extraEnvVars:
     ## @param minio.extraEnvVars[0].MINIO_CONFIG_ENV_FILE Specifies the full path to the file the MinIO server process uses for loading environment variables.
     ## ref: https://min.io/docs/minio/container/operations/install-deploy-manage/deploy-minio-single-node-single-drive.html#id7
+    ## ref: https://min.io/docs/minio/linux/reference/minio-server/settings/core.html#envvar.MINIO_CONFIG_ENV_FILE
     ##
     - name: MINIO_CONFIG_ENV_FILE
       value: /etc/config.env
