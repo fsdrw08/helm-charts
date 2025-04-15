@@ -204,114 +204,119 @@ traefik:
     # readOnlyRootFilesystem: false
 
   ## %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-
-  ## @param traefik.staticConfiguration
-  # https://doc.traefik.io/traefik/getting-started/configuration-overview/#the-static-configuration
-  staticConfiguration:
-    ## @param traefik.staticConfiguration.providers
-    ## ref: https://doc.traefik.io/traefik/providers/overview/
-    ##
-    providers:
-      ## @param traefik.staticConfiguration.providers.docker
-      ## Config docker provider to let traefik understand how to route the traffic by reading docker label information
-      ## ref: https://doc.traefik.io/traefik/providers/docker/
-      ##
-      docker:
-        endpoint: unix:///var/run/docker.sock
-        useBindPortIP: false
-        exposedByDefault: false
-      ## @param traefik.staticConfiguration.providers.file
-      ## @param traefik.staticConfiguration.providers.file.directory
-      ## Config The file provider let traefik understand how to route the traffic by reading the YAML or TOML file
-      ## ref: https://doc.traefik.io/traefik/providers/file/
-      ##
-      file:
-        directory: /etc/traefik/dynamic
-        watch: true
-    ## @param traefik.staticConfiguration.serversTransport
-    ## ref: https://doc.traefik.io/traefik/routing/overview/#transport-configuration
-    serversTransport:
-      insecureSkipVerify: false
-    ## @param traefik.staticConfiguration.globalArguments global arguments
-    ## e.g.
-    ## globalArguments:
-    ##   checkNewVersion: false
-    ##   sendAnonymousUsage: false
-    ##
-    global: {}
-    ## @param traefik.staticConfiguration.entryPoints
-    ## ref: https://doc.traefik.io/traefik/routing/overview/
-    ##
-    entryPoints:
-      traefik:
-        address: ":8080"
-      web:
-        address: ":80"
-        forwardedHeaders:
-          trustedIPs: []
-      # https://community.traefik.io/t/lets-encrypt-x509-certificate-signed-by-unknown-authority/11112/1
-      webSecure:
-        address: ":443"
-        # https://doc.traefik.io/traefik/routing/entrypoints/#forwarded-headers
-        # https://community.traefik.io/t/how-to-get-real-ip-from-the-client/8239
-        # https://www.bboy.app/2020/04/16/traefik%E5%90%8E%E7%AB%AF%E5%BA%94%E7%94%A8%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E7%9C%9F%E5%AE%9Eip/
-        forwardedHeaders:
-          trustedIPs: []
-    ## @param traefik.staticConfiguration.api
-    ## Traefik exposes a number of information through an API handler
-    ##
-    api:
-      dashboard: true
-    ## @param traefik.staticConfiguration.certificatesResolvers
-    ## ref: https://doc.traefik.io/traefik/https/acme/
-    ## e.g.
-    ## certificatesResolvers:
-    ##   external:
-    ##     acme:
-    ##       caServer: https://acme-v02.api.letsencrypt.org/directory
-    ##       certificatesDuration: 2160
-    ##       email:
-    ##       storage: /mnt/acmeStorage/external_acme.json
-    ##       tlsChallenge: {}
-    ##   internal:
-    ##     acme:
-    ##       caServer:
-    ##       certificatesDuration: 2160
-    ##       email:
-    ##       storage: /mnt/acmeStorage/internal_acme.json
-    ##       tlsChallenge: {}
-    ##
-    certificatesResolvers: null
-    ## @param traefik.staticConfiguration.log
-    ## ref: https://doc.traefik.io/traefik/observability/logs/
-    ##
-    log:
-      ## @param traefik.staticConfiguration.log.level
-      ## Alternative logging levels are DEBUG, INFO, WARN, ERROR, FATAL, and PANIC.
-      level: ERROR
-    ## @param traefik.staticConfiguration.ping Checking the Health of Your Traefik Instances
-    ## ref: https://doc.traefik.io/traefik/operations/ping/
-    ##
-    ping: {}
-  ## @param traefik.dynamicConfigurationFile
-  ## The file provider lets you define the dynamic configuration in a YAML or TOML file.
-  ## The block define here will put into configMap and let traefik treat as dynamic file configuration file.
-  ## The values will render as a yaml file put into configmap then mount to the path set in traefik.staticConfiguration.providers.file.directory
-  ## ref: https://doc.traefik.io/traefik/providers/file/
+  ## @param traefik.configFiles traefik configs divided to 2 parts: static config and dynamic config
+  ## ref: https://doc.traefik.io/traefik/getting-started/configuration-overview/#configuration-introduction
   ##
-  dynamicConfigurationFiles:
-    mwToHttps.yaml:
-      http:
-        middlewares:
-          toHttps:
-            redirectScheme:
-              scheme: https
-              permanent: true
-    # tlsCerts:
-    #   tls:
-    #     certificates:
-    #       - certFile: /etc/traefik/tls/domain.crt
-    #         keyFile: /etc/traefik/tls/domain.key
+  configFiles:
+    ## @param traefik.configFiles.static The startup configuration for traefik
+    ## static config file which will place in /etc/traefik/traefik.yml and load by traefik when it start
+    ## ref: https://doc.traefik.io/traefik/getting-started/configuration-overview/#the-static-configuration
+    ##
+    static:
+      ## @param traefik.configFiles.static.providers
+      ## ref: https://doc.traefik.io/traefik/providers/overview/
+      ##
+      providers:
+        ## @param traefik.configFiles.static.providers.docker
+        ## Config docker provider to let traefik understand how to route the traffic by reading docker label information
+        ## ref: https://doc.traefik.io/traefik/providers/docker/
+        ##
+        docker:
+          endpoint: unix:///var/run/docker.sock
+          useBindPortIP: false
+          exposedByDefault: false
+        ## @param traefik.configFiles.static.providers.file
+        ## @param traefik.configFiles.static.providers.file.directory
+        ## Config The file provider let traefik understand how to route the traffic by reading the YAML or TOML file
+        ## ref: https://doc.traefik.io/traefik/providers/file/
+        ##
+        file:
+          directory: /etc/traefik/dynamic
+          watch: true
+      ## @param traefik.configFiles.static.serversTransport
+      ## ref: https://doc.traefik.io/traefik/routing/overview/#transport-configuration
+      serversTransport:
+        insecureSkipVerify: false
+      ## @param traefik.configFiles.static.globalArguments global arguments
+      ## e.g.
+      ## globalArguments:
+      ##   checkNewVersion: false
+      ##   sendAnonymousUsage: false
+      ##
+      global: {}
+      ## @param traefik.configFiles.static.entryPoints
+      ## ref: https://doc.traefik.io/traefik/routing/overview/
+      ##
+      entryPoints:
+        traefik:
+          address: ":8080"
+        web:
+          address: ":80"
+          forwardedHeaders:
+            trustedIPs: []
+        # https://community.traefik.io/t/lets-encrypt-x509-certificate-signed-by-unknown-authority/11112/1
+        webSecure:
+          address: ":443"
+          # https://doc.traefik.io/traefik/routing/entrypoints/#forwarded-headers
+          # https://community.traefik.io/t/how-to-get-real-ip-from-the-client/8239
+          # https://www.bboy.app/2020/04/16/traefik%E5%90%8E%E7%AB%AF%E5%BA%94%E7%94%A8%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E7%9C%9F%E5%AE%9Eip/
+          forwardedHeaders:
+            trustedIPs: []
+      ## @param traefik.configFiles.static.api
+      ## Traefik exposes a number of information through an API handler
+      ##
+      api:
+        dashboard: true
+      ## @param traefik.configFiles.static.certificatesResolvers
+      ## ref: https://doc.traefik.io/traefik/https/acme/
+      ## e.g.
+      ## certificatesResolvers:
+      ##   external:
+      ##     acme:
+      ##       caServer: https://acme-v02.api.letsencrypt.org/directory
+      ##       certificatesDuration: 2160
+      ##       email:
+      ##       storage: /mnt/acmeStorage/external_acme.json
+      ##       tlsChallenge: {}
+      ##   internal:
+      ##     acme:
+      ##       caServer:
+      ##       certificatesDuration: 2160
+      ##       email:
+      ##       storage: /mnt/acmeStorage/internal_acme.json
+      ##       tlsChallenge: {}
+      ##
+      certificatesResolvers: null
+      ## @param traefik.configFiles.static.log
+      ## ref: https://doc.traefik.io/traefik/observability/logs/
+      ##
+      log:
+        ## @param traefik.configFiles.static.log.level
+        ## Alternative logging levels are DEBUG, INFO, WARN, ERROR, FATAL, and PANIC.
+        level: ERROR
+      ## @param traefik.configFiles.static.ping Checking the Health of Your Traefik Instances
+      ## ref: https://doc.traefik.io/traefik/operations/ping/
+      ##
+      ping: {}
+    ## @param traefik.configFiles.dynamic file provider for traefik dynamic config
+    ## The file provider lets you define the dynamic configuration in a YAML or TOML file.
+    ## The block define here will put into configMap and let traefik treat as dynamic file configuration file.
+    ## The values will render as a yaml file put into configmap then mount to the path set in traefik.configFiles.static.providers.file.directory
+    ## ref: https://doc.traefik.io/traefik/providers/file/
+    ##
+    dynamic:
+      mwToHttps.yaml:
+        http:
+          middlewares:
+            toHttps:
+              redirectScheme:
+                scheme: https
+                permanent: true
+      # tlsCerts:
+      #   tls:
+      #     certificates:
+      #       - certFile: /etc/traefik/tls/domain.crt
+      #         keyFile: /etc/traefik/tls/domain.key
   ## @param traefik.tls secret setting of cert and key or whatever tls content will set in the container
   ## @param traefik.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
   ##

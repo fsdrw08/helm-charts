@@ -1,4 +1,3 @@
-{{- if .Values.traefik.staticConfiguration -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,9 +12,8 @@ metadata:
   {{- end }}
 data:
   traefik.yml: |
-    {{- include "common.tplvalues.render" (dict "value" .Values.traefik.staticConfiguration "context" $) | nindent 4 -}}
-{{- end -}}
-{{- if .Values.traefik.dynamicConfigurationFiles }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.traefik.configFiles.static "context" $) | nindent 4 -}}
+{{- if .Values.traefik.configFiles.dynamic }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -30,7 +28,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  {{- range $key, $val := .Values.traefik.dynamicConfigurationFiles }}
+  {{- range $key, $val := .Values.traefik.configFiles.dynamic }}
   {{ $key }}: |
     {{- include "common.tplvalues.render" (dict "value" $val "context" $) | nindent 4 -}}
   {{- end }}

@@ -95,11 +95,11 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.traefik.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: staticConfiguration
+        - name: config-static
           mountPath: /etc/traefik/traefik.yml
           subPath: traefik.yml
-        - name: dynamicConfigurationFileDir
-          mountPath: {{ .Values.traefik.staticConfiguration.providers.file.directory }}/builtin
+        - name: config-dynamic-builtin
+          mountPath: {{ .Values.traefik.configFiles.static.providers.file.directory }}/builtin
         {{- if .Values.traefik.tls.contents }}
         - name: tls
           mountPath: {{ .Values.traefik.tls.mountPath }}
@@ -116,14 +116,14 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.traefik.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: staticConfiguration
+    - name: config-static
       configMap:
         name: {{ template "common.names.fullname" . }}-cm-stat
         items:
           - key: traefik.yml
             path: traefik.yml
-    {{- if .Values.traefik.dynamicConfigurationFiles }}
-    - name: dynamicConfigurationFileDir
+    {{- if .Values.traefik.configFiles.dynamic }}
+    - name: config-dynamic-builtin
       configMap:
         name: {{ template "common.names.fullname" . }}-cm-dyn
     {{- end }}
