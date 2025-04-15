@@ -66,6 +66,8 @@ spec:
         - {{ .Values.minio.config.MINIO_VOLUMES }}
       {{- end }}
       env:
+        - name: MINIO_CONFIG_ENV_FILE
+          value: {{ .Values.minio.config.MINIO_CONFIG_ENV_FILE }}
         {{- if .Values.minio.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.minio.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
