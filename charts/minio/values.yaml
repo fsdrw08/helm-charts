@@ -98,7 +98,7 @@ minio:
   ## @param minio.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: foo
     periodSeconds: bar
     timeoutSeconds: foo
@@ -147,7 +147,7 @@ minio:
   ## @param minio.resourcesPreset Set minio container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if minio.resources is set (minio.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "nano"
+  resourcesPreset: "medium"
   ## @param minio.resources Set minio container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
@@ -174,7 +174,7 @@ minio:
   ## @param minio.containerSecurityContext.runAsUser Set minio containers' Security Context runAsUser
   ## @param minio.containerSecurityContext.runAsNonRoot Set minio containers' Security Context runAsNonRoot
   ## @param minio.containerSecurityContext.readOnlyRootFilesystem Set minio containers' Security Context runAsNonRoot
-  ## ref: https://github.com/minio/minio/blob/master/helm/minio/values.yaml#L272
+  ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-08T15-41-24Z/helm/minio/values.yaml#L272-L277
   ##
   containerSecurityContext:
     enabled: true
@@ -186,31 +186,45 @@ minio:
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param minio.config MinIO settings define runtime behavior of the MinIO server process.
   ## all content under this block will place in the path which set in env var MINIO_CONFIG_ENV_FILE (defaul: /etc/config.env)
+  ## config keys must have:
+  ##   MINIO_OPTS, MINIO_VOLUMES, MINIO_CONFIG_ENV_FILE
   ## ref: https://min.io/docs/minio/linux/reference/minio-server/settings.html
   ##
   config:
     ## @param minio.config.MINIO_OPTS Set a string of parameters to use when starting the MinIO Server.
     ## ref: https://min.io/docs/minio/linux/reference/minio-server/settings/core.html#envvar.MINIO_OPTS
+    ## ref: https://min.io/docs/minio/linux/reference/minio-server/minio-server.html#minio-server-parameters
     ##
-    MINIO_OPTS: --address :9000 --console-address :9001
+    MINIO_OPTS: --address=:9000 --console-address=:9001
     ## @param minio.config.MINIO_VOLUMES The directories or drives the minio server process uses as the storage backend.
     ## Functionally equivalent to setting minio server DIRECTORIES. Use this value when configuring MinIO to run using an environment file.
     ## ref: https://min.io/docs/minio/linux/reference/minio-server/settings/core.html#envvar.MINIO_VOLUMES
     ## ref: https://min.io/docs/minio/container/operations/install-deploy-manage/deploy-minio-single-node-single-drive.html#id7
+    ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-08T15-41-24Z/Dockerfile
     ##
-    MINIO_VOLUMES: /mnt/data
+    MINIO_VOLUMES: /data
+    ## @param minio.config.MINIO_CONFIG_ENV_FILE Specifies the full path to the file the MinIO server process uses for loading environment variables.
+    ## Sets a MinIO environment variable pointing to the container-mounted path of the environment file.
+    ## ref: https://min.io/docs/minio/container/operations/install-deploy-manage/deploy-minio-single-node-single-drive.html#id7
+    ## ref: https://min.io/docs/minio/linux/reference/minio-server/settings/core.html#envvar.MINIO_CONFIG_ENV_FILE
+    ##
+    MINIO_CONFIG_ENV_FILE: /etc/config.env
     ## @param minio.config.MINIO_ROOT_USER The access key for the root user.
     ## @param minio.config.MINIO_ROOT_PASSWORD The secret key for the root user.
     ## ref: https://min.io/docs/minio/linux/reference/minio-server/settings/root-credentials.html
     ##
     MINIO_ROOT_USER: minioadmin
     MINIO_ROOT_PASSWORD: minioadmin
-    MINIO_UPDATE: off
+    ## @param minio.config.MINIO_UPDATE In place update is true by default if the MINIO_UPDATE is not set or is not set to 'off',
+    ## if MINIO_UPDATE is set to 'off' then in-place update is off.
+    ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-08T15-41-24Z/cmd/common-main.go#L808
+    ##
+    MINIO_UPDATE: "off"
   ## @param minio.tls secret setting of cert and key or whatever tls content will set in the container
   ##
   tls:
     ## @param minio.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
-    ## ref: https://github.com/minio/minio/blob/master/helm/minio/values.yaml#L109
+    ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-08T15-41-24Z/helm/minio/values.yaml#L109
     ## ref: https://min.io/docs/minio/linux/operations/network-encryption.html#enabling-tls
     ##
     mountPath: /etc/minio/certs
@@ -262,7 +276,8 @@ minio:
   ## @param minio.podAnnotations Annotations for minio pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param minio.autoscaling.enabled Enable autoscaling for minio
@@ -284,13 +299,7 @@ minio:
   ##   - name: FOO
   ##     value: "bar"
   ##
-  extraEnvVars:
-    ## @param minio.extraEnvVars[0].MINIO_CONFIG_ENV_FILE Specifies the full path to the file the MinIO server process uses for loading environment variables.
-    ## ref: https://min.io/docs/minio/container/operations/install-deploy-manage/deploy-minio-single-node-single-drive.html#id7
-    ## ref: https://min.io/docs/minio/linux/reference/minio-server/settings/core.html#envvar.MINIO_CONFIG_ENV_FILE
-    ##
-    - name: MINIO_CONFIG_ENV_FILE
-      value: /etc/config.env
+  extraEnvVars: []
   ## @param minio.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for minio nodes
   ##
   extraEnvVarsCM: ""
@@ -337,7 +346,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /mnt/data
+  mountPath: /data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
@@ -382,9 +391,9 @@ volumePermissions:
   ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
   ##
   image:
-    registry: docker.io
-    repository: bitnami/os-shell
-    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    registry: quay.io
+    repository: minio/minio
+    tag: RELEASE.2025-04-08T15-41-24Z
     pullPolicy: IfNotPresent
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.

@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.minio.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: minio
+    - name: server
       image: {{ template "minio.image" . }}
       imagePullPolicy: {{ .Values.minio.image.pullPolicy | quote }}
       {{- if .Values.minio.containerSecurityContext.enabled }}
@@ -57,6 +57,13 @@ spec:
       {{- end }}
       {{- if .Values.minio.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.minio.args "context" $) | nindent 8 }}
+      {{- else }}
+      args: 
+        - server
+        {{- range $command := splitList " " .Values.minio.config.MINIO_OPTS }}
+        - {{ $command }}
+        {{- end }}
+        - {{ .Values.minio.config.MINIO_VOLUMES }}
       {{- end }}
       env:
         {{- if .Values.minio.extraEnvVars }}
@@ -99,6 +106,9 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.minio.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: {{ .Values.minio.config.MINIO_CONFIG_ENV_FILE }}
+          subPath: {{ base .Values.minio.config.MINIO_CONFIG_ENV_FILE }}
         {{- if and ( index .Values.minio.tls.contents "public.crt" ) ( index .Values.minio.tls.contents "private.key" ) }}
         - name: tls-default
           mountPath: {{ .Values.minio.tls.mountPath }}
@@ -110,10 +120,8 @@ spec:
         {{- end }}
         {{- end }}
         {{- if .Values.minio.tls.contents.CAs }}
-        {{- range $key, $val := .Values.minio.tls.contents.CAs }}
-        - name: tls-ca-{{ $key }}
+        - name: tls-ca
           mountPath: {{ $.Values.minio.tls.mountPath }}/CAs
-        {{- end }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -127,10 +135,13 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.minio.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      secret: 
+        secretName: {{ template "common.names.fullname" . }}-sec-config
     {{- if and ( index .Values.minio.tls.contents "public.crt" ) ( index .Values.minio.tls.contents "private.key" ) }}
     - name: tls-default
       secret:
-        secretName: {{ template "common.names.fullname" . }}-sec-tls
+        secretName: {{ template "common.names.fullname" . }}-sec-tls-default
         items:
           - key: public.crt
             path: public.crt
@@ -141,7 +152,7 @@ spec:
     {{- range $additionalDomain := .Values.minio.tls.contents.additionalDomains }}
     - name: tls-additional-{{ $additionalDomain.name }}
       secret:
-        secretName: {{ template "common.names.fullname" $ }}-sec-tls
+        secretName: {{ template "common.names.fullname" $ }}-sec-tls-additional
         items:
           - key: {{ $additionalDomain.name }}.public.crt
             path: public.crt
@@ -150,14 +161,14 @@ spec:
     {{- end }}
     {{- end }}
     {{- if .Values.minio.tls.contents.CAs }}
-    {{- range $key, $val := .Values.minio.tls.contents.CAs }}
-    - name: tls-ca-{{ trimSuffix (ext $key) $key }}
+    - name: tls-ca
       secret:
-        secretName: {{ template "common.names.fullname" $ }}-sec-tls
+        secretName: {{ template "common.names.fullname" $ }}-sec-tls-ca
         items:
+          {{- range $key, $val := .Values.minio.tls.contents.CAs }}
           - key: ca.{{ $key }}
             path: {{ $key }}
-    {{- end }}
+          {{- end }}
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
