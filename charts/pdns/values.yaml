@@ -113,9 +113,8 @@ powerdns:
       ## @param powerdns.containers.auth.enabled present this container in the pod
       enabled: true
       ## powerdns auth image
-      ## ref: https://cloudsmith.io/~isc/repos/docker/packages/detail/docker/powerdns-auth/#versions
-      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/master/powerdns-recursor/Dockerfile?ref_type=heads
-      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/move-v2-6-to-newest-alpine/powerdns-recursor/Dockerfile?ref_type=heads
+      ## ref: https://github.com/PowerDNS/pdns/blob/auth-4.9.4/Dockerfile-auth
+      ## ref: https://hub.docker.com/r/powerdns/pdns-auth-49/tags
       ## @param powerdns.containers.auth.image.registry powerdns image registry
       ## @param powerdns.containers.auth.image.repository powerdns image repository
       ## @param powerdns.containers.auth.image.tag powerdns image tag (immutable tags are recommended)
@@ -350,10 +349,9 @@ powerdns:
     recursor:
       ## @param powerdns.containers.recursor.enabled present this container in the pod
       enabled: true
-      ## ISC powerdns recursor image
-      ## ref: https://cloudsmith.io/~isc/repos/docker/packages/detail/docker/powerdns-recursor/#versions
-      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/master/powerdns-recursor/Dockerfile
-      ## ref: https://gitlab.isc.org/isc-projects/powerdns-docker/-/blob/move-v2-6-to-newest-alpine/powerdns-recursor/Dockerfile
+      ## powerdns recursor image
+      ## ref: https://github.com/PowerDNS/pdns/blob/rec-4.9.9/Dockerfile-recursor
+      ## ref: https://hub.docker.com/r/powerdns/pdns-recursor-49/tags
       ## @param powerdns.containers.recursor.image.registry powerdns image registry
       ## @param powerdns.containers.recursor.image.repository powerdns image repository
       ## @param powerdns.containers.recursor.image.tag powerdns image tag (immutable tags are recommended)
