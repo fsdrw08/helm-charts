@@ -33,7 +33,7 @@ spec:
       command:
         - chown
         - -R
-        - {{ .Values.value.containerSecurityContext.runAsUser }}:{{ .Values.value.containerSecurityContext.runAsGroup }}
+        - {{ .Values.vault.containerSecurityContext.runAsUser }}:{{ .Values.vault.containerSecurityContext.runAsGroup }}
         - /vault
       securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
       {{- if .Values.volumePermissions.resources }}
