@@ -98,12 +98,17 @@ minio:
   ## @param minio.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
+    enabled: true
+    initialDelaySeconds: 20
+    periodSeconds: 600
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    exec:
+      command:
+        - mc
+        - ready
+        - local
   ## @param minio.readinessProbe.enabled Enable readinessProbe on minio containers
   ## @param minio.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param minio.readinessProbe.periodSeconds Period seconds for readinessProbe
