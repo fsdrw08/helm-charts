@@ -1,0 +1,27 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 0.43.0
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: A file server that supports static serving, uploading, searching, accessing control, webdav...
+home: https://github.com/fsdrw08/helm-charts
+keywords:
+  - dufs
+  - webdav
+  - file server
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: dufs
+sources:
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/dufs
+  - https://github.com/sigoden/dufs
+  - ...
+version: 0.1.0
