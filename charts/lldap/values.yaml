@@ -97,6 +97,7 @@ lldap:
   ## @param lldap.livenessProbe.failureThreshold Failure threshold for livenessProbe
   ## @param lldap.livenessProbe.successThreshold Success threshold for livenessProbe
   ## ref: https://github.com/lldap/lldap/blob/main/Dockerfile#L98
+  ## ref: https://github.com/lldap/lldap/issues/700
   ##
   livenessProbe:
     enabled: true
