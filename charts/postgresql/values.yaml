@@ -87,7 +87,11 @@ postgresql:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts:
+    - name: postgresql
+      containerPort: 5432
+      hostPort: 5432
+      protocol: TCP
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param postgresql.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers

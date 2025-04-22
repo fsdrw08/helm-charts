@@ -23,6 +23,6 @@ maintainers:
 name: postgresql
 sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/postgresql
-  - https://github.com/sclorg/postgresql-container/tree/master
+  - https://github.com/sclorg/postgresql-container/tree/master/16
   - ...
 version: 0.1.0

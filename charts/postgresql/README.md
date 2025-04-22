@@ -7,7 +7,7 @@ PostgreSQL (Postgres) is an open source object-relational database known for rel
 ## TL;DR
 
 ```console
-helm template .\charts\postgresql--name-template=postgresql | podman kube play -
+helm template . --name-template=postgresql | podman kube play -
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart generate a postgresql k8s yaml file for podman kube play
 To install the chart with the release name `my-release`:
 
 ```console
-helm template .\charts\postgresql--name-template=postgresql | podman kube play -
+helm template . --name-template=postgresql | podman kube play -
 ```
 
 The command deploys PostgreSQL on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
@@ -36,7 +36,7 @@ The command deploys PostgreSQL on the Kubernetes cluster in the default configur
 To uninstall/delete the `my-release` deployment:
 
 ```console
-helm template .\charts\postgresql--name-template=PostgreSQL | podman kube play --down -
+helm template . --name-template=PostgreSQL | podman kube play --down -
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
