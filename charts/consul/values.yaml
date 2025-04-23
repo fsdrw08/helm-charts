@@ -241,6 +241,9 @@ consul:
       ## ref:https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bind
       ##
       bind_addr: "0.0.0.0"
+      ## @param consul.configFiles.main.ports This is a nested object that allows setting the bind ports for the following keys
+      ##
+      ports: {}
       ## @param consul.configFiles.main.bootstrap_expect This flag provides the number of expected servers in the datacenter.
       ## This flag requires -server mode.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect
@@ -256,6 +259,12 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
       ##
       datacenter: dc1
+      ## @param consul.configFiles.main.node_name The name of this node in the cluster.
+      ## This must be unique within the cluster. By default this is the hostname of the machine.
+      ## The node name cannot contain whitespace or quotation marks. To query the node from DNS, the name must only contain alphanumeric characters and hyphens (-).
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_node
+      ##
+      # node_name:
       ## @param consul.configFiles.main.data_dir This flag provides a data directory for the agent to store state. This is required for all agents.
       ## data_dir is set in official container entrypoint, no need to set in config file
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
@@ -265,9 +274,6 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#disable_update_check
       ##
       disable_update_check: true
-      ## @param consul.configFiles.main.ports This is a nested object that allows setting the bind ports for the following keys
-      ##
-      ports: {}
       ## @param consul.configFiles.main.retry_join Address of another agent to join upon starting up
       ## The retry_join parameter allows you to configure all Consul agents to automatically form a datacenter using a common Consul server accessed via DNS address,
       ## IP address or using Cloud Auto-join.
