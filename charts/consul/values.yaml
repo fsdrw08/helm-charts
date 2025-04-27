@@ -229,11 +229,6 @@ consul:
       ##
       acl:
         enabled: false
-      ## @param consul.configFiles.main.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change.
-      ## Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_auto_reload_config
-      ##
-      auto_reload_config: true
       ## @param consul.configFiles.main.bind_addr The address that should be bound to for internal cluster communications.
       ## This is an IP address that should be reachable by all other nodes in the cluster.
       ## By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
@@ -241,9 +236,6 @@ consul:
       ## ref:https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bind
       ##
       bind_addr: "0.0.0.0"
-      ## @param consul.configFiles.main.ports This is a nested object that allows setting the bind ports for the following keys
-      ##
-      ports: {}
       ## @param consul.configFiles.main.bootstrap_expect This flag provides the number of expected servers in the datacenter.
       ## This flag requires -server mode.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_bootstrap_expect
@@ -253,12 +245,12 @@ consul:
       ## By default, this is "127.0.0.1", allowing only loopback connections.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_client
       ##
-      client_addr: "0.0.0.0"
+      client_addr: "127.0.0.1"
       ## @param consul.configFiles.main.datacenter This flag controls the datacenter in which the agent is running.
       ## If not provided, it defaults to "dc1".
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
       ##
-      datacenter: dc1
+      # datacenter: dc1
       ## @param consul.configFiles.main.node_name The name of this node in the cluster.
       ## This must be unique within the cluster. By default this is the hostname of the machine.
       ## The node name cannot contain whitespace or quotation marks. To query the node from DNS, the name must only contain alphanumeric characters and hyphens (-).
@@ -275,6 +267,19 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#disable_update_check
       ##
       disable_update_check: true
+      ## @param consul.configFiles.main.encrypt
+      ## Specifies the secret key to use for encryption of Consul network traffic. This key must be 32-bytes that are Base64-encoded.
+      ## The easiest way to create an encryption key is to use consul keygen. All nodes within a cluster must share the same encryption key to communicate.
+      ## The provided key is automatically persisted to the data directory and loaded automatically whenever the agent is restarted.
+      ## This means that to encrypt Consul's gossip protocol, this option only needs to be provided once on each agent's initial startup sequence.
+      ## If it is provided after Consul has been initialized with an encryption key, then the provided key is ignored and a warning will be displayed
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_encrypt
+      ##
+      # encrypt: ""
+      ## @param consul.configFiles.main.ports This is a nested object that allows setting the bind ports for the following keys
+      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ports
+      ##
+      ports: {}
       ## @param consul.configFiles.main.retry_join Address of another agent to join upon starting up
       ## The retry_join parameter allows you to configure all Consul agents to automatically form a datacenter using a common Consul server accessed via DNS address,
       ## IP address or using Cloud Auto-join.
@@ -286,15 +291,16 @@ consul:
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_server
       ##
       server: true
-      ## @param consul.configFiles.main.encrypt
-      ## Specifies the secret key to use for encryption of Consul network traffic. This key must be 32-bytes that are Base64-encoded.
-      ## The easiest way to create an encryption key is to use consul keygen. All nodes within a cluster must share the same encryption key to communicate.
-      ## The provided key is automatically persisted to the data directory and loaded automatically whenever the agent is restarted.
-      ## This means that to encrypt Consul's gossip protocol, this option only needs to be provided once on each agent's initial startup sequence.
-      ## If it is provided after Consul has been initialized with an encryption key, then the provided key is ignored and a warning will be displayed
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_encrypt
+      ## @param consul.configFiles.main.tls
+      ## this block should better set together with below consul.tls block
+      ## e.g.
+      ## tls:
+      ##   defaults:
+      ##    ca_file: /consul/config/certs/consul-agent-ca.pem
+      ##    cert_file: /consul/config/certs/dc1-server-consul-1.pem
+      ##    key_file: /consul/config/certs/dc1-server-consul-1-key.pem
       ##
-      encrypt: ""
+      tls: {}
       ## @param consul.configFiles.main.ui_config This object allows a number of sub-keys to be set which controls the display or features available in the UI.
       ## Configuring the UI with this stanza was added in Consul 1.9.0.
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui-parameters
@@ -308,16 +314,6 @@ consul:
         ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui_config_content_path
         ##
         content_path: /ui/
-      ## @param consul.configFiles.main.tls
-      ## this block should better set together with below consul.tls block
-      ## e.g.
-      ## tls:
-      ##   defaults:
-      ##    ca_file: /consul/config/certs/consul-agent-ca.pem
-      ##    cert_file: /consul/config/certs/dc1-server-consul-1.pem
-      ##    key_file: /consul/config/certs/dc1-server-consul-1-key.pem
-      ##
-      tls: {}
 
   ## @param consul.tls secret setting of cert and key or whatever tls content will set in the container
   ## @param consul.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
