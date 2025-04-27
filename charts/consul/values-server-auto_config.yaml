@@ -1,0 +1,107 @@
+global:
+  imageRegistry: zot.day0.sololab
+consul:
+  containerPorts: []
+  ## @param consul.configFiles
+  ##
+  configFiles:
+    main:
+      acl:
+        enabled: true
+        default_policy: deny
+        enable_token_persistence: true
+        tokens:
+          initial_management: e95b599e-166e-7d80-08ad-aee76e7ddf19
+          agent: e95b599e-166e-7d80-08ad-aee76e7ddf19
+          config_file_service_registration: e95b599e-166e-7d80-08ad-aee76e7ddf19
+      auto_config:
+        authorization:
+          enabled: true
+          static:
+            oidc_discovery_url: https://vault.day0.sololab:8200/v1/identity/oidc
+            oidc_discovery_ca_cert: ## set via helm value
+            bound_issuer: https://vault.day0.sololab:8200/v1/identity/oidc
+            # The value for matching the aud field of the JSON web token (JWT).
+            # The audience aud claim in a JWT is meant to refer to the authorization servers that should accept the token.
+            bound_audiences:
+              - consul-cluster-dc1
+            claim_mappings:
+              /consul/hostname: node_name
+            claim_assertions:
+              - value.node_name == "${node}"
+      bind_addr: '{{ GetInterfaceIP "eth0" }}'
+      # log_level: trace
+      # https://github.com/hashicorp/learn-consul-docker/blob/110bc9484b0dcd714e64604cd011a360d03b9bc6/datacenter-deploy-auto-config/vault/consul/server2.json#L33
+      client_addr: "0.0.0.0"
+      datacenter: dc1
+      encrypt: aPuGh+5UDskRAbkLaXRzFoSOcSM+5vAK+NEYOWHJH7w=
+      # https://discuss.hashicorp.com/t/failed-to-receive-encryption-is-configured-but-remote-state-is-not-encrypted/41222
+      # encrypt_verify_incoming: true
+      # encrypt_verify_outgoing: false
+      ports:
+        https: 8501
+      tls:
+        defaults:
+          ca_file: /consul/config/certs/ca.crt
+          cert_file: /consul/config/certs/server.crt
+          key_file: /consul/config/certs/server.key
+          verify_incoming: false
+          verify_outgoing: true
+        internal_rpc:
+          # verify_incoming: true
+          verify_server_hostname: true
+  ## @param consul.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param consul.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /consul/config/certs
+    ## @param consul.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ##
+    contents:
+      ca.crt: xxxx
+      server.crt: xxxx
+      server.key: xxxx
+  ## @param consul.args add additional config-dir for file service registry
+  ##
+  args:
+    - agent
+    - -config-dir=/consul/services
+  ## @param consul.podAnnotations Annotations for consul pods
+  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/containers/podman/discussions/22378
+  ## ref: https://github.com/hashicorp/consul/blob/v1.20.2/Dockerfile#L271-L273
+  ## e.g.
+  ## podAnnotations:
+  ##   io.podman.annotations.userns: keep-id:uid=100,gid=1000
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=100,gid=1000
+
+  podLabels:
+    traefik.enable: true
+    traefik.tcp.routers.consul-web.entrypoints: webSecure
+    traefik.tcp.routers.consul-web.rule: HostSNI(`consul.day0.sololab`)
+    traefik.tcp.routers.consul-web.tls.passthrough: true
+    traefik.tcp.routers.consul-web.service: consul-web
+    traefik.tcp.services.consul-web.loadbalancer.server.port: 8501
+
+  extraEnvVars:
+    - name: CONSUL_DISABLE_PERM_MGMT
+      value: "ture"
+    - name: TZ
+      value: Asia/Shanghai
+  ## @param consul.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the consul container(s)
+  ## ref: https://blog.christophersmart.com/2021/01/31/podman-volumes-and-selinux/
+  ##
+  extraVolumeMounts:
+    - name: services
+      mountPath: "/consul/services:Z"
+  ## @param consul.extraVolumes Optionally specify extra list of additional volumes for the consul pod(s)
+  ##
+  extraVolumes:
+    - name: services
+      hostPath:
+        path: /var/home/podmgr/consul-services
+        type: Directory
