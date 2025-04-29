@@ -227,13 +227,16 @@ consul:
     ## https://developer.hashicorp.com/consul/tutorials/production-deploy/deployment-guide#configure-consul-agents
     ##
     main:
-      ## @param consul.configFiles.main.acl
-      ## This object allows a number of sub-keys to be set which controls the ACL system.
+      ## @param consul.configFiles.main.acl This object allows a number of sub-keys to be set which controls the ACL system.
       ## Configuring the ACL system within the ACL stanza was added in Consul 1.4.0
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#acl
       ##
       acl:
         enabled: false
+      ## @param consul.configFiles.main.auto_reload_config This option directs Consul to automatically reload the reloadable configuration options when configuration files change
+      ## Consul also watches the certificate and key files specified with the cert_file and key_file parameters and reloads the configuration if the files are updated.
+      ##
+      auto_reload_config: true
       ## @param consul.configFiles.main.bind_addr The address that should be bound to for internal cluster communications.
       ## This is an IP address that should be reachable by all other nodes in the cluster.
       ## By default, this is "0.0.0.0", meaning Consul will bind to all addresses on the local machine and will advertise the private IPv4 address to the rest of the cluster.
@@ -252,7 +255,7 @@ consul:
       ##
       client_addr: "127.0.0.1"
       ## @param consul.configFiles.main.datacenter This flag controls the datacenter in which the agent is running.
-      ## If not provided, it defaults to "dc1".
+      ## If not provided, it defaults to "dc1". Might be it should not set if using auto_config in consul client
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_datacenter
       ##
       # datacenter: dc1
