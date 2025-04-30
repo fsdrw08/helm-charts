@@ -87,7 +87,15 @@ minio:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: []
+  containerPorts:
+    - name: api
+      containerPort: 9000
+      hostPort: 9000
+      protocol: TCP
+    - name: console
+      containerPort: 9001
+      hostPort: 9001
+      protocol: TCP
   ## Configure extra options for minio containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param minio.livenessProbe.enabled Enable livenessProbe on minio containers
@@ -99,7 +107,7 @@ minio:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 20
+    initialDelaySeconds: 3
     periodSeconds: 600
     timeoutSeconds: 5
     failureThreshold: 3
