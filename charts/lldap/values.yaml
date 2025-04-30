@@ -101,17 +101,17 @@ lldap:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 10
+    initialDelaySeconds: 3
     periodSeconds: 600
     timeoutSeconds: 10
     failureThreshold: 5
     successThreshold: 1
     exec:
       command:
-        - /bin/sh
-        - -c
-        - |
-          /app/lldap healthcheck --config-file /data/lldap_config.toml
+        - /app/lldap
+        - healthcheck
+        - --config-file
+        - /data/lldap_config.toml
   ## @param lldap.readinessProbe.enabled Enable readinessProbe on lldap containers
   ## @param lldap.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param lldap.readinessProbe.periodSeconds Period seconds for readinessProbe

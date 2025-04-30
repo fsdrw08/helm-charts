@@ -103,17 +103,14 @@ postgresql:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 30
+    initialDelaySeconds: 3
     periodSeconds: 600
     timeoutSeconds: 10
     failureThreshold: 5
     successThreshold: 1
     exec:
       command:
-        - /bin/sh
-        - -c
-        - |
-          pg_isready
+        - pg_isready
   ## @param postgresql.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
   ## @param postgresql.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param postgresql.readinessProbe.periodSeconds Period seconds for readinessProbe

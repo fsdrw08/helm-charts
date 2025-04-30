@@ -166,7 +166,7 @@ powerdns:
       ##
       livenessProbe:
         enabled: true
-        initialDelaySeconds: 30
+        initialDelaySeconds: 3
         periodSeconds: 300
         timeoutSeconds: 5
         failureThreshold: 3

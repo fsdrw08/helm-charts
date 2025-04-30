@@ -123,8 +123,8 @@ consul:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 30
-    periodSeconds: 300
+    initialDelaySeconds: 3
+    periodSeconds: 600
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
@@ -142,7 +142,7 @@ consul:
   readinessProbe:
     enabled: false
     initialDelaySeconds: 180
-    periodSeconds: 300
+    periodSeconds: 600
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
