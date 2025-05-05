@@ -7,7 +7,7 @@ https://github.com/grafana/helm-charts/blob/main/charts/grafana/templates/_confi
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "common.names.fullname" . }}-cm
+  name: {{ template "common.names.fullname" . }}-cm-custom
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: grafana
@@ -29,6 +29,23 @@ data:
     {{- end }}
 {{- end }}
 {{- end }}
-{{- /*
-{{- toToml .Values.grafana.config | nindent 4 }}
-*/}}
+
+{{- if .Values.grafana.configFiles.dataSource }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm-datasource
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: grafana
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  {{- range $key, $value := .Values.grafana.configFiles.dataSource }}
+  {{ $key }}: |
+    {{- toYaml $value | nindent 4 }}
+  {{- end -}}
+{{- end -}}
+
