@@ -211,12 +211,11 @@ vault:
     ## @param vault.configFiles.main main config for server
     ##
     main:
+      ## @param vault.configFiles.main.disable_mlock Disables the server from executing the mlock syscall
+      ##
       disable_mlock: true
       log_level: info
-    ## @param vault.configFiles.storage storage config for server
-    ##
-    storage:
-      ## @param vault.configFiles.storage
+      ## @param vault.configFiles.main.storage storage config for server
       ## The storage stanza configures the storage backend, which represents the location for the durable storage of Vault's information
       ## if the storage file changed, do forget also change it in persistence.mountPath.storage
       ## https://developer.hashicorp.com/vault/docs/configuration/storage
@@ -225,19 +224,14 @@ vault:
       storage:
         file:
           path: /vault/file
-    ## @param vault.configFiles.listeners listeners config for server
-    ##
-    listeners:
-      ## @param vault.configFiles.listeners.ui
-      ## Enables the built-in web UI, which is available on all listeners (address + port) at the /ui path.
+      ## @param vault.configFiles.main.ui Enables the built-in web UI, which is available on all listeners (address + port) at the /ui path.
       ## Browsers accessing the standard Vault API address will automatically redirect there.
       ## This can also be provided via the environment variable VAULT_UI.
       ## The UI runs on the same port as the Vault listener. As such, you must configure at least one listener stanza in order to access the UI.
       ## For more information, please see the https://developer.hashicorp.com/vault/docs/configuration/ui.
       ##
       ui: true
-      ## @param vault.configFiles.listeners.listener
-      ## Configures how Vault is listening for API requests.
+      ## @param vault.configFiles.main.listener Configures how Vault is listening for API requests.
       ## https://developer.hashicorp.com/vault/docs/configuration/listener/tcp
       ## https://github.com/hashicorp/vault/blob/aaf59a7705bb6c1d6ba2f6c2400787d5da872817/command/server/test-fixtures/config4.hcl.json#L6
       ## https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L931
