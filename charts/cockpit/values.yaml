@@ -52,7 +52,7 @@ cockpit:
   image:
     registry: quay.io
     repository: cockpit/ws
-    tag: 333
+    tag: 337
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -187,9 +187,9 @@ cockpit:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param cockpit.config the cockpit web server config, which will place in /etc/cockpit/cockpit.conf
-  ## ref: https://github.com/cockpit-project/cockpit/blob/333/containers/ws/default-bastion.conf
+  ## ref: https://github.com/cockpit-project/cockpit/blob/337/containers/ws/default-bastion.conf
   ## ref: https://cockpit-project.org/guide/latest/cockpit.conf.5.html
-  ## ref: https://github.com/cockpit-project/cockpit/blob/333/doc/authentication.md
+  ## ref: https://github.com/cockpit-project/cockpit/blob/337/doc/authentication.md
   ##
   config: |
     [WebService]
