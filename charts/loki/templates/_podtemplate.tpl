@@ -1,4 +1,4 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "loki.podTemplate" -}}
 metadata:
   {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
@@ -15,7 +15,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "loki.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.loki.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.loki.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -25,7 +25,7 @@ spec:
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "loki.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -47,7 +47,7 @@ spec:
     {{- end }}
   containers:
     - name: loki
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+      image: {{ template "loki.image" . }}
       imagePullPolicy: {{ .Values.loki.image.pullPolicy | quote }}
       {{- if .Values.loki.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.loki.containerSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -99,6 +99,13 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.loki.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /etc/loki/local-config.yaml
+          subPath: local-config.yaml
+        {{- if .Values.loki.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.loki.tls.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -111,6 +118,14 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.loki.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.loki.tls.contents }}
+    - name: tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:

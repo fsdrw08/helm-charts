@@ -192,14 +192,10 @@ loki:
     ## if true. If false, the OrgID will always be set to 'fake'.
     ##
     auth_enabled: false
-    ## @param loki.config.server Configures the server of the launched module(s).
-    ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#server
-    ##
-    server:
-      http_listen_port: 3100
     ## @param loki.config.common Common configuration to be shared between multiple modules.
     ## If a more specific configuration is given in other sections, the related configuration within this section will be ignored.
     ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#common
+    ## ref: https://github.com/grafana/loki/blob/v3.5.0/production/helm/loki/values.yaml
     ##
     common:
       instance_addr: 127.0.0.1
@@ -212,6 +208,8 @@ loki:
       ring:
         kvstore:
           store: inmemory
+    ruler:
+      alertmanager_url: http://localhost:9093
     ## @param loki.config.schema_config Configures the chunk index schema and where it is stored.
     ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#schema_config
     ##
@@ -226,8 +224,11 @@ loki:
           index:
             prefix: index_
             period: 24h
-    ruler:
-      alertmanager_url: http://localhost:9093
+    ## @param loki.config.server Configures the server of the launched module(s).
+    ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#server
+    ##
+    server:
+      http_listen_port: 3100
 
   ## @param loki.tls secret setting of cert and key or whatever tls content will set in the container
   ##
@@ -335,7 +336,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/loki/data
+  mountPath: /var/loki
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
