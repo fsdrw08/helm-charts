@@ -74,22 +74,28 @@ loki:
   ##
   replicaCount: 1
   ## @param loki.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#server:~:text=%2Dserver.http%2Dlisten%2Dport
+  ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#server:~:text=listen%2Dport%0A%5B-,grpc_listen_port,-%3A%20%3Cint%3E
   ## e.g.
   ## containerPorts:
   ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
+  ##     containerPort: 3100
+  ##     hostPort: 3100
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts:
+    - name: http
+      containerPort: 3100
+      hostPort: 3100
+      protocol: TCP
+    - name: grpc
+      containerPort: 9095
+      hostPort: 9095
+      protocol: TCP
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## ref: https://community.grafana.com/t/loki-healthcheck-in-docker-compose/117767
   ## @param loki.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
   ## @param loki.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param loki.livenessProbe.periodSeconds Period seconds for livenessProbe
@@ -99,11 +105,17 @@ loki:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          wget --quiet --tries=1 --output-document=- http://localhost:3100/ready | grep -q -w ready
   ## @param loki.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
   ## @param loki.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param loki.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -177,7 +189,7 @@ loki:
   ##
   containerSecurityContext:
     enabled: false
-    runAsUser: 1001
+    runAsUser: 10001
     runAsNonRoot: true
     readOnlyRootFilesystem: false
 
@@ -186,6 +198,7 @@ loki:
   ## ref: https://github.com/grafana/loki/blob/v3.5.0/cmd/loki/Dockerfile#L22
   ## ref: https://github.com/grafana/loki/blob/v3.5.0/cmd/loki/loki-docker-config.yaml
   ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#supported-contents-and-default-values-of-lokiyaml
+  ## ref: https://grafana.com/docs/loki/latest/get-started/deployment-modes/
   ##
   config:
     ## @param loki.config.auth_enabled Enables authentication through the X-Scope-OrgID header, which must be present
@@ -243,8 +256,8 @@ loki:
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
     ## e.g.
     ## contents:
-    ##  tls.crt: ""
-    ##  tls.key: ""
+    ##  loki.crt: ""
+    ##  loki.key: ""
     ##
     contents: {}
   ## @param loki.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
@@ -266,8 +279,10 @@ loki:
   podLabels: {}
   ## @param loki.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/grafana/loki/blob/v3.5.0/cmd/loki/Dockerfile#L26-L27
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=10001,gid=10001
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param loki.autoscaling.enabled Enable autoscaling for loki

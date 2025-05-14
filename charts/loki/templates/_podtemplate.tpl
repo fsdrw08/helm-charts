@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.loki.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: loki
+    - name: server
       image: {{ template "loki.image" . }}
       imagePullPolicy: {{ .Values.loki.image.pullPolicy | quote }}
       {{- if .Values.loki.containerSecurityContext.enabled }}
