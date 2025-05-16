@@ -213,6 +213,8 @@ loki:
     common:
       instance_addr: 127.0.0.1
       path_prefix: /var/loki
+      ## @param loki.config.common.storage config storage backend for the general storage
+      ##
       storage:
         filesystem:
           chunks_directory: /var/loki/chunks
