@@ -23,7 +23,7 @@ spec:
   {{- end }}
   {{- if .Values.kea.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.kea.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end -}}
+  {{- end }}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions

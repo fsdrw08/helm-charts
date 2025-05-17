@@ -24,7 +24,7 @@ spec:
   {{ end }}
   {{- if .Values.freeipa.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.freeipa.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end -}}
+  {{- end }}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions

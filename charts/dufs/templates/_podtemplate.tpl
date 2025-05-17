@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.dufs.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.dufs.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end -}}
+  {{- end }}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions

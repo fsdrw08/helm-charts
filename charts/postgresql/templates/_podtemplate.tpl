@@ -21,7 +21,7 @@ spec:
   {{- end }}
   {{- if .Values.postgresql.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.postgresql.podSecurityContext "enabled" | toYaml | nindent 4 }}
-  {{- end -}}
+  {{- end }}
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
