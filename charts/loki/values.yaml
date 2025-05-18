@@ -274,10 +274,7 @@ loki:
   ## @param loki.hostAliases loki pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
-  hostAliases:
-    - ip: host-gateway
-      hostnames:
-        - minio-api.day1.sololab
+  hostAliases: []
   ## @param loki.podLabels Extra labels for loki pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
