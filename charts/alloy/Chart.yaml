@@ -1,0 +1,27 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: v1.8.3
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: Grafana Alloy
+home: https://github.com/fsdrw08/helm-charts
+icon: https://raw.githubusercontent.com/grafana/alloy/main/docs/sources/assets/alloy_icon_orange.svg
+keywords:
+  - grafana
+  - metrics
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: alloy
+sources:
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/alloy
+  - https://github.com/grafana/alloy
+  - https://github.com/grafana/alloy/blob/main/Dockerfile
+version: 0.1.0
