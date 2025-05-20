@@ -183,6 +183,18 @@ alloy:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  config:
+
+  ## @param alloy.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ##
+  existingConfigmap:
+  ## @param alloy.command Override default container command (aka ENTRYPOINT in dockerfile, useful when using custom images)
+  ##
+  command: []
+  ## @param alloy.flags flags for `alloy run` command
+  ## ref: https://grafana.com/docs/alloy/v1.8/reference/cli/run/
+  ##
   flags:
     server:
       http:
@@ -221,15 +233,7 @@ alloy:
         enabled: false
       prometheus:
         metric-validation-scheme: legacy
-  config:
-
-  ## @param alloy.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
-  ##
-  existingConfigmap:
-  ## @param alloy.command Override default container command (useful when using custom images)
-  ##
-  command: []
-  ## @param alloy.args Override default container args (useful when using custom images)
+  ## @param alloy.args Override default container args, if set, will also ignore flags set in alloy.flags (useful when using custom images)
   ##
   args: []
   ## @param alloy.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases

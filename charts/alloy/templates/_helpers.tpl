@@ -73,7 +73,7 @@ Compile all warnings into a single message.
       {{- include "processFlags" (dict "values" $value "prefix" $fullPath) | nindent 0 -}}
     {{- else -}}
       {{- if not (kindIs "invalid" $value) }}
-- --{{ $fullPath }}
+- --{{ $fullPath }}={{ $value | quote }}
       {{- end -}}
     {{- end -}}
   {{- end -}}
