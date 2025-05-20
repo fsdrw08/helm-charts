@@ -198,40 +198,99 @@ alloy:
   flags:
     server:
       http:
+        ## @param alloy.flags.server.http.enable-pprof Enable /debug/pprof profiling endpoints. (default true).
+        ##
         enable-pprof: true
+        ## @param alloy.flags.server.http.memory-addr Address to listen for in-memory HTTP traffic on (default alloy.internal:12345).
+        ##
         memory-addr: alloy.internal:12345
+        ## @param alloy.flags.server.http.listen-addr: Address to listen for HTTP traffic on (default 127.0.0.1:12345).
+        ##
         listen-addr: 127.0.0.1:12345
+        ## @param alloy.flags.
+        ##
         ui-path-prefix: /
     storage:
+      ## @param alloy.flags.storage.path Base directory where components can store data (default data-alloy/).
+      ##
       path: data-alloy/
-    disable-reporting: false
-    disable-support-bundle: false
+    ## @param alloy.flags.disable-reporting Disable data collection (default false).
+    ##
+    disable-reporting: true
+    ## @param alloy.flags.disable-support-bundle Disable support bundle endpoint (default false)
+    ##
+    disable-support-bundle: true
     cluster:
+      ## @param alloy.flags.cluster.enabled Start Alloy in clustered mode (default false).
+      ##
       enabled: false
+      ## @param alloy.flags.cluster.node-name The name to use for this node (defaults to the environment’s hostname).
+      ##
       node-name:
+      ## @param alloy.flags.cluster.join-addresses Comma-separated list of addresses to join the cluster at (default "").
+      ## Mutually exclusive with --cluster.discover-peers.
+      ##
       join-addresses:
+      ## @param alloy.flags.cluster.discover-peers List of key-value tuples for discovering peers (default "").
+      ## Mutually exclusive with --cluster.join-addresses.
+      ##
       discover-peers:
+      ## @param alloy.flags.cluster.rejoin-interval How often to rejoin the list of peers (default "60s").
+      ##
       rejoin-interval: 60s
+      ## @param alloy.flags.cluster.advertise-address Address to advertise to other cluster nodes (default "").
+      ##
       advertise-address:
+      ## @param alloy.flags.cluster.advertise-interfaces List of interfaces used to infer an address to advertise. Set to all to use all available network interfaces on the system. (default "eth0,en0").
+      ##
       advertise-interfaces: eth0,en0
+      ## @param alloy.flags.cluster.max-join-peers Number of peers to join from the discovered set (default 5).
+      ##
       max-join-peers: 5
+      ## @param alloy.flags.cluster.name Name to prevent nodes without this identifier from joining the cluster (default "").
+      ##
       name:
+      ## @param alloy.flags.cluster.enable-tls Specifies whether TLS should be used for communication between peers (default false).
+      ##
       enable-tls: false
+      ## @param alloy.flags.cluster.tls-ca-path: Path to the CA certificate file used for peer communication over TLS.
+      ##
       tls-ca-path:
+      ## @param alloy.flags.cluster.tls-key-path: Path to the key file used for peer communication over TLS.
+      ##
       tls-key-path:
+      ## @param alloy.flags.cluster.tls-server-name: Server name used for peer communication over TLS.
+      ##
       tls-server-name:
+      ## @param alloy.flags.cluster.wait-for-size: Wait for the cluster to reach the specified number of instances before allowing components that use clustering to begin processing. Zero means disabled (default 0).
+      ##
       wait-for-size: 0
+      ## @param alloy.flags.cluster.wait-timeout: Maximum duration to wait for minimum cluster size before proceeding with available nodes. Zero means wait forever, no timeout (default 0).
+      ##
       wait-timeout: 0
     config:
+      ## @param alloy.flags.config.format: The format of the source file. Supported formats: alloy, otelcol, prometheus, promtail, static (default "alloy").
+      ##
       format: alloy
+      ## @param alloy.flags.config.bypass-conversion-errors: Enable bypassing errors when converting (default false).
+      ##
       bypass-conversion-errors: false
+      ## @param alloy.flags.config.extra-args: Extra arguments from the original format used by the converter.
+      ##
       extra-args:
     stability:
+      ## @param alloy.flags.stability.level: The minimum permitted stability level of functionality to run. Supported values: experimental, public-preview, generally-available (default "generally-available").
+      ##
       level: generally-available
     feature:
       community-components:
+        ## @param alloy.flags.feature.community-components.enabled: Enable community components (default false).
+        ##
         enabled: false
       prometheus:
+        ## @param alloy.flags.feature.prometheus.metric-validation-scheme: Prometheus metric validation scheme to use. Supported values: legacy, utf-8.
+        ## NOTE: this is an experimental flag and may be removed in future releases (default "legacy").
+        ##
         metric-validation-scheme: legacy
   ## @param alloy.args Override default container args, if set, will also ignore flags set in alloy.flags (useful when using custom images)
   ##

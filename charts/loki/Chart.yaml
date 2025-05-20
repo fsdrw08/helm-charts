@@ -20,7 +20,7 @@ keywords:
   - tracing
   - metrics
   - infrastructure
-  - ...
+  - podman kube play
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts

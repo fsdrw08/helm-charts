@@ -60,7 +60,7 @@ spec:
       {{- else }}
       args:
         - run
-        {{- include "processFlags" (dict "values" .Values.alloy.flags) | nindent 8 -}}
+        {{- include "processFlags" (dict "values" .Values.alloy.flags) | trim | nindent 8 -}}
         {{- /*
         {{- range $key, $value := .Values.alloy.flags }}
           {{- if kindIs "map" $value }}

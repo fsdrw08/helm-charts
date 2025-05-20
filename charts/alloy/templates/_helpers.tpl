@@ -70,10 +70,14 @@ Compile all warnings into a single message.
   {{- range $key, $value := .values -}}
     {{- $fullPath := printf "%s%s" $prefix $key -}}
     {{- if kindIs "map" $value -}}
-      {{- include "processFlags" (dict "values" $value "prefix" $fullPath) | nindent 0 -}}
+      {{- include "processFlags" (dict "values" $value "prefix" $fullPath) | trim | nindent 0 -}}
     {{- else -}}
       {{- if not (kindIs "invalid" $value) }}
+      {{- if or (kindIs "bool" $value) (kindIs "int" $value) }}
+- --{{ $fullPath }}={{ $value }}
+      {{- else }}
 - --{{ $fullPath }}={{ $value | quote }}
+      {{- end -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
