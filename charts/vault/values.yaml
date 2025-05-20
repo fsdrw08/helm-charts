@@ -107,7 +107,7 @@ vault:
     enabled: true
     initialDelaySeconds: 3
     periodSeconds: 300
-    timeoutSeconds: 5
+    timeoutSeconds: 10
     failureThreshold: 3
     successThreshold: 1
     exec:
