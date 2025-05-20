@@ -4,7 +4,7 @@ annotations:
   category: CertificateAuthority
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v1.19
+appVersion: 1.19.4
 dependencies:
   - name: common
     repository: file://../common
