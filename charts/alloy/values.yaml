@@ -183,9 +183,38 @@ alloy:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-
+  ## @param alloy.config alloy configuration which will host in /etc/alloy/config.alloy
   config:
-
+    - component: logging
+      attributes:
+        level: debug
+        format: logfmt
+    - component: tracing
+      attributes:
+        sampling_fraction: 1
+        write_to:
+          - otelcol.exporter.otlp.tempo.input
+    - component: otelcol.exporter.otlp
+      label: tempo
+      attributes:
+        client:
+          endpoint: localhost:4317
+          tls:
+            insecure: true
+    - component: prometheus.exporter.unix
+      label: default
+      attributes: {}
+    - component: prometheus.scrape
+      label: default
+      attributes:
+        targets: prometheus.exporter.unix.default.targets
+        forward_to:
+          - prometheus.remote_write.default.receiver
+    - component: prometheus.remote_write
+      label: default
+      attributes:
+        endpoint:
+          url: http://localhost:9009/api/prom/push
   ## @param alloy.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
   existingConfigmap:

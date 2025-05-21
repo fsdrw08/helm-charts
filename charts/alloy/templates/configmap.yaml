@@ -14,5 +14,31 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  config.alloy: |
-  # Config file
+  config.alloy: |-
+
+    {{- range .Values.alloy.config }}
+    {{ .component }} {{ if .label }}{{ .label }}{{ end }} {
+      {{- range $key, $value := .attributes }}
+      {{- if not (kindIs "map" $value) }}
+      {{ $key }} = {{ $value }}
+      {{- else }}
+      {{ $key }} {
+        {{- range $subKey, $subValue := $value }}
+        {{ $subKey }} = {{ $subValue }}
+        {{- end }}
+      }
+      {{- end }}
+      {{- end }}
+    }
+    {{- /*
+    {{- range $idx, $zone := .zones }}{{ if $idx }} {{ else }}{{ end }}{{ default "" $zone.scheme }}{{ default "." $zone.zone }}{{ else }}.{{ end -}}
+    {{- if .port }}:{{ .port }} {{ end -}}
+    {
+      {{- range .plugins }}
+        {{ .name }}{{ if .parameters }} {{ .parameters }}{{ end }}{{ if .configBlock }} {
+            {{ .configBlock }}
+        }{{ end }}
+      {{- end }}
+    }
+    */}}
+    {{- end -}}
