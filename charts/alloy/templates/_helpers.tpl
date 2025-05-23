@@ -82,3 +82,42 @@ Compile all warnings into a single message.
     {{- end -}}
   {{- end -}}
 {{- end -}}
+
+
+{{- define "alloy.yamlToAlloy" -}}
+{{- $config := . -}}
+{{- range $config }}
+{{ .component }} {{ if .label }}"{{ .label }}" {{ end -}} {{ print "{" }}
+  {{- $indent := 2 }}
+  {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" .attributes "indent" $indent) }}
+{{ print "}" }}
+{{ end }}
+{{- end }}
+
+{{- define "alloy.yamlToAlloyAttribute" -}}
+{{- $attributes := .attributes -}}
+{{- $indent := .indent -}}
+{{- range $key, $value := $attributes -}}
+{{- if kindIs "map" $value }}
+{{ $key | indent $indent }} {{ print "{" }}
+{{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $value "indent" (add $indent 2 | int)) }}
+{{ print "}" | indent $indent }}
+{{- else if kindIs "slice" $value }}
+{{ $key | indent $indent }} = [
+  {{- range $subKey, $subValue := $value }}
+  {{- if kindIs "map" . }}
+  {{ print "{" | indent $indent }}
+  {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $subValue "indent" (add $indent 4 | int)) }}
+  {{ print "}," | indent $indent }}
+  {{- else }}
+  {{ join "," $value | indent (add $indent | int) }}
+  {{- end }}
+  {{- end }}
+{{ print "]" | indent ($indent | int) }}
+{{- else if kindIs "string" $value }}
+{{ $key | indent $indent }} = {{ $value }}
+{{- else }}
+{{ $key | indent $indent }} = {{ $value }}
+{{- end }}
+{{- end }}
+{{- end }}

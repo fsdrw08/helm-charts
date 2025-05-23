@@ -184,6 +184,39 @@ alloy:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param alloy.config alloy configuration which will host in /etc/alloy/config.alloy
+  ## component: https://grafana.com/docs/alloy/latest/get-started/configuration-syntax/components/
+  ## ref: https://github.com/grafana/alloy/blob/v1.8.3/example-config.alloy
+  ## e.g.
+  ## follow values:
+  ## - component: logging
+  ##   attributes:
+  ##     level: debug
+  ##     format: logfmt
+  ##
+  ## will convert to:
+  ## logging {
+  ##   level  = "debug"
+  ##   format = "logfmt"
+  ## }
+  ##
+  ## follow values:
+  ## - component: otelcol.exporter.otlp
+  ##   label: tempo
+  ##   attributes:
+  ##     client:
+  ##       endpoint: '"localhost:4317"'
+  ##       tls:
+  ##         insecure: true
+  ##
+  ## will convert to:
+  ## otelcol.exporter.otlp "tempo" {
+  ##   client {
+  ##     endpoint = "localhost:4317"
+  ##     tls {
+  ##       insecure = true
+  ##     }
+  ##   }
+  ## }
   config:
     - component: logging
       attributes:
@@ -198,7 +231,7 @@ alloy:
       label: tempo
       attributes:
         client:
-          endpoint: localhost:4317
+          endpoint: '"localhost:4317"'
           tls:
             insecure: true
     - component: prometheus.exporter.unix
@@ -207,14 +240,19 @@ alloy:
     - component: prometheus.scrape
       label: default
       attributes:
-        targets: prometheus.exporter.unix.default.targets
+        targets:
+          prometheus.exporter.unix.default.targets
+          # - '"__address__"': prometheus.exporter.unix.default.targets
+          # - '"__address__"': '"localhost:9001"'
         forward_to:
           - prometheus.remote_write.default.receiver
+        scrape_config:
+          job_name: '"default"'
     - component: prometheus.remote_write
       label: default
       attributes:
         endpoint:
-          url: http://localhost:9009/api/prom/push
+          url: '"http://localhost:9009/api/prom/push"'
   ## @param alloy.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
   existingConfigmap:

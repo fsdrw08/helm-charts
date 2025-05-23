@@ -60,31 +60,8 @@ spec:
       {{- else }}
       args:
         - run
-        {{- include "processFlags" (dict "values" .Values.alloy.flags) | trim | nindent 8 -}}
-        {{- /*
-        {{- range $key, $value := .Values.alloy.flags }}
-          {{- if kindIs "map" $value }}
-            {{- range $subkey, $subvalue := $value }}
-              {{- if kindIs "map" $subvalue }}
-                {{- range $subsubkey, $subsubvalue := $subvalue }}
-                  {{- if not (empty $subsubvalue) }}
-                  {{- if kindIs "bool" $subsubvalue }}
-        - --{{ $key }}.{{ $subkey }}.{{ $subsubkey }}={{ $subsubvalue }}
-                  {{- else }}
-        - --{{ $key }}.{{ $subkey }}.{{ $subsubkey }}={{ $subsubvalue | quote }}
-                  {{- end }}
-                  {{- end }}
-                {{- end }}
-              {{- else if not (empty $subvalue) }}
-        - --{{ $key }}.{{ $subkey }}={{ $subvalue | quote }}
-              {{- end }}
-            {{- end }}
-          {{- else if not (empty $value) }}
-        - --{{ $key }}={{ $value | quote }}
-          {{- end }}
-        {{- end }}
-        */}}
         - /etc/alloy/config.alloy
+        {{- include "processFlags" (dict "values" .Values.alloy.flags) | trim | nindent 8 -}}
       {{- end }}
       env:
         {{- if .Values.alloy.extraEnvVars }}
