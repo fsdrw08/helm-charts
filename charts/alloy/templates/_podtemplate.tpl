@@ -104,8 +104,11 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.alloy.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /etc/alloy/config.alloy
+          subPath: config.alloy
         - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $)  }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -116,6 +119,14 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.alloy.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.alloy.tls.contents }}
+    - name: tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
