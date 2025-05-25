@@ -18,9 +18,10 @@ data:
   {{- /*
   {{- include "alloy.yamlToAlloy" .Values.alloy.config | indent 4}}
   */}}
-    {{- range .Values.alloy.config }}
+    {{- range .Values.alloy.config.fromYAML }}
     {{ .component }} {{ if .label }}"{{ .label }}" {{ end -}} {{ print "{" }}
       {{- $indent := 6 }}
       {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" .attributes "indent" $indent) }}
     {{ print "}" }}
     {{ end }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.alloy.config.fromPlanText "context" $) | nindent 4 }}

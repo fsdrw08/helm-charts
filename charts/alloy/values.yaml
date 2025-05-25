@@ -184,79 +184,83 @@ alloy:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param alloy.config alloy configuration which will host in /etc/alloy/config.alloy
-  ## component: https://grafana.com/docs/alloy/latest/get-started/configuration-syntax/components/
-  ## ref: https://github.com/grafana/alloy/blob/v1.8.3/example-config.alloy
-  ## e.g.
-  ## follow values:
-  ## - component: logging
-  ##   attributes:
-  ##     level: debug
-  ##     format: logfmt
   ##
-  ## will convert to:
-  ## logging {
-  ##   level  = "debug"
-  ##   format = "logfmt"
-  ## }
-  ##
-  ## follow values:
-  ## - component: otelcol.exporter.otlp
-  ##   label: tempo
-  ##   attributes:
-  ##     client:
-  ##       endpoint: '"localhost:4317"'
-  ##       tls:
-  ##         insecure: true
-  ##
-  ## will convert to:
-  ## otelcol.exporter.otlp "tempo" {
-  ##   client {
-  ##     endpoint = "localhost:4317"
-  ##     tls {
-  ##       insecure = true
-  ##     }
-  ##   }
-  ## }
-  ##
-  ## follow values:
-  ## - component: loki.relabel
-  ##   label: journal
-  ##   attributes:
-  ##     forward_to: []
-  ##     rule.0:
-  ##       source_labels:
-  ##         - '"__journal__systemd_unit"'
-  ##       target_label: '"systemd_unit"'
-  ##     rule.1:
-  ##       source_labels:
-  ##         - '"__journal__hostname"'
-  ##       target_label: '"systemd_hostname"'
-  ##     rule.2:
-  ##       source_labels:
-  ##         - '"__journal__transport"'
-  ##       target_label: '"systemd_transport"'
-  ##
-  ## will convert to
-  ## loki.relabel "journal" {
-  ##   forward_to = []
-  ##   rule {
-  ##     source_labels = ["__journal__systemd_unit"]
-  ##     target_label  = "systemd_unit"
-  ##   }
-  ##   rule {
-  ##     source_labels = ["__journal__hostname"]
-  ##     target_label = "systemd_hostname"
-  ##   }
-  ##   rule {
-  ##     source_labels = ["__journal__transport"]
-  ##     target_label = "systemd_transport"
-  ##   }
-  ## }
   config:
-    - component: logging
-      attributes:
-        level: debug
-        format: logfmt
+    ## @param alloy.config.fromYAML alloy configuration convert from yaml
+    ## component: https://grafana.com/docs/alloy/latest/get-started/configuration-syntax/components/
+    ## ref: https://github.com/grafana/alloy/blob/v1.8.3/example-config.alloy
+    ## e.g.
+    ## follow values:
+    ## - component: logging
+    ##   attributes:
+    ##     level: debug
+    ##     format: logfmt
+    ##
+    ## will convert to:
+    ## logging {
+    ##   level  = "debug"
+    ##   format = "logfmt"
+    ## }
+    ## ---
+    ## follow values:
+    ## - component: otelcol.exporter.otlp
+    ##   label: tempo
+    ##   attributes:
+    ##     client:
+    ##       endpoint: '"localhost:4317"'
+    ##       tls:
+    ##         insecure: true
+    ##
+    ## will convert to:
+    ## otelcol.exporter.otlp "tempo" {
+    ##   client {
+    ##     endpoint = "localhost:4317"
+    ##     tls {
+    ##       insecure = true
+    ##     }
+    ##   }
+    ## }
+    ## ---
+    ## follow values:
+    ## - component: loki.relabel
+    ##   label: journal
+    ##   attributes:
+    ##     forward_to: []
+    ##     rule.0:
+    ##       source_labels:
+    ##         - '"__journal__systemd_unit"'
+    ##       target_label: '"systemd_unit"'
+    ##     rule.1:
+    ##       source_labels:
+    ##         - '"__journal__hostname"'
+    ##       target_label: '"systemd_hostname"'
+    ##     rule.2:
+    ##       source_labels:
+    ##         - '"__journal__transport"'
+    ##       target_label: '"systemd_transport"'
+    ##
+    ## will convert to
+    ## loki.relabel "journal" {
+    ##   forward_to = []
+    ##   rule {
+    ##     source_labels = ["__journal__systemd_unit"]
+    ##     target_label  = "systemd_unit"
+    ##   }
+    ##   rule {
+    ##     source_labels = ["__journal__hostname"]
+    ##     target_label = "systemd_hostname"
+    ##   }
+    ##   rule {
+    ##     source_labels = ["__journal__transport"]
+    ##     target_label = "systemd_transport"
+    ##   }
+    ## }
+    ##
+    fromYAML:
+      - component: logging
+        attributes:
+          level: debug
+          format: logfmt
     # - component: tracing
     #   attributes:
     #     sampling_fraction: 1
@@ -288,6 +292,24 @@ alloy:
     #   attributes:
     #     endpoint:
     #       url: '"http://localhost:9009/api/prom/push"'
+    ## @param alloy.config.fromPlanText put content directly from below block
+    ##
+    fromPlanText: |-
+      loki.relabel "journal" {
+        forward_to = []
+        rule {
+          source_labels = ["__journal__systemd_unit"]
+          target_label  = "systemd_unit"
+        }
+        rule {
+          source_labels = ["__journal__hostname"]
+          target_label = "systemd_hostname"
+        }
+        rule {
+          source_labels = ["__journal__transport"]
+          target_label = "systemd_transport"
+        }
+      }
   ## @param alloy.tls secret setting of cert and key or whatever tls content will set in the container
   ##
   tls:
