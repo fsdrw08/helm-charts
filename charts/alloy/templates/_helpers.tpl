@@ -98,7 +98,12 @@ Compile all warnings into a single message.
 {{- $attributes := .attributes -}}
 {{- $indent := .indent -}}
 {{- range $key, $value := $attributes -}}
-{{- if kindIs "map" $value }}
+{{- if and (regexMatch "\\.\\d+$" $key) (kindIs "map" $value) }}
+{{- /* handle blocks which can specify multi times with same name */}}
+{{ regexReplaceAll "\\.\\d+$" $key ""  | indent $indent }} {{ print "{" }}
+{{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $value "indent" (add $indent 2 | int)) }}
+{{ print "}" | indent $indent }}
+{{- else if kindIs "map" $value }}
 {{ $key | indent $indent }} {{ print "{" }}
 {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $value "indent" (add $indent 2 | int)) }}
 {{ print "}" | indent $indent }}
