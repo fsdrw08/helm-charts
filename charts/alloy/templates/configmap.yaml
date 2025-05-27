@@ -24,4 +24,6 @@ data:
       {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" .attributes "indent" $indent) }}
     {{ print "}" }}
     {{ end }}
+    {{- if .Values.alloy.config.fromPlanText }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.alloy.config.fromPlanText "context" $) | nindent 4 }}
+    {{ end }}

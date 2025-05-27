@@ -73,11 +73,12 @@ Compile all warnings into a single message.
       {{- include "processFlags" (dict "values" $value "prefix" $fullPath) | trim | nindent 0 -}}
     {{- else -}}
       {{- if not (kindIs "invalid" $value) }}
-      {{- if kindIs "string" $value }}
+      {{- /*{{- if kindIs "string" $value }}
 - --{{ $fullPath }}={{ $value | quote}}
       {{- else }}
 - --{{ $fullPath }}={{ $value }}
-      {{- end -}}
+      {{- end -}}*/}}
+- --{{ $fullPath }}={{ $value }}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -98,14 +99,15 @@ Compile all warnings into a single message.
 {{- $attributes := .attributes -}}
 {{- $indent := .indent -}}
 {{- range $key, $value := $attributes -}}
+{{- /* handle blocks config which can specify multi times with same name */}}
 {{- if and (regexMatch "\\.\\d+$" $key) (kindIs "map" $value) }}
-{{- /* handle blocks which can specify multi times with same name */}}
 {{ regexReplaceAll "\\.\\d+$" $key ""  | indent $indent }} {{ print "{" }}
 {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $value "indent" (add $indent 2 | int)) }}
 {{ print "}" | indent $indent }}
+{{- /* handle map config which can specify multi times with same name */}}
 {{- else if kindIs "map" $value }}
-{{ $key | indent $indent }} {{ print "{" }}
-{{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $value "indent" (add $indent 2 | int)) }}
+{{ $key | indent $indent }} {{ print "= {" }}
+{{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $value "indent" (add $indent 2 | int)) }}{{ print "," }}
 {{ print "}" | indent $indent }}
 {{- else if kindIs "slice" $value }}
 {{ $key | indent $indent }} = [
@@ -115,7 +117,7 @@ Compile all warnings into a single message.
   {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $subValue "indent" (add $indent 4 | int)) }}
   {{ print "}," | indent $indent }}
   {{- else }}
-  {{ join "," $value | indent (add $indent | int) }}
+  {{ print $subValue | indent (add $indent | int) }}{{print ","}}
   {{- end }}
   {{- end }}
 {{ print "]" | indent ($indent | int) }}

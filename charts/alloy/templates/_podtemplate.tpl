@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.alloy.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: alloy
+    - name: collector
       image: {{ template "alloy.image" . }}
       imagePullPolicy: {{ .Values.alloy.image.pullPolicy | quote }}
       {{- if .Values.alloy.containerSecurityContext.enabled }}
@@ -107,6 +107,10 @@ spec:
         - name: config
           mountPath: /etc/alloy/config.alloy
           subPath: config.alloy
+        {{- if .Values.alloy.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.alloy.tls.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $)  }}
           {{- if .Values.persistence.subPath }}
