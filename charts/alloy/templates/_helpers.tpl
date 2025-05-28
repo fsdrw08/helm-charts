@@ -114,7 +114,7 @@ Compile all warnings into a single message.
   {{- range $subKey, $subValue := $value }}
   {{- if kindIs "map" . }}
   {{ print "{" | indent $indent }}
-  {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $subValue "indent" (add $indent 4 | int)) }}
+  {{- include "alloy.yamlToAlloyAttribute" (dict "attributes" $subValue "indent" (add $indent 4 | int)) }}{{ print "," }}
   {{ print "}," | indent $indent }}
   {{- else }}
   {{ print $subValue | indent (add $indent | int) }}{{print ","}}

@@ -181,6 +181,7 @@ alloy:
     runAsGroup: 473
     runAsNonRoot: true
     readOnlyRootFilesystem: false
+    privileged: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param alloy.config alloy configuration which will host in /etc/alloy/config.alloy
