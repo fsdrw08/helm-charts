@@ -52,7 +52,7 @@ loki:
   image:
     registry: docker.io
     repository: grafana/loki
-    tag: 3.5.0
+    tag: 3.5.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -195,8 +195,8 @@ loki:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param loki.config loki config file which will host in /etc/loki/local-config.yaml
-  ## ref: https://github.com/grafana/loki/blob/v3.5.0/cmd/loki/Dockerfile#L22
-  ## ref: https://github.com/grafana/loki/blob/v3.5.0/cmd/loki/loki-docker-config.yaml
+  ## ref: https://github.com/grafana/loki/blob/v3.5.1/cmd/loki/Dockerfile#L22
+  ## ref: https://github.com/grafana/loki/blob/v3.5.1/cmd/loki/loki-docker-config.yaml
   ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#supported-contents-and-default-values-of-lokiyaml
   ## ref: https://grafana.com/docs/loki/latest/get-started/deployment-modes/
   ##
@@ -208,7 +208,7 @@ loki:
     ## @param loki.config.common Common configuration to be shared between multiple modules.
     ## If a more specific configuration is given in other sections, the related configuration within this section will be ignored.
     ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#common
-    ## ref: https://github.com/grafana/loki/blob/v3.5.0/production/helm/loki/values.yaml
+    ## ref: https://github.com/grafana/loki/blob/v3.5.1/production/helm/loki/values.yaml
     ##
     common:
       instance_addr: 127.0.0.1
@@ -281,7 +281,7 @@ loki:
   podLabels: {}
   ## @param loki.podAnnotations Annotations for loki pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/grafana/loki/blob/v3.5.0/cmd/loki/Dockerfile#L26-L27
+  ## ref: https://github.com/grafana/loki/blob/v3.5.1/cmd/loki/Dockerfile#L26-L27
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=10001,gid=10001
