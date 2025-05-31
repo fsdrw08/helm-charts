@@ -1,0 +1,84 @@
+global:
+  imageRegistry: zot.day0.sololab
+loki:
+  containerPorts: []
+  resourcesPreset: "medium"
+  config:
+    # common:
+    #   instance_interface_names:
+    #     - lo
+    schema_config:
+      ## @param loki.config.schema_config.configs list of period_configs
+      ##
+      configs:
+        - from: 2025-01-01
+          store: tsdb
+          object_store: s3
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
+
+    ## loki cannot handle tls well by itself,
+    ## reason: failed to run local healthcheck if tls configed
+    ## error message: tls: invalid ClientKeyExchange message
+    # server:
+    #   http_listen_address: 127.0.0.1
+    #   grpc_listen_address: 127.0.0.1
+    #   http_tls_config:
+    #     # https://pkg.go.dev/crypto/tls#ClientAuthType
+    #     client_auth_type: VerifyClientCertIfGiven
+    #     client_ca_file: /etc/loki/certs/ca.crt
+    #     cert_file: /etc/loki/certs/loki.crt
+    #     key_file: /etc/loki/certs/loki.key
+
+    ## @param loki.config.storage_config config storage backend for storing chunks of log data
+    ## ref: https://grafana.com/docs/loki/latest/configure/#storage_config
+    ## ref: https://grafana.com/docs/loki/latest/operations/storage/tsdb/#single-store-tsdb-tsdb
+    ##
+    storage_config:
+      tsdb_shipper:
+        active_index_directory: /var/loki/tsdb-index
+        cache_location: /var/loki/tsdb-cache
+      use_thanos_objstore: true
+      object_store:
+        # https://grafana.com/docs/loki/latest/configure/#thanos_object_store_config
+        s3:
+          # https://github.com/cloudlena/s3manager/issues/7
+          endpoint: minio-api.day1.sololab
+          bucket_name: loki
+          access_key_id: # set from terraform data
+          secret_access_key: # set from terraform data
+          # s3forcepathstyle: true
+          http:
+            tls_ca_path: /etc/loki/certs/ca.crt
+    ui:
+      enabled: true
+      node_name: day1
+
+  tls:
+    mountPath: /etc/loki/certs
+  #   contents:
+  #     loki.crt: # set from terraform data
+  #     loki.key: # set from terraform data
+
+  # when using podman default network in podman 5.0 (the passta network),
+  # and object storage server hosting in the same host with loki,
+  # you need to specify object storage server like this way,
+  # to make loki communicate with it
+  hostAliases:
+    - ip: host-gateway
+      hostnames:
+        - minio-api.day1.sololab
+  podLabels:
+    traefik.enable: true
+    traefik.http.routers.loki-redirect.entrypoints: web
+    traefik.http.routers.loki-redirect.rule: Host(`loki.day1.sololab`)
+    traefik.http.routers.loki-redirect.middlewares: toHttps@file
+    traefik.http.routers.loki.entryPoints: webSecure
+    traefik.http.routers.loki.rule: Host(`loki.day1.sololab`)
+    traefik.http.routers.loki.tls.certresolver: internal
+    traefik.http.services.loki.loadbalancer.server.port: 3100
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
