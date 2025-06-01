@@ -52,7 +52,7 @@ prometheus:
   image:
     registry: quay.io
     repository: prometheus/prometheus
-    tag: v3.4.0
+    tag: v3.4.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -185,7 +185,7 @@ prometheus:
   ## @param prometheus.config the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
   ## The config file will presents in the path which specify in prometheus.flags.config.file, default: /etc/prometheus/prometheus.yml
   ## ref: https://github.com/prometheus/prometheus/blob/v3.4.0/documentation/examples/prometheus.yml
-  ## ref: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+  ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/
   ##
   config:
     ## @param prometheus.config.global The global configuration specifies parameters that are valid in all other configuration contexts.
