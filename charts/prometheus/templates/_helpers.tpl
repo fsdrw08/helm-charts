@@ -59,3 +59,21 @@ Compile all warnings into a single message.
 {{-   printf "\nVALUES VALIDATION:\n%s" $message -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "processFlags" -}}
+  {{- $prefix := "" -}}
+  {{- if .prefix -}}
+    {{- $prefix = printf "%s." .prefix -}}
+  {{- end -}}
+
+  {{- range $key, $value := .values -}}
+    {{- $fullPath := printf "%s%s" $prefix $key -}}
+    {{- if kindIs "map" $value -}}
+      {{- include "processFlags" (dict "values" $value "prefix" $fullPath) | trim | nindent 0 -}}
+    {{- else -}}
+      {{- if not (kindIs "invalid" $value) }}
+- --{{ $fullPath }}={{ $value }}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}

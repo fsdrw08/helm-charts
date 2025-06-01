@@ -57,6 +57,9 @@ spec:
       {{- end }}
       {{- if .Values.prometheus.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.args "context" $) | nindent 8 }}
+      {{- else }}
+      args: 
+      {{- include "processFlags" (dict "values" .Values.prometheus.flags) | trim | nindent 8 -}}
       {{- end }}
       env:
         {{- if .Values.prometheus.extraEnvVars }}
@@ -99,8 +102,15 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prometheus.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: {{ .Values.prometheus.flags.config.file }}
+          subPath: {{ base .Values.prometheus.flags.config.file }}
+        {{- if .Values.prometheus.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.prometheus.tls.mountPath }}
+        {{- end }}
         - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $) }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -111,6 +121,14 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.prometheus.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.prometheus.tls.contents }}
+    - name: tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
