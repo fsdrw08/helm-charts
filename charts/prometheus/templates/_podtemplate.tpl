@@ -1,4 +1,4 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "prometheus.podTemplate" -}}
 metadata:
   {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
@@ -15,7 +15,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "prometheus.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.prometheus.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -25,7 +25,7 @@ spec:
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "prometheus.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -46,8 +46,8 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: prometheus
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+    - name: {{ if .Values.prometheus.flags.agent }}agent{{ else }}server{{ end }}
+      image: {{ template "prometheus.image" . }}
       imagePullPolicy: {{ .Values.prometheus.image.pullPolicy | quote }}
       {{- if .Values.prometheus.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.prometheus.containerSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -105,6 +105,11 @@ spec:
         - name: config
           mountPath: {{ .Values.prometheus.flags.config.file }}
           subPath: {{ base .Values.prometheus.flags.config.file }}
+        {{- if .Values.prometheus.flags.web.config.file }}
+        - name: web
+          mountPath: {{ .Values.prometheus.flags.web.config.file }}
+          subPath: {{ base .Values.prometheus.flags.web.config.file }}
+        {{- end }}
         {{- if .Values.prometheus.tls.contents }}
         - name: tls
           mountPath: {{ .Values.prometheus.tls.mountPath }}
@@ -124,6 +129,11 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.prometheus.flags.web.config.file }}
+    - name: web
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- end }}
     {{- if .Values.prometheus.tls.contents }}
     - name: tls
       secret:

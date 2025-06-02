@@ -14,5 +14,9 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  {{ base .Values.prometheus.flags.config.file }}: |
-    {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.config "context" $) | nindent 4 -}}
+  {{ base .Values.prometheus.flags.config.file }}: {{ print "|" }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.configFiles.main "context" $) | nindent 4 -}}
+  {{- if .Values.prometheus.flags.web.config.file }}
+  {{ base .Values.prometheus.flags.web.config.file }}: {{ print "|" }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.configFiles.web "context" $) | nindent 4 -}}
+  {{- end -}}

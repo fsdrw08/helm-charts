@@ -87,7 +87,11 @@ prometheus:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts:
+    - name: http
+      containerPort: 9090
+      hostPort: 9090
+      protocol: TCP
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param prometheus.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
@@ -99,11 +103,17 @@ prometheus:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          wget --quiet --tries=1 --output-document=- http://localhost:9090/-/healthy | grep -q -w Healthy
   ## @param prometheus.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
   ## @param prometheus.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param prometheus.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -182,47 +192,59 @@ prometheus:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## @param prometheus.config the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
-  ## The config file will presents in the path which specify in prometheus.flags.config.file, default: /etc/prometheus/prometheus.yml
-  ## ref: https://github.com/prometheus/prometheus/blob/v3.4.0/documentation/examples/prometheus.yml
-  ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/
-  ##
-  config:
-    ## @param prometheus.config.global The global configuration specifies parameters that are valid in all other configuration contexts.
-    ## They also serve as defaults for other configuration sections.
+  configFiles:
+    ## @param prometheus.configFiles.main the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
+    ## The config file will presents in the path which specify in prometheus.flags.config.file, default: /etc/prometheus/prometheus.yml
+    ## ref: https://github.com/prometheus/prometheus/blob/v3.4.0/documentation/examples/prometheus.yml
+    ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/
     ##
-    global:
-      scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-      evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
-      # scrape_timeout is set to the global default (10s).
-    ## @param prometheus.config.alerting Alerting specifies settings related to the Alertmanager
-    ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/#alertmanager_config
-    ##
-    alerting:
-      alertmanagers:
-        - static_configs:
-            - targets:
-              # - alertmanager:9093
-    ## @param prometheus.config.rule_files Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-    ##
-    rule_files:
-      # - "first_rules.yml"
-      # - "second_rules.yml"
-    ## @param prometheus.config.scrape_configs A scrape configuration containing exactly one endpoint to scrape:
-    ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/#scrape_config
-    ##
-    scrape_configs:
-      ## Here it's Prometheus itself.
-      ## The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-      - job_name: prometheus
-        metrics_path: /metrics # defaults to '/metrics'
-        scheme: http # defaults to 'http'.
+    main:
+      ## @param prometheus.configFiles.main.global The global configuration specifies parameters that are valid in all other configuration contexts.
+      ## They also serve as defaults for other configuration sections.
+      ##
+      global:
+        scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+        evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+        # scrape_timeout is set to the global default (10s).
+      ## @param prometheus.configFiles.main.alerting Alerting specifies settings related to the Alertmanager
+      ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/#alertmanager_config
+      ##
+      alerting:
+        alertmanagers:
+          - static_configs:
+              - targets:
+                # - alertmanager:9093
+      ## @param prometheus.configFiles.main.rule_files Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+      ##
+      rule_files:
+        # - "first_rules.yml"
+        # - "second_rules.yml"
+      ## @param prometheus.configFiles.main.scrape_configs A scrape configuration containing exactly one endpoint to scrape:
+      ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/#scrape_config
+      ##
+      scrape_configs:
+        ## Here it's Prometheus itself.
+        ## The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+        - job_name: prometheus
+          metrics_path: /metrics # defaults to '/metrics'
+          scheme: http # defaults to 'http'.
 
-        static_configs:
-          - targets: ["localhost:9090"]
-            # The label name is added as a label `label_name=<label_value>` to any timeseries scraped from this config.
-            labels:
-              app: "prometheus"
+          static_configs:
+            - targets: ["localhost:9090"]
+              # The label name is added as a label `label_name=<label_value>` to any timeseries scraped from this config.
+              labels:
+                app: "prometheus"
+    ## @param prometheus.configFiles.web basic authentication and TLS config
+    ## The config file will presents in the path which specify in prometheus.flags.web.config.file, default: /etc/prometheus/web.yml
+    ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/https/
+    ## e.g.
+    ## web:
+    ##  tls_server_config:
+    ##    cert_file: /etc/prometheus/certs/prometheus.crt
+    ##    key_file: /etc/prometheus/certs/prometheus.key
+    ##
+    web: {}
+
   ## @param prometheus.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
   ## @param prometheus.tls secret setting of cert and key or whatever tls content will set in the container
@@ -274,7 +296,7 @@ prometheus:
       config:
         ## @param prometheus.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
         ##
-        file:
+        file: # /etc/prometheus/web.yml
       ## @param prometheus.flags.web.read-timeout Maximum duration before timing out read of the request, and closing idle connections.
       ##
       read-timeout: 5m
@@ -352,11 +374,11 @@ prometheus:
       agent:
         ## @param prometheus.flags.storage.agent.path Base path for metrics storage. Use with agent mode only.
         ##
-        path: data-agent/
+        path: # data-agent/
         ## @param prometheus.flags.storage.agent.wal-compression Compress the agent WAL. If false, the --storage.agent.wal-compression-type flag is ignored.
         ## Use with agent mode only.
         ##
-        wal-compression: true
+        wal-compression: # true
         retention:
           ## @param prometheus.flags.storage.agent.retention.min-time Minimum age samples may be before being considered for deletion when the WAL is truncated.
           ## Use with agent mode only.
@@ -368,7 +390,7 @@ prometheus:
           max-time:
         ## @param prometheus.flags.storage.agent.no-lockfile Do not create lockfile in data directory. Use with agent mode only.
         ##
-        no-lockfile: false
+        no-lockfile: # false
       remote:
         ## @param prometheus.flags.storage.remote.flush-deadline How long to wait flushing sample on shutdown or config reload.
         ##
@@ -443,7 +465,7 @@ prometheus:
     enable-feature:
     ## @param prometheus.flags.agent Run Prometheus in 'Agent mode'.
     ##
-    agent:
+    agent: false
     log:
       ## @param prometheus.flags.log.level Only log messages with the given severity or above. One of: [debug, info, warn, error]
       ##

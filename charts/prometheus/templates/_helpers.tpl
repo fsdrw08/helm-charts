@@ -6,28 +6,28 @@ SPDX-License-Identifier: APACHE-2.0
 {{/*
 Return the proper prometheus image name
 */}}
-{{- define "%%TEMPLATE_NAME%%.image" -}}
+{{- define "prometheus.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.prometheus.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "%%TEMPLATE_NAME%%.volumePermissions.image" -}}
+{{- define "prometheus.volumePermissions.image" -}}
 {{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
-{{- define "%%TEMPLATE_NAME%%.imagePullSecrets" -}}
+{{- define "prometheus.imagePullSecrets" -}}
 {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.prometheus.image .Values.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "%%TEMPLATE_NAME%%.serviceAccountName" -}}
+{{- define "prometheus.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
     {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
@@ -39,7 +39,7 @@ Create the name of the service account to use
 Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
 Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
 */}}
-{{- define "%%TEMPLATE_NAME%%.ingress.certManagerRequest" -}}
+{{- define "prometheus.ingress.certManagerRequest" -}}
 {{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
     {{- true -}}
 {{- end -}}
@@ -48,10 +48,10 @@ Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
 {{/*
 Compile all warnings into a single message.
 */}}
-{{- define "%%TEMPLATE_NAME%%.validateValues" -}}
+{{- define "prometheus.validateValues" -}}
 {{- $messages := list -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.foo" .) -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.bar" .) -}}
+{{- $messages := append $messages (include "prometheus.validateValues.foo" .) -}}
+{{- $messages := append $messages (include "prometheus.validateValues.bar" .) -}}
 {{- $messages := without $messages "" -}}
 {{- $message := join "\n" $messages -}}
 
@@ -71,7 +71,12 @@ Compile all warnings into a single message.
     {{- if kindIs "map" $value -}}
       {{- include "processFlags" (dict "values" $value "prefix" $fullPath) | trim | nindent 0 -}}
     {{- else -}}
-      {{- if not (kindIs "invalid" $value) }}
+    {{- /* https://github.com/prometheus/prometheus/pull/7410#issuecomment-718696715 */}}
+      {{- if (kindIs "bool" $value) }}
+      {{- if $value }}
+- --{{ $fullPath }}
+      {{- end -}}
+      {{- else if not (kindIs "invalid" $value) }}
 - --{{ $fullPath }}={{ $value }}
       {{- end -}}
     {{- end -}}
