@@ -455,6 +455,9 @@ alloy:
   ## @param alloy.args Override default container args, if set, will also ignore flags set in alloy.flags (useful when using custom images)
   ##
   args: []
+  ## @param alloy.hostNetwork hostNetwork mode in alloy, only set this key to true can make container hostname set the host hostname
+  ##
+  hostNetwork: true
   ## @param alloy.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##

@@ -16,6 +16,7 @@ metadata:
     {{- end }}
 spec:
   {{- include "alloy.imagePullSecrets" . | nindent 2 }}
+  hostNetwork: {{ .Values.alloy.hostNetwork }}
   {{- if .Values.alloy.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.hostAliases "context" $) | nindent 4 }}
   {{- end }}
