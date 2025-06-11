@@ -85,6 +85,16 @@ powerdns:
   ## @param powerdns.extraVolumes Optionally specify extra list of additional volumes for the powerdns pod(s)
   ##
   extraVolumes: []
+  ## @param powerdns.initContainers Add additional init containers to the powerdns pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
   ## @param powerdns.sidecars Add additional sidecar containers to the powerdns pod(s)
   ## e.g:
   ## sidecars:
@@ -96,16 +106,6 @@ powerdns:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param powerdns.initContainers Add additional init containers to the powerdns pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
   containers:
     ## @param powerdns.containers.auth powerdns auth container
     ##

@@ -5,10 +5,10 @@ SPDX-License-Identifier: APACHE-2.0
 
 {{/*
 Return the proper prometheus image name
-*/}}
 {{- define "prometheus.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.prometheus.image "global" .Values.global) }}
 {{- end -}}
+*/}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
@@ -81,4 +81,14 @@ Compile all warnings into a single message.
       {{- end -}}
     {{- end -}}
   {{- end -}}
+{{- end -}}
+
+{{- define "checkTlsEnabled" -}}
+{{- $tlsEnabled := false -}}
+{{- range $key, $val := .Values.prometheus.containers }}
+  {{- if and $val.enabled $val.tls.contents -}}
+    {{- $tlsEnabled = true -}}
+  {{- end -}}
+{{- end -}}
+{{- $tlsEnabled -}}
 {{- end -}}

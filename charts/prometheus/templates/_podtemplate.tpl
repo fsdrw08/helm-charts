@@ -15,7 +15,9 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
+  {{/*
   {{- include "prometheus.imagePullSecrets" . | nindent 2 }}
+  */}}
   {{- if .Values.prometheus.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -36,92 +38,101 @@ spec:
       resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
+        {{- range $key, $val := .Values.persistence.mountPath }}
+        - name: {{ $key }}
+          mountPath: {{ $val }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        {{- end }}
     {{- end }}
     {{- if .Values.prometheus.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: {{ if .Values.prometheus.flags.agent }}agent{{ else }}server{{ end }}
-      image: {{ template "prometheus.image" . }}
-      imagePullPolicy: {{ .Values.prometheus.image.pullPolicy | quote }}
-      {{- if .Values.prometheus.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.prometheus.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+  {{- range $key, $val := .Values.prometheus.containers }}
+  {{- if $val.enabled }}
+    - name: {{ $key }}
+      image: {{ include "common.images.image" (dict "imageRoot" $val.image "global" $.Values.global) }}
+      imagePullPolicy: {{ $val.image.pullPolicy | quote }}
+      {{- if $val.containerSecurityContext.enabled }}
+      securityContext: {{- omit $val.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      {{- if .Values.prometheus.command }}
-      command: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.command "context" $) | nindent 8 }}
+      {{- if $val.command }}
+      command: {{- include "common.tplvalues.render" (dict "value" $val.command "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.prometheus.args }}
-      args: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.args "context" $) | nindent 8 }}
+      {{- if $val.args }}
+      args: {{- include "common.tplvalues.render" (dict "value" $val.args "context" $) | nindent 8 }}
       {{- else }}
       args: 
-      {{- include "processFlags" (dict "values" .Values.prometheus.flags) | trim | nindent 8 -}}
+      {{- include "processFlags" (dict "values" $val.flags) | trim | nindent 8 -}}
       {{- end }}
       env:
-        {{- if .Values.prometheus.extraEnvVars }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.extraEnvVars "context" $) | nindent 8 }}
+        {{- if $val.extraEnvVars }}
+        {{- include "common.tplvalues.render" (dict "value" $val.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
       envFrom:
-        {{- if .Values.prometheus.extraEnvVarsCM }}
+        {{- if $val.extraEnvVarsCM }}
         - configMapRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.prometheus.extraEnvVarsCM "context" $) }}
+            name: {{ include "common.tplvalues.render" (dict "value" $val.extraEnvVarsCM "context" $) }}
         {{- end }}
         {{- /*
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
-        {{- if .Values.prometheus.extraEnvVarsSecret }}
+            name: {{ template "common.names.fullname" $ }}
+        */ -}}
+        {{- if $val.extraEnvVarsSecret }}
         - secretRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.prometheus.extraEnvVarsSecret "context" $) }}
+            name: {{ include "common.tplvalues.render" (dict "value" $val.extraEnvVarsSecret "context" $) }}
         {{- end }}
-      {{- if .Values.prometheus.resources }}
-      resources: {{- toYaml .Values.prometheus.resources | nindent 8 }}
-      {{- else if ne .Values.prometheus.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.prometheus.resourcesPreset) | nindent 8 }}
+      {{- if $val.resources }}
+      resources: {{- toYaml $val.resources | nindent 8 }}
+      {{- else if ne $val.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" $val.resourcesPreset) | nindent 8 }}
       {{- end }}
-      {{- if .Values.prometheus.containerPorts }}
-      ports: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.containerPorts "context" $) | nindent 8 -}}
+      {{- if $val.containerPorts }}
+      ports: {{- include "common.tplvalues.render" (dict "value" $val.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
-      {{- if .Values.prometheus.customLivenessProbe }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.customLivenessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.prometheus.livenessProbe.enabled }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prometheus.livenessProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customLivenessProbe }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" $val.customLivenessProbe "context" $) | nindent 8 }}
+      {{- else if $val.livenessProbe.enabled }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.livenessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.prometheus.customReadinessProbe }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.customReadinessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.prometheus.readinessProbe.enabled }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prometheus.readinessProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customReadinessProbe }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" $val.customReadinessProbe "context" $) | nindent 8 }}
+      {{- else if $val.readinessProbe.enabled }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.readinessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.prometheus.customStartupProbe }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.customStartupProbe "context" $) | nindent 8 }}
-      {{- else if .Values.prometheus.startupProbe.enabled }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prometheus.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customStartupProbe }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" $val.customStartupProbe "context" $) | nindent 8 }}
+      {{- else if $val.startupProbe.enabled }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
-          mountPath: {{ .Values.prometheus.flags.config.file }}
-          subPath: {{ base .Values.prometheus.flags.config.file }}
-        {{- if .Values.prometheus.flags.web.config.file }}
+          mountPath: {{ $val.flags.config.file }}
+          subPath: {{ base $val.flags.config.file }}
+        {{- if $val.flags.web.config.file }}
         - name: web
-          mountPath: {{ .Values.prometheus.flags.web.config.file }}
-          subPath: {{ base .Values.prometheus.flags.web.config.file }}
+          mountPath: {{ $val.flags.web.config.file }}
+          subPath: {{ base $val.flags.web.config.file }}
         {{- end }}
-        {{- if .Values.prometheus.tls.contents }}
+        {{- if $val.tls.contents }}
         - name: tls
-          mountPath: {{ .Values.prometheus.tls.mountPath }}
+          mountPath: {{ $val.tls.mountPath }}
         {{- end }}
         - name: data
-          mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $) }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
+          mountPath: {{ include "common.tplvalues.render" (dict "value" (index $.Values "persistence" "mountPath" $key) "context" $) }}
+          subPath: {{ $key }}
+          {{- /*
+          {{- if $.Values.persistence.subPath }}
+          subPath: {{ $.Values.persistence.subPath }}
           {{- end }}
-      {{- if .Values.prometheus.extraVolumeMounts }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.extraVolumeMounts "context" $) | nindent 8 }}
+          */}}
+      {{- if $val.extraVolumeMounts }}
+      {{- include "common.tplvalues.render" (dict "value" $val.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
+  {{- end }}
+  {{- end }}
     {{- if .Values.prometheus.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.prometheus.sidecars "context" $) | nindent 4 }}
     {{- end }}
@@ -129,20 +140,20 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.prometheus.flags.web.config.file }}
     - name: web
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- end }}
-    {{- if .Values.prometheus.tls.contents }}
+    {{- if ( include "checkTlsEnabled" . ) }}
     - name: tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
+    {{- range $key, $val := .Values.persistence.mountPath }}
       persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" $) "-pvc" ) $.Values.persistence.existingClaim }}
+    {{- end }}
     {{- else }}
       emptyDir: {}
     {{- end }}
