@@ -84,10 +84,10 @@ Compile all warnings into a single message.
 {{- end -}}
 
 {{- define "checkTlsEnabled" -}}
-{{- $tlsEnabled := false -}}
+{{- $tlsEnabled := "" -}}
 {{- range $key, $val := .Values.prometheus.containers }}
   {{- if and $val.enabled $val.tls.contents -}}
-    {{- $tlsEnabled = true -}}
+    {{- $tlsEnabled = "1" -}}
   {{- end -}}
 {{- end -}}
 {{- $tlsEnabled -}}

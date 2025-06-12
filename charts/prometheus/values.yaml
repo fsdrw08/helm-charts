@@ -547,6 +547,332 @@ prometheus:
       ## @param prometheus.containers.server.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
       ##
       extraVolumeMounts: []
+    alertmanager:
+      ## @param prometheus.containers.auth.enabled present this container in the pod
+      enabled: true
+      ## prometheus alertmanager image
+      ## ref: https://quay.io/repository/prometheus/alertmanager?tab=tags
+      ## @param prometheus.containers.alertmanager.image.registry prometheus image registry
+      ## @param prometheus.containers.alertmanager.image.repository prometheus image repository
+      ## @param prometheus.containers.alertmanager.image.tag prometheus image tag (immutable tags are recommended)
+      ## @param prometheus.containers.alertmanager.image.digest prometheus image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+      ## @param prometheus.containers.alertmanager.image.pullPolicy prometheus image pull policy
+      ## @param prometheus.containers.alertmanager.image.pullSecrets prometheus image pull secrets
+      ##
+      image:
+        registry: quay.io
+        repository: prometheus/alertmanager
+        tag: v0.28.1
+        digest: ""
+        ## Specify a imagePullPolicy
+        ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+        ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+        ##
+        pullPolicy: IfNotPresent
+        ## Optionally specify an array of imagePullSecrets.
+        ## Secrets must be manually created in the namespace.
+        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+        ## e.g:
+        ## pullSecrets:
+        ##   - myRegistryKeySecretName
+        ##
+        pullSecrets: []
+      ## @param prometheus.containers.alertmanager.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+      ## e.g.
+      ## containerPorts:
+      ##   - name: http
+      ##     containerPort: 80
+      ##     hostPort: 80
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##   - name: https
+      ##     containerPort: 443
+      ##     hostPort: 443
+      ##     hostIP: 192.168.255.10
+      ##     protocol: TCP
+      ##
+      containerPorts:
+        - name: http
+          containerPort: 9093
+          hostPort: 9093
+          protocol: TCP
+      ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+      ## @param prometheus.containers.alertmanager.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+      ## @param prometheus.containers.alertmanager.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+      ## @param prometheus.containers.alertmanager.livenessProbe.periodSeconds Period seconds for livenessProbe
+      ## @param prometheus.containers.alertmanager.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+      ## @param prometheus.containers.alertmanager.livenessProbe.failureThreshold Failure threshold for livenessProbe
+      ## @param prometheus.containers.alertmanager.livenessProbe.successThreshold Success threshold for livenessProbe
+      ##
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 3
+        periodSeconds: 600
+        timeoutSeconds: 5
+        failureThreshold: 3
+        successThreshold: 1
+        exec:
+          command:
+            - sh
+            - -c
+            - |
+              wget --quiet --tries=1 --output-document=- http://localhost:9093/-/healthy | grep -q -w Healthy
+      ## @param prometheus.containers.alertmanager.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+      ## @param prometheus.containers.alertmanager.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+      ## @param prometheus.containers.alertmanager.readinessProbe.periodSeconds Period seconds for readinessProbe
+      ## @param prometheus.containers.alertmanager.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+      ## @param prometheus.containers.alertmanager.readinessProbe.failureThreshold Failure threshold for readinessProbe
+      ## @param prometheus.containers.alertmanager.readinessProbe.successThreshold Success threshold for readinessProbe
+      ## note: podman not support readinessProbe currently
+      ##
+      readinessProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param prometheus.containers.alertmanager.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+      ## @param prometheus.containers.alertmanager.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+      ## @param prometheus.containers.alertmanager.startupProbe.periodSeconds Period seconds for startupProbe
+      ## @param prometheus.containers.alertmanager.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+      ## @param prometheus.containers.alertmanager.startupProbe.failureThreshold Failure threshold for startupProbe
+      ## @param prometheus.containers.alertmanager.startupProbe.successThreshold Success threshold for startupProbe
+      ##
+      startupProbe:
+        enabled: false
+        initialDelaySeconds: foo
+        periodSeconds: bar
+        timeoutSeconds: foo
+        failureThreshold: bar
+        successThreshold: foo
+      ## @param prometheus.containers.alertmanager.customLivenessProbe Custom livenessProbe that overrides the default one
+      ##
+      customLivenessProbe: {}
+      ## @param prometheus.containers.alertmanager.customReadinessProbe Custom readinessProbe that overrides the default one
+      ##
+      customReadinessProbe: {}
+      ## @param prometheus.containers.alertmanager.customStartupProbe Custom startupProbe that overrides the default one
+      ##
+      customStartupProbe: {}
+      ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+      ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+      ## @param prometheus.containers.alertmanager.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if prometheus.containers.alertmanager.resources is set (prometheus.resources is recommended for production).
+      ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+      ##
+      resourcesPreset: "nano"
+      ## @param prometheus.containers.alertmanager.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+      ## Example:
+      ## resources:
+      ##   requests:
+      ##     cpu: 2
+      ##     memory: 512Mi
+      ##   limits:
+      ##     cpu: 3
+      ##     memory: 1024Mi
+      ##
+      resources: {}
+      ## Configure Container Security Context
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+      ## @param prometheus.containers.alertmanager.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
+      ## @param prometheus.containers.alertmanager.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
+      ## @param prometheus.containers.alertmanager.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+      ## @param prometheus.containers.alertmanager.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+      ##
+      containerSecurityContext:
+        enabled: false
+        runAsUser: 1001
+        runAsNonRoot: true
+        readOnlyRootFilesystem: false
+
+      # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+      configFiles:
+        ## @param prometheus.containers.alertmanager.configFiles.main the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
+        ## The config file will presents in the path which specify in prometheus.containers.alertmanager.flags.config.file, default: /etc/prometheus/prometheus.yml
+        ## ref: https://github.com/prometheus/alertmanager/blob/v0.28.1/examples/ha/alertmanager.yml
+        ## ref: https://prometheus.io/docs/alerting/0.28/configuration/
+        ##
+        main:
+          ## @param prometheus.containers.alertmanager.configFiles.main.route A route block defines a node in a routing tree and its children.
+          ## Its optional configuration parameters are inherited from its parent node if not set.
+          ## ref: https://prometheus.io/docs/alerting/0.28/configuration/#route-related-settings
+          ##
+          route:
+            ## @param prometheus.containers.alertmanager.configFiles.main.route.group_by The labels by which incoming alerts are grouped together.
+            ## For example, multiple alerts coming in for cluster=A and alertname=LatencyHigh would be batched into a single group.
+            ## To aggregate by all possible labels use the special value '...' as the sole label name, for example:
+            ## group_by: ['...']
+            ## This effectively disables aggregation entirely, passing through all alerts as-is.
+            ## This is unlikely to be what you want, unless you have a very low alert volume or your upstream notification system performs its own grouping.
+            ##
+            group_by: ["alertname"]
+            ## @param prometheus.containers.alertmanager.configFiles.main.route.group_wait How long to initially wait to send a notification for a group of alerts.
+            ## Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group. (Usually ~0s to few minutes.)
+            ## If omitted, child routes inherit the group_wait of the parent route.
+            ##
+            group_wait: 30s
+            ## How long to wait before sending a notification about new alerts that are added to a group of alerts
+            ## for which an initial notification has already been sent. (Usually ~5m or more.)
+            ## If omitted, child routes inherit the group_interval of the parent route.
+            ##
+            group_interval: 5m
+            repeat_interval: 1h
+            receiver: "web.hook"
+          ## @param prometheus.containers.alertmanager.configFiles.main.receivers These receiver settings allow configuring notification destinations (receivers) and HTTP client options for HTTP-based receivers.
+          ## ref: https://prometheus.io/docs/alerting/0.28/configuration/#receiver
+          ##
+          receivers:
+            - name: "web.hook"
+              webhook_configs:
+                - url: "http://127.0.0.1:5001/"
+          ## @param prometheus.containers.alertmanager.configFiles.main.inhibit_rules An inhibition rule mutes an alert (target) matching a set of matchers when an alert (source) exists that matches another set of matchers.
+          ## Both target and source alerts must have the same label values for the label names in the equal list.
+          ## ref: https://prometheus.io/docs/alerting/0.28/configuration/#inhibit_rule
+          ##
+          inhibit_rules:
+            - source_match:
+                severity: "critical"
+              target_match:
+                severity: "warning"
+              equal: ["alertname", "dev", "instance"]
+        ## @param prometheus.containers.alertmanager.configFiles.web basic authentication and TLS config
+        ## The config file will presents in the path which specify in prometheus.containers.alertmanager.flags.web.config.file, default: /etc/prometheus/web.yml
+        ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/https/
+        ## e.g.
+        ## web:
+        ##  tls_server_config:
+        ##    cert_file: /etc/prometheus/certs/prometheus.crt
+        ##    key_file: /etc/prometheus/certs/prometheus.key
+        ##
+        web: {}
+
+      ## @param prometheus.containers.alertmanager.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+      ##
+      existingConfigmap:
+      ## @param prometheus.containers.alertmanager.tls secret setting of cert and key or whatever tls content will set in the container
+      ##
+      tls:
+        ## @param prometheus.containers.alertmanager.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
+        ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
+        ##
+        mountPath: /etc/alertmanager/certs
+        ## @param prometheus.containers.alertmanager.tls.contents secret content of cert and key or whatever tls content will set in the container
+        ## You can set the content key as whatever file name you like
+        ## But the tls set in configFiles above must match with the settings here
+        ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+        ## e.g.
+        ## contents:
+        ##  ca.crt: ""
+        ##  prometheus.containers.alertmanager.crt: ""
+        ##  prometheus.containers.alertmanager.key: ""
+        ##
+        contents: {}
+      ## @param prometheus.containers.alertmanager.command Override default container command (useful when using custom images)
+      ##
+      command: []
+      ## @param prometheus.containers.alertmanager.flags flags for `prometheus` command
+      ## ref: https://prometheus.io/docs/prometheus/3.4/command-line/prometheus/
+      ##
+      flags:
+        ## @param prometheus.containers.alertmanager.flags.config.file Prometheus configuration file path.
+        ##
+        config:
+          file: /etc/alertmanager/alertmanager.yml
+        ## @param prometheus.containers.alertmanager.flags.cluster To create a highly available cluster of the Alertmanager the instances need to be configured to communicate with each other.
+        ## This is configured using the --cluster.* flags.
+        ## ref: https://github.com/prometheus/alertmanager/tree/v0.28.1?tab=readme-ov-file#high-availability
+        ##
+        cluster:
+          ## @param prometheus.containers.alertmanager.flags.cluster.listen-address string: cluster listen address (default "0.0.0.0:9094"; empty string disables HA mode)
+          ##
+          listen-address: # 0.0.0.0:9094
+          ## @param prometheus.containers.alertmanager.flags.cluster.advertise-address string: cluster advertise address
+          ##
+          advertise-address:
+          ## @param prometheus.containers.alertmanager.flags.cluster.peer value: initial peers (repeat flag for each additional peer)
+          ##
+          peer:
+          ## @param prometheus.containers.alertmanager.flags.cluster.peer-timeout value: peer timeout period (default "15s")
+          ##
+          peer-timeout: 15s
+          ## @param prometheus.containers.alertmanager.flags.cluster.gossip-interval value: cluster message propagation speed (default "200ms")
+          ##
+          gossip-interval: 200ms
+          ## @param prometheus.containers.alertmanager.flags.cluster.pushpull-interval value: lower values will increase convergence speeds at expense of bandwidth (default "1m0s")
+          ##
+          pushpull-interval: 1m0s
+          ## @param prometheus.containers.alertmanager.flags.cluster.settle-timeout value: maximum time to wait for cluster connections to settle before evaluating notifications.
+          ##
+          settle-timeout:
+          ## @param prometheus.containers.alertmanager.flags.cluster.tcp-timeout value: timeout value for tcp connections, reads and writes (default "10s")
+          ##
+          tcp-timeout: 10s
+          ## @param prometheus.containers.alertmanager.flags.cluster.probe-timeout value: time to wait for ack before marking node unhealthy (default "500ms")
+          ##
+          probe-timeout: 500ms
+          ## @param prometheus.containers.alertmanager.flags.cluster.probe-interval value: interval between random node probes (default "1s")
+          ##
+          probe-interval: 1s
+          ## @param prometheus.containers.alertmanager.flags.cluster.reconnect-interval value: interval between attempting to reconnect to lost peers (default "10s")
+          ##
+          reconnect-interval: 10s
+          ## @param prometheus.containers.alertmanager.flags.cluster.reconnect-timeout value: length of time to attempt to reconnect to a lost peer (default: "6h0m0s")
+          ##
+          reconnect-timeout: 6h0m0s
+          ## @param prometheus.containers.alertmanager.flags.cluster.label value: the label is an optional string to include on each packet and stream. It uniquely identifies the cluster and prevents cross-communication issues when sending gossip messages (default:"")
+          ##
+          label:
+
+        ## @param prometheus.containers.alertmanager.flags.enable-feature Comma separated feature names to enable. Valid options:
+        ## FeatureReceiverNameInMetrics, FeatureClassicMode, FeatureUTF8StrictMode, FeatureAutoGOMEMLIMIT, FeatureAutoGOMAXPROCS,
+        ## See https://github.com/prometheus/alertmanager/blob/v0.28.1/featurecontrol/featurecontrol.go#L31-L37 for more details.
+        ##
+        enable-feature:
+        ## @param prometheus.containers.alertmanager.flags.log.level Only log messages with the given severity or above. One of: [debug, info, warn, error]
+        ##
+        log:
+          level: info
+        ## @param prometheus.containers.alertmanager.flags.storage.path Base path for data storage.
+        ##
+        storage:
+          path: /alertmanager
+        web:
+          ## @param prometheus.containers.alertmanager.flags.web.listen-address Address to listen on for UI, API, and telemetry. Can be repeated.
+          ##
+          listen-address: 0.0.0.0:9093
+          config:
+            ## @param prometheus.containers.alertmanager.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
+            ##
+            file: # /etc/alertmanager/web.yml
+          ## @param prometheus.containers.alertmanager.flags.web.external-url The URL under which Alertmanager is externally reachable (for example, if Alertmanager is served via a reverse proxy).
+          ## Used for generating relative and absolute links back to Alertmanager itself.
+          ## If the URL has a path portion, it will be used to prefix all HTTP endpoints served by Alertmanager.
+          ## If omitted, relevant URL components will be derived automatically.
+          ##
+          external-url:
+          ## @param prometheus.containers.alertmanager.flags.web.route-prefix Prefix for the internal routes of web endpoints. Defaults to path of --web.external-url.
+          ##
+          route-prefix:
+      ## @param prometheus.containers.alertmanager.args Override default container args (useful when using custom images)
+      ##
+      args: []
+      ## @param prometheus.containers.alertmanager.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+      ## e.g:
+      ## extraEnvVars:
+      ##   - name: FOO
+      ##     value: "bar"
+      ##
+      extraEnvVars: []
+      ## @param prometheus.containers.alertmanager.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+      ##
+      extraEnvVarsCM: ""
+      ## @param prometheus.containers.alertmanager.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+      ##
+      extraEnvVarsSecret: ""
+      ## @param prometheus.containers.alertmanager.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+      ##
+      extraVolumeMounts: []
 
 ## @section Persistence Parameters
 ##
@@ -562,9 +888,12 @@ persistence:
   ##
   mountPath:
     server: "{{ .Values.prometheus.containers.server.flags.storage.tsdb.path }}"
+    alertmanager: "{{ .Values.prometheus.containers.alertmanager.flags.storage.path }}"
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
-  subPath: ""
+  subPath:
+    server:
+    alertmanager:
   ## @param persistence.storageClass Storage class of backing PVC
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning

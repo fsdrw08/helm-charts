@@ -120,14 +120,11 @@ spec:
         - name: tls
           mountPath: {{ $val.tls.mountPath }}
         {{- end }}
-        - name: data
+        - name: {{ $key }}-data
           mountPath: {{ include "common.tplvalues.render" (dict "value" (index $.Values "persistence" "mountPath" $key) "context" $) }}
-          subPath: {{ $key }}
-          {{- /*
-          {{- if $.Values.persistence.subPath }}
-          subPath: {{ $.Values.persistence.subPath }}
+          {{- if (index $.Values "persistence" "subPath" $key) }}
+          subPath: {{ index $.Values "persistence" "subPath" $key }}
           {{- end }}
-          */}}
       {{- if $val.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" $val.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -148,14 +145,16 @@ spec:
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
-    - name: data
-    {{- if .Values.persistence.enabled }}
-    {{- range $key, $val := .Values.persistence.mountPath }}
+    {{- range $key, $val := .Values.prometheus.containers }}
+    {{- if $val.enabled }}
+    - name: {{ $key }}-data
+    {{- if $.Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" $) "-pvc" ) $.Values.persistence.existingClaim }}
-    {{- end }}
+        claimName: {{ default ( print (include "common.names.fullname" $) "-" $key "-pvc" ) $.Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
+    {{- end }}
+    {{- end }}
     {{- end }}
     {{- if .Values.prometheus.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.extraVolumes "context" $) | nindent 4 }}
