@@ -1,0 +1,5 @@
+{{- if eq .Values.workloadKind "Pod"  -}}
+apiVersion: v1
+kind: Pod
+{{ template "alertmanager.podTemplate" . }}
+{{- end }}
