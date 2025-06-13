@@ -120,11 +120,13 @@ spec:
         - name: tls
           mountPath: {{ $val.tls.mountPath }}
         {{- end }}
+        {{- if index $.Values "persistence" "mountPath" $key }}
         - name: {{ $key }}-data
           mountPath: {{ include "common.tplvalues.render" (dict "value" (index $.Values "persistence" "mountPath" $key) "context" $) }}
           {{- if (index $.Values "persistence" "subPath" $key) }}
           subPath: {{ index $.Values "persistence" "subPath" $key }}
           {{- end }}
+        {{- end }}
       {{- if $val.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" $val.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
