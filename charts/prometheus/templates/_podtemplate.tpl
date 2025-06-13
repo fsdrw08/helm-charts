@@ -52,7 +52,7 @@ spec:
   containers:
   {{- range $key, $val := .Values.prometheus.containers }}
   {{- if $val.enabled }}
-    - name: {{ $key }}
+    - name: {{ kebabcase $key }}
       image: {{ include "common.images.image" (dict "imageRoot" $val.image "global" $.Values.global) }}
       imagePullPolicy: {{ $val.image.pullPolicy | quote }}
       {{- if $val.containerSecurityContext.enabled }}

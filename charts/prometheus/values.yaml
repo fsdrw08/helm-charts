@@ -550,7 +550,7 @@ prometheus:
       extraVolumeMounts: []
     alertmanager:
       ## @param prometheus.containers.auth.enabled present this container in the pod
-      enabled: true
+      enabled: false
       ## prometheus alertmanager image
       ## ref: https://quay.io/repository/prometheus/alertmanager?tab=tags
       ## @param prometheus.containers.alertmanager.image.registry prometheus image registry
@@ -876,7 +876,7 @@ prometheus:
       extraVolumeMounts: []
     blackboxExporter:
       ## @param prometheus.containers.blackboxExporter.enabled present this container in the pod
-      enabled: false
+      enabled: true
       ## prometheus blackboxExporter image
       ## ref: https://quay.io/repository/prometheus/blackbox-exporter?tab=tags
       ## @param prometheus.containers.blackboxExporter.image.registry prometheus image registry
@@ -920,8 +920,8 @@ prometheus:
       ##
       containerPorts:
         - name: http
-          containerPort: 9090
-          hostPort: 9090
+          containerPort: 9115
+          hostPort: 9115
           protocol: TCP
       ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -1017,8 +1017,7 @@ prometheus:
       configFiles:
         ## @param prometheus.containers.blackboxExporter.configFiles.main the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
         ## The config file will presents in the path which specify in prometheus.containers.blackboxExporter.flags.config.file, default: /etc/prometheus/prometheus.yml
-        ## ref: https://github.com/prometheus/prometheus/blob/v3.4.0/documentation/examples/prometheus.yml
-        ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/
+        ## ref: https://github.com/prometheus/blackbox_exporter/blob/v0.26.0/blackbox.yml
         ##
         main:
           ## @param prometheus.containers.blackboxExporter.configFiles.main.global The global configuration specifies parameters that are valid in all other configuration contexts.
@@ -1114,8 +1113,8 @@ prometheus:
         ## e.g.
         ## contents:
         ##  ca.crt: ""
-        ##  prometheus.containers.blackboxExporter.crt: ""
-        ##  prometheus.containers.blackboxExporter.key: ""
+        ##  blackboxExporter.crt: ""
+        ##  blackboxExporter.key: ""
         ##
         contents: {}
       ## @param prometheus.containers.blackboxExporter.command Override default container command (useful when using custom images)
