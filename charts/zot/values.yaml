@@ -52,7 +52,7 @@ zot:
   image:
     registry: ghcr.io
     repository: project-zot/zot-linux-amd64
-    tag: v2.1.2
+    tag: v2.1.5
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -190,14 +190,14 @@ zot:
 
   ## @param zot.config config file for zot, content under this block will convert to json file place in /etc/zot/config.json
   ## you can set whatever content under this block, just follow the zot configuration guide
-  ## ref: https://zotregistry.dev/v2.1.2/admin-guide/admin-configuration/
-  ## ref: https://github.com/project-zot/zot/blob/v2.1.2/build/Dockerfile#L14-L26
+  ## ref: https://zotregistry.dev/v2.1.5/admin-guide/admin-configuration/
+  ## ref: https://github.com/project-zot/zot/blob/v2.1.5/build/Dockerfile#L14-L26
   ##
   config:
-    # https://zotregistry.dev/v2.1.2/articles/storage/#configuring-zot-storage
+    # https://zotregistry.dev/v2.1.5/articles/storage/#configuring-zot-storage
     storage:
       rootDirectory: /var/lib/registry
-    # ref: https://zotregistry.dev/v2.1.2/admin-guide/admin-configuration/#network-configuration
+    # ref: https://zotregistry.dev/v2.1.5/admin-guide/admin-configuration/#network-configuration
     http:
       address: "0.0.0.0"
       port: "5000"
@@ -208,7 +208,7 @@ zot:
 
   ## @param zot.htpasswd username and password content which encrypt by htpasswd
   ## and set in to the path which config in .Values.zot.config.http.auth.htpasswd.path
-  ## ref: https://zotregistry.dev/v2.1.2/articles/authn-authz/#htpasswd
+  ## ref: https://zotregistry.dev/v2.1.5/articles/authn-authz/#htpasswd
   ## Example htpasswd with 'admin:admin' & 'user:user' user:pass pairs
   ## htpasswd: |-
   ##   admin:$2y$05$vmiurPmJvHylk78HHFWuruFFVePlit9rZWGA/FbZfTEmNRneGJtha
