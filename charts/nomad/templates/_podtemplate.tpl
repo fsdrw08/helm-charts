@@ -16,6 +16,7 @@ metadata:
     {{- end }}
 spec:
   {{- include "nomad.imagePullSecrets" . | nindent 2 }}
+  hostNetwork: {{ .Values.consul.hostNetwork }}
   {{- if .Values.nomad.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.nomad.hostAliases "context" $) | nindent 4 }}
   {{- end }}

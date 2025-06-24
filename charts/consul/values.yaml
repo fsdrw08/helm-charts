@@ -349,6 +349,9 @@ consul:
   ## @param consul.args Override default container args (useful when using custom images)
   ##
   args: []
+  ## @param consul.hostNetwork hostNetwork mode in consul, only set this key to true can make container hostname set the host hostname
+  ##
+  hostNetwork: true
   ## @param consul.hostAliases consul pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##

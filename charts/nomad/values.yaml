@@ -52,7 +52,7 @@ nomad:
   image:
     registry: docker.io
     repository: hashicorp/nomad
-    tag: "1.10"
+    tag: "1.10.2"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -76,23 +76,26 @@ nomad:
   replicaCount: 1
   ## @param nomad.containerPorts nomad container port to expose to host
   ## ref: https://developer.hashicorp.com/nomad/docs/configuration
-  containerPorts:
-    - name: http
-      containerPort: 4646
-      hostPort: 4646
-      protocol: TCP
-    - name: rpc
-      containerPort: 4647
-      hostPort: 4647
-      protocol: TCP
-    - name: serf-tcp
-      containerPort: 4648
-      hostPort: 4648
-      protocol: TCP
-    - name: serf-udp
-      containerPort: 4648
-      hostPort: 4648
-      protocol: UDP
+  ## e.g.:
+  ## containerPorts:
+  ##  - name: http
+  ##    containerPort: 4646
+  ##    hostPort: 4646
+  ##    protocol: TCP
+  ##  - name: rpc
+  ##    containerPort: 4647
+  ##    hostPort: 4647
+  ##    protocol: TCP
+  ##  - name: serf-tcp
+  ##    containerPort: 4648
+  ##    hostPort: 4648
+  ##    protocol: TCP
+  ##  - name: serf-udp
+  ##    containerPort: 4648
+  ##    hostPort: 4648
+  ##    protocol: UDP
+  ##
+  containerPorts: []
   ## Configure extra options for nomad containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param nomad.livenessProbe.enabled Enable livenessProbe on nomad containers
@@ -248,7 +251,7 @@ nomad:
       ## This value is used to identify individual agents. When specified on a server, the name must be unique within the region.
       ## ref: https://developer.hashicorp.com/nomad/docs/configuration#name
       ##
-      name: nomad_server
+      # name: nomad_server
       ## @param nomad.configFiles.main.ports This is a nested object that allows setting the bind ports for the following keys
       ## ref: https://developer.hashicorp.com/nomad/docs/configuration#ports
       ##
@@ -344,6 +347,9 @@ nomad:
   args:
     - agent
     - -config=/nomad/config
+  ## @param nomad.hostNetwork hostNetwork mode in consul, only set this key to true can make container hostname set the host hostname
+  ##
+  hostNetwork: true
   ## @param nomad.hostAliases nomad pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
