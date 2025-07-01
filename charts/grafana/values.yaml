@@ -199,7 +199,7 @@ grafana:
     ## you can add whatever config under this block according to https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#variable-expansion
     ## ref: https://github.com/grafana/grafana/blob/v12.0.1/conf/defaults.ini
     ##
-    custom:
+    grafana:
       ## @param grafana.configFile.custome.app_mode Options are production and development. Default is production.
       ## Don’t change this option unless you are working on Grafana development.
       ##

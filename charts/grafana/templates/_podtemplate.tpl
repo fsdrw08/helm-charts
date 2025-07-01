@@ -116,7 +116,7 @@ spec:
           mountPath: {{ .Values.grafana.tls.mountPath }}
         {{- end }}
         - name: data
-          mountPath: {{ .Values.grafana.configFiles.custom.paths.data }}
+          mountPath: {{ .Values.grafana.configFiles.grafana.paths.data }}
       {{- if .Values.grafana.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.grafana.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}

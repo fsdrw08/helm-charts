@@ -21,7 +21,7 @@ data:
     {{ $node }} = {{ $config }}
 {{- end }}
 {{- end }}
-{{- range $node, $config := .Values.grafana.configFiles.custom }}
+{{- range $node, $config := .Values.grafana.configFiles.grafana }}
 {{- if kindIs "map" $config }}
     [{{ $node }}]
     {{- range $key, $value := $config }}
