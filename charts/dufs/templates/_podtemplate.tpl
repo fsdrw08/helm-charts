@@ -7,7 +7,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: dufs
     {{- if .Values.dufs.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.dufs.podLabels "context" $) | nindent 4 }}
     {{- end }}
@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.dufs.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: dufs
+    - name: server
       image: {{ template "%%TEMPLATE_NAME%%.image" . }}
       imagePullPolicy: {{ .Values.dufs.image.pullPolicy | quote }}
       {{- if .Values.dufs.containerSecurityContext.enabled }}
@@ -57,6 +57,10 @@ spec:
       {{- end }}
       {{- if .Values.dufs.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.args "context" $) | nindent 8 }}
+      {{- else }}
+      args: 
+        - --config
+        - /etc/dufs/config.yaml
       {{- end }}
       env:
         {{- if .Values.dufs.extraEnvVars }}
@@ -99,8 +103,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.dufs.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /etc/dufs
         - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $) }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -111,6 +117,9 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.dufs.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:

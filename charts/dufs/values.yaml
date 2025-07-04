@@ -74,7 +74,7 @@ dufs:
   ##
   replicaCount: 1
   ## @param dufs.containerPorts dufs container port to expose to host
-  ## e.g. 
+  ## e.g.
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
@@ -182,17 +182,17 @@ dufs:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## @param dufs.config 
+  ## @param dufs.config
   ## ref: https://github.com/sigoden/dufs?tab=readme-ov-file#configuration-file
   config:
     ## @param dufs.config.serve-path Specific path to serve [default: .]
-    ## 
-    serve-path: '.'
+    ##
+    serve-path: /data
     ## @param dufs.config.bind Specify bind address or unix socket
-    ## 
+    ##
     bind: 0.0.0.0
     ## @param dufs.config.port Specify port to listen on [default: 5000]
-    ## 
+    ##
     port: 5000
     ## @param dufs.config.path-prefix Specify a path prefix
     ##
@@ -201,14 +201,14 @@ dufs:
     ##
     hidden:
       - tmp
-      - '*.log'
-      - '*.lock'
+      - "*.log"
+      - "*.lock"
     ## @param dufs.config.auth Add auth roles, e.g. user:pass@/dir1:rw,/dir2
     ##
     auth:
       - admin:admin@/:rw
       - user:pass@/src:rw,/share
-      - '@/'  # According to the YAML spec, quoting is required.
+      - "@/" # According to the YAML spec, quoting is required.
     ## @param dufs.config.allow-all Allow all operations
     ##
     allow-all: false
@@ -347,7 +347,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/dufs/data
+  mountPath: '{{ index .Values.dufs.config "serve-path" }}'
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
@@ -439,4 +439,4 @@ volumePermissions:
 # %%SUBCHART_NAME%%:
 SUBCHART_NAME:
   enabled: false
-  %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
