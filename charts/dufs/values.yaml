@@ -196,7 +196,7 @@ dufs:
     port: 5000
     ## @param dufs.config.path-prefix Specify a path prefix
     ##
-    path-prefix: /dufs
+    path-prefix: /
     ## @param dufs.config.hidden Hide paths from directory listings, e.g. tmp,*.log,*.lock
     ##
     hidden:
@@ -241,7 +241,7 @@ dufs:
     render-spa: true
     ## @param dufs.config.assets Set the path to the assets directory for overriding the built-in assets
     ##
-    assets: ./assets/
+    # assets: ./assets/
     ## @param dufs.config.log-format Customize http log format
     ##
     log-format: '$remote_addr "$request" $status $http_user_agent'
@@ -253,10 +253,28 @@ dufs:
     compress: low
     ## @param dufs.config.tls-cert Path to an SSL/TLS certificate to serve with HTTPS
     ##
-    tls-cert: tests/data/cert.pem
+    # tls-cert: /tls/cert.pem
     ## @param dufs.config.tls-key Path to the SSL/TLS certificate's private key
     ##
-    tls-key: tests/data/key_pkcs1.pem
+    # tls-key: /tls/key_pkcs1.pem
+
+  ## @param dufs.tls secret setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    ## @param dufs.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ##
+    mountPath: /tls
+    ## @param dufs.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## contents:
+    ##  dufs-agent-ca.pem: ""
+    ##  dc1-server-dufs-1.pem: ""
+    ##  dc1-server-dufs-1-key.pem: ""
+    ##
+    contents: {}
 
   ## @param dufs.existingConfigmap The name of an existing ConfigMap with your custom configuration for dufs
   ##
