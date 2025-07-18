@@ -52,7 +52,7 @@ postgresql:
   image:
     registry: quay.io
     repository: sclorg/postgresql-16-c10s
-    tag: "20250108"
+    tag: "20250716"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
