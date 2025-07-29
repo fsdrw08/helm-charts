@@ -3,6 +3,7 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
+{{- if .Values.configFiles.web }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -14,5 +15,6 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  %%CONFIG_FILE_NAME%%: |
-  # Config file
+  web.yaml: {{ print "|" }}
+{{- include "common.tplvalues.render" (dict "value" .Values.prometheusPodmanExporter.configFile.web "context" $) | nindent 4 -}}
+{{- end -}}

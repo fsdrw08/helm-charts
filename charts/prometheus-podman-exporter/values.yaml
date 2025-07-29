@@ -183,6 +183,7 @@ prometheusPodmanExporter:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   configFile:
+    ## @param prometheusPodmanExporter.configFile.web content of web config file
     web: {}
   ## @param prometheusPodmanExporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
@@ -249,7 +250,7 @@ prometheusPodmanExporter:
     web:
       config:
         ## @param prometheusPodmanExporter.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
-        file:
+        file: # /etc/exporter/web.yaml
       ## @param prometheusPodmanExporter.flags.web.Exclude metrics about the exporter itself (promhttp_*, process_*, go_*).
       disable-exporter-metrics: false
       ## @param prometheusPodmanExporter.flags.web.Address on which to expose metrics and web interface. (default ":9882")

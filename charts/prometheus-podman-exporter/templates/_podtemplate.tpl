@@ -102,6 +102,15 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prometheusPodmanExporter.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        {{- if .Values.prometheusPodmanExporter.flags.web.config.file }}
+        - name: web
+          mountPath: {{ .Values.prometheusPodmanExporter.flags.web.config.file }}
+          subPath: {{ base .Values.prometheusPodmanExporter.flags.web.config.file }}
+        {{- end }}
+        {{- if .Values.prometheusPodmanExporter.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.prometheusPodmanExporter.tls.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
