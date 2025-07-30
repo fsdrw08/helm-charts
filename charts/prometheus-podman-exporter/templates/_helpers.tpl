@@ -4,30 +4,30 @@ SPDX-License-Identifier: APACHE-2.0
 */}}
 
 {{/*
-Return the proper prometheusPodmanExporter image name
+Return the proper exporter image name
 */}}
-{{- define "prometheusPodmanExporter.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.prometheusPodmanExporter.image "global" .Values.global) }}
+{{- define "exporter.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.exporter.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "prometheusPodmanExporter.volumePermissions.image" -}}
+{{- define "exporter.volumePermissions.image" -}}
 {{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
-{{- define "prometheusPodmanExporter.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.prometheusPodmanExporter.image .Values.volumePermissions.image) "context" $) -}}
+{{- define "exporter.imagePullSecrets" -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.exporter.image .Values.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "prometheusPodmanExporter.serviceAccountName" -}}
+{{- define "exporter.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
     {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
@@ -39,7 +39,7 @@ Create the name of the service account to use
 Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
 Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
 */}}
-{{- define "prometheusPodmanExporter.ingress.certManagerRequest" -}}
+{{- define "exporter.ingress.certManagerRequest" -}}
 {{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
     {{- true -}}
 {{- end -}}
@@ -48,10 +48,10 @@ Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
 {{/*
 Compile all warnings into a single message.
 */}}
-{{- define "prometheusPodmanExporter.validateValues" -}}
+{{- define "exporter.validateValues" -}}
 {{- $messages := list -}}
-{{- $messages := append $messages (include "prometheusPodmanExporter.validateValues.foo" .) -}}
-{{- $messages := append $messages (include "prometheusPodmanExporter.validateValues.bar" .) -}}
+{{- $messages := append $messages (include "exporter.validateValues.foo" .) -}}
+{{- $messages := append $messages (include "exporter.validateValues.bar" .) -}}
 {{- $messages := without $messages "" -}}
 {{- $message := join "\n" $messages -}}
 

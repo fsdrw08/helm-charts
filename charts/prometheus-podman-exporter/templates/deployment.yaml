@@ -11,18 +11,18 @@ metadata:
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: prometheus-podman-exporter
-  {{- if or .Values.prometheusPodmanExporter.deploymentAnnotations .Values.commonAnnotations }}
-  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.prometheusPodmanExporter.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
+  {{- if or .Values.exporter.deploymentAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.exporter.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.prometheusPodmanExporter.autoscaling.hpa.enabled }}
-  replicas: {{ .Values.prometheusPodmanExporter.replicaCount }}
+  {{- if not .Values.exporter.autoscaling.hpa.enabled }}
+  replicas: {{ .Values.exporter.replicaCount }}
   {{- end }}
-  {{- if .Values.prometheusPodmanExporter.updateStrategy }}
-  strategy: {{- toYaml .Values.prometheusPodmanExporter.updateStrategy | nindent 4 }}
+  {{- if .Values.exporter.updateStrategy }}
+  strategy: {{- toYaml .Values.exporter.updateStrategy | nindent 4 }}
   {{- end }}
-  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.prometheusPodmanExporter.podLabels .Values.commonLabels) "context" .) }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.exporter.podLabels .Values.commonLabels) "context" .) }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
       app.kubernetes.io/component: prometheus-podman-exporter

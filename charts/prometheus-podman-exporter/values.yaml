@@ -32,27 +32,27 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param prometheusPodmanExporter.workloadKind specify the deploy kind： Pod, or Deployment
+## @param exporter.workloadKind specify the deploy kind： Pod, or Deployment
 workloadKind: Pod
 ## @section prometheus-podman-exporter Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
-prometheusPodmanExporter:
-  ## Bitnami prometheus-podman-exporter image
+exporter:
+  ## prometheus-podman-exporter image
   ## ref: https://quay.io/repository/navidys/prometheus-podman-exporter?tab=tags
-  ## @param prometheusPodmanExporter.image.registry prometheus-podman-exporter image registry
-  ## @param prometheusPodmanExporter.image.repository prometheus-podman-exporter image repository
-  ## @param prometheusPodmanExporter.image.tag prometheus-podman-exporter image tag (immutable tags are recommended)
-  ## @param prometheusPodmanExporter.image.digest prometheus-podman-exporter image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param prometheusPodmanExporter.image.pullPolicy prometheus-podman-exporter image pull policy
-  ## @param prometheusPodmanExporter.image.pullSecrets prometheus-podman-exporter image pull secrets
+  ## @param exporter.image.registry prometheus-podman-exporter image registry
+  ## @param exporter.image.repository prometheus-podman-exporter image repository
+  ## @param exporter.image.tag prometheus-podman-exporter image tag (immutable tags are recommended)
+  ## @param exporter.image.digest prometheus-podman-exporter image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param exporter.image.pullPolicy prometheus-podman-exporter image pull policy
+  ## @param exporter.image.pullSecrets prometheus-podman-exporter image pull secrets
   ##
   image:
     registry: quay.io
     repository: navidys/prometheus-podman-exporter
-    tag: v1.17.0
+    tag: v1.17.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,13 +67,13 @@ prometheusPodmanExporter:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param prometheusPodmanExporter.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## @param exporter.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param prometheusPodmanExporter.replicaCount Number of prometheus-podman-exporter replicas to deploy
+  ## @param exporter.replicaCount Number of prometheus-podman-exporter replicas to deploy
   ##
   replicaCount: 1
-  ## @param prometheusPodmanExporter.containerPorts prometheus-podman-exporter container port to expose to host
+  ## @param exporter.containerPorts prometheus-podman-exporter container port to expose to host
   ## e.g.
   ## containerPorts:
   ##   - name: http
@@ -90,26 +90,26 @@ prometheusPodmanExporter:
   containerPorts: {}
   ## Configure extra options for prometheus-podman-exporter containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param prometheusPodmanExporter.livenessProbe.enabled Enable livenessProbe on prometheus-podman-exporter containers
-  ## @param prometheusPodmanExporter.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
-  ## @param prometheusPodmanExporter.livenessProbe.periodSeconds Period seconds for livenessProbe
-  ## @param prometheusPodmanExporter.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
-  ## @param prometheusPodmanExporter.livenessProbe.failureThreshold Failure threshold for livenessProbe
-  ## @param prometheusPodmanExporter.livenessProbe.successThreshold Success threshold for livenessProbe
+  ## @param exporter.livenessProbe.enabled Enable livenessProbe on prometheus-podman-exporter containers
+  ## @param exporter.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param exporter.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param exporter.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param exporter.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param exporter.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: foo
     periodSeconds: bar
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param prometheusPodmanExporter.readinessProbe.enabled Enable readinessProbe on prometheus-podman-exporter containers
-  ## @param prometheusPodmanExporter.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  ## @param prometheusPodmanExporter.readinessProbe.periodSeconds Period seconds for readinessProbe
-  ## @param prometheusPodmanExporter.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-  ## @param prometheusPodmanExporter.readinessProbe.failureThreshold Failure threshold for readinessProbe
-  ## @param prometheusPodmanExporter.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## @param exporter.readinessProbe.enabled Enable readinessProbe on prometheus-podman-exporter containers
+  ## @param exporter.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param exporter.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param exporter.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param exporter.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param exporter.readinessProbe.successThreshold Success threshold for readinessProbe
   ## note: podman not support readinessProbe currently
   ##
   readinessProbe:
@@ -119,12 +119,12 @@ prometheusPodmanExporter:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param prometheusPodmanExporter.startupProbe.enabled Enable startupProbe on prometheus-podman-exporter containers
-  ## @param prometheusPodmanExporter.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
-  ## @param prometheusPodmanExporter.startupProbe.periodSeconds Period seconds for startupProbe
-  ## @param prometheusPodmanExporter.startupProbe.timeoutSeconds Timeout seconds for startupProbe
-  ## @param prometheusPodmanExporter.startupProbe.failureThreshold Failure threshold for startupProbe
-  ## @param prometheusPodmanExporter.startupProbe.successThreshold Success threshold for startupProbe
+  ## @param exporter.startupProbe.enabled Enable startupProbe on prometheus-podman-exporter containers
+  ## @param exporter.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param exporter.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param exporter.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param exporter.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param exporter.startupProbe.successThreshold Success threshold for startupProbe
   ##
   startupProbe:
     enabled: false
@@ -133,22 +133,22 @@ prometheusPodmanExporter:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param prometheusPodmanExporter.customLivenessProbe Custom livenessProbe that overrides the default one
+  ## @param exporter.customLivenessProbe Custom livenessProbe that overrides the default one
   ##
   customLivenessProbe: {}
-  ## @param prometheusPodmanExporter.customReadinessProbe Custom readinessProbe that overrides the default one
+  ## @param exporter.customReadinessProbe Custom readinessProbe that overrides the default one
   ##
   customReadinessProbe: {}
-  ## @param prometheusPodmanExporter.customStartupProbe Custom startupProbe that overrides the default one
+  ## @param exporter.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
   ## prometheus-podman-exporter resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param prometheusPodmanExporter.resourcesPreset Set prometheus-podman-exporter container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if prometheusPodmanExporter.resources is set (prometheusPodmanExporter.resources is recommended for production).
+  ## @param exporter.resourcesPreset Set prometheus-podman-exporter container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if exporter.resources is set (exporter.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "nano"
-  ## @param prometheusPodmanExporter.resources Set prometheus-podman-exporter container requests and limits for different resources like CPU or memory (essential for production workloads)
+  resourcesPreset: "small"
+  ## @param exporter.resources Set prometheus-podman-exporter container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -161,8 +161,8 @@ prometheusPodmanExporter:
   resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param prometheusPodmanExporter.podSecurityContext.enabled Enabled prometheus-podman-exporter pods' Security Context
-  ## @param prometheusPodmanExporter.podSecurityContext.fsGroup Set prometheus-podman-exporter pod's Security Context fsGroup
+  ## @param exporter.podSecurityContext.enabled Enabled prometheus-podman-exporter pods' Security Context
+  ## @param exporter.podSecurityContext.fsGroup Set prometheus-podman-exporter pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
@@ -170,117 +170,117 @@ prometheusPodmanExporter:
     # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param prometheusPodmanExporter.containerSecurityContext.enabled Enabled prometheus-podman-exporter containers' Security Context
-  ## @param prometheusPodmanExporter.containerSecurityContext.runAsUser Set prometheus-podman-exporter containers' Security Context runAsUser
-  ## @param prometheusPodmanExporter.containerSecurityContext.runAsNonRoot Set prometheus-podman-exporter containers' Security Context runAsNonRoot
-  ## @param prometheusPodmanExporter.containerSecurityContext.readOnlyRootFilesystem Set prometheus-podman-exporter containers' Security Context runAsNonRoot
+  ## @param exporter.containerSecurityContext.enabled Enabled prometheus-podman-exporter containers' Security Context
+  ## @param exporter.containerSecurityContext.runAsUser Set prometheus-podman-exporter containers' Security Context runAsUser
+  ## @param exporter.containerSecurityContext.runAsNonRoot Set prometheus-podman-exporter containers' Security Context runAsNonRoot
+  ## @param exporter.containerSecurityContext.readOnlyRootFilesystem Set prometheus-podman-exporter containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
     enabled: false
     runAsUser: 1001
-    runAsNonRoot: true
-    readOnlyRootFilesystem: false
+    # runAsNonRoot: true
+    # readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   configFile:
-    ## @param prometheusPodmanExporter.configFile.web content of web config file
+    ## @param exporter.configFile.web content of web config file
     web: {}
-  ## @param prometheusPodmanExporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param exporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
-  ## @param prometheusPodmanExporter.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param exporter.tls secret setting of cert and key or whatever tls content will set in the container
   ##
   tls:
-    ## @param prometheusPodmanExporter.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
+    ## @param exporter.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
     ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
     ##
     mountPath: /etc/prometheus/certs
-    ## @param prometheusPodmanExporter.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ## @param exporter.tls.contents secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
     ## e.g.
     ## contents:
     ##  ca.crt: ""
-    ##  prometheusPodmanExporter.crt: ""
-    ##  prometheusPodmanExporter.key: ""
+    ##  exporter.crt: ""
+    ##  exporter.key: ""
     ##
     contents: {}
-  ## @param prometheusPodmanExporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for prometheus-podman-exporter
+  ## @param exporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for prometheus-podman-exporter
   ##
   existingConfigmap:
-  ## @param prometheusPodmanExporter.command Override default container command (useful when using custom images)
+  ## @param exporter.command Override default container command (useful when using custom images)
   ##
   command: []
-  ## @param prometheusPodmanExporter.flags flags to launch prometheus-podman-exporter
+  ## @param exporter.flags flags to launch prometheus-podman-exporter
   flags:
     collector:
-      ## @param prometheusPodmanExporter.flags.collector.cache_duration Duration (seconds) to retrieve container, size and refresh the cache. (default 3600)
+      ## @param exporter.flags.collector.cache_duration Duration (seconds) to retrieve container, size and refresh the cache. (default 3600)
       ##
       cache_duration: 3600
-      ## @param prometheusPodmanExporter.flags.collector.enable-all Enable all collectors by default.
+      ## @param exporter.flags.collector.enable-all Enable all collectors by default.
       ##
       enable-all: true
-      ## @param prometheusPodmanExporter.flags.collector.enhance-metrics enhance all metrics with the same field as for their podman_<...>_info metrics.
+      ## @param exporter.flags.collector.enhance-metrics enhance all metrics with the same field as for their podman_<...>_info metrics.
       ##
       enhance-metrics: true
-      ## @param prometheusPodmanExporter.flags.collector.image Enable image collector.
+      ## @param exporter.flags.collector.image Enable image collector.
       ##
       image: false
-      ## @param prometheusPodmanExporter.flags.collector.network Enable network collector.
+      ## @param exporter.flags.collector.network Enable network collector.
       ##
       network: false
-      ## @param prometheusPodmanExporter.flags.collector.pod Enable pod collector.
+      ## @param exporter.flags.collector.pod Enable pod collector.
       ##
       pod: false
-      ## @param prometheusPodmanExporter.flags.collector.store_labels Convert pod/container/image labels on prometheus metrics for each pod/container/image.
+      ## @param exporter.flags.collector.store_labels Convert pod/container/image labels on prometheus metrics for each pod/container/image.
       ##
       store_labels: false
-      ## @param prometheusPodmanExporter.flags.collector.system Enable system collector.
+      ## @param exporter.flags.collector.system Enable system collector.
       ##
       system: false
-      ## @param prometheusPodmanExporter.flags.collector.volume Enable volume collector.
+      ## @param exporter.flags.collector.volume Enable volume collector.
       ##
       volume: false
-      ## @param prometheusPodmanExporter.flags.collector.whitelisted_labels Comma separated list of pod/container/image labels to be converted to labels on prometheus metrics for each pod/container/image.
+      ## @param exporter.flags.collector.whitelisted_labels Comma separated list of pod/container/image labels to be converted to labels on prometheus metrics for each pod/container/image.
       ## collector.store_labels must be set to false for this to take effect.
       ##
       whitelisted_labels: false
-    ## @param prometheusPodmanExporter.flags.debug Set log level to debug.
+    ## @param exporter.flags.debug Set log level to debug.
     debug: false
     web:
       config:
-        ## @param prometheusPodmanExporter.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
+        ## @param exporter.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
         file: # /etc/exporter/web.yaml
-      ## @param prometheusPodmanExporter.flags.web.Exclude metrics about the exporter itself (promhttp_*, process_*, go_*).
+      ## @param exporter.flags.web.Exclude metrics about the exporter itself (promhttp_*, process_*, go_*).
       disable-exporter-metrics: false
-      ## @param prometheusPodmanExporter.flags.web.Address on which to expose metrics and web interface. (default ":9882")
+      ## @param exporter.flags.web.Address on which to expose metrics and web interface. (default ":9882")
       listen-address: :9882
-      ## @param prometheusPodmanExporter.flags.web.Maximum number of parallel scrape requests. Use 0 to disable (default 40)
+      ## @param exporter.flags.web.Maximum number of parallel scrape requests. Use 0 to disable (default 40)
       max-requests: 40
-      ## @param prometheusPodmanExporter.flags.web.Path under which to expose metrics. (default "/metrics")
+      ## @param exporter.flags.web.Path under which to expose metrics. (default "/metrics")
       telemetry-path: /metrics
-  ## @param prometheusPodmanExporter.args Override default container args (useful when using custom images)
+  ## @param exporter.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param prometheusPodmanExporter.hostAliases prometheus-podman-exporter pods host aliases
+  ## @param exporter.hostAliases prometheus-podman-exporter pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param prometheusPodmanExporter.podLabels Extra labels for prometheus-podman-exporter pods
+  ## @param exporter.podLabels Extra labels for prometheus-podman-exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param prometheusPodmanExporter.podAnnotations Annotations for prometheus-podman-exporter pods
+  ## @param exporter.podAnnotations Annotations for prometheus-podman-exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param prometheusPodmanExporter.autoscaling.enabled Enable autoscaling for prometheusPodmanExporter
-  ## @param prometheusPodmanExporter.autoscaling.minReplicas Minimum number of prometheusPodmanExporter replicas
-  ## @param prometheusPodmanExporter.autoscaling.maxReplicas Maximum number of prometheusPodmanExporter replicas
-  ## @param prometheusPodmanExporter.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param prometheusPodmanExporter.autoscaling.targetMemory Target Memory utilization percentage
+  ## @param exporter.autoscaling.enabled Enable autoscaling for exporter
+  ## @param exporter.autoscaling.minReplicas Minimum number of exporter replicas
+  ## @param exporter.autoscaling.maxReplicas Maximum number of exporter replicas
+  ## @param exporter.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param exporter.autoscaling.targetMemory Target Memory utilization percentage
   ##
   autoscaling:
     enabled: false
@@ -289,26 +289,26 @@ prometheusPodmanExporter:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param prometheusPodmanExporter.extraEnvVars Array with extra environment variables to add to prometheus-podman-exporter nodes
+  ## @param exporter.extraEnvVars Array with extra environment variables to add to prometheus-podman-exporter nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param prometheusPodmanExporter.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for prometheus-podman-exporter nodes
+  ## @param exporter.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for prometheus-podman-exporter nodes
   ##
   extraEnvVarsCM: ""
-  ## @param prometheusPodmanExporter.extraEnvVarsSecret Name of existing Secret containing extra env vars for prometheus-podman-exporter nodes
+  ## @param exporter.extraEnvVarsSecret Name of existing Secret containing extra env vars for prometheus-podman-exporter nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param prometheusPodmanExporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-podman-exporter pod(s)
+  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-podman-exporter pod(s)
   ##
   extraVolumes: []
-  ## @param prometheusPodmanExporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-podman-exporter container(s)
+  ## @param exporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-podman-exporter container(s)
   ##
   extraVolumeMounts: []
-  ## @param prometheusPodmanExporter.sidecars Add additional sidecar containers to the prometheus-podman-exporter pod(s)
+  ## @param exporter.sidecars Add additional sidecar containers to the prometheus-podman-exporter pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -319,7 +319,7 @@ prometheusPodmanExporter:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param prometheusPodmanExporter.initContainers Add additional init containers to the prometheus-podman-exporter pod(s)
+  ## @param exporter.initContainers Add additional init containers to the prometheus-podman-exporter pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -339,10 +339,10 @@ prometheusPodmanExporter:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/prometheusPodmanExporter/data
+  mountPath: /bitnami/exporter/data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
