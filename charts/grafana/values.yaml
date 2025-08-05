@@ -52,7 +52,7 @@ grafana:
   image:
     registry: docker.io
     repository: grafana/grafana
-    tag: 12.0.1
+    tag: 12.1.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -181,7 +181,7 @@ grafana:
   ## @param grafana.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
   ## @param grafana.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
   ## @param grafana.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## ref: https://github.com/grafana/grafana/blob/v12.0.1/Dockerfile#L129
+  ## ref: https://github.com/grafana/grafana/blob/v12.1.0/Dockerfile#L129
   ##
   containerSecurityContext:
     enabled: true
@@ -197,7 +197,7 @@ grafana:
   configFiles:
     ## @param grafana.configFiles.custom custom configuration file which will place in /etc/grafana/grafana.ini
     ## you can add whatever config under this block according to https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#variable-expansion
-    ## ref: https://github.com/grafana/grafana/blob/v12.0.1/conf/defaults.ini
+    ## ref: https://github.com/grafana/grafana/blob/v12.1.0/conf/defaults.ini
     ##
     grafana:
       ## @param grafana.configFile.custome.app_mode Options are production and development. Default is production.
@@ -263,7 +263,7 @@ grafana:
     ## @param grafana.configFiles.ldap Grafana's LDAP configuration
     ## by default, the ldap config will place in /etc/grafana/ldap.toml
     ## ref: https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/ldap/
-    ## ref: https://github.com/grafana/grafana/blob/v12.0.1/conf/defaults.ini#L945C15-L945C37
+    ## ref: https://github.com/grafana/grafana/blob/v12.1.0/conf/defaults.ini#L945C15-L945C37
     ## e.g.
     ## ldap:
     ##   servers:
