@@ -2,6 +2,13 @@ annotations:
   # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
   # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
   category: Analytics
+  images: |
+    - name: alertmanager
+      image: quay.io/prometheus/alertmanager:v0.28.1
+    - name: blackbox-exporter
+      image: quay.io/bitnami/prometheus/blackbox-exporter:v0.27.0
+    - name: prometheus
+      image: quay.io/prometheus/prometheus:v3.5.0
   licenses: Apache-2.0
 apiVersion: v2
 appVersion: v3.5.0
@@ -27,6 +34,6 @@ sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/prometheus
   - https://github.com/prometheus/prometheus
   - https://github.com/prometheus-community/helm-charts
-  - https://github.com/prometheus/prometheus/blob/v3.4.0/Dockerfile
+  - https://github.com/prometheus/prometheus/blob/v3.5.0/Dockerfile
   - ...
 version: 0.1.0
