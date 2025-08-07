@@ -186,8 +186,8 @@ redis:
   ##
   containerSecurityContext:
     enabled: true
-    runAsUser: 1000
-    runAsGroup: 999
+    runAsUser: 999
+    runAsGroup: 1000
     runAsNonRoot: true
     readOnlyRootFilesystem: false
 
@@ -325,7 +325,7 @@ redis:
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=1000,gid=999
+    io.podman.annotations.userns: keep-id:uid=999,gid=1000
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param redis.autoscaling.enabled Enable autoscaling for redis
