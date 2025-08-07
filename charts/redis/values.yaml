@@ -32,27 +32,27 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param workloadKind specify the deploy kind： Pod, or Deployment
+## @param redis.workloadKind specify the deploy kind： Pod, or Deployment
 workloadKind: Pod
-## @section zot Parameters
+## @section redis Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
-zot:
-  ## zot image
-  ## ref: https://github.com/project-zot/zot/pkgs/container/zot-linux-amd64
-  ## @param zot.image.registry zot image registry
-  ## @param zot.image.repository zot image repository
-  ## @param zot.image.tag zot image tag (immutable tags are recommended)
-  ## @param zot.image.digest zot image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param zot.image.pullPolicy zot image pull policy
-  ## @param zot.image.pullSecrets zot image pull secrets
+redis:
+  ## Redis image
+  ## ref: https://hub.docker.com/_/redis/tags
+  ## @param redis.image.registry redis image registry
+  ## @param redis.image.repository redis image repository
+  ## @param redis.image.tag redis image tag (immutable tags are recommended)
+  ## @param redis.image.digest redis image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param redis.image.pullPolicy redis image pull policy
+  ## @param redis.image.pullSecrets redis image pull secrets
   ##
   image:
-    registry: ghcr.io
-    repository: project-zot/zot-linux-amd64
-    tag: v2.1.7
+    registry: docker.io
+    repository: library/redis
+    tag: 8.2.0-alpine
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,13 +67,13 @@ zot:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param zot.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## @param redis.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param zot.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ## @param redis.replicaCount Number of redis replicas to deploy
   ##
   replicaCount: 1
-  ## @param zot.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param redis.containerPorts redis container port to expose to host
   ## e.g.
   ## containerPorts:
   ##   - name: http
@@ -88,33 +88,36 @@ zot:
   ##     protocol: TCP
   ##
   containerPorts:
-    - name: http
-      containerPort: 5000
-      hostPort: 5000
+    - name: redis
+      containerPort: 6379
+      hostPort: 6379
       protocol: TCP
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## Configure extra options for redis containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param zot.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param zot.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
-  ## @param zot.livenessProbe.periodSeconds Period seconds for livenessProbe
-  ## @param zot.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
-  ## @param zot.livenessProbe.failureThreshold Failure threshold for livenessProbe
-  ## @param zot.livenessProbe.successThreshold Success threshold for livenessProbe
-  ## zot have not provide health check endpoint currently https://github.com/project-zot/zot/issues/2487
+  ## @param redis.livenessProbe.enabled Enable livenessProbe on redis containers
+  ## @param redis.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param redis.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param redis.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param redis.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param redis.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param zot.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param zot.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-  ## @param zot.readinessProbe.periodSeconds Period seconds for readinessProbe
-  ## @param zot.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-  ## @param zot.readinessProbe.failureThreshold Failure threshold for readinessProbe
-  ## @param zot.readinessProbe.successThreshold Success threshold for readinessProbe
+    enabled: true
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    exec:
+      command:
+        - redis-cli
+        - ping
+  ## @param redis.readinessProbe.enabled Enable readinessProbe on redis containers
+  ## @param redis.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param redis.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param redis.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param redis.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param redis.readinessProbe.successThreshold Success threshold for readinessProbe
   ## note: podman not support readinessProbe currently
   ##
   readinessProbe:
@@ -124,12 +127,12 @@ zot:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param zot.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
-  ## @param zot.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
-  ## @param zot.startupProbe.periodSeconds Period seconds for startupProbe
-  ## @param zot.startupProbe.timeoutSeconds Timeout seconds for startupProbe
-  ## @param zot.startupProbe.failureThreshold Failure threshold for startupProbe
-  ## @param zot.startupProbe.successThreshold Success threshold for startupProbe
+  ## @param redis.startupProbe.enabled Enable startupProbe on redis containers
+  ## @param redis.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param redis.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param redis.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param redis.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param redis.startupProbe.successThreshold Success threshold for startupProbe
   ##
   startupProbe:
     enabled: false
@@ -138,22 +141,22 @@ zot:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param zot.customLivenessProbe Custom livenessProbe that overrides the default one
+  ## @param redis.customLivenessProbe Custom livenessProbe that overrides the default one
   ##
   customLivenessProbe: {}
-  ## @param zot.customReadinessProbe Custom readinessProbe that overrides the default one
+  ## @param redis.customReadinessProbe Custom readinessProbe that overrides the default one
   ##
   customReadinessProbe: {}
-  ## @param zot.customStartupProbe Custom startupProbe that overrides the default one
+  ## @param redis.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## redis resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param zot.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if zot.resources is set (zot.resources is recommended for production).
+  ## @param redis.resourcesPreset Set redis container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if redis.resources is set (redis.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param zot.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## @param redis.resources Set redis container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -166,99 +169,170 @@ zot:
   resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param zot.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param zot.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param redis.podSecurityContext.enabled Enabled redis pods' Security Context
+  ## @param redis.podSecurityContext.fsGroup Set redis pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
     enabled: false
     # fsGroup: 1001
   ## Configure Container Security Context
+  ## ref： https://github.com/redis/docker-library-redis/blob/release/8.2/alpine/Dockerfile#L6-L7
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param zot.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param zot.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param zot.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param zot.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param redis.containerSecurityContext.enabled Enabled redis containers' Security Context
+  ## @param redis.containerSecurityContext.runAsUser Set redis containers' Security Context runAsUser
+  ## @param redis.containerSecurityContext.runAsNonRoot Set redis containers' Security Context runAsNonRoot
+  ## @param redis.containerSecurityContext.readOnlyRootFilesystem Set redis containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
-    enabled: false
-    runAsUser: 1001
+    enabled: true
+    runAsUser: 1000
+    runAsGroup: 999
     runAsNonRoot: true
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  # @param redis.configFiles configuration files for redis
+  ## ref: https://github.com/redis/redis/blob/8.2.0/redis.conf
+  configFiles:
+    redis:
+      # NETWORK
+      bind: 127.0.0.1 -::1
+      protected-mode: "yes"
+      port: 6379
+      tcp-backlog: 511
+      timeout: 0
+      tcp-keepalive: 300
+      # GENERAL
+      daemonize: "no"
+      pidfile: /var/run/redis_6379.pid
+      loglevel: notice
+      logfile: '""'
+      databases: 16
+      always-show-logo: "no"
+      set-proc-title: "yes"
+      proc-title-template: '"{title} {listen-addr} {server-mode}"'
+      locale-collate: '""'
+      # SNAPSHOTTING
+      stop-writes-on-bgsave-error: "yes"
+      rdbcompression: "yes"
+      rdbchecksum: "yes"
+      dbfilename: dump.rdb
+      rdb-del-sync-files: "no"
+      dir: /data/
+      # REPLICATION
+      replica-serve-stale-data: "yes"
+      replica-read-only: "yes"
+      repl-diskless-sync: "yes"
+      repl-diskless-sync-delay: 5
+      repl-diskless-sync-max-replicas: 0
+      repl-diskless-load: disabled
+      repl-disable-tcp-nodelay: "no"
+      replica-priority: 100
+      # SECURITY
+      acllog-max-len: 128
+      # LAZY FREEING
+      lazyfree-lazy-eviction: "no"
+      lazyfree-lazy-expire: "no"
+      lazyfree-lazy-server-del: "no"
+      replica-lazy-flush: "no"
+      lazyfree-lazy-user-del: "no"
+      lazyfree-lazy-user-flush: "no"
+      # KERNEL OOM CONTROL
+      oom-score-adj: "no"
+      oom-score-adj-values: 0 200 800
+      # KERNEL transparent hugepage CONTROL
+      disable-thp: "yes"
+      # APPEND ONLY MODE
+      appendonly: "no"
+      appendfilename: "appendonly.aof"
+      appenddirname: "appendonlydir"
+      appendfsync: everysec
+      no-appendfsync-on-rewrite: "no"
+      auto-aof-rewrite-percentage: 100
+      auto-aof-rewrite-min-size: 64mb
+      aof-load-truncated: "yes"
+      aof-use-rdb-preamble: "yes"
+      aof-timestamp-enabled: "no"
+      # SLOW LOG
+      slowlog-log-slower-than: 10000
+      slowlog-max-len: 128
+      # LATENCY MONITOR
+      latency-monitor-threshold: 0
+      # EVENT NOTIFICATION
+      notify-keyspace-events: '""'
+      hash-max-listpack-entries: 512
+      hash-max-listpack-value: 64
+      # ADVANCED CONFIG
+      list-max-listpack-size: -2
+      list-compress-depth: 0
+      set-max-intset-entries: 512
+      set-max-listpack-entries: 128
+      set-max-listpack-value: 64
+      zset-max-listpack-entries: 128
+      zset-max-listpack-value: 64
+      hll-sparse-max-bytes: 3000
+      stream-node-max-bytes: 4096
+      stream-node-max-entries: 100
+      activerehashing: "yes"
+      client-output-buffer-limit:
+        - normal 0 0 0
+        - replica 256mb 64mb 60
+        - pubsub 32mb 8mb 60
+      hz: 10
+      dynamic-hz: "yes"
+      aof-rewrite-incremental-fsync: "yes"
+      rdb-save-incremental-fsync: "yes"
+      # ACTIVE DEFRAGMENTATION
+      jemalloc-bg-thread: "yes"
 
-  ## @param zot.config config file for zot, content under this block will convert to json file place in /etc/zot/config.json
-  ## you can set whatever content under this block, just follow the zot configuration guide
-  ## ref: https://zotregistry.dev/v2.1.7/admin-guide/admin-configuration/
-  ## ref: https://github.com/project-zot/zot/blob/v2.1.7/build/Dockerfile#L14-L26
-  ##
-  config:
-    # https://zotregistry.dev/v2.1.7/articles/storage/#configuring-zot-storage
-    storage:
-      rootDirectory: /var/lib/registry
-    # ref: https://zotregistry.dev/v2.1.7/admin-guide/admin-configuration/#network-configuration
-    http:
-      address: "0.0.0.0"
-      port: "5000"
-      compat:
-        - docker2s2
-    log:
-      level: "debug"
-
-  ## @param zot.htpasswd username and password content which encrypt by htpasswd
-  ## and set in to the path which config in .Values.zot.config.http.auth.htpasswd.path
-  ## ref: https://zotregistry.dev/v2.1.7/articles/authn-authz/#htpasswd
-  ## Example htpasswd with 'admin:admin' & 'user:user' user:pass pairs
-  ## htpasswd: |-
-  ##   admin:$2y$05$vmiurPmJvHylk78HHFWuruFFVePlit9rZWGA/FbZfTEmNRneGJtha
-  ##   user:$2y$05$L86zqQDfH5y445dcMlwu6uHv.oXFgT6AiJCwpv3ehr7idc0rI3S2G
-  ##
-  htpasswd: ""
-  ## @param zot.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param zot.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ## @param redis.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param redis.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
   ##
   tls:
-    mountPath: /etc/zot/certs
-    ## @param zot.tls.content secret content of cert and key or whatever tls content will set in the container
+    mountPath: /tls
+    ## @param redis.tls.contents secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
     ## e.g.
     ## contents:
     ##  ca.crt: ""
-    ##  tls.crt: ""
-    ##  tls.key: ""
+    ##  redis.crt: ""
+    ##  redis.key: ""
     ##
     contents: {}
-  ## @param zot.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+
+  ## @param redis.existingConfigmap The name of an existing ConfigMap with your custom configuration for redis
   ##
   existingConfigmap:
-  ## @param zot.command Override default container command (useful when using custom images)
+  ## @param redis.command Override default container command (useful when using custom images)
   ##
   command: []
-  ## @param zot.args Override default container args (useful when using custom images)
+  ## @param redis.args Override default container args (useful when using custom images)
   ##
-  args: []
-  ## @param zot.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  args:
+    - /etc/redis/redis.conf
+  ## @param redis.hostAliases redis pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param zot.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param redis.podLabels Extra labels for redis pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param zot.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param redis.podAnnotations Annotations for redis pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=1000,gid=999
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param zot.autoscaling.enabled Enable autoscaling for zot
-  ## @param zot.autoscaling.minReplicas Minimum number of zot replicas
-  ## @param zot.autoscaling.maxReplicas Maximum number of zot replicas
-  ## @param zot.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param zot.autoscaling.targetMemory Target Memory utilization percentage
+  ## @param redis.autoscaling.enabled Enable autoscaling for redis
+  ## @param redis.autoscaling.minReplicas Minimum number of redis replicas
+  ## @param redis.autoscaling.maxReplicas Maximum number of redis replicas
+  ## @param redis.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param redis.autoscaling.targetMemory Target Memory utilization percentage
   ##
   autoscaling:
     enabled: false
@@ -267,26 +341,26 @@ zot:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param zot.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param redis.extraEnvVars Array with extra environment variables to add to redis nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param zot.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param redis.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for redis nodes
   ##
   extraEnvVarsCM: ""
-  ## @param zot.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param redis.extraEnvVarsSecret Name of existing Secret containing extra env vars for redis nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param zot.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param redis.extraVolumes Optionally specify extra list of additional volumes for the redis pod(s)
   ##
   extraVolumes: []
-  ## @param zot.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param redis.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the redis container(s)
   ##
   extraVolumeMounts: []
-  ## @param zot.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param redis.sidecars Add additional sidecar containers to the redis pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -297,7 +371,7 @@ zot:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param zot.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param redis.initContainers Add additional init containers to the redis pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -320,7 +394,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /var/lib/registry
+  mountPath: /data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

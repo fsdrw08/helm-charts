@@ -176,10 +176,10 @@ exporter:
   ## @param exporter.containerSecurityContext.readOnlyRootFilesystem Set prometheus-podman-exporter containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
-    enabled: false
-    runAsUser: 1001
-    # runAsNonRoot: true
-    # readOnlyRootFilesystem: false
+    enabled: true
+    runAsUser: 65534
+    seLinuxOptions:
+      type: spc_t
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   configFile:
@@ -273,7 +273,8 @@ exporter:
   ## @param exporter.podAnnotations Annotations for prometheus-podman-exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=65534,gid=65534
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param exporter.autoscaling.enabled Enable autoscaling for exporter
