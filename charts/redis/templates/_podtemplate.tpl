@@ -15,7 +15,9 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
+  {{/*
   {{- include "redis.imagePullSecrets" . | nindent 2 }}
+  */}}
   {{- if .Values.redis.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.redis.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -46,73 +48,79 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.redis.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: server
-      image: {{ template "redis.image" . }}
-      imagePullPolicy: {{ .Values.redis.image.pullPolicy | quote }}
-      {{- if .Values.redis.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.redis.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+  {{- range $key, $val := .Values.redis.containers }}
+  {{- if $val.enabled }}
+    - name: {{ kebabcase $key }}
+      image: {{ include "common.images.image" (dict "imageRoot" $val.image "global" $.Values.global) }}
+      imagePullPolicy: {{ $val.image.pullPolicy | quote }}
+      {{- if $val.containerSecurityContext.enabled }}
+      securityContext: {{- omit $val.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      {{- if .Values.redis.command }}
-      command: {{- include "common.tplvalues.render" (dict "value" .Values.redis.command "context" $) | nindent 8 }}
+      {{- if $val.command }}
+      command: {{- include "common.tplvalues.render" (dict "value" $val.command "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.redis.args }}
-      args: {{- include "common.tplvalues.render" (dict "value" .Values.redis.args "context" $) | nindent 8 }}
+      {{- if $val.args }}
+      args: {{- include "common.tplvalues.render" (dict "value" $val.args "context" $) | nindent 8 }}
       {{- end }}
       env:
-        {{- if .Values.redis.extraEnvVars }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.redis.extraEnvVars "context" $) | nindent 8 }}
+        {{- if $val.extraEnvVars }}
+        {{- include "common.tplvalues.render" (dict "value" $val.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
       envFrom:
-        {{- if .Values.redis.extraEnvVarsCM }}
+        {{- if $val.extraEnvVarsCM }}
         - configMapRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.redis.extraEnvVarsCM "context" $) }}
+            name: {{ include "common.tplvalues.render" (dict "value" $val.extraEnvVarsCM "context" $) }}
         {{- end }}
         {{- /*
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
-        {{- if .Values.redis.extraEnvVarsSecret }}
+            name: {{ template "common.names.fullname" $ }}
+        */ -}}
+        {{- if $val.extraEnvVarsSecret }}
         - secretRef:
-            name: {{ include "common.tplvalues.render" (dict "value" .Values.redis.extraEnvVarsSecret "context" $) }}
+            name: {{ include "common.tplvalues.render" (dict "value" $val.extraEnvVarsSecret "context" $) }}
         {{- end }}
-      {{- if .Values.redis.resources }}
-      resources: {{- toYaml .Values.redis.resources | nindent 8 }}
-      {{- else if ne .Values.redis.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.redis.resourcesPreset) | nindent 8 }}
+      {{- if $val.resources }}
+      resources: {{- toYaml $val.resources | nindent 8 }}
+      {{- else if ne $val.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" $val.resourcesPreset) | nindent 8 }}
       {{- end }}
-      {{- if .Values.redis.containerPorts }}
-      ports: {{- include "common.tplvalues.render" (dict "value" .Values.redis.containerPorts "context" $) | nindent 8 -}}
+      {{- if $val.containerPorts }}
+      ports: {{- include "common.tplvalues.render" (dict "value" $val.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
-      {{- if .Values.redis.customLivenessProbe }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.redis.customLivenessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.redis.livenessProbe.enabled }}
-      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.redis.livenessProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customLivenessProbe }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" $val.customLivenessProbe "context" $) | nindent 8 }}
+      {{- else if $val.livenessProbe.enabled }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.livenessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.redis.customReadinessProbe }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.redis.customReadinessProbe "context" $) | nindent 8 }}
-      {{- else if .Values.redis.readinessProbe.enabled }}
-      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.redis.readinessProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customReadinessProbe }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" $val.customReadinessProbe "context" $) | nindent 8 }}
+      {{- else if $val.readinessProbe.enabled }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.readinessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.redis.customStartupProbe }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.redis.customStartupProbe "context" $) | nindent 8 }}
-      {{- else if .Values.redis.startupProbe.enabled }}
-      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.redis.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- if $val.customStartupProbe }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" $val.customStartupProbe "context" $) | nindent 8 }}
+      {{- else if $val.startupProbe.enabled }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
           mountPath: /etc/redis
-        {{- if .Values.redis.tls.contents }}
+        {{- if $val.tls.contents }}
         - name: tls
-          mountPath: {{ .Values.redis.tls.mountPath }}
+          mountPath: {{ $val.tls.mountPath }}
         {{- end }}
-        - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
+        {{- if index $.Values "persistence" "mountPath" $key }}
+        - name: {{ $key }}-data
+          mountPath: {{ include "common.tplvalues.render" (dict "value" (index $.Values "persistence" "mountPath" $key) "context" $) }}
+          {{- if (index $.Values "persistence" "subPath" $key) }}
+          subPath: {{ index $.Values "persistence" "subPath" $key }}
           {{- end }}
-      {{- if .Values.redis.extraVolumeMounts }}
-      {{- include "common.tplvalues.render" (dict "value" .Values.redis.extraVolumeMounts "context" $) | nindent 8 }}
+        {{- end }}
+      {{- if $val.extraVolumeMounts }}
+      {{- include "common.tplvalues.render" (dict "value" $val.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
+  {{- end }}
+  {{- end }}
     {{- if .Values.redis.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.redis.sidecars "context" $) | nindent 4 }}
     {{- end }}
@@ -120,17 +128,21 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.redis.tls.contents }}
+    {{- if ( include "checkTlsEnabled" . ) }}
     - name: tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
-    - name: data
-    {{- if .Values.persistence.enabled }}
+    {{- range $key, $val := .Values.redis.containers }}
+    {{- if $val.enabled }}
+    - name: {{ $key }}-data
+    {{- if $.Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" $) "-" $key "-pvc" ) $.Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
+    {{- end }}
+    {{- end }}
     {{- end }}
     {{- if .Values.redis.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.redis.extraVolumes "context" $) | nindent 4 }}

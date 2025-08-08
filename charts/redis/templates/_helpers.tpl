@@ -59,3 +59,13 @@ Compile all warnings into a single message.
 {{-   printf "\nVALUES VALIDATION:\n%s" $message -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "checkTlsEnabled" -}}
+{{- $tlsEnabled := "" -}}
+{{- range $key, $val := .Values.redis.containers }}
+  {{- if and $val.enabled $val.tls.contents -}}
+    {{- $tlsEnabled = "1" -}}
+  {{- end -}}
+{{- end -}}
+{{- $tlsEnabled -}}
+{{- end -}}
