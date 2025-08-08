@@ -1,0 +1,25 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Analytics
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 2.70.1
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: GUI for Redis.
+home: https://github.com/fsdrw08/helm-charts
+icon: https://truecharts.org/img/hotlink-ok/chart-icons/redisinsight.webp
+keywords:
+  - redisinsight
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: redis-insight
+sources:
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/redis-insight
+  - https://github.com/redis/RedisInsight
+  - ...
+version: 0.1.0

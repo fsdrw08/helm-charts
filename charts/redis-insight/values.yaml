@@ -1,0 +1,423 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param redisInsight.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
+## @section RedisInsight Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+redisInsight:
+  ## Bitnami RedisInsight image
+  ## ref: https://hub.docker.com/r/redis/redisinsight/tags
+  ## @param redisInsight.image.registry RedisInsight image registry
+  ## @param redisInsight.image.repository RedisInsight image repository
+  ## @param redisInsight.image.tag RedisInsight image tag (immutable tags are recommended)
+  ## @param redisInsight.image.digest RedisInsight image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param redisInsight.image.pullPolicy RedisInsight image pull policy
+  ## @param redisInsight.image.pullSecrets RedisInsight image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: redis/redisinsight
+    tag: 2.70.1
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param redisInsight.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param redisInsight.replicaCount Number of RedisInsight replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param redisInsight.containerPorts RedisInsight container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts:
+    - name: http
+      containerPort: 5540
+      hostPort: 5540
+      protocol: TCP
+  ## Configure extra options for RedisInsight containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param redisInsight.livenessProbe.enabled Enable livenessProbe on RedisInsight containers
+  ## @param redisInsight.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param redisInsight.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param redisInsight.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param redisInsight.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param redisInsight.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param redisInsight.readinessProbe.enabled Enable readinessProbe on RedisInsight containers
+  ## @param redisInsight.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param redisInsight.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param redisInsight.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param redisInsight.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param redisInsight.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param redisInsight.startupProbe.enabled Enable startupProbe on RedisInsight containers
+  ## @param redisInsight.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param redisInsight.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param redisInsight.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param redisInsight.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param redisInsight.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param redisInsight.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param redisInsight.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param redisInsight.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## RedisInsight resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param redisInsight.resourcesPreset Set RedisInsight container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if redisInsight.resources is set (redisInsight.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param redisInsight.resources Set RedisInsight container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param redisInsight.podSecurityContext.enabled Enabled RedisInsight pods' Security Context
+  ## @param redisInsight.podSecurityContext.fsGroup Set RedisInsight pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param redisInsight.containerSecurityContext.enabled Enabled RedisInsight containers' Security Context
+  ## @param redisInsight.containerSecurityContext.runAsUser Set RedisInsight containers' Security Context runAsUser
+  ## @param redisInsight.containerSecurityContext.runAsNonRoot Set RedisInsight containers' Security Context runAsNonRoot
+  ## @param redisInsight.containerSecurityContext.readOnlyRootFilesystem Set RedisInsight containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param redisInsight.config env var config for redis insight
+  ## ref: https://redis.io/docs/latest/operate/redisinsight/configuration/
+  ##
+  config:
+    # https://github.com/redis/RedisInsight/blob/2.70.1/Dockerfile#L55
+    RI_APP_FOLDER_ABSOLUTE_PATH: /data
+    RI_APP_HOST: 0.0.0.0
+    RI_APP_PORT: 5540
+    ## Certificate for supplied private key. Public certificate in PEM format. Can be a path to a file or a string in PEM format.
+    ##
+    # RI_SERVER_TLS_CERT: null
+    ## Private key for HTTPS. Private key in PEM format. Can be a path to a file or a string in PEM format.
+    ##
+    # RI_SERVER_TLS_KEY: null
+    ## Key to encrypt data with. Redis insight stores sensitive information (database passwords, Workbench history, etc.) locally (using sqlite3).
+    ## This variable allows you to store sensitive information encrypted using the specified encryption key.
+    ## Note: The same encryption key should be provided for subsequent docker run commands with the same volume attached to decrypt the information.
+    ##
+    # RI_ENCRYPTION_KEY: null
+    ## Configures the log level of the application.
+    ## Supported logging levels are prioritized from highest to lowest:
+    ## error, warn, info, http, verbose, debug, silly,
+    # RI_LOG_LEVEL: info
+    ## By default, you can find log files in the following folders: /data/logs
+    ##
+    # RI_FILES_LOGGER: true
+    ## Logs to STDOUT.
+    ##
+    # RI_STDOUT_LOGGER: true
+    ## Configures a subpath for a proxy.
+    ##
+    # RI_PROXY_PATH: null
+    ## When set to false, this disables the ability to manage database connections (adding, editing, or deleting).
+    ##
+    # RI_DATABASE_MANAGEMENT: true
+    ## This environment variable allows you to accept the End User License Agreement (EULA) without displaying it in the UI.
+    ## By setting this variable, you acknowledge that your use of Redis Insight is governed either by your signed agreement with Redis or, if none exists, by the Redis Enterprise Software Subscription Agreement. If neither applies, your use is subject to the Server Side Public License (SSPL).
+    ##
+    # RI_ACCEPT_TERMS_AND_CONDITIONS: true
+  ## @param redisInsight.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param redisInsight.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /tls
+    ## @param redisInsight.tls.content secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## contents:
+    ##  ca.crt: ""
+    ##  tls.crt: ""
+    ##  tls.key: ""
+    ##
+    contents: {}
+  ## @param redisInsight.existingConfigmap The name of an existing ConfigMap with your custom configuration for RedisInsight
+  ##
+  existingConfigmap:
+  ## @param redisInsight.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param redisInsight.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param redisInsight.hostAliases RedisInsight pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param redisInsight.podLabels Extra labels for RedisInsight pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param redisInsight.podAnnotations Annotations for RedisInsight pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations:
+    ## ref: https://github.com/redis/RedisInsight/blob/main/Dockerfile
+    ## ref: https://github.com/nodejs/docker-node/blob/main/20/alpine3.22/Dockerfile
+    ##
+    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param redisInsight.autoscaling.enabled Enable autoscaling for redisInsight
+  ## @param redisInsight.autoscaling.minReplicas Minimum number of redisInsight replicas
+  ## @param redisInsight.autoscaling.maxReplicas Maximum number of redisInsight replicas
+  ## @param redisInsight.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param redisInsight.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+
+  ## @param redisInsight.extraEnvVars Array with extra environment variables to add to RedisInsight nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param redisInsight.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for RedisInsight nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param redisInsight.extraEnvVarsSecret Name of existing Secret containing extra env vars for RedisInsight nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param redisInsight.extraVolumes Optionally specify extra list of additional volumes for the RedisInsight pod(s)
+  ##
+  extraVolumes: []
+  ## @param redisInsight.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the RedisInsight container(s)
+  ##
+  extraVolumeMounts: []
+  ## @param redisInsight.sidecars Add additional sidecar containers to the RedisInsight pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param redisInsight.initContainers Add additional init containers to the RedisInsight pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
