@@ -108,7 +108,7 @@ prometheus:
   containers:
     ## @param prometheus.containers.server prometheus server container configuration
     server:
-      ## @param prometheus.containers.auth.enabled present this container in the pod
+      ## @param prometheus.containers.server.enabled present this container in the pod
       enabled: true
       ## prometheus image
       ## ref: https://quay.io/repository/prometheus/prometheus?tab=tags
