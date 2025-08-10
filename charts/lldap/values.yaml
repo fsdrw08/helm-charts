@@ -182,6 +182,7 @@ lldap:
   ## @param lldap.containerSecurityContext.runAsUser Set lldap containers' Security Context runAsUser
   ## @param lldap.containerSecurityContext.runAsNonRoot Set lldap containers' Security Context runAsNonRoot
   ## @param lldap.containerSecurityContext.readOnlyRootFilesystem Set lldap containers' Security Context runAsNonRoot
+  ## ref: https://github.com/lldap/lldap/blob/main/Dockerfile
   ##
   containerSecurityContext:
     enabled: true
@@ -256,6 +257,7 @@ lldap:
   ## to keep container user as same permission as host user, set keep-id point to the container user and group id
   ## the userns annotation only work podman v4.9+
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/lldap/lldap/blob/main/Dockerfile
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=10001,gid=10001

@@ -248,7 +248,7 @@ redis:
         readOnlyRootFilesystem: false
 
       # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-      # @param redis.containers.server.configFiles configuration files for redis
+      # @param redis.containers.server.configFiles configuration files for redis, config files will place in /etc/redis/
       ## ref: https://github.com/redis/redis/blob/8.2.0/redis.conf
       configFiles:
         server:
@@ -499,12 +499,12 @@ redis:
       ##
       resources: {}
       ## Configure Container Security Context
-      ## ref： https://github.com/redis/docker-library-redis/blob/release/8.2/alpine/Dockerfile#L6-L7
       ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
       ## @param redis.containers.sentinel.containerSecurityContext.enabled Enabled redis containers' Security Context
       ## @param redis.containers.sentinel.containerSecurityContext.runAsUser Set redis containers' Security Context runAsUser
       ## @param redis.containers.sentinel.containerSecurityContext.runAsNonRoot Set redis containers' Security Context runAsNonRoot
       ## @param redis.containers.sentinel.containerSecurityContext.readOnlyRootFilesystem Set redis containers' Security Context runAsNonRoot
+      ## ref： https://github.com/redis/docker-library-redis/blob/release/8.2/alpine/Dockerfile#L6-L7
       ##
       containerSecurityContext:
         enabled: true
@@ -514,7 +514,7 @@ redis:
         readOnlyRootFilesystem: false
 
       # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-      # @param redis.containers.sentinel.configFiles configuration files for redis
+      # @param redis.containers.sentinel.configFiles configuration files for redis, config files will place in /etc/redis/
       ## ref: https://github.com/redis/redis/blob/8.2.0/sentinel.conf
       configFiles:
         sentinel:
