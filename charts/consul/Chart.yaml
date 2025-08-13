@@ -24,4 +24,5 @@ name: consul
 sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/consul
   - https://github.com/hashicorp/consul
+  - https://github.com/hashicorp/consul/blob/main/Dockerfile
 version: 0.1.0
