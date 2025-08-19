@@ -301,7 +301,8 @@ traefik:
     ## @param traefik.configFiles.dynamic file provider for traefik dynamic config
     ## The file provider lets you define the dynamic configuration in a YAML or TOML file.
     ## The block define here will put into configMap and let traefik treat as dynamic file configuration file.
-    ## The values will render as a yaml file put into configmap then mount to the path set in traefik.configFiles.static.providers.file.directory
+    ## The values will render as a yaml file put into configmap then mount to the path set in
+    ## {{ .Values.traefik.configFiles.static.providers.file.directory }}/builtin
     ## ref: https://doc.traefik.io/traefik/providers/file/
     ##
     dynamic:
