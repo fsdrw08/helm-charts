@@ -76,7 +76,7 @@ consul:
   replicaCount: 1
   ## @param consul.containerPorts consul container port to expose to host
   ## suggest to use host network, consul needs to detect host ip address
-  ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ports
+  ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#ports
   ##
   containerPorts:
     []
@@ -217,8 +217,8 @@ consul:
   ## @param consul.configFiles config files to start consul
   ## The sub config block will convert to json and injected as ConfigMap and mount into /consul/config/***.json
   ## You can add whatever sub items under this block
-  ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files
-  ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#general-parameters
+  ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general
+  ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#general-parameters
   ## ref: https://github.com/hashicorp/consul/blob/v1.21.1/.release/docker/docker-entrypoint.sh#L54
   ##
   configFiles:
@@ -229,7 +229,7 @@ consul:
     main:
       ## @param consul.configFiles.main.acl This object allows a number of sub-keys to be set which controls the ACL system.
       ## Configuring the ACL system within the ACL stanza was added in Consul 1.4.0
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#acl
+      ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#acl
       ##
       acl:
         enabled: false
@@ -272,7 +272,7 @@ consul:
       ##
       # data_dir: /consul/data
       ## @param consul.configFiles.main.disable_update_check Disables automatic checking for security bulletins and new version releases. This is disabled in Consul Enterprise
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#disable_update_check
+      ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#disable_update_check
       ##
       disable_update_check: true
       ## @param consul.configFiles.main.encrypt
@@ -285,7 +285,7 @@ consul:
       ##
       # encrypt: ""
       ## @param consul.configFiles.main.ports This is a nested object that allows setting the bind ports for the following keys
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ports
+      ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#ports
       ##
       ports: {}
       ## @param consul.configFiles.main.retry_join Address of another agent to join upon starting up
@@ -295,7 +295,7 @@ consul:
       ##
       retry_join: null
       ## @param consul.configFiles.main.server This flag is used to control if an agent is in server or client mode. When provided, an agent will act as a Consul server.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#server-1
+      ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#server-1
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_server
       ##
       server: true
@@ -311,15 +311,15 @@ consul:
       tls: {}
       ## @param consul.configFiles.main.ui_config This object allows a number of sub-keys to be set which controls the display or features available in the UI.
       ## Configuring the UI with this stanza was added in Consul 1.9.0.
-      ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui-parameters
+      ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#ui-parameters
       ##
       ui_config:
         ## @param consul.configFiles.main.ui_config.enabled This enables the service of the web UI from this agent
-        ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui_config_enabled
+        ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#ui_config_enabled
         ##
         enabled: true
         ## @param consul.configFiles.main.ui_config.content_path This specifies the HTTP path that the web UI should be served from.
-        ## ref: https://developer.hashicorp.com/consul/docs/agent/config/config-files#ui_config_content_path
+        ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#ui_config_content_path
         ##
         content_path: /ui/
 
