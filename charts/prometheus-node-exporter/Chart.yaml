@@ -1,0 +1,30 @@
+annotations:
+  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
+  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
+  category: Infrastructure
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: v1.9.1
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description:
+  Prometheus exporter for hardware and OS metrics exposed by UNIX kernels,
+  with pluggable metric collectors.
+home: https://github.com/fsdrw08/helm-charts
+icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/node-exporter/img/node-exporter-stack-220x234.png
+keywords:
+  - prometheus
+  - node-exporter
+  - monitoring
+  - observability
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: prometheus-node-exporter
+sources:
+  - https://github.com/prometheus/node_exporter
+  - ...
+version: 0.1.0
