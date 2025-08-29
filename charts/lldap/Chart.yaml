@@ -4,7 +4,7 @@ annotations:
   category: Infrastructure
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: 2025-07-29-alpine-rootless
+appVersion: v0.6.2-alpine-rootless
 dependencies:
   - name: common
     repository: file://../common

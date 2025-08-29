@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.etcd.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: etcd
+    - name: server
       image: {{ template "etcd.image" . }}
       imagePullPolicy: {{ .Values.etcd.image.pullPolicy | quote }}
       {{- if .Values.etcd.containerSecurityContext.enabled }}

@@ -52,7 +52,7 @@ etcd:
   image:
     registry: quay.io
     repository: coreos/etcd
-    tag: v3.6.0
+    tag: v3.6.4
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -207,7 +207,7 @@ etcd:
 
   ## @param etcd.configFile An etcd configuration file consists of a YAML map whose keys are command-line flag names and values are the flag values
   ## ref:
-  ##  https://etcd.io/docs/v3.5/op-guide/configuration/
+  ##  https://etcd.io/docs/v3.6/op-guide/configuration/
   ##  https://github.com/etcd-io/etcd/blob/main/etcd.conf.yml.sample
   ##
   configFile:
@@ -352,7 +352,7 @@ etcd:
     enable-v2: false
     ## @param etcd.configFile.v2-deprecation Phase of v2store deprecation. Allows to opt-in for higher compatibility mode.
     ## Supported values:
-    ##  'not-yet'                // Issues a warning if v2store have meaningful content (default in v3.5)
+    ##  'not-yet'                // Issues a warning if v2store have meaningful content (default in v3.6)
     ##  'write-only'             // Custom v2 state is not allowed (planned default in v3.6)
     ##  'write-only-drop-data'   // Custom v2 state will get DELETED !
     ##  'gone'                   // v2store is not maintained any longer. (planned default in v3.7)

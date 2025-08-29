@@ -52,7 +52,7 @@ coredns:
   image:
     registry: docker.io
     repository: coredns/coredns
-    tag: 1.12.1
+    tag: 1.12.3
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
