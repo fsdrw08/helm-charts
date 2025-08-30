@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.coredns.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: coredns
+    - name: server
       image: {{ template "coredns.image" . }}
       imagePullPolicy: {{ .Values.coredns.image.pullPolicy | quote }}
       {{- if .Values.coredns.containerSecurityContext.enabled }}

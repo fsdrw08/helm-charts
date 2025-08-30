@@ -11,17 +11,17 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  Corefile: |-
+  Corefile: {{ print "|-" }}
     {{- range $name, $conf := .Values.coredns.extraConfig }}
     {{ $name }}{{ if $conf.parameters }} {{ $conf.parameters }}{{ end }}
     {{- end }}
     {{ range .Values.coredns.servers }}
     {{- range $idx, $zone := .zones }}{{ if $idx }} {{ else }}{{ end }}{{ default "" $zone.scheme }}{{ default "." $zone.zone }}{{ else }}.{{ end -}}
-    {{- if .port }}:{{ .port }} {{ end -}}
-    {
+    {{- if .port }}{{ print ":"}}{{ .port }} {{ end -}}
+    {{ print "{"}}
       {{- range .plugins }}
-        {{ .name }}{{ if .parameters }} {{ .parameters }}{{ end }}{{ if .configBlock }} {
-            {{ .configBlock }}
+        {{ .name }}{{ if .parameters }} {{ include "common.tplvalues.render" (dict "value" .parameters "context" $) }}{{ end }}{{ if .configBlock }} {{ print "{"}}
+{{ include "common.tplvalues.render" (dict "value" .configBlock "context" $) | indent 12 }}
         }{{ end }}
       {{- end }}
     }
