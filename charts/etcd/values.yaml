@@ -379,15 +379,15 @@ etcd:
       ## Note setting this parameter will also automatically enable client cert authentication no matter what value is set for `--client-cert-auth`.
       ## aka --trusted-ca-file
       ##
-      trusted-ca-file:
+      # trusted-ca-file:
       ## @param etcd.configFile.client-transport-security.allowed-hostname Allowed TLS hostname for client cert authentication.
       ## aka --client-cert-allowed-hostname
       ##
-      allowed-hostname:
+      # allowed-hostname:
       ## @param etcd.configFile.client-transport-security.auto-tls Client TLS using generated certificates.
       ## aka --auto-tls
       ##
-      auto-tls: false
+      # auto-tls: false
       ## @param etcd.configFile.client-transport-security.crl-file Path to the client certificate revocation list file, aka --client-crl-file.
       ## aka --client-crl-file
       ##
