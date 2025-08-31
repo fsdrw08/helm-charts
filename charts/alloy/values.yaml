@@ -52,7 +52,7 @@ alloy:
   image:
     registry: docker.io
     repository: grafana/alloy
-    tag: v1.8.3
+    tag: v1.10.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -189,7 +189,7 @@ alloy:
   config:
     ## @param alloy.config.fromYAML alloy configuration convert from yaml
     ## component: https://grafana.com/docs/alloy/latest/get-started/configuration-syntax/components/
-    ## ref: https://github.com/grafana/alloy/blob/v1.8.3/example-config.alloy
+    ## ref: https://github.com/grafana/alloy/blob/v1.10.2/example-config.alloy
     ## e.g.
     ## follow values:
     ## - component: logging

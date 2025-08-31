@@ -52,7 +52,7 @@ vault:
   image:
     registry: docker.io
     repository: hashicorp/vault
-    tag: 1.19.4
+    tag: 1.20.3
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -184,7 +184,7 @@ vault:
     runAsGroup: 1000
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## ref: https://github.com/hashicorp/vault/blob/v1.19.4/Dockerfile
+  ## ref: https://github.com/hashicorp/vault/blob/v1.20.3/Dockerfile
   ## @param vault.containerSecurityContext.enabled Enabled vault containers' Security Context
   ## @param vault.containerSecurityContext.runAsUser Set vault containers' Security Context runAsUser
   ## @param vault.containerSecurityContext.runAsNonRoot Set vault containers' Security Context runAsNonRoot
@@ -233,7 +233,7 @@ vault:
       ui: true
       ## @param vault.configFiles.main.listener Configures how Vault is listening for API requests.
       ## https://developer.hashicorp.com/vault/docs/configuration/listener/tcp
-      ## https://github.com/hashicorp/vault/blob/v1.19.4/command/server/test-fixtures/config4.hcl.json#L6
+      ## https://github.com/hashicorp/vault/blob/v1.20.3/command/server/test-fixtures/config4.hcl.json#L6
       ## https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L931
       ##
       listener:
@@ -241,7 +241,7 @@ vault:
             tls_disable: true
             address: "[::]:8200"
             cluster_address: "[::]:8201"
-            # https://github.com/hashicorp/vault/blob/v1.19.4/website/content/docs/deploy/kubernetes/helm/examples/standalone-tls.mdx?plain=1#L191
+            # https://github.com/hashicorp/vault/blob/v1.20.3/website/content/docs/deploy/kubernetes/helm/examples/standalone-tls.mdx?plain=1#L191
             # cert and key must put in the same dir: https://github.com/containers/podman/blob/22ca67a7536e2f8e8554e734c102fe1ae181fbb5/pkg/specgen/specgen.go#L641
             # the tls file should better set together with below vault.tls block
             tls_cert_file: /vault/userconfig/vault-server-tls/tls.crt
@@ -287,7 +287,7 @@ vault:
   ## the userns annotation only work podman v4.9+
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ## ref: https://github.com/containers/podman/discussions/22378
-  ## ref: https://github.com/hashicorp/vault/blob/v1.19.4/Dockerfile#L121-L123
+  ## ref: https://github.com/hashicorp/vault/blob/v1.20.3/Dockerfile#L121-L123
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=100,gid=1000
@@ -313,7 +313,7 @@ vault:
   ##     value: "bar"
   ##
   extraEnvVars:
-    # https://github.com/hashicorp/vault/blob/v1.19.4/.release/docker/docker-entrypoint.sh
+    # https://github.com/hashicorp/vault/blob/v1.20.3/.release/docker/docker-entrypoint.sh
     # https://github.com/elihe2011/summary/blob/1603f477212f552a4c64ab8a0729539a52a1bd27/edgex/edgex/edgex_security/ok/02.edgex-vault.yaml#L64
     - name: SKIP_CHOWN
       value: "true"
