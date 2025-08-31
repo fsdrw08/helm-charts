@@ -108,10 +108,10 @@ etcd:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: 180
-    periodSeconds: 300
-    timeoutSeconds: 5
-    failureThreshold: 3
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
     successThreshold: 1
     ## https://github.com/openshift/microshift/blob/80d5b311cf012acc0cb33b9178d148198a64c2d3/ansible/roles/install-microshift/files/etcd.service
     ## note: after enable auth ("etcdctl auth enable"), the `endpoint health` command will require credential,
