@@ -166,25 +166,28 @@ nfs:
   ## @param nfs.containerSecurityContext.runAsUser Set nfs-ganesha containers' Security Context runAsUser
   ## @param nfs.containerSecurityContext.runAsNonRoot Set nfs-ganesha containers' Security Context runAsNonRoot
   ## @param nfs.containerSecurityContext.readOnlyRootFilesystem Set nfs-ganesha containers' Security Context runAsNonRoot
+  ## ref: https://github.com/hectorm/docker-nfs-ganesha/blob/master/compose.yaml
+  ## this container must run in root level podman process
   ##
   containerSecurityContext:
     enabled: true
     runAsUser: 0
     runAsNonRoot: false
     readOnlyRootFilesystem: false
-    privileged: true
-    # capabilities:
-    #   add:
-    #     - CHOWN
-    #     - DAC_OVERRIDE
-    #     - DAC_READ_SEARCH
-    #     - FOWNER
-    #     - FSETID
-    #     - SETGID
-    #     - SETUID
-    #     - SETPCAP
-    #     - SYS_RESOURCE
-    #     - SYS_ADMIN
+    seLinuxOptions:
+      type: spc_t
+    capabilities:
+      add:
+        - "CHOWN"
+        - "DAC_OVERRIDE"
+        - "DAC_READ_SEARCH"
+        - "FOWNER"
+        - "FSETID"
+        - "SETGID"
+        - "SETUID"
+        - "SYS_RESOURCE"
+      drop:
+        - "ALL"
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param nfs.config nfs-ganesha config file content which will host in /etc/ganesha/ganesha.conf
