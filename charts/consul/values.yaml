@@ -225,11 +225,12 @@ consul:
     ## @param consul.configFiles.main Main config for server and client agent
     ## The config under this node will convert to json file and place in /consul/config/main.json
     ## https://developer.hashicorp.com/consul/tutorials/production-deploy/deployment-guide#configure-consul-agents
+    ## https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file
     ##
     main:
       ## @param consul.configFiles.main.acl This object allows a number of sub-keys to be set which controls the ACL system.
       ## Configuring the ACL system within the ACL stanza was added in Consul 1.4.0
-      ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#acl
+      ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/acl
       ##
       acl:
         enabled: false
