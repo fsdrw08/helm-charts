@@ -195,7 +195,7 @@ grafana:
   ## @param grafana.configFiles grafana configuration files include custom (grafana.ini), datasource
   ##
   configFiles:
-    ## @param grafana.configFiles.custom custom configuration file which will place in /etc/grafana/grafana.ini
+    ## @param grafana.configFiles.grafana configuration file which will place in /etc/grafana/grafana.ini
     ## you can add whatever config under this block according to https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#variable-expansion
     ## ref: https://github.com/grafana/grafana/blob/v12.1.1/conf/defaults.ini
     ##
@@ -204,44 +204,44 @@ grafana:
       ## Don’t change this option unless you are working on Grafana development.
       ##
       app_mode: production
-      ## @param grafana.configFiles.custom.paths config under [paths]
+      ## @param grafana.configFiles.grafana.paths config under [paths]
       ## ref: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#paths
       ##
       paths:
-        ## @param grafana.configFiles.custom.paths.data Path to where grafana can store temp files, sessions, and the sqlite3 db (if that is used)
+        ## @param grafana.configFiles.grafana.paths.data Path to where grafana can store temp files, sessions, and the sqlite3 db (if that is used)
         ##
         data: /var/lib/grafana
-        ## @param grafana.configFiles.custom.paths.logs Directory where grafana can store logs
+        ## @param grafana.configFiles.grafana.paths.logs Directory where grafana can store logs
         ##
         logs: /var/log/grafana
-        ## @param grafana.configFiles.custom.paths.plugins Directory where grafana will automatically scan and look for plugins
+        ## @param grafana.configFiles.grafana.paths.plugins Directory where grafana will automatically scan and look for plugins
         ##
         plugins: /var/lib/grafana/plugins
-        ## @param grafana.configFiles.custom.paths.provisioning folder that contains provisioning config files that grafana will apply on startup and while running.
+        ## @param grafana.configFiles.grafana.paths.provisioning folder that contains provisioning config files that grafana will apply on startup and while running.
         ##
         provisioning: /etc/grafana/provisioning
-        ## @param grafana.configFiles.custom.paths.temp_data_lifetime Temporary files in `data` directory older than given duration will be removed
+        ## @param grafana.configFiles.grafana.paths.temp_data_lifetime Temporary files in `data` directory older than given duration will be removed
         ##
         temp_data_lifetime: 24h
-      ## @param grafana.configFiles.custom.analytics usage analytics
+      ## @param grafana.configFiles.grafana.analytics usage analytics
       ## ref: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#analytics
       ##
       analytics:
-        ## @param grafana.configFiles.custom.analytics.check_for_updates Set to false to disable all checks to https://grafana.com
+        ## @param grafana.configFiles.grafana.analytics.check_for_updates Set to false to disable all checks to https://grafana.com
         ## for new versions of grafana. The check is used in some UI views to notify that a grafana update exists.
         ## This option does not cause any auto updates, nor send any information only a GET request to https://grafana.com/api/grafana/versions/stable to get the latest version.
         ##
         check_for_updates: true
-      ## @param grafana.configFiles.custom.log Grafana logging options
+      ## @param grafana.configFiles.grafana.log Grafana logging options
       ## ref: https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#log
       ##
       log:
-        ## @param grafana.configFiles.custom.log.mode Options are console, file, and syslog.
+        ## @param grafana.configFiles.grafana.log.mode Options are console, file, and syslog.
         ## Default is console and file. Use spaces to separate multiple modes, for example, console file.
         ##
         mode: console
     ## @param grafana.configFiles.dataSource Configure grafana datasources
-    ## configs under this block will place under {{ .Value.grafana.configFiles.custom.paths.provisioning }}/datasources/
+    ## configs under this block will place under {{ .Value.grafana.configFiles.grafana.paths.provisioning }}/datasources/
     ## by default: /etc/grafana/provisioning/datasources/
     ## ref: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
     ## ref: https://github.com/grafana/helm-charts/blob/main/charts/grafana/templates/_pod.tpl#L1027-L1039
