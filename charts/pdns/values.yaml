@@ -113,8 +113,8 @@ powerdns:
       ## @param powerdns.containers.auth.enabled present this container in the pod
       enabled: true
       ## powerdns auth image
-      ## ref: https://github.com/PowerDNS/pdns/blob/auth-4.9.4/Dockerfile-auth
-      ## ref: https://hub.docker.com/r/powerdns/pdns-auth-49/tags
+      ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.0/Dockerfile-auth
+      ## ref: https://hub.docker.com/r/powerdns/pdns-auth-50/tags
       ## @param powerdns.containers.auth.image.registry powerdns image registry
       ## @param powerdns.containers.auth.image.repository powerdns image repository
       ## @param powerdns.containers.auth.image.tag powerdns image tag (immutable tags are recommended)
@@ -124,8 +124,8 @@ powerdns:
       ##
       image:
         registry: docker.io
-        repository: powerdns/pdns-auth-49
-        tag: 4.9.4
+        repository: powerdns/pdns-auth-50
+        tag: 5.0.0
         digest: ""
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -237,7 +237,7 @@ powerdns:
       ## @param powerdns.containers.auth.containerSecurityContext.runAsUser Set powerdns containers' Security Context runAsUser
       ## @param powerdns.containers.auth.containerSecurityContext.runAsNonRoot Set powerdns containers' Security Context runAsNonRoot
       ## @param powerdns.containers.auth.containerSecurityContext.readOnlyRootFilesystem Set powerdns containers' Security Context runAsNonRoot
-      ## ref: https://github.com/PowerDNS/pdns/blob/auth-4.9.4/Dockerfile-auth#L93
+      ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.0/Dockerfile-auth#L93
       ##
       containerSecurityContext:
         enabled: true
@@ -278,7 +278,7 @@ powerdns:
         gsqlite3-dnssec: yes
         gsqlite3-database: /var/lib/powerdns/pdns.sqlite3
         ## @param powerdns.containers.auth.config.webserver Start a webserver for monitoring
-        ## ref: https://github.com/PowerDNS/pdns/blob/auth-4.9.4/dockerdata/startup.py#L28-L33
+        ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.0/dockerdata/startup.py#L28-L33
         ## ref: https://doc.powerdns.com/authoritative/settings.html#webserver
         ##
         webserver: yes
