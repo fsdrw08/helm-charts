@@ -1,0 +1,26 @@
+annotations:
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: v2.6.6
+dependencies:
+  - name: common
+    repository: oci://registry-1.docker.io/bitnamicharts
+    tags:
+      - bitnami-common
+    version: 2.x.x
+description: Fully featured and highly configurable SFTP server with optional FTP/S and WebDAV support.
+home: https://github.com/fsdrw08/helm-charts
+icon: https://sftpgo.com/assets/img/logo.png
+keywords:
+  - sftp
+  - ftp
+  - webdav
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: sftpgo
+sources:
+  - https://github.com/drakkan/sftpgo
+  - https://github.com/fsdrw08/helm-charts/charts/sftpgo
+  - ...
+version: 0.1.0
