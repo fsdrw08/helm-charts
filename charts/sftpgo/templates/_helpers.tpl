@@ -6,28 +6,28 @@ SPDX-License-Identifier: APACHE-2.0
 {{/*
 Return the proper sftpgo image name
 */}}
-{{- define "%%TEMPLATE_NAME%%.image" -}}
+{{- define "sftpgo.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.sftpgo.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "%%TEMPLATE_NAME%%.volumePermissions.image" -}}
+{{- define "sftpgo.volumePermissions.image" -}}
 {{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
-{{- define "%%TEMPLATE_NAME%%.imagePullSecrets" -}}
+{{- define "sftpgo.imagePullSecrets" -}}
 {{- include "common.images.renderPullSecrets" (dict "images" (list .Values.sftpgo.image .Values.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "%%TEMPLATE_NAME%%.serviceAccountName" -}}
+{{- define "sftpgo.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
     {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
@@ -39,7 +39,7 @@ Create the name of the service account to use
 Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
 Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
 */}}
-{{- define "%%TEMPLATE_NAME%%.ingress.certManagerRequest" -}}
+{{- define "sftpgo.ingress.certManagerRequest" -}}
 {{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
     {{- true -}}
 {{- end -}}
@@ -48,10 +48,10 @@ Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
 {{/*
 Compile all warnings into a single message.
 */}}
-{{- define "%%TEMPLATE_NAME%%.validateValues" -}}
+{{- define "sftpgo.validateValues" -}}
 {{- $messages := list -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.foo" .) -}}
-{{- $messages := append $messages (include "%%TEMPLATE_NAME%%.validateValues.bar" .) -}}
+{{- $messages := append $messages (include "sftpgo.validateValues.foo" .) -}}
+{{- $messages := append $messages (include "sftpgo.validateValues.bar" .) -}}
 {{- $messages := without $messages "" -}}
 {{- $message := join "\n" $messages -}}
 

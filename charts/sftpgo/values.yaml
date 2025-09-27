@@ -70,11 +70,11 @@ sftpgo:
   ## @param sftpgo.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
-  ## @param sftpgo.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ## @param sftpgo.replicaCount Number of sftpgo replicas to deploy
   ##
   replicaCount: 1
-  ## @param sftpgo.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
-  ## e.g. 
+  ## @param sftpgo.containerPorts sftpgo container port to expose to host
+  ## e.g.
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
@@ -88,9 +88,9 @@ sftpgo:
   ##     protocol: TCP
   ##
   containerPorts: {}
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## Configure extra options for sftpgo containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param sftpgo.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param sftpgo.livenessProbe.enabled Enable livenessProbe on sftpgo containers
   ## @param sftpgo.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param sftpgo.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param sftpgo.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -99,12 +99,16 @@ sftpgo:
   ##
   livenessProbe:
     enabled: true
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
-  ## @param sftpgo.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - /usr/local/bin/sftpgo
+        - ping
+  ## @param sftpgo.readinessProbe.enabled Enable readinessProbe on sftpgo containers
   ## @param sftpgo.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param sftpgo.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param sftpgo.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
@@ -119,7 +123,7 @@ sftpgo:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param sftpgo.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param sftpgo.startupProbe.enabled Enable startupProbe on sftpgo containers
   ## @param sftpgo.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param sftpgo.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param sftpgo.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -142,13 +146,13 @@ sftpgo:
   ## @param sftpgo.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## sftpgo resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param sftpgo.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if sftpgo.resources is set (sftpgo.resources is recommended for production).
+  ## @param sftpgo.resourcesPreset Set sftpgo container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if sftpgo.resources is set (sftpgo.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param sftpgo.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## @param sftpgo.resources Set sftpgo container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -161,8 +165,8 @@ sftpgo:
   resources: {}
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param sftpgo.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param sftpgo.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param sftpgo.podSecurityContext.enabled Enabled sftpgo pods' Security Context
+  ## @param sftpgo.podSecurityContext.fsGroup Set sftpgo pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
@@ -170,27 +174,45 @@ sftpgo:
     # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param sftpgo.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param sftpgo.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param sftpgo.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param sftpgo.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param sftpgo.containerSecurityContext.enabled Enabled sftpgo containers' Security Context
+  ## @param sftpgo.containerSecurityContext.runAsUser Set sftpgo containers' Security Context runAsUser
+  ## @param sftpgo.containerSecurityContext.runAsNonRoot Set sftpgo containers' Security Context runAsNonRoot
+  ## @param sftpgo.containerSecurityContext.readOnlyRootFilesystem Set sftpgo containers' Security Context runAsNonRoot
+  ## ref: https://github.com/drakkan/sftpgo/blob/v2.6.6/Dockerfile
   ##
   containerSecurityContext:
-    enabled: false
-    runAsUser: 1001
+    enabled: true
+    runAsUser: 1000
+    runAsGroup: 1000
     runAsNonRoot: true
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
-  ## @param sftpgo.config custom config file storage at /var/lib/sftpgo/.config/sftpgo/sftpgo.json
-  ## ref: https://docs.sftpgo.com/devel/docker/#configuration
-  ## ref: 
+  ## @param sftpgo.configFiles custom config files storage at /etc/sftpgo
+  ## ref: https://docs.sftpgo.com/2.6/config-file/
+  ## ref: https://github.com/drakkan/sftpgo/blob/v2.6.6/sftpgo.json
   ##
-  config: {}
+  configFiles:
+    sftpgo: {}
 
-
-  ## @param sftpgo.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param sftpgo.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param sftpgo.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /etc/sftpgo/tls
+    ## @param sftpgo.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## content:
+    ##  ca.crt: ""
+    ##  tls.crt: ""
+    ##  tls.key: ""
+    ##
+    contents: {}
+  ## @param sftpgo.existingConfigmap The name of an existing ConfigMap with your custom configuration for sftpgo
   ##
   existingConfigmap:
   ## @param sftpgo.command Override default container command (useful when using custom images)
@@ -199,18 +221,21 @@ sftpgo:
   ## @param sftpgo.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param sftpgo.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param sftpgo.hostAliases sftpgo pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
-  ## @param sftpgo.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param sftpgo.podLabels Extra labels for sftpgo pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
-  ## @param sftpgo.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param sftpgo.podAnnotations Annotations for sftpgo pods
+  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param sftpgo.autoscaling.enabled Enable autoscaling for sftpgo
@@ -226,26 +251,26 @@ sftpgo:
     targetCPU: ""
     targetMemory: ""
 
-  ## @param sftpgo.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param sftpgo.extraEnvVars Array with extra environment variables to add to sftpgo nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param sftpgo.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param sftpgo.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for sftpgo nodes
   ##
   extraEnvVarsCM: ""
-  ## @param sftpgo.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param sftpgo.extraEnvVarsSecret Name of existing Secret containing extra env vars for sftpgo nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param sftpgo.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param sftpgo.extraVolumes Optionally specify extra list of additional volumes for the sftpgo pod(s)
   ##
   extraVolumes: []
-  ## @param sftpgo.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param sftpgo.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the sftpgo container(s)
   ##
   extraVolumeMounts: []
-  ## @param sftpgo.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param sftpgo.sidecars Add additional sidecar containers to the sftpgo pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -256,7 +281,7 @@ sftpgo:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param sftpgo.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param sftpgo.initContainers Add additional init containers to the sftpgo pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -278,13 +303,20 @@ persistence:
   ##
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
+  ## ref: https://docs.sftpgo.com/devel/docker/#where-to-store-data
+  ## /srv/sftpgo to handle persistent data.
+  ## The default home directory for SFTP/FTP/WebDAV users is /srv/sftpgo/data/<username>. Backups are stored in /srv/sftpgo/backups
+  ## /var/lib/sftpgo is the home directory for the sftpgo system user defined inside the container.
+  ## This is the container working directory too, host keys will be created here when using the default configuration.
   ##
-  mountPath: 
-    users: /srv/sftpgo
+  mountPath:
+    storage: /srv/sftpgo
     workDir: /var/lib/sftpgo
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
-  subPath: ""
+  subPath: {}
+    # users: null
+    # workDir: null
   ## @param persistence.storageClass Storage class of backing PVC
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -373,4 +405,4 @@ volumePermissions:
 # %%SUBCHART_NAME%%:
 SUBCHART_NAME:
   enabled: false
-  %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

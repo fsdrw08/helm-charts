@@ -1,4 +1,4 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "sftpgo.podTemplate" -}}
 metadata:
   {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
@@ -7,7 +7,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: sftpgo
     {{- if .Values.sftpgo.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.podLabels "context" $) | nindent 4 }}
     {{- end }}
@@ -15,7 +15,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "sftpgo.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.sftpgo.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -25,7 +25,7 @@ spec:
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "sftpgo.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -46,8 +46,8 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: sftpgo
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+    - name: server
+      image: {{ template "sftpgo.image" . }}
       imagePullPolicy: {{ .Values.sftpgo.image.pullPolicy | quote }}
       {{- if .Values.sftpgo.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.sftpgo.containerSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -99,11 +99,18 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.sftpgo.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
+        - name: config
+        {{/*
+          mountPath: /etc/sftpgo/sftpgo.json
+        */}}
+          mountPath: /etc/sftpgo
+      {{- range $name, $path := .Values.persistence.mountPath }}
+        - name: {{ $name }}
+          mountPath: {{ $path }}
+          {{- if hasKey $.Values.persistence.subPath $name }}
+          subPath: {{ index $.Values.persistence.subPath $name }}
           {{- end }}
+      {{- end }}
       {{- if .Values.sftpgo.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -111,12 +118,24 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.sftpgo.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: data
-    {{- if .Values.persistence.enabled }}
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- range $name, $path := .Values.persistence.mountPath }}
+    - name: {{ $name }}
+      {{- if $.Values.persistence.enabled }}
       persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
+        claimName: {{ default ( print (include "common.names.fullname" $) "-pvc-" $name ) $.Values.persistence.existingClaim }}
+      {{- else }}
+      emptyDir: {}
+      {{- end }}
     {{- else }}
       emptyDir: {}
+    {{- end }}
+    {{- if .Values.sftpgo.tls.contents }}
+    - name: tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
     {{- if .Values.sftpgo.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.extraVolumes "context" $) | nindent 4 }}
