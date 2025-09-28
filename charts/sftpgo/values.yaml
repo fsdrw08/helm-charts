@@ -200,7 +200,7 @@ sftpgo:
   ## @param sftpgo.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
   ##
   tls:
-    mountPath: /etc/sftpgo/tls
+    mountPath: /etc/sftpgo/certs
     ## @param sftpgo.tls.contents secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here

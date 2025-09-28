@@ -100,17 +100,18 @@ spec:
       {{- end }}
       volumeMounts:
         - name: config
-        {{/*
-          mountPath: /etc/sftpgo/sftpgo.json
-        */}}
           mountPath: /etc/sftpgo
-      {{- range $name, $path := .Values.persistence.mountPath }}
+        {{- if .Values.sftpgo.tls.contents }}
+        - name: tls
+          mountPath: {{ .Values.sftpgo.tls.mountPath }}
+        {{- end }}
+        {{- range $name, $path := .Values.persistence.mountPath }}
         - name: {{ $name }}
           mountPath: {{ $path }}
           {{- if hasKey $.Values.persistence.subPath $name }}
           subPath: {{ index $.Values.persistence.subPath $name }}
           {{- end }}
-      {{- end }}
+        {{- end }}
       {{- if .Values.sftpgo.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -121,6 +122,11 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.sftpgo.tls.contents }}
+    - name: tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     {{- range $name, $path := .Values.persistence.mountPath }}
     - name: {{ $name }}
       {{- if $.Values.persistence.enabled }}
