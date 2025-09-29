@@ -225,6 +225,23 @@ sftpgo:
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
+  ## @param sftpgo.hostNetwork Specify if host network should be enabled for sftpgo pod
+  ##
+  hostNetwork: true
+  ## @param sftpgo.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
   ## @param sftpgo.podLabels Extra labels for sftpgo pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
@@ -314,7 +331,8 @@ persistence:
     workDir: /var/lib/sftpgo
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
-  subPath: {}
+  subPath:
+    {}
     # users: null
     # workDir: null
   ## @param persistence.storageClass Storage class of backing PVC

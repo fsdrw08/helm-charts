@@ -19,6 +19,10 @@ spec:
   {{- if .Values.sftpgo.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.hostAliases "context" $) | nindent 4 }}
   {{- end }}
+  hostNetwork: {{ .Values.sftpgo.hostNetwork }}
+  {{- if .Values.sftpgo.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.sftpgo.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
   {{- if .Values.sftpgo.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.sftpgo.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
