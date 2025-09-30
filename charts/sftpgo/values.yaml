@@ -40,6 +40,91 @@ workloadKind: Pod
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 sftpgo:
+  ## @param sftpgo.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param sftpgo.replicaCount Number of sftpgo replicas to deploy
+  ##
+  replicaCount: 1
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param sftpgo.podSecurityContext.enabled Enabled sftpgo pods' Security Context
+  ## @param sftpgo.podSecurityContext.fsGroup Set sftpgo pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param sftpgo.hostAliases sftpgo pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param sftpgo.hostNetwork Specify if host network should be enabled for sftpgo pod
+  ##
+  hostNetwork: true
+  ## @param sftpgo.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param sftpgo.podLabels Extra labels for sftpgo pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param sftpgo.podAnnotations Annotations for sftpgo pods
+  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param sftpgo.autoscaling.enabled Enable autoscaling for sftpgo
+  ## @param sftpgo.autoscaling.minReplicas Minimum number of sftpgo replicas
+  ## @param sftpgo.autoscaling.maxReplicas Maximum number of sftpgo replicas
+  ## @param sftpgo.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param sftpgo.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param sftpgo.extraVolumes Optionally specify extra list of additional volumes for the sftpgo pod(s)
+  ##
+  extraVolumes: []
+  ## @param sftpgo.initContainers Add additional init containers to the sftpgo pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param sftpgo.sidecars Add additional sidecar containers to the sftpgo pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## Bitnami sftpgo image
   ## ref: https://hub.docker.com/r/drakkan/sftpgo/tags/
   ## @param sftpgo.image.registry sftpgo image registry
@@ -67,12 +152,6 @@ sftpgo:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param sftpgo.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param sftpgo.replicaCount Number of sftpgo replicas to deploy
-  ##
-  replicaCount: 1
   ## @param sftpgo.containerPorts sftpgo container port to expose to host
   ## e.g.
   ## containerPorts:
@@ -163,15 +242,6 @@ sftpgo:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param sftpgo.podSecurityContext.enabled Enabled sftpgo pods' Security Context
-  ## @param sftpgo.podSecurityContext.fsGroup Set sftpgo pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param sftpgo.containerSecurityContext.enabled Enabled sftpgo containers' Security Context
@@ -221,52 +291,6 @@ sftpgo:
   ## @param sftpgo.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param sftpgo.hostAliases sftpgo pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param sftpgo.hostNetwork Specify if host network should be enabled for sftpgo pod
-  ##
-  hostNetwork: true
-  ## @param sftpgo.dnsConfig  Allows users more control on the DNS settings for a Pod.
-  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
-  ## E.g.
-  ## dnsConfig:
-  ##   nameservers:
-  ##     - 192.0.2.1 # this is an example
-  ##   searches:
-  ##     - ns1.svc.cluster-domain.example
-  ##     - my.dns.search.suffix
-  ##   options:
-  ##     - name: ndots
-  ##       value: "2"
-  ##     - name: edns0
-  dnsConfig: {}
-  ## @param sftpgo.podLabels Extra labels for sftpgo pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param sftpgo.podAnnotations Annotations for sftpgo pods
-  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
-  ## the userns annotation only work podman v4.9+
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param sftpgo.autoscaling.enabled Enable autoscaling for sftpgo
-  ## @param sftpgo.autoscaling.minReplicas Minimum number of sftpgo replicas
-  ## @param sftpgo.autoscaling.maxReplicas Maximum number of sftpgo replicas
-  ## @param sftpgo.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param sftpgo.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param sftpgo.extraEnvVars Array with extra environment variables to add to sftpgo nodes
   ## e.g:
@@ -281,33 +305,9 @@ sftpgo:
   ## @param sftpgo.extraEnvVarsSecret Name of existing Secret containing extra env vars for sftpgo nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param sftpgo.extraVolumes Optionally specify extra list of additional volumes for the sftpgo pod(s)
-  ##
-  extraVolumes: []
   ## @param sftpgo.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the sftpgo container(s)
   ##
   extraVolumeMounts: []
-  ## @param sftpgo.sidecars Add additional sidecar containers to the sftpgo pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param sftpgo.initContainers Add additional init containers to the sftpgo pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##
@@ -331,8 +331,7 @@ persistence:
     workDir: /var/lib/sftpgo
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
-  subPath:
-    {}
+  subPath: {}
     # users: null
     # workDir: null
   ## @param persistence.storageClass Storage class of backing PVC

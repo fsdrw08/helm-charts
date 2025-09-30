@@ -40,6 +40,89 @@ workloadKind: Pod
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 exporter:
+  ## @param exporter.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param exporter.replicaCount Number of prometheus-podman-exporter replicas to deploy
+  ##
+  replicaCount: 1
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param exporter.podSecurityContext.enabled Enabled prometheus-podman-exporter pods' Security Context
+  ## @param exporter.podSecurityContext.fsGroup Set prometheus-podman-exporter pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param exporter.hostAliases prometheus-podman-exporter pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param exporter.hostNetwork Specify if host network should be enabled for %%MAIN_OBJECT_BLOCK%% pod
+  ##
+  hostNetwork: true
+  ## @param exporter.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param exporter.podLabels Extra labels for prometheus-podman-exporter pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param exporter.podAnnotations Annotations for prometheus-podman-exporter pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=65534,gid=65534
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param exporter.autoscaling.enabled Enable autoscaling for exporter
+  ## @param exporter.autoscaling.minReplicas Minimum number of exporter replicas
+  ## @param exporter.autoscaling.maxReplicas Maximum number of exporter replicas
+  ## @param exporter.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param exporter.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-podman-exporter pod(s)
+  ##
+  extraVolumes: []
+  ## @param exporter.initContainers Add additional init containers to the prometheus-podman-exporter pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param exporter.sidecars Add additional sidecar containers to the prometheus-podman-exporter pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## prometheus-podman-exporter image
   ## ref: https://quay.io/repository/navidys/prometheus-podman-exporter?tab=tags
   ## @param exporter.image.registry prometheus-podman-exporter image registry
@@ -67,12 +150,6 @@ exporter:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param exporter.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param exporter.replicaCount Number of prometheus-podman-exporter replicas to deploy
-  ##
-  replicaCount: 1
   ## @param exporter.containerPorts prometheus-podman-exporter container port to expose to host
   ## e.g.
   ## containerPorts:
@@ -159,15 +236,6 @@ exporter:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param exporter.podSecurityContext.enabled Enabled prometheus-podman-exporter pods' Security Context
-  ## @param exporter.podSecurityContext.fsGroup Set prometheus-podman-exporter pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param exporter.containerSecurityContext.enabled Enabled prometheus-podman-exporter containers' Security Context
@@ -262,33 +330,6 @@ exporter:
   ## @param exporter.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param exporter.hostAliases prometheus-podman-exporter pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param exporter.podLabels Extra labels for prometheus-podman-exporter pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param exporter.podAnnotations Annotations for prometheus-podman-exporter pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=65534,gid=65534
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param exporter.autoscaling.enabled Enable autoscaling for exporter
-  ## @param exporter.autoscaling.minReplicas Minimum number of exporter replicas
-  ## @param exporter.autoscaling.maxReplicas Maximum number of exporter replicas
-  ## @param exporter.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param exporter.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param exporter.extraEnvVars Array with extra environment variables to add to prometheus-podman-exporter nodes
   ## e.g:
@@ -303,33 +344,9 @@ exporter:
   ## @param exporter.extraEnvVarsSecret Name of existing Secret containing extra env vars for prometheus-podman-exporter nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-podman-exporter pod(s)
-  ##
-  extraVolumes: []
   ## @param exporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-podman-exporter container(s)
   ##
   extraVolumeMounts: []
-  ## @param exporter.sidecars Add additional sidecar containers to the prometheus-podman-exporter pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param exporter.initContainers Add additional init containers to the prometheus-podman-exporter pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

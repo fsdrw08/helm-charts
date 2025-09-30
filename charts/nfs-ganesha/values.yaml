@@ -40,6 +40,88 @@ workloadKind: Pod
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 nfs:
+  ## @param nfs.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param nfs.replicaCount Number of nfs-ganesha replicas to deploy
+  ##
+  replicaCount: 1
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param nfs.podSecurityContext.enabled Enabled nfs-ganesha pods' Security Context
+  ## @param nfs.podSecurityContext.fsGroup Set nfs-ganesha pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param nfs.hostAliases nfs-ganesha pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param nfs.hostNetwork Specify if host network should be enabled for nfs pod
+  ##
+  hostNetwork: true
+  ## @param nfs.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param nfs.podLabels Extra labels for nfs-ganesha pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param nfs.podAnnotations Annotations for nfs-ganesha pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param nfs.autoscaling.enabled Enable autoscaling for nfs
+  ## @param nfs.autoscaling.minReplicas Minimum number of nfs replicas
+  ## @param nfs.autoscaling.maxReplicas Maximum number of nfs replicas
+  ## @param nfs.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param nfs.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param nfs.extraVolumes Optionally specify extra list of additional volumes for the nfs-ganesha pod(s)
+  ##
+  extraVolumes: []
+  ## @param nfs.initContainers Add additional init containers to the nfs-ganesha pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param nfs.sidecars Add additional sidecar containers to the nfs-ganesha pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## nfs-ganesha image
   ## ref: https://hub.docker.com/r/hectorm/nfs-ganesha/tags
   ## @param nfs.image.registry nfs-ganesha image registry
@@ -67,12 +149,6 @@ nfs:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param nfs.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param nfs.replicaCount Number of nfs-ganesha replicas to deploy
-  ##
-  replicaCount: 1
   ## @param nfs.containerPorts nfs-ganesha container port to expose to host
   ##
   containerPorts:
@@ -151,15 +227,6 @@ nfs:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param nfs.podSecurityContext.enabled Enabled nfs-ganesha pods' Security Context
-  ## @param nfs.podSecurityContext.fsGroup Set nfs-ganesha pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param nfs.containerSecurityContext.enabled Enabled nfs-ganesha containers' Security Context
@@ -258,32 +325,6 @@ nfs:
   ## @param nfs.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param nfs.hostAliases nfs-ganesha pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param nfs.podLabels Extra labels for nfs-ganesha pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param nfs.podAnnotations Annotations for nfs-ganesha pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param nfs.autoscaling.enabled Enable autoscaling for nfs
-  ## @param nfs.autoscaling.minReplicas Minimum number of nfs replicas
-  ## @param nfs.autoscaling.maxReplicas Maximum number of nfs replicas
-  ## @param nfs.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param nfs.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param nfs.extraEnvVars Array with extra environment variables to add to nfs-ganesha nodes
   ## e.g:
@@ -298,33 +339,9 @@ nfs:
   ## @param nfs.extraEnvVarsSecret Name of existing Secret containing extra env vars for nfs-ganesha nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param nfs.extraVolumes Optionally specify extra list of additional volumes for the nfs-ganesha pod(s)
-  ##
-  extraVolumes: []
   ## @param nfs.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the nfs-ganesha container(s)
   ##
   extraVolumeMounts: []
-  ## @param nfs.sidecars Add additional sidecar containers to the nfs-ganesha pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param nfs.initContainers Add additional init containers to the nfs-ganesha pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##
