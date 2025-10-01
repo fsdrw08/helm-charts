@@ -52,7 +52,7 @@ etcd:
   image:
     registry: quay.io
     repository: coreos/etcd
-    tag: v3.6.4
+    tag: v3.6.5
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
