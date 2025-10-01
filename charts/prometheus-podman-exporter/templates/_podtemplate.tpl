@@ -19,6 +19,10 @@ spec:
   {{- if .Values.exporter.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.hostAliases "context" $) | nindent 4 }}
   {{- end }}
+  hostNetwork: {{ .Values.exporter.hostNetwork }}
+  {{- if .Values.exporter.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
   {{- if .Values.exporter.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.exporter.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
