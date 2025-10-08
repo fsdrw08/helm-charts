@@ -40,6 +40,88 @@ workloadKind: Pod
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 cockpit:
+  ## @param cockpit.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param cockpit.replicaCount Number of cockpit replicas to deploy
+  ##
+  replicaCount: 1
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param cockpit.podSecurityContext.enabled Enabled cockpit pods' Security Context
+  ## @param cockpit.podSecurityContext.fsGroup Set cockpit pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param cockpit.hostAliases cockpit pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param cockpit.hostNetwork Specify if host network should be enabled for cockpit pod
+  ##
+  hostNetwork: true
+  ## @param cockpit.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param cockpit.podLabels Extra labels for cockpit pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param cockpit.podAnnotations Annotations for cockpit pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param cockpit.autoscaling.enabled Enable autoscaling for cockpit
+  ## @param cockpit.autoscaling.minReplicas Minimum number of cockpit replicas
+  ## @param cockpit.autoscaling.maxReplicas Maximum number of cockpit replicas
+  ## @param cockpit.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param cockpit.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param cockpit.extraVolumes Optionally specify extra list of additional volumes for the cockpit pod(s)
+  ##
+  extraVolumes: []
+  ## @param cockpit.initContainers Add additional init containers to the cockpit pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param cockpit.sidecars Add additional sidecar containers to the cockpit pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## cockpit image
   ## ref: https://quay.io/repository/cockpit/ws?tab=tags
   ## @param cockpit.image.registry cockpit image registry
@@ -67,31 +149,15 @@ cockpit:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param cockpit.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param cockpit.replicaCount Number of cockpit replicas to deploy
-  ##
-  replicaCount: 1
   ## @param cockpit.containerPorts cockpit container port to expose to host
   ## e.g.
   ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
-  ##     hostIP: 192.168.255.10
+  ##   - name: web
+  ##     containerPort: 9090
+  ##     hostPort: 9090
   ##     protocol: TCP
   ##
-  containerPorts:
-    - name: web
-      containerPort: 9090
-      hostPort: 9090
-      protocol: TCP
+  containerPorts: []
   ## Configure extra options for cockpit containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param cockpit.livenessProbe.enabled Enable livenessProbe on cockpit containers
@@ -163,15 +229,6 @@ cockpit:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param cockpit.podSecurityContext.enabled Enabled cockpit pods' Security Context
-  ## @param cockpit.podSecurityContext.fsGroup Set cockpit pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param cockpit.containerSecurityContext.enabled Enabled cockpit containers' Security Context
@@ -230,32 +287,6 @@ cockpit:
   ## @param cockpit.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param cockpit.hostAliases cockpit pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param cockpit.podLabels Extra labels for cockpit pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param cockpit.podAnnotations Annotations for cockpit pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param cockpit.autoscaling.enabled Enable autoscaling for cockpit
-  ## @param cockpit.autoscaling.minReplicas Minimum number of cockpit replicas
-  ## @param cockpit.autoscaling.maxReplicas Maximum number of cockpit replicas
-  ## @param cockpit.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param cockpit.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param cockpit.extraEnvVars Array with extra environment variables to add to cockpit nodes
   ## e.g:
@@ -270,33 +301,9 @@ cockpit:
   ## @param cockpit.extraEnvVarsSecret Name of existing Secret containing extra env vars for cockpit nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param cockpit.extraVolumes Optionally specify extra list of additional volumes for the cockpit pod(s)
-  ##
-  extraVolumes: []
   ## @param cockpit.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the cockpit container(s)
   ##
   extraVolumeMounts: []
-  ## @param cockpit.sidecars Add additional sidecar containers to the cockpit pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param cockpit.initContainers Add additional init containers to the cockpit pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

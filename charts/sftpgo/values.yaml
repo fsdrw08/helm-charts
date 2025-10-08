@@ -166,7 +166,7 @@ sftpgo:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts: []
   ## Configure extra options for sftpgo containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param sftpgo.livenessProbe.enabled Enable livenessProbe on sftpgo containers
