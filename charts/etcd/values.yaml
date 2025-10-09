@@ -40,6 +40,88 @@ workloadKind: Pod
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 etcd:
+  ## @param etcd.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param etcd.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ##
+  replicaCount: 1
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param etcd.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param etcd.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param etcd.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param etcd.hostNetwork Specify if host network should be enabled for etcd pod
+  ##
+  hostNetwork: true
+  ## @param etcd.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param etcd.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param etcd.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param etcd.autoscaling.enabled Enable autoscaling for etcd
+  ## @param etcd.autoscaling.minReplicas Minimum number of etcd replicas
+  ## @param etcd.autoscaling.maxReplicas Maximum number of etcd replicas
+  ## @param etcd.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param etcd.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param etcd.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param etcd.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param etcd.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## etcd image
   ## ref: https://quay.io/repository/coreos/etcd?tab=tags
   ## @param etcd.image.registry etcd image registry
@@ -67,35 +149,19 @@ etcd:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param etcd.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param etcd.replicaCount Number of etcd replicas to deploy
-  ##
-  replicaCount: 1
   ## @param etcd.containerPorts etcd container port to expose to host
   ## e.g.
   ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
+  ##   - name: client
+  ##     containerPort: 2379
+  ##     hostPort: 2379
   ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
-  ##     hostIP: 192.168.255.10
+  ##   - name: peer
+  ##     containerPort: 2380
+  ##     hostPort: 2380
   ##     protocol: TCP
   ##
-  containerPorts:
-    - name: client
-      containerPort: 2379
-      hostPort: 2379
-      protocol: TCP
-    - name: peer
-      containerPort: 2380
-      hostPort: 2380
-      protocol: TCP
+  containerPorts: []
 
   ## Configure extra options for etcd containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -181,15 +247,6 @@ etcd:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param etcd.podSecurityContext.enabled Enabled etcd pods' Security Context
-  ## @param etcd.podSecurityContext.fsGroup Set etcd pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param etcd.containerSecurityContext.enabled Enabled etcd containers' Security Context
@@ -536,32 +593,6 @@ etcd:
   ## @param etcd.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param etcd.hostAliases etcd pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param etcd.podLabels Extra labels for etcd pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param etcd.podAnnotations Annotations for etcd pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param etcd.autoscaling.enabled Enable autoscaling for etcd
-  ## @param etcd.autoscaling.minReplicas Minimum number of etcd replicas
-  ## @param etcd.autoscaling.maxReplicas Maximum number of etcd replicas
-  ## @param etcd.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param etcd.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param etcd.extraEnvVars Array with extra environment variables to add to etcd nodes
   ## e.g:
@@ -576,33 +607,9 @@ etcd:
   ## @param etcd.extraEnvVarsSecret Name of existing Secret containing extra env vars for etcd nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param etcd.extraVolumes Optionally specify extra list of additional volumes for the etcd pod(s)
-  ##
-  extraVolumes: []
   ## @param etcd.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the etcd container(s)
   ##
   extraVolumeMounts: []
-  ## @param etcd.sidecars Add additional sidecar containers to the etcd pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param etcd.initContainers Add additional init containers to the etcd pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

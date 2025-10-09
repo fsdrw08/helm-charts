@@ -19,6 +19,10 @@ spec:
   {{- if .Values.etcd.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.hostAliases "context" $) | nindent 4 }}
   {{- end }}
+  hostNetwork: {{ .Values.etcd.hostNetwork }}
+  {{- if .Values.etcd.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
   {{- if .Values.etcd.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.etcd.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
