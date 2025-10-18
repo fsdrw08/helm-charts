@@ -78,8 +78,7 @@ consul:
   ## suggest to use host network, consul needs to detect host ip address
   ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#ports
   ##
-  containerPorts:
-    []
+  containerPorts: []
     # - name: server
     #   containerPort: 8300
     #   hostPort: 8300
@@ -207,8 +206,8 @@ consul:
   ##
   containerSecurityContext:
     enabled: true
-    runAsGroup: 1000
     runAsUser: 100
+    runAsGroup: 1000
     runAsNonRoot: true
     readOnlyRootFilesystem: true
 

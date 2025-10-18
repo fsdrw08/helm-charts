@@ -1,7 +1,4 @@
 annotations:
-  # CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE
-  # https://github.com/bitnami/charts/blob/main/CHART_CATEGORIES
-  category: %%CHOOSE_ONE_FROM_CHART_CATEGORIES_FILE%%
   licenses: Apache-2.0
 apiVersion: v2
 appVersion: %%UPSTREAM_PROJECT_VERSION%%

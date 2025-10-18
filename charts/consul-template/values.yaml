@@ -1,0 +1,448 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param consulTemplate.workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
+## @section consulTemplate Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+consulTemplate:
+  ## @param consulTemplate.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param consulTemplate.replicaCount Number of consulTemplate replicas to deploy
+  ##
+  replicaCount: 1
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param consulTemplate.podSecurityContext.enabled Enabled consulTemplate pods' Security Context
+  ## @param consulTemplate.podSecurityContext.fsGroup Set consulTemplate pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param consulTemplate.hostAliases consulTemplate pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param consulTemplate.hostNetwork Specify if host network should be enabled for consulTemplate pod
+  ##
+  hostNetwork: true
+  ## @param consulTemplate.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param consulTemplate.podLabels Extra labels for consulTemplate pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param consulTemplate.podAnnotations Annotations for consulTemplate pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param consulTemplate.autoscaling.enabled Enable autoscaling for consulTemplate
+  ## @param consulTemplate.autoscaling.minReplicas Minimum number of consulTemplate replicas
+  ## @param consulTemplate.autoscaling.maxReplicas Maximum number of consulTemplate replicas
+  ## @param consulTemplate.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param consulTemplate.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param consulTemplate.extraVolumes Optionally specify extra list of additional volumes for the consulTemplate pod(s)
+  ##
+  extraVolumes: []
+  ## @param consulTemplate.initContainers Add additional init containers to the consulTemplate pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param consulTemplate.sidecars Add additional sidecar containers to the consulTemplate pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## Bitnami consulTemplate image
+  ## ref: https://hub.docker.com/r/hashicorp/consul-template/tags/
+  ## @param consulTemplate.image.registry consulTemplate image registry
+  ## @param consulTemplate.image.repository consulTemplate image repository
+  ## @param consulTemplate.image.tag consulTemplate image tag (immutable tags are recommended)
+  ## @param consulTemplate.image.digest consulTemplate image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param consulTemplate.image.pullPolicy consulTemplate image pull policy
+  ## @param consulTemplate.image.pullSecrets consulTemplate image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: hashicorp/consul-template
+    tag: 0.41.2
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param consulTemplate.containerPorts consulTemplate container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts: {}
+  ## Configure extra options for consulTemplate containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param consulTemplate.livenessProbe.enabled Enable livenessProbe on consulTemplate containers
+  ## @param consulTemplate.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param consulTemplate.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param consulTemplate.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param consulTemplate.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param consulTemplate.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param consulTemplate.readinessProbe.enabled Enable readinessProbe on consulTemplate containers
+  ## @param consulTemplate.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param consulTemplate.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param consulTemplate.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param consulTemplate.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param consulTemplate.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param consulTemplate.startupProbe.enabled Enable startupProbe on consulTemplate containers
+  ## @param consulTemplate.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param consulTemplate.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param consulTemplate.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param consulTemplate.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param consulTemplate.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param consulTemplate.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param consulTemplate.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param consulTemplate.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## consulTemplate resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param consulTemplate.resourcesPreset Set consulTemplate container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if consulTemplate.resources is set (consulTemplate.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param consulTemplate.resources Set consulTemplate container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param consulTemplate.containerSecurityContext.enabled Enabled consulTemplate containers' Security Context
+  ## @param consulTemplate.containerSecurityContext.runAsUser Set consulTemplate containers' Security Context runAsUser
+  ## @param consulTemplate.containerSecurityContext.runAsNonRoot Set consulTemplate containers' Security Context runAsNonRoot
+  ## @param consulTemplate.containerSecurityContext.readOnlyRootFilesystem Set consulTemplate containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 100
+    runAsGroup: 1000
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  ## @param consulTemplate.configFiles config files to start consul-template
+  ## The sub config block will convert to json and injected as ConfigMap and mount into /consul-template/config/***.json
+  ## You can add whatever sub items under this block
+  ## ref: https://developer.hashicorp.com/consul/docs/reference/consul-template/configuration
+  ##
+  configFiles:
+    ## @param consulTemplate.configFiles.main Main config consul-template
+    ## The config under this node will convert to json file and place in /consul-template/config/main.json
+    ## https://github.com/hashicorp/consul-template/tree/v0.41.2?tab=readme-ov-file#docker-image-use
+    ##
+    main:
+      ## @param consulTemplate.configFiles.main.block_query_wait This is amount of time in seconds to do a blocking query for.
+      ## Many endpoints in Consul support a feature known as "blocking queries".
+      ## A blocking query is used to wait for a potential change using long polling.
+      ##
+      block_query_wait: "60s"
+      ## @param consulTemplate.configFiles.main.kill_signal This is the signal to listen for to trigger a graceful stop.
+      ## Setting this value to the empty string will cause Consul Template to not listen for any graceful stop signals.
+      ##
+      kill_signal: SIGINT
+      ## @param consulTemplate.configFiles.main.log_level This is the log level. This is also available as a command line flag.
+      ## Valid options include (in order of verbosity): trace, debug, info, warn, err
+      ##
+      log_level: "warn"
+      ## @param consulTemplate.configFiles.main.template_error_fatal This controls whether an error within a template
+      ## will cause consul-template to immediately exit.
+      ## This value can be overridden within each template configuration.
+      ##
+      template_error_fatal: true
+      ## @param consulTemplate.configFiles.main.err_on_failed_lookup This will cause consul-template to exit
+      ## with an error if it fails to successfully fetch a value for a field.
+      ## Note that the retry logic defined for the services don't apply to this type of error.
+      ##
+      err_on_failed_lookup: true
+      ## @param consulTemplate.configFiles.main.wait This is the quiescence timers;
+      ## it defines the minimum and maximum amount of time to wait for the cluster to reach a consistent state
+      ## before rendering a template. This is useful to enable in systems that have a lot of flapping,
+      ## because it will reduce the the number of times a template is rendered.
+      ##
+      wait:
+        min: "5s"
+        max: "10s"
+      ## @param consulTemplate.configFiles.main.consul This object allows a number of sub-keys to be set which controls the Consul connection.
+      ##
+      consul:
+        address: 127.0.0.1:8500
+
+  ## @param consulTemplate.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param consulTemplate.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ##
+  tls:
+    mountPath: /consul-template/config/certs
+    ## @param consulTemplate.tls.contents secret content of cert and key or whatever tls content will set in the container
+    ## You can set the content key as whatever file name you like
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## e.g.
+    ## contents:
+    ##  consul-agent-ca.pem: ""
+    ##  dc1-server-consul-1.pem: ""
+    ##  dc1-server-consul-1-key.pem: ""
+    ##
+    contents: {}
+  ## @param consulTemplate.existingConfigmap The name of an existing ConfigMap with your custom configuration for consulTemplate
+  ##
+  existingConfigmap:
+  ## @param consulTemplate.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param consulTemplate.args Override default container args (useful when using custom images)
+  ##
+  args: []
+
+  ## @param consulTemplate.extraEnvVars Array with extra environment variables to add to consulTemplate nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param consulTemplate.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for consulTemplate nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param consulTemplate.extraEnvVarsSecret Name of existing Secret containing extra env vars for consulTemplate nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param consulTemplate.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the consulTemplate container(s)
+  ##
+  extraVolumeMounts: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: false
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /consul-template/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
