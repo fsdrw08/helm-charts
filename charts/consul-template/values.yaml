@@ -163,7 +163,7 @@ consulTemplate:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts: []
   ## Configure extra options for consulTemplate containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param consulTemplate.livenessProbe.enabled Enable livenessProbe on consulTemplate containers
@@ -294,15 +294,30 @@ consulTemplate:
         min: "5s"
         max: "10s"
       ## @param consulTemplate.configFiles.main.consul This object allows a number of sub-keys to be set which controls the Consul connection.
+      ## ref: https://developer.hashicorp.com/consul/docs/reference/consul-template/configuration#consul-parameters
       ##
       consul:
         address: 127.0.0.1:8500
+      ## @param consulTemplate.configFiles.main.template A template block defines the configuration for a template.
+      ## Unlike other blocks, this block may be specified multiple times to configure multiple templates.
+      ## It is also possible to configure templates via the CLI directly.
+      ## ref: https://developer.hashicorp.com/consul/docs/reference/consul-template/configuration#template-parameters
+      ##
+      template: []
+
+  ## @param consulTemplate.templates templates to render, in order to make this block take effect,
+  ## you need to set value of key `source` in consulTemplate.configFiles.main.template.*.source to "/consul-template/templates/<name>"
+  ##
+  ## templates:
+  ##   - name:
+  ##     content:
+  templates: []
 
   ## @param consulTemplate.tls secret setting of cert and key or whatever tls content will set in the container
   ## @param consulTemplate.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
   ##
   tls:
-    mountPath: /consul-template/config/certs
+    mountPath: /consul-template/tls
     ## @param consulTemplate.tls.contents secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here
@@ -322,7 +337,8 @@ consulTemplate:
   command: []
   ## @param consulTemplate.args Override default container args (useful when using custom images)
   ##
-  args: []
+  args:
+    - -config=/consul-template/config/
 
   ## @param consulTemplate.extraEnvVars Array with extra environment variables to add to consulTemplate nodes
   ## e.g:

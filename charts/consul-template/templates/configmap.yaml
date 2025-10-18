@@ -21,3 +21,20 @@ data:
   {{ $key }}.json: |-
 {{ toJson $val | indent 4 }}
 {{- end }}
+{{- if .Values.consulTemplate.templates }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm-tmpl
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: consulTemplate
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  {{- range $file := .Values.consulTemplate.templates }}
+  {{ $file.name }}: {{ print "|" }}
+    {{- $file.content | nindent 4 -}}
+  {{- end }}
+{{- end -}}

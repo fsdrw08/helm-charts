@@ -50,7 +50,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.consulTemplate.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: consulTemplate
+    - name: daemon
       image: {{ template "consulTemplate.image" . }}
       imagePullPolicy: {{ .Values.consulTemplate.image.pullPolicy | quote }}
       {{- if .Values.consulTemplate.containerSecurityContext.enabled }}
@@ -105,15 +105,21 @@ spec:
       volumeMounts:
         - name: config
           mountPath: /consul-template/config
+        {{- if .Values.consulTemplate.templates }}
+        - name: templates
+          mountPath: /consul-template/templates
+        {{- end }}
         {{- if .Values.consulTemplate.tls.contents }}
         - name: tls
           mountPath: {{ .Values.consulTemplate.tls.mountPath }}
         {{- end }}
+        {{/*
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        */}}
       {{- if .Values.consulTemplate.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.consulTemplate.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -124,11 +130,17 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.consulTemplate.templates }}
+    - name: templates
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm-tmpl
+    {{- end }}
     {{- if .Values.consulTemplate.tls.contents }}
     - name: tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
+    {{/*
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
@@ -136,6 +148,7 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
+    */}}
     {{- if .Values.consulTemplate.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.consulTemplate.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
