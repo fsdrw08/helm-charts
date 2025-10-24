@@ -114,9 +114,9 @@ spec:
         - name: tmp
           mountPath: /tmp
         {{- end }}
-        {{- if .Values.zot.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.zot.tls.mountPath }}
+        {{- if .Values.zot.secret.contents }}
+        - name: secret
+          mountPath: {{ .Values.zot.secret.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -133,18 +133,20 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.zot.htpasswd }}
     - name: htpasswd
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec
         items:
           - key: htpasswd
             path: htpasswd
-    {{- if .Values.zot.tls.contents }}
-    - name: tls
+    {{- end }}
+    {{- if .Values.zot.secret.contents }}
+    - name: secret
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec
         items:
-        {{- range $key, $val := .Values.zot.tls.contents }}
+        {{- range $key, $val := .Values.zot.secret.contents }}
          - key: {{ $key }}
            path: {{ $key }}
         {{- end }}

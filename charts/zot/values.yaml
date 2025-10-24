@@ -215,12 +215,12 @@ zot:
   ##   user:$2y$05$L86zqQDfH5y445dcMlwu6uHv.oXFgT6AiJCwpv3ehr7idc0rI3S2G
   ##
   htpasswd: ""
-  ## @param zot.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param zot.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ## @param zot.secret secret setting of cert and key or whatever tls content will set in the container
+  ## @param zot.secret.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
   ##
-  tls:
-    mountPath: /etc/zot/certs
-    ## @param zot.tls.content secret content of cert and key or whatever tls content will set in the container
+  secret:
+    mountPath: /etc/zot/secret
+    ## @param zot.secret.content secret content of cert and key or whatever tls content will set in the container
     ## You can set the content key as whatever file name you like
     ## But the tls set in configFiles above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
