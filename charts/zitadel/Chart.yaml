@@ -1,0 +1,24 @@
+annotations:
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: v4.4.0
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: A Helm chart for ZITADEL
+home: https://github.com/fsdrw08/helm-charts
+icon: https://zitadel.com/zitadel-logo-dark.svg
+keywords:
+  - oidc
+  - saml
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts/tree/main/charts/zitadel
+name: zitadel
+sources:
+  - https://github.com/zitadel/zitadel/blob/main/apps/api/Dockerfile
+  - https://github.com/zitadel/zitadel/pkgs/container/zitadel
+  - ...
+version: 0.1.0
