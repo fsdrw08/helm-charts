@@ -206,29 +206,24 @@ zot:
     log:
       level: "debug"
 
-  ## @param zot.htpasswd username and password content which encrypt by htpasswd
-  ## and set in to the path which config in .Values.zot.config.http.auth.htpasswd.path
-  ## ref: https://zotregistry.dev/v2.1.8/articles/authn-authz/#htpasswd
-  ## Example htpasswd with 'admin:admin' & 'user:user' user:pass pairs
-  ## htpasswd: |-
-  ##   admin:$2y$05$vmiurPmJvHylk78HHFWuruFFVePlit9rZWGA/FbZfTEmNRneGJtha
-  ##   user:$2y$05$L86zqQDfH5y445dcMlwu6uHv.oXFgT6AiJCwpv3ehr7idc0rI3S2G
-  ##
-  htpasswd: ""
-  ## @param zot.secret secret setting of cert and key or whatever tls content will set in the container
-  ## @param zot.secret.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ## @param zot.secret secret will set in the container, setting for tls cert and key or whatever secrets
+  ## @param zot.secret.mountPath secret mount path in the container
   ##
   secret:
     mountPath: /etc/zot/secret
-    ## @param zot.secret.content secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
+    ## @param zot.secret.content secret content will set in the container
+    ## You can set the content key as whatever file name you want
     ## But the tls set in configFiles above must match with the settings here
     ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## and also can set htpasswd and ldap bind dn credential secret here
     ## e.g.
     ## contents:
     ##  ca.crt: ""
     ##  tls.crt: ""
     ##  tls.key: ""
+    ##  htpasswd: |-
+    ##    admin:$2y$05$vmiurPmJvHylk78HHFWuruFFVePlit9rZWGA/FbZfTEmNRneGJtha
+    ##    user:$2y$05$L86zqQDfH5y445dcMlwu6uHv.oXFgT6AiJCwpv3ehr7idc0rI3S2G
     ##
     contents: {}
   ## @param zot.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%

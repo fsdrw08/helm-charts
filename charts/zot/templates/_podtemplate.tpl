@@ -102,11 +102,6 @@ spec:
         - name: config
           mountPath: /etc/zot/config.json
           subPath: config.json
-        {{- if .Values.zot.htpasswd }}
-        - name: htpasswd
-          mountPath: {{ .Values.zot.config.http.auth.htpasswd.path }}
-          subPath: htpasswd
-        {{- end }}
         {{- /*
         https://stackoverflow.com/questions/59795596/how-to-make-nested-variables-optional-in-helm/68807258#68807258
         */ -}}
@@ -133,14 +128,6 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.zot.htpasswd }}
-    - name: htpasswd
-      secret:
-        secretName: {{ template "common.names.fullname" . }}-sec
-        items:
-          - key: htpasswd
-            path: htpasswd
-    {{- end }}
     {{- if .Values.zot.secret.contents }}
     - name: secret
       secret:
