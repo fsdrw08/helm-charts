@@ -163,7 +163,7 @@ zitadel:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts: []
   ## Configure extra options for zitadel containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param zitadel.livenessProbe.enabled Enable livenessProbe on zitadel containers
@@ -250,26 +250,34 @@ zitadel:
     privileged: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param zitadel.configFiles config files for zitadel init, setup and run, file will place in /config/zitadel-config.yaml
+  ## ref: https://zitadel.com/docs/self-hosting/manage/configure#passing-the-configuration
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_init.yaml#L52
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_setup.yaml#L60
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/deployment_zitadel.yaml#L56
+  ##
   configFiles:
-    ## @param zitadel.configFiles.steps config file used in zitadel setup phase
+    ## @param zitadel.configFiles.step config file used in zitadel setup phase, this file will place in /config/zitadel-step.yaml
     ## All possible options and their defaults: https://github.com/zitadel/zitadel/blob/v4.4.0/cmd/setup/steps.yaml
     ## ref: https://zitadel.com/docs/self-hosting/manage/updating_scaling#the-setup-phase
     ## ref: https://github.com/zitadel/zitadel/blob/main/cmd/setup/steps.yaml
     ## ref: https://github.com/zitadel/zitadel/blob/v4.4.0/docs/docs/self-hosting/manage/configure/docker-compose.yaml#L7
     ##
-    steps:
+    step:
       # FirstInstance:
       #   Org:
       #     Human:
       #       Username: zitadel-admin
       #       Password: Password1!
-    ## @param zitadel.configFiles.configs config file for zitadel runtime
+    ## @param zitadel.configFiles.config config file for zitadel runtime, this file will place in /config/zitadel-config.yaml
     ## ref: https://github.com/zitadel/zitadel/blob/v4.4.0/cmd/defaults.yaml
     ##
-    configs:
-      ExternalSecure: false
+    config:
+      TLS:
+        Enabled: false
   ## @param zitadel.secret secret will set in the container, setting for tls cert and key or whatever secrets
-  ## @param zitadel.secret.mountPath secret mount path in the container
+  ## @param zitadel.secret.tls secret will set in the container, setting for tls cert and key secrets
+  ## @param zitadel.secret.others secret will set in the container, setting for whatever secrets except tls
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/values.yaml#L146
   ##
   secret:
@@ -285,13 +293,11 @@ zitadel:
       ##  ca.crt: ""
       ##  tls.crt: ""
       ##  tls.key: ""
-      ##  htpasswd: |-
-      ##    admin:$2y$05$vmiurPmJvHylk78HHFWuruFFVePlit9rZWGA/FbZfTEmNRneGJtha
-      ##    user:$2y$05$L86zqQDfH5y445dcMlwu6uHv.oXFgT6AiJCwpv3ehr7idc0rI3S2G
       ##
       contents: {}
     others:
-      mountPath:
+      mountPath: /secret
+      contents: {}
   ## @param zitadel.existingConfigmap The name of an existing ConfigMap with your custom configuration for zitadel
   ##
   existingConfigmap:
@@ -300,7 +306,10 @@ zitadel:
   command: []
   ## @param zitadel.args Override default container args (useful when using custom images)
   ##
-  args: []
+  args:
+    - start-from-init
+    - --config
+    - /config/zitadel-config.yaml
 
   ## @param zitadel.extraEnvVars Array with extra environment variables to add to zitadel nodes
   ## e.g:
@@ -328,10 +337,10 @@ zitadel:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/zitadel/data
+  mountPath: /data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

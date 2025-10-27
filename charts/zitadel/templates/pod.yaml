@@ -1,5 +1,5 @@
 {{- if eq .Values.workloadKind "Pod"  -}}
 apiVersion: v1
 kind: Pod
-{{ template "%%TEMPLATE_NAME%%.podTemplate" . }}
+{{ template "zitadel.podTemplate" . }}
 {{- end }}

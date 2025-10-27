@@ -9,10 +9,14 @@ metadata:
   name: {{ template "common.names.fullname" . }}-cm
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: zitadel
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  %%CONFIG_FILE_NAME%%: |
-  # Config file
+  {{- if .Values.zitadel.configFiles.step }}
+  zitadel-step.yaml: {{ print "|-" }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.configFiles.step "context" $) | nindent 4 }}
+  {{- end }}
+  zitadel-config.yaml: {{ print "|-" }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.configFiles.config "context" $) | nindent 4 }}

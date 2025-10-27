@@ -1,4 +1,4 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "zitadel.podTemplate" -}}
 metadata:
   {{- if eq .Values.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
@@ -7,7 +7,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: zitadel
     {{- if .Values.zitadel.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.podLabels "context" $) | nindent 4 }}
     {{- end }}
@@ -15,7 +15,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "zitadel.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.zitadel.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -29,7 +29,7 @@ spec:
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "zitadel.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -51,7 +51,7 @@ spec:
     {{- end }}
   containers:
     - name: zitadel
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+      image: {{ template "zitadel.image" . }}
       imagePullPolicy: {{ .Values.zitadel.image.pullPolicy | quote }}
       {{- if .Values.zitadel.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.zitadel.containerSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -103,11 +103,23 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.zitadel.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /config
+        {{- if .Values.zitadel.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.zitadel.secret.tls.mountPath }}
+        {{- end }}
+        {{- if .Values.zitadel.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.zitadel.secret.others.mountPath }}
+        {{- end }}
+        {{- if .Values.persistence.enabled }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        {{- end }}
       {{- if .Values.zitadel.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -115,12 +127,23 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.zitadel.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: data
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.zitadel.secret.tls.contents }}
+    - name: secret-tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    {{- if .Values.zitadel.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
+    {{- end }}
     {{- if .Values.persistence.enabled }}
+    - name: data
       persistentVolumeClaim:
         claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
-    {{- else }}
-      emptyDir: {}
     {{- end }}
     {{- if .Values.zitadel.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.extraVolumes "context" $) | nindent 4 }}
