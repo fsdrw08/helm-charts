@@ -163,7 +163,7 @@ workloadKind: Pod
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts: []
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param %%MAIN_OBJECT_BLOCK%%.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers

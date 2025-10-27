@@ -19,6 +19,10 @@ spec:
   {{- if .Values.postgresql.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.hostAliases "context" $) | nindent 4 }}
   {{- end }}
+  hostNetwork: {{ .Values.postgresql.hostNetwork }}
+  {{- if .Values.postgresql.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
   {{- if .Values.postgresql.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.postgresql.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}

@@ -40,6 +40,88 @@ workloadKind: Pod
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 postgresql:
+  ## @param postgresql.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## @param postgresql.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
+  ##
+  replicaCount: 1
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param postgresql.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param postgresql.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param postgresql.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param postgresql.hostNetwork Specify if host network should be enabled for postgresql pod
+  ##
+  hostNetwork: false
+  ## @param postgresql.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param postgresql.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param postgresql.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param postgresql.autoscaling.enabled Enable autoscaling for postgresql
+  ## @param postgresql.autoscaling.minReplicas Minimum number of postgresql replicas
+  ## @param postgresql.autoscaling.maxReplicas Maximum number of postgresql replicas
+  ## @param postgresql.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param postgresql.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param postgresql.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param postgresql.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param postgresql.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## sclorg postgresql-16-c10s image
   ## ref: https://quay.io/repository/sclorg/postgresql-16-c10s?tab=tags
   ## @param postgresql.image.registry %%MAIN_CONTAINER%% image registry
@@ -67,12 +149,6 @@ postgresql:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param postgresql.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param postgresql.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
-  ##
-  replicaCount: 1
   ## @param postgresql.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
   ## e.g.
   ## containerPorts:
@@ -166,15 +242,6 @@ postgresql:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param postgresql.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param postgresql.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param postgresql.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
@@ -313,32 +380,6 @@ postgresql:
   ## @param postgresql.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param postgresql.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param postgresql.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param postgresql.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param postgresql.autoscaling.enabled Enable autoscaling for postgresql
-  ## @param postgresql.autoscaling.minReplicas Minimum number of postgresql replicas
-  ## @param postgresql.autoscaling.maxReplicas Maximum number of postgresql replicas
-  ## @param postgresql.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param postgresql.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param postgresql.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
   ## e.g:
@@ -353,33 +394,9 @@ postgresql:
   ## @param postgresql.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param postgresql.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-  ##
-  extraVolumes: []
   ## @param postgresql.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
   ##
   extraVolumeMounts: []
-  ## @param postgresql.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param postgresql.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##
