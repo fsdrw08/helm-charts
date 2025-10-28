@@ -83,7 +83,8 @@ postgresql:
   ## @param postgresql.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=26,gid=26
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param postgresql.autoscaling.enabled Enable autoscaling for postgresql
@@ -134,7 +135,7 @@ postgresql:
   image:
     registry: quay.io
     repository: sclorg/postgresql-16-c10s
-    tag: "20250827"
+    tag: "20250912"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -257,27 +258,19 @@ postgresql:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param postgresql.config environment variable config for postgresql
+  ## ref: https://github.com/sclorg/postgresql-container/tree/master/16#environment-variables-and-volumes
   ##
   config:
     ## @param postgresql.config.POSTGRESQL_USER User name for PostgreSQL account to be created
     ##
     POSTGRESQL_USER: user
-    ## @param postgresql.config.POSTGRESQL_PASSWORD Password for the user account
-    ##
-    POSTGRESQL_PASSWORD: password
     ## @param postgresql.config.POSTGRESQL_DATABASE Database name
     ##
     POSTGRESQL_DATABASE: database
-    ## @param postgresql.config.POSTGRESQL_ADMIN_PASSWORD Password for the postgres admin account (optional)
-    ##
-    POSTGRESQL_ADMIN_PASSWORD: password
     ## Alternatively, the following options are related to migration scenario:
     ## @param postgresql.config.POSTGRESQL_MIGRATION_REMOTE_HOST Hostname/IP to migrate from
     ##
     POSTGRESQL_MIGRATION_REMOTE_HOST:
-    ## @param postgresql.config.POSTGRESQL_MIGRATION_ADMIN_PASSWORD Password for the remote 'postgres' admin user
-    ##
-    POSTGRESQL_MIGRATION_ADMIN_PASSWORD:
     ## @param postgresql.config.POSTGRESQL_MIGRATION_IGNORE_ERRORS Set to 'yes' to ignore sql import errors, optional, default 'no'
     ##
     POSTGRESQL_MIGRATION_IGNORE_ERRORS: no
@@ -354,23 +347,39 @@ postgresql:
     ## except that these scripts are always sourced (after postgresql-init/ scripts, if they exist).
     ##
     start: {}
-  ## @param postgresql.ssl secret setting of cert and key or whatever ssl content will set in the container
+  ## @param postgresql.secret secret will set in the container, setting tls cert and key or whatever secrets for volume mount or env var
   ##
-  ssl:
-    ## @param postgresql.ssl.mountPath secret mount path setting of whatever ssl content will set in the container
-    ## ref: https://github.com/containers/podman/issues/20956
+  secret:
+    ## @param postgresql.secret.ssl setting tls cert and key for volume mount
+    ## secret setting of cert and key or whatever ssl content will set in the container
     ##
-    mountPath: /opt/app-root/src/certs:U
-    ## @param postgresql.ssl.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
-    ## e.g.
-    ## contents:
-    ##  tls.crt: ""
-    ##  tls.key: ""
+    ssl:
+      ## @param postgresql.secret.ssl.mountPath secret mount path setting of whatever ssl content will set in the container
+      ## ref: https://github.com/containers/podman/issues/20956
+      ##
+      mountPath: /opt/app-root/src/certs:U
+      ## @param postgresql.secret.ssl.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  tls.crt: ""
+      ##  tls.key: ""
+      ##
+      contents: {}
+    ## @param postgresql.secret.envVars secret content of env var set in container
     ##
-    contents: {}
+    envVars:
+      ## @param postgresql.secret.envVars.POSTGRESQL_PASSWORD Password for the user account
+      ##
+      POSTGRESQL_PASSWORD: password
+      ## @param postgresql.secret.envVars.POSTGRESQL_ADMIN_PASSWORD Password for the postgres admin account (optional)
+      ##
+      POSTGRESQL_ADMIN_PASSWORD: password
+      ## @param postgresql.secret.envVars.POSTGRESQL_MIGRATION_ADMIN_PASSWORD Password for the remote 'postgres' admin user
+      ##
+      # POSTGRESQL_MIGRATION_ADMIN_PASSWORD:
   ## @param postgresql.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
   existingConfigmap:

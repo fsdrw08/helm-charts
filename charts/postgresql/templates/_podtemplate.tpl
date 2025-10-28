@@ -73,10 +73,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.postgresql.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.postgresql.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */ -}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.postgresql.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.postgresql.extraEnvVarsSecret "context" $) }}
@@ -111,9 +111,9 @@ spec:
           mountPath: /opt/app-root/src/postgresql-{{ $key }}
         {{- end }}
         {{- end }}
-        {{- if .Values.postgresql.ssl.contents }}
+        {{- if .Values.postgresql.secret.ssl.contents }}
         - name: ssl
-          mountPath: {{ .Values.postgresql.ssl.mountPath }}
+          mountPath: {{ .Values.postgresql.secret.ssl.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -134,7 +134,7 @@ spec:
         name: {{ template "common.names.fullname" $ }}-cm-extending-{{ $key }}
     {{- end }}
     {{- end }}
-    {{- if .Values.postgresql.ssl.contents }}
+    {{- if .Values.postgresql.secret.ssl.contents }}
     - name: ssl
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-ssl
