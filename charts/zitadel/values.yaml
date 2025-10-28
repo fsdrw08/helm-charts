@@ -83,7 +83,8 @@ zitadel:
   ## @param zitadel.podAnnotations Annotations for zitadel pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param zitadel.autoscaling.enabled Enable autoscaling for zitadel
@@ -134,7 +135,7 @@ zitadel:
   image:
     registry: github.io
     repository: zitadel/zitadel
-    tag: v4.4.0
+    tag: v4.5.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -174,12 +175,18 @@ zitadel:
   ## @param zitadel.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
+    enabled: true
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - /app/zitadel
+        - ready
+        - --config
+        - /config/zitadel-config.yaml
   ## @param zitadel.readinessProbe.enabled Enable readinessProbe on zitadel containers
   ## @param zitadel.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param zitadel.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -258,10 +265,10 @@ zitadel:
   ##
   configFiles:
     ## @param zitadel.configFiles.step config file used in zitadel setup phase, this file will place in /config/zitadel-step.yaml
-    ## All possible options and their defaults: https://github.com/zitadel/zitadel/blob/v4.4.0/cmd/setup/steps.yaml
+    ## All possible options and their defaults: https://github.com/zitadel/zitadel/blob/v4.5.0/cmd/setup/steps.yaml
     ## ref: https://zitadel.com/docs/self-hosting/manage/updating_scaling#the-setup-phase
     ## ref: https://github.com/zitadel/zitadel/blob/main/cmd/setup/steps.yaml
-    ## ref: https://github.com/zitadel/zitadel/blob/v4.4.0/docs/docs/self-hosting/manage/configure/docker-compose.yaml#L7
+    ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/docs/docs/self-hosting/manage/configure/docker-compose.yaml#L7
     ##
     step:
       # FirstInstance:
@@ -270,17 +277,17 @@ zitadel:
       #       Username: zitadel-admin
       #       Password: Password1!
     ## @param zitadel.configFiles.config config file for zitadel runtime, this file will place in /config/zitadel-config.yaml
-    ## ref: https://github.com/zitadel/zitadel/blob/v4.4.0/cmd/defaults.yaml
+    ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/cmd/defaults.yaml
     ##
     config:
       TLS:
         Enabled: false
-  ## @param zitadel.secret secret will set in the container, setting for tls cert and key or whatever secrets
-  ## @param zitadel.secret.tls secret will set in the container, setting for tls cert and key secrets
-  ## @param zitadel.secret.others secret will set in the container, setting for whatever secrets except tls
+  ## @param zitadel.secret secret will set in the container, setting tls cert and key or whatever secrets for volume mount or env var
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/values.yaml#L146
   ##
   secret:
+    ## @param zitadel.secret.tls secret will set in the container, setting for tls cert and key secrets
+    ##
     tls:
       mountPath: /etc/tls
       ## @param zitadel.secret.content secret content will set in the container
@@ -295,9 +302,14 @@ zitadel:
       ##  tls.key: ""
       ##
       contents: {}
+    ## @param zitadel.secret.others secret will set in the container, setting for whatever secrets except tls
+    ##
     others:
       mountPath: /secret
-      contents: {}
+      contents:
+        masterkey: dGVzdC1tYXN0ZXJrZXktZm9yLXZhbGlkYXRpb24=
+    envVars: {}
+      # ZITADEL_MASTERKEY: dGVzdC1tYXN0ZXJrZXktZm9yLXZhbGlkYXRpb24=
   ## @param zitadel.existingConfigmap The name of an existing ConfigMap with your custom configuration for zitadel
   ##
   existingConfigmap:
@@ -305,12 +317,14 @@ zitadel:
   ##
   command: []
   ## @param zitadel.args Override default container args (useful when using custom images)
+  ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/docs/docs/self-hosting/manage/configure/configure.mdx#masterkey
   ##
   args:
     - start-from-init
     - --config
     - /config/zitadel-config.yaml
-
+    - --masterkeyFile
+    - /secret/masterkey
   ## @param zitadel.extraEnvVars Array with extra environment variables to add to zitadel nodes
   ## e.g:
   ## extraEnvVars:
@@ -402,7 +416,7 @@ volumePermissions:
   ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "nano"
+  resourcesPreset: "medium"
   ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
