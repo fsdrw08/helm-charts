@@ -350,7 +350,23 @@ postgresql:
   ## @param postgresql.secret secret will set in the container, setting tls cert and key or whatever secrets for volume mount or env var
   ##
   secret:
-    ## @param postgresql.secret.ssl setting tls cert and key for volume mount
+    ## @param postgresql.secret.envVars secret content pass to container via environment variable
+    ## e.g.
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
+    ##
+    envVars:
+      ## @param postgresql.secret.envVars.POSTGRESQL_PASSWORD Password for the user account
+      ##
+      POSTGRESQL_PASSWORD: password
+      ## @param postgresql.secret.envVars.POSTGRESQL_ADMIN_PASSWORD Password for the postgres admin account (optional)
+      ##
+      POSTGRESQL_ADMIN_PASSWORD: password
+      ## @param postgresql.secret.envVars.POSTGRESQL_MIGRATION_ADMIN_PASSWORD Password for the remote 'postgres' admin user
+      ##
+      # POSTGRESQL_MIGRATION_ADMIN_PASSWORD:
+    ## @param postgresql.secret.ssl tls cert and key pass to the container via volume and mount
     ## secret setting of cert and key or whatever ssl content will set in the container
     ##
     ssl:
@@ -368,18 +384,13 @@ postgresql:
       ##  tls.key: ""
       ##
       contents: {}
-    ## @param postgresql.secret.envVars secret content of env var set in container
-    ##
-    envVars:
-      ## @param postgresql.secret.envVars.POSTGRESQL_PASSWORD Password for the user account
-      ##
-      POSTGRESQL_PASSWORD: password
-      ## @param postgresql.secret.envVars.POSTGRESQL_ADMIN_PASSWORD Password for the postgres admin account (optional)
-      ##
-      POSTGRESQL_ADMIN_PASSWORD: password
-      ## @param postgresql.secret.envVars.POSTGRESQL_MIGRATION_ADMIN_PASSWORD Password for the remote 'postgres' admin user
-      ##
-      # POSTGRESQL_MIGRATION_ADMIN_PASSWORD:
+    ## @param postgresql.secret.others other secret pass to the the container, setting for whatever secrets except tls
+    ## e.g.
+    ## others:
+    ##   mountPath: /secret
+    ##   contents:
+    ##     secret.file: secret content
+    others: {}
   ## @param postgresql.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
   existingConfigmap:
