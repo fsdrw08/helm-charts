@@ -111,6 +111,7 @@ powerdns:
     ##
     auth:
       ## @param powerdns.containers.auth.enabled present this container in the pod
+      ##
       enabled: true
       ## powerdns auth image
       ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.0/Dockerfile-auth
