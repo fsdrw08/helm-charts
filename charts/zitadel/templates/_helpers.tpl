@@ -59,3 +59,33 @@ Compile all warnings into a single message.
 {{-   printf "\nVALUES VALIDATION:\n%s" $message -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "checkSecretEnvVarsEnabled" -}}
+{{- $secretEnvVarsEnabled := "" -}}
+{{- range $key, $val := .Values.zitadel.container }}
+  {{- if and $val.enabled $val.secret.envVars -}}
+    {{- $secretEnvVarsEnabled = "1" -}}
+  {{- end -}}
+{{- end -}}
+{{- $secretEnvVarsEnabled -}}
+{{- end -}}
+
+{{- define "checkSecretTlsEnabled" -}}
+{{- $secretTlsEnabled := "" -}}
+{{- range $key, $val := .Values.zitadel.container }}
+  {{- if and $val.enabled $val.secret.tls.contents -}}
+    {{- $secretTlsEnabled = "1" -}}
+  {{- end -}}
+{{- end -}}
+{{- $secretTlsEnabled -}}
+{{- end -}}
+
+{{- define "checkSecretOthersEnabled" -}}
+{{- $secretOthersEnabled := "" -}}
+{{- range $key, $val := .Values.zitadel.container }}
+  {{- if and $val.enabled $val.secret.others.contents -}}
+    {{- $secretOthersEnabled = "1" -}}
+  {{- end -}}
+{{- end -}}
+{{- $secretOthersEnabled -}}
+{{- end -}}

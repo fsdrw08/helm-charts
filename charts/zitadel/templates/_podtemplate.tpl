@@ -50,6 +50,89 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
+  {{- range $key, $val := .Values.zitadel.containers }}
+  {{- if $val.enabled }}
+    - name: {{ kebabcase $key }}
+      image: {{ include "common.images.image" (dict "imageRoot" $val.image "global" $.Values.global) }}
+      imagePullPolicy: {{ $val.image.pullPolicy | quote }}
+      {{- if $val.containerSecurityContext.enabled }}
+      securityContext: {{- omit $val.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if $val.command }}
+      command: {{- include "common.tplvalues.render" (dict "value" $val.command "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $val.args }}
+      args: {{- include "common.tplvalues.render" (dict "value" $val.args "context" $) | nindent 8 }}
+      {{- else }}
+      args: 
+      {{- include "processFlags" (dict "values" $val.flags) | trim | nindent 8 -}}
+      {{- end }}
+      env:
+        {{- if $val.extraEnvVars }}
+        {{- include "common.tplvalues.render" (dict "value" $val.extraEnvVars "context" $) | nindent 8 }}
+        {{- end }}
+      envFrom:
+        {{- if $val.extraEnvVarsCM }}
+        - configMapRef:
+            name: {{ include "common.tplvalues.render" (dict "value" $val.extraEnvVarsCM "context" $) }}
+        {{- end }}
+        {{- if $val.secret.envVars }}
+        - secretRef:
+            name: {{ template "common.names.fullname" $ }}-sec-envVars
+        {{- end }}
+        {{- if $val.extraEnvVarsSecret }}
+        - secretRef:
+            name: {{ include "common.tplvalues.render" (dict "value" $val.extraEnvVarsSecret "context" $) }}
+        {{- end }}
+      {{- if $val.resources }}
+      resources: {{- toYaml $val.resources | nindent 8 }}
+      {{- else if ne $val.resourcesPreset "none" }}
+      resources: {{- include "common.resources.preset" (dict "type" $val.resourcesPreset) | nindent 8 }}
+      {{- end }}
+      {{- if $val.containerPorts }}
+      ports: {{- include "common.tplvalues.render" (dict "value" $val.containerPorts "context" $) | nindent 8 -}}
+      {{- end }}
+      {{- if $val.customLivenessProbe }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" $val.customLivenessProbe "context" $) | nindent 8 }}
+      {{- else if $val.livenessProbe.enabled }}
+      livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.livenessProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $val.customReadinessProbe }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" $val.customReadinessProbe "context" $) | nindent 8 }}
+      {{- else if $val.readinessProbe.enabled }}
+      readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.readinessProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if $val.customStartupProbe }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" $val.customStartupProbe "context" $) | nindent 8 }}
+      {{- else if $val.startupProbe.enabled }}
+      startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit $val.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      volumeMounts:
+        - name: config
+          mountPath: {{ $val.flags.config.file }}
+          subPath: {{ base $val.flags.config.file }}
+        {{- if $val.flags.web.config.file }}
+        - name: web
+          mountPath: {{ $val.flags.web.config.file }}
+          subPath: {{ base $val.flags.web.config.file }}
+        {{- end }}
+        {{- if $val.tls.contents }}
+        - name: tls
+          mountPath: {{ $val.tls.mountPath }}
+        {{- end }}
+        {{- if index $.Values "persistence" "mountPath" $key }}
+        - name: {{ $key }}-data
+          mountPath: {{ include "common.tplvalues.render" (dict "value" (index $.Values "persistence" "mountPath" $key) "context" $) }}
+          {{- if (index $.Values "persistence" "subPath" $key) }}
+          subPath: {{ index $.Values "persistence" "subPath" $key }}
+          {{- end }}
+        {{- end }}
+      {{- if $val.extraVolumeMounts }}
+      {{- include "common.tplvalues.render" (dict "value" $val.extraVolumeMounts "context" $) | nindent 8 }}
+      {{- end }}
+  {{- end }}
+  {{- end }}
+  {{/*
     - name: zitadel
       image: {{ template "zitadel.image" . }}
       imagePullPolicy: {{ .Values.zitadel.image.pullPolicy | quote }}
@@ -123,6 +206,7 @@ spec:
       {{- if .Values.zitadel.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
+  */}}
     {{- if .Values.zitadel.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.zitadel.sidecars "context" $) | nindent 4 }}
     {{- end }}
@@ -130,12 +214,12 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.zitadel.secret.tls.contents }}
+    {{- if ( include "checkSecretTlsEnabled" . ) }}
     - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
-    {{- if .Values.zitadel.secret.others.contents }}
+    {{- if ( include "checkSecretOthersEnabled" . ) }}
     - name: secret-others
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-others
