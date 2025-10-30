@@ -14,9 +14,5 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  {{- if .Values.zitadel.configFiles.step }}
-  zitadel-step.yaml: {{ print "|-" }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.configFiles.step "context" $) | nindent 4 }}
-  {{- end }}
   zitadel-config.yaml: {{ print "|-" }}
-    {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.configFiles.config "context" $) | nindent 4 }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.zitadel.config "context" $) | nindent 4 }}

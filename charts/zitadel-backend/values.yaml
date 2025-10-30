@@ -259,59 +259,50 @@ zitadel:
     privileged: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## @param zitadel.configFiles config files for zitadel init, setup and run, file will place in /config/zitadel-config.yaml
+  ## @param zitadel.config config file for zitadel init, setup and run, file will place in /config/zitadel-config.yaml
+  ## ref: https://github.com/zitadel/zitadel/blob/v4.6.1/cmd/defaults.yaml
   ## ref: https://zitadel.com/docs/self-hosting/manage/configure#passing-the-configuration
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_init.yaml#L52
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_setup.yaml#L60
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/deployment_zitadel.yaml#L56
   ##
-  configFiles:
-    ## @param zitadel.configFiles.step config file used in zitadel setup phase, this file will place in /config/zitadel-step.yaml
-    ## All possible options and their defaults: https://github.com/zitadel/zitadel/blob/v4.5.0/cmd/setup/steps.yaml
-    ## ref: https://zitadel.com/docs/self-hosting/manage/updating_scaling#the-setup-phase
-    ## ref: https://github.com/zitadel/zitadel/blob/main/cmd/setup/steps.yaml
-    ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/docs/docs/self-hosting/manage/configure/docker-compose.yaml#L7
-    ##
-    step:
-      # FirstInstance:
-      #   Org:
-      #     Human:
-      #       Username: zitadel-admin
-      #       Password: Password1!
-    ## @param zitadel.configFiles.config config file for zitadel runtime, this file will place in /config/zitadel-config.yaml
-    ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/cmd/defaults.yaml
-    ##
-    config:
-      TLS:
-        Enabled: false
+  config:
+    TLS:
+      Enabled: false
   ## @param zitadel.secret secret will set in the container, setting tls cert and key or whatever secrets for volume mount or env var
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/values.yaml#L146
   ##
   secret:
-    ## @param zitadel.secret.tls secret will set in the container, setting for tls cert and key secrets
+    ## @param zitadel.secret.envVars secret pass to the container via environment variable
+    ## e.g.
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
+    ##
+    envVars: {}
+    ## @param zitadel.secret.tls tls cert and key secrets pass to the container via secret volume mount
+    ## @param zitadel.secret.tls.mountPath tls secret volume mount path
+    ## @param zitadel.secret.content secret content will set in the container
+    ## You can set the content key as whatever file name you want
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## and also can set htpasswd and ldap bind dn credential secret here
+    ## e.g.
+    ## contents:
+    ##   ca.crt: ""
+    ##   tls.crt: ""
+    ##   tls.key: ""
     ##
     tls:
       mountPath: /etc/tls
-      ## @param zitadel.secret.content secret content will set in the container
-      ## You can set the content key as whatever file name you want
-      ## But the tls set in configFiles above must match with the settings here
-      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
-      ## and also can set htpasswd and ldap bind dn credential secret here
-      ## e.g.
-      ## contents:
-      ##  ca.crt: ""
-      ##  tls.crt: ""
-      ##  tls.key: ""
-      ##
       contents: {}
-    ## @param zitadel.secret.others secret will set in the container, setting for whatever secrets except tls
+    ## @param zitadel.secret.others other secrets pass to the container via secret volume mount
+    ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.3/examples/1-postgres-insecure/zitadel-values.yaml#L2
     ##
     others:
       mountPath: /secret
       contents:
-        masterkey: dGVzdC1tYXN0ZXJrZXktZm9yLXZhbGlkYXRpb24=
-    envVars: {}
-      # ZITADEL_MASTERKEY: dGVzdC1tYXN0ZXJrZXktZm9yLXZhbGlkYXRpb24=
+        masterKey: x123456789012345678901234567891y
   ## @param zitadel.existingConfigmap The name of an existing ConfigMap with your custom configuration for zitadel
   ##
   existingConfigmap:
@@ -319,14 +310,14 @@ zitadel:
   ##
   command: []
   ## @param zitadel.args Override default container args (useful when using custom images)
-  ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/docs/docs/self-hosting/manage/configure/configure.mdx#masterkey
+  ## ref: https://github.com/zitadel/zitadel/blob/v4.6.1/docs/docs/self-hosting/manage/configure/configure.mdx#masterkey
   ##
   args:
     - start-from-init
     - --config
     - /config/zitadel-config.yaml
     - --masterkeyFile
-    - /secret/masterkey
+    - /secret/masterKey
   ## @param zitadel.extraEnvVars Array with extra environment variables to add to zitadel nodes
   ## e.g:
   ## extraEnvVars:
