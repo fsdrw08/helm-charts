@@ -1,0 +1,451 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+
+## @param workloadKind specify the deploy kind： Pod, or Deployment
+workloadKind: Pod
+## @section zitadel Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+zitadel:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param zitadel.autoscaling.enabled Enable autoscaling for zitadel
+  ## @param zitadel.autoscaling.minReplicas Minimum number of zitadel replicas
+  ## @param zitadel.autoscaling.maxReplicas Maximum number of zitadel replicas
+  ## @param zitadel.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param zitadel.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param zitadel.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param zitadel.extraVolumes Optionally specify extra list of additional volumes for the zitadel pod(s)
+  ##
+  extraVolumes: []
+  ## @param zitadel.hostAliases zitadel pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param zitadel.hostNetwork Specify if host network should be enabled for zitadel pod
+  ##
+  hostNetwork: true
+  ## @param zitadel.podAnnotations Annotations for zitadel pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/values.yaml#L331
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
+  ## @param zitadel.podLabels Extra labels for zitadel pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param zitadel.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param zitadel.podSecurityContext.enabled Enabled zitadel pods' Security Context
+  ## @param zitadel.podSecurityContext.fsGroup Set zitadel pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param zitadel.replicaCount Number of zitadel replicas to deploy
+  ##
+  replicaCount: 1
+  ## @param zitadel.initContainers Add additional init containers to the zitadel pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param zitadel.sidecars Add additional sidecar containers to the zitadel pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## zitadel image
+  ## ref: https://github.com/zitadel/zitadel/pkgs/container/zitadel
+  ## @param zitadel.image.registry zitadel image registry
+  ## @param zitadel.image.repository zitadel image repository
+  ## @param zitadel.image.tag zitadel image tag (immutable tags are recommended)
+  ## @param zitadel.image.digest zitadel image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param zitadel.image.pullPolicy zitadel image pull policy
+  ## @param zitadel.image.pullSecrets zitadel image pull secrets
+  ##
+  image:
+    registry: github.io
+    repository: zitadel/zitadel
+    tag: v4.6.1
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param zitadel.containerPorts zitadel container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##
+  containerPorts: []
+  ## Configure extra options for zitadel containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param zitadel.livenessProbe.enabled Enable livenessProbe on zitadel containers
+  ## @param zitadel.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param zitadel.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param zitadel.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param zitadel.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param zitadel.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    exec:
+      command:
+        - /app/zitadel
+        - ready
+        - --config
+        - /config/zitadel-config.yaml
+  ## @param zitadel.readinessProbe.enabled Enable readinessProbe on zitadel containers
+  ## @param zitadel.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param zitadel.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param zitadel.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param zitadel.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param zitadel.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param zitadel.startupProbe.enabled Enable startupProbe on zitadel containers
+  ## @param zitadel.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param zitadel.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param zitadel.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param zitadel.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param zitadel.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param zitadel.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param zitadel.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param zitadel.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## zitadel resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param zitadel.resourcesPreset Set zitadel container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if zitadel.resources is set (zitadel.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param zitadel.resources Set zitadel container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/values.yaml#L331
+  ## @param zitadel.containerSecurityContext.enabled Enabled zitadel containers' Security Context
+  ## @param zitadel.containerSecurityContext.runAsUser Set zitadel containers' Security Context runAsUser
+  ## @param zitadel.containerSecurityContext.runAsNonRoot Set zitadel containers' Security Context runAsNonRoot
+  ## @param zitadel.containerSecurityContext.readOnlyRootFilesystem Set zitadel containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1000
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    privileged: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param zitadel.configFiles config files for zitadel init, setup and run, file will place in /config/zitadel-config.yaml
+  ## ref: https://zitadel.com/docs/self-hosting/manage/configure#passing-the-configuration
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_init.yaml#L52
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_setup.yaml#L60
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/deployment_zitadel.yaml#L56
+  ##
+  configFiles:
+    ## @param zitadel.configFiles.step config file used in zitadel setup phase, this file will place in /config/zitadel-step.yaml
+    ## All possible options and their defaults: https://github.com/zitadel/zitadel/blob/v4.5.0/cmd/setup/steps.yaml
+    ## ref: https://zitadel.com/docs/self-hosting/manage/updating_scaling#the-setup-phase
+    ## ref: https://github.com/zitadel/zitadel/blob/main/cmd/setup/steps.yaml
+    ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/docs/docs/self-hosting/manage/configure/docker-compose.yaml#L7
+    ##
+    step:
+      # FirstInstance:
+      #   Org:
+      #     Human:
+      #       Username: zitadel-admin
+      #       Password: Password1!
+    ## @param zitadel.configFiles.config config file for zitadel runtime, this file will place in /config/zitadel-config.yaml
+    ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/cmd/defaults.yaml
+    ##
+    config:
+      TLS:
+        Enabled: false
+  ## @param zitadel.secret secret will set in the container, setting tls cert and key or whatever secrets for volume mount or env var
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/values.yaml#L146
+  ##
+  secret:
+    ## @param zitadel.secret.tls secret will set in the container, setting for tls cert and key secrets
+    ##
+    tls:
+      mountPath: /etc/tls
+      ## @param zitadel.secret.content secret content will set in the container
+      ## You can set the content key as whatever file name you want
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## and also can set htpasswd and ldap bind dn credential secret here
+      ## e.g.
+      ## contents:
+      ##  ca.crt: ""
+      ##  tls.crt: ""
+      ##  tls.key: ""
+      ##
+      contents: {}
+    ## @param zitadel.secret.others secret will set in the container, setting for whatever secrets except tls
+    ##
+    others:
+      mountPath: /secret
+      contents:
+        masterkey: dGVzdC1tYXN0ZXJrZXktZm9yLXZhbGlkYXRpb24=
+    envVars: {}
+      # ZITADEL_MASTERKEY: dGVzdC1tYXN0ZXJrZXktZm9yLXZhbGlkYXRpb24=
+  ## @param zitadel.existingConfigmap The name of an existing ConfigMap with your custom configuration for zitadel
+  ##
+  existingConfigmap:
+  ## @param zitadel.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param zitadel.args Override default container args (useful when using custom images)
+  ## ref: https://github.com/zitadel/zitadel/blob/v4.5.0/docs/docs/self-hosting/manage/configure/configure.mdx#masterkey
+  ##
+  args:
+    - start-from-init
+    - --config
+    - /config/zitadel-config.yaml
+    - --masterkeyFile
+    - /secret/masterkey
+  ## @param zitadel.extraEnvVars Array with extra environment variables to add to zitadel nodes
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param zitadel.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for zitadel nodes
+  ##
+  extraEnvVarsCM: ""
+  ## @param zitadel.extraEnvVarsSecret Name of existing Secret containing extra env vars for zitadel nodes
+  ##
+  extraEnvVarsSecret: ""
+  ## @param zitadel.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the zitadel container(s)
+  ##
+  extraVolumeMounts: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: false
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+## @section Init Container Parameters
+##
+
+## 'volumePermissions' init container parameters
+## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
+##   based on the *podSecurityContext/*containerSecurityContext parameters
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## OS Shell + Utility image
+  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
+  ## @param volumePermissions.image.registry OS Shell + Utility image registry
+  ## @param volumePermissions.image.repository OS Shell + Utility image repository
+  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
+  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
+  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: 11-debian-11-r%%IMAGE_REVISION%%
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## Init container's resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "medium"
+  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Init container Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
+  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+  ##
+  containerSecurityContext:
+    runAsUser: 0
+
+## @section Other Parameters
+##
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

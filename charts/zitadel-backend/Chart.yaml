@@ -1,7 +1,7 @@
 annotations:
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v4.5.0
+appVersion: v4.6.1
 dependencies:
   - name: common
     repository: file://../common
@@ -16,7 +16,7 @@ keywords:
 maintainers:
   - name: Windom WU
     url: https://github.com/fsdrw08/helm-charts/tree/main/charts/zitadel
-name: zitadel
+name: zitadel-backend
 sources:
   - https://github.com/zitadel/zitadel/blob/main/apps/api/Dockerfile
   - https://github.com/zitadel/zitadel/pkgs/container/zitadel
