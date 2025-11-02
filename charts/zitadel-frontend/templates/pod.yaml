@@ -1,0 +1,5 @@
+{{- if eq .Values.zitadelLogin.workloadKind "Pod"  -}}
+apiVersion: v1
+kind: Pod
+{{ template "zitadelLogin.podTemplate" . }}
+{{- end }}
