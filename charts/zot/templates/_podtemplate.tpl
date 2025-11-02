@@ -1,6 +1,6 @@
 {{- define "zot.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.zot.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.zot.podAnnotations }}
@@ -67,10 +67,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.zot.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{/*
+        {{- if .Values.zot.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.zot.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.zot.extraEnvVarsSecret "context" $) }}
@@ -109,9 +109,13 @@ spec:
         - name: tmp
           mountPath: /tmp
         {{- end }}
-        {{- if .Values.zot.secret.contents }}
-        - name: secret
-          mountPath: {{ .Values.zot.secret.mountPath }}
+        {{- if .Values.zot.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.zot.secret.tls.mountPath }}
+        {{- end }}
+        {{- if .Values.zot.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.zot.secret.others.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -128,15 +132,15 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.zot.secret.contents }}
-    - name: secret
+    {{- if .Values.zot.secret.tls.contents }}
+    - name: secret-tls
       secret:
-        secretName: {{ template "common.names.fullname" . }}-sec
-        items:
-        {{- range $key, $val := .Values.zot.secret.contents }}
-         - key: {{ $key }}
-           path: {{ $key }}
-        {{- end }}
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    {{- if .Values.zot.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
