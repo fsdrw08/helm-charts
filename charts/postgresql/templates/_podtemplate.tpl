@@ -150,7 +150,7 @@ spec:
     {{- if .Values.postgresql.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.postgresql.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.postgresql.podRestartPolicy }}
