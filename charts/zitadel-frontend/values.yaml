@@ -273,9 +273,11 @@ zitadelLogin:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## ref: https://github.com/zitadel/zitadel-charts/blob/67c02edfba21eea194d7692128f5e7525e785d49/charts/zitadel/templates/configmap_login.yaml
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.3/charts/zitadel/templates/configmap_login.yaml
   ##
   config:
+    CUSTOM_REQUEST_HEADERS: Host:{{ .Values.zitadel.configmapConfig.ExternalDomain }}
+    # NODE_TLS_REJECT_UNAUTHORIZED: 0
     NEXT_PUBLIC_BASE_PATH: /ui/v2/login
     ZITADEL_API_URL: http://localhost:8080
     ZITADEL_SERVICE_USER_TOKEN_FILE: /login-client/pat
