@@ -32,8 +32,6 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section zitadel Parameters
 ##
 
@@ -80,6 +78,7 @@ zitadel:
   hostNetwork: true
   ## @param zitadel.podAnnotations Annotations for zitadel pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://docs.podman.io/en/latest/markdown/podman-kube-play.1.html#userns-mode
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/values.yaml#L331
   ##
   podAnnotations:
@@ -100,11 +99,14 @@ zitadel:
   podSecurityContext:
     enabled: false
     # fsGroup: 1001
-  ## @param zitadel.replicaCount Number of zitadel replicas to deploy
+  ## @param zitadel.replicaCount Number of zitadel replicas to deploy if workloadKind set to deployment
   ##
   replicaCount: 1
+  ## @param zitadel.workloadKind specify the deploy kind： Pod, or Deployment
+  workloadKind: Pod
   ## @param zitadel.initContainers Add additional init containers to the zitadel pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.3/charts/zitadel/templates/deployment_zitadel.yaml#L228
   ## e.g:
   ## initContainers:
   ##  - name: your-image-name
@@ -112,7 +114,17 @@ zitadel:
   ##    imagePullPolicy: Always
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
-  initContainers: []
+  initContainers:
+    - name: wait-for-postgres
+      image: wait4x/wait4x:3.6.0
+      command:
+        - wait4x
+        - tcp
+        - '{{ default "localhost" .Values.zitadel.configFiles.config.Database.postgres.Host }}:{{ default 5432 .Values.zitadel.configFiles.config.Database.postgres.Post }}'
+        - --timeout
+        - 5m
+        - --interval
+        - 5s
   ## @param zitadel.sidecars Add additional sidecar containers to the zitadel pod(s)
   ## e.g:
   ## sidecars:
@@ -259,16 +271,23 @@ zitadel:
     privileged: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## @param zitadel.config config file for zitadel init, setup and run, file will place in /config/zitadel-config.yaml
+  ## @param zitadel.configFiles.config config file for zitadel run, file will place in /config/zitadel-config.yaml
+  ## @param zitadel.configFiles.step config file for zitadel setup, file will place in /config/zitadel-step.yaml
   ## ref: https://github.com/zitadel/zitadel/blob/v4.6.1/cmd/defaults.yaml
   ## ref: https://zitadel.com/docs/self-hosting/manage/configure#passing-the-configuration
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_init.yaml#L52
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_setup.yaml#L60
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/deployment_zitadel.yaml#L56
   ##
-  config:
-    TLS:
-      Enabled: false
+  configFiles:
+    config:
+      Database:
+        postgres:
+          Host: localhost
+          Port: 5432
+      TLS:
+        Enabled: false
+    step: {}
   ## @param zitadel.secret secret will set in the container, setting tls cert and key or whatever secrets for volume mount or env var
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/values.yaml#L146
   ##

@@ -1,6 +1,6 @@
 {{- define "zitadel.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.zitadel.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.zitadel.podAnnotations }}
