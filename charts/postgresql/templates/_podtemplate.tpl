@@ -1,6 +1,6 @@
 {{- define "postgresql.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.postgresql.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.postgresql.podAnnotations }}
