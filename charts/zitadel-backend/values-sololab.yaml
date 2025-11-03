@@ -1,0 +1,109 @@
+global:
+  imageRegistry: "zot.vyos.sololab"
+zitadel:
+  hostNetwork: false
+  # https://zitadel.com/docs/self-hosting/manage/reverseproxy/traefik
+  # podLabels:
+  #   traefik.enable: true
+  #   traefik.http.routers.zitadel-redirect.entrypoints: web
+  #   traefik.http.routers.zitadel-redirect.rule: Host(`zitadel.day0.sololab`)
+  #   traefik.http.routers.zitadel-redirect.middlewares: toHttps@file
+  #   traefik.http.routers.zitadel-redirect.service: zitadel
+
+  #   traefik.http.routers.zitadel.entrypoints: webSecure
+  #   traefik.http.routers.zitadel.rule: Host(`zitadel.day0.sololab`)
+  #   traefik.http.routers.zitadel.tls: true
+  #   traefik.http.routers.zitadel.service: zitadel
+
+  #   traefik.http.services.zitadel.loadbalancer.server.port: 8080
+  #   traefik.http.services.zitadel.loadbalancer.server.scheme: h2c
+  initContainers:
+    - name: wait-for-postgres
+      image: zot.vyos.sololab/wait4x/wait4x:3.6.0
+      command:
+        - wait4x
+        - tcp
+        - '{{ default "localhost" .Values.zitadel.configFiles.config.Database.postgres.Host }}:{{ default 5432 .Values.zitadel.configFiles.config.Database.postgres.Post }}'
+        - --timeout
+        - 5m
+        - --interval
+        - 5s
+  containerPorts:
+    - name: http
+      containerPort: 8080
+      hostPort: 8081
+      hostIP: 127.0.0.1
+      protocol: TCP
+  configFiles:
+    config:
+      Database:
+        postgres:
+          Host: # set in terraform zitadel-database
+      ExternalPort: 443
+      ExternalDomain: zitadel.day0.sololab
+    step:
+      # https://zitadel.com/docs/self-hosting/deploy/compose
+      # https://github.com/zitadel/zitadel/blob/v4.6.2/cmd/setup/steps.yaml
+      FirstInstance:
+        # https://questions.zitadel.com/m/1397337190165643284
+        MachineKeyPath: /data/zitadel-admin-sa.json
+        LoginClientPatPath: /data/login-client.pat
+        Org:
+          Name: ZITADEL
+          Human:
+            # ref: https://zitadel.com/docs/self-hosting/deploy/compose#next-steps
+            # ref: https://github.com/zitadel/zitadel/blob/v4.6.2/docs/docs/self-hosting/deploy/docker-compose.yaml
+            # login name = <FirstInstance.Org.Human.UserName>@<FirstInstance.Org.Name>.<ExternalDomain>
+            # in this case:
+            # login name = admin@zitadel.zitadel.day0.sololab
+            #
+            UserName: admin
+            Password: P@ssw0rd
+            PasswordChangeRequired: false
+          LoginClient:
+            Machine:
+              Name: Automatically Initialized IAM_LOGIN_CLIENT
+              Username: login-client
+            Pat:
+              ExpirationDate: "2100-01-01T00:00:00Z"
+          # create machine credential for terraform
+          # https://registry.terraform.io/providers/zitadel/zitadel/latest/docs
+          # https://questions.zitadel.com/m/1397337190165643284
+          # https://zitadel.com/docs/self-hosting/manage/custom-domain
+          Machine:
+            Machine:
+              UserName: zitadel-admin-sa
+              Name: admin
+            MachineKey:
+              Type: 1
+  secret:
+    # tls:
+    #   contents:
+    #     ca.crt: # set by terraform data
+    others:
+      contents:
+        # https://github.com/zitadel/zitadel/blob/v4.6.2/cmd/defaults.yaml#L115C1-L115C10
+        database.yaml: |-
+          Database:
+            postgres:
+              User:
+                Password: zitadel
+              Admin:
+                Password: P@ssw0rd
+  args:
+    - start-from-init
+    - --config
+    - /config/zitadel-config.yaml
+    - --steps
+    - /config/zitadel-step.yaml
+    - --masterkeyFile
+    - /secret/masterKey
+    - --config
+    - /secret/database.yaml
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+
+persistence:
+  enabled: true
+  mountPath: /data

@@ -79,7 +79,7 @@ zitadelLogin:
   ## @param zitadelLogin.podAnnotations Annotations for zitadel-login pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ## ref: https://docs.podman.io/en/latest/markdown/podman-kube-play.1.html#userns-mode
-  ## ref: https://github.com/zitadel/zitadel/blob/v4.6.1/apps/login/Dockerfile#L3
+  ## ref: https://github.com/zitadel/zitadel/blob/v4.6.2/apps/login/Dockerfile#L3
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=1001,gid=1001
@@ -153,7 +153,7 @@ zitadelLogin:
   image:
     registry: github.io
     repository: zitadel/zitadel-login
-    tag: v4.6.1
+    tag: v4.6.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -247,7 +247,7 @@ zitadelLogin:
   ## @param zitadelLogin.resourcesPreset Set zitadel-login container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if zitadelLogin.resources is set (zitadelLogin.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "nano"
+  resourcesPreset: "micro"
   ## @param zitadelLogin.resources Set zitadel-login container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:

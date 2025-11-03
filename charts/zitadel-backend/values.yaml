@@ -104,7 +104,7 @@ zitadel:
   replicaCount: 1
   ## @param zitadel.workloadKind specify the deploy kind： Pod, or Deployment
   workloadKind: Pod
-  ## @param zitadel.initContainers Add additional init containers to the zitadel pod(s)
+  ## @param zitadel.initContainers Add additional init containers to the zitadel-backend pod
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.3/charts/zitadel/templates/deployment_zitadel.yaml#L228
   ## e.g:
@@ -148,7 +148,7 @@ zitadel:
   image:
     registry: github.io
     repository: zitadel/zitadel
-    tag: v4.6.1
+    tag: v4.6.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -243,7 +243,7 @@ zitadel:
   ## @param zitadel.resourcesPreset Set zitadel container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if zitadel.resources is set (zitadel.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "nano"
+  resourcesPreset: "micro"
   ## @param zitadel.resources Set zitadel container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
@@ -271,9 +271,10 @@ zitadel:
     privileged: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param zitadel.configFiles config files for zitadel run, files will place under /config/
   ## @param zitadel.configFiles.config config file for zitadel run, file will place in /config/zitadel-config.yaml
   ## @param zitadel.configFiles.step config file for zitadel setup, file will place in /config/zitadel-step.yaml
-  ## ref: https://github.com/zitadel/zitadel/blob/v4.6.1/cmd/defaults.yaml
+  ## ref: https://github.com/zitadel/zitadel/blob/v4.6.2/cmd/defaults.yaml
   ## ref: https://zitadel.com/docs/self-hosting/manage/configure#passing-the-configuration
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_init.yaml#L52
   ## ref: https://github.com/zitadel/zitadel-charts/blob/zitadel-9.12.2/charts/zitadel/templates/job_setup.yaml#L60
@@ -329,7 +330,7 @@ zitadel:
   ##
   command: []
   ## @param zitadel.args Override default container args (useful when using custom images)
-  ## ref: https://github.com/zitadel/zitadel/blob/v4.6.1/docs/docs/self-hosting/manage/configure/configure.mdx#masterkey
+  ## ref: https://github.com/zitadel/zitadel/blob/v4.6.2/docs/docs/self-hosting/manage/configure/configure.mdx#masterkey
   ##
   args:
     - start-from-init
@@ -428,7 +429,7 @@ volumePermissions:
   ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "medium"
+  resourcesPreset: "nano"
   ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
