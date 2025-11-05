@@ -1,6 +1,6 @@
 {{- define "keycloak.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.keycloak.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.keycloak.podAnnotations }}
@@ -46,7 +46,7 @@ spec:
     {{- include "common.tplvalues.render" (dict "value" .Values.keycloak.initContainers "context" $) | nindent 4 }}
     {{- end }}
   containers:
-    - name: keycloak
+    - name: server
       image: {{ template "keycloak.image" . }}
       imagePullPolicy: {{ .Values.keycloak.image.pullPolicy | quote }}
       {{- if .Values.keycloak.containerSecurityContext.enabled }}
@@ -67,8 +67,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.keycloak.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{- if .Values.keycloak.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.keycloak.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.keycloak.extraEnvVarsSecret "context" $) }}
@@ -97,6 +99,9 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.keycloak.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /opt/keycloak/conf/keycloak.conf
+          subPath: keycloak.conf
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -109,6 +114,9 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.keycloak.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" $ }}-cm
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
@@ -119,7 +127,7 @@ spec:
     {{- if .Values.keycloak.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.keycloak.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.keycloak.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.keycloak.podRestartPolicy }}

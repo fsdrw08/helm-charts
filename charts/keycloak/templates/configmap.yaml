@@ -6,7 +6,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "common.names.fullname" . }}-cm-config
+  name: {{ template "common.names.fullname" . }}-cm
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: keycloak
@@ -14,5 +14,10 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  keycloak.conf: |
-    {{- include "common.tplvalues.render" (dict "value" .Values.keycloak.configFile "context" $) | nindent 4 -}}
+  keycloak.conf: {{ print "|" }}
+    {{- range $key, $val := .Values.keycloak.configFile }}
+    {{- if $key }}
+    {{ $key }}{{ print "=" }}{{ include "common.tplvalues.render" (dict "value" $val "context" $) }}
+    {{- end }}
+    {{- end }}
+    

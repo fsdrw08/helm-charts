@@ -32,14 +32,97 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param keycloak.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section keycloak Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 keycloak:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param keycloak.autoscaling.enabled Enable autoscaling for keycloak
+  ## @param keycloak.autoscaling.minReplicas Minimum number of keycloak replicas
+  ## @param keycloak.autoscaling.maxReplicas Maximum number of keycloak replicas
+  ## @param keycloak.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param keycloak.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param keycloak.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param keycloak.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param keycloak.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param keycloak.hostNetwork Specify if host network should be enabled for keycloak pod
+  ##
+  hostNetwork: true
+  ## @param keycloak.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param keycloak.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param keycloak.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param keycloak.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param keycloak.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param keycloak.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param keycloak.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param keycloak.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param keycloak.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## Official keycloak image
   ## ref: https://quay.io/repository/keycloak/keycloak?tab=tags
   ## @param keycloak.image.registry keycloak image registry
@@ -52,7 +135,7 @@ keycloak:
   image:
     registry: quay.io
     repository: keycloak/keycloak
-    tag: 26.0
+    tag: 26.4.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,12 +150,6 @@ keycloak:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param keycloak.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param keycloak.replicaCount Number of keycloak replicas to deploy
-  ##
-  replicaCount: 1
   ## @param keycloak.containerPorts keycloak container port to expose to host
   ## e.g.
   ## containerPorts:
@@ -98,7 +175,7 @@ keycloak:
   ## @param keycloak.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: 60
     periodSeconds: 600
     timeoutSeconds: 10
@@ -162,15 +239,6 @@ keycloak:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param keycloak.podSecurityContext.enabled Enabled keycloak pods' Security Context
-  ## @param keycloak.podSecurityContext.fsGroup Set keycloak pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param keycloak.containerSecurityContext.enabled Enabled keycloak containers' Security Context
@@ -185,54 +253,21 @@ keycloak:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## @param keycloak.configFile keycloak configure which will place into file conf/keycloak.conf
+  ## @param keycloak.configFile keycloak configure which will place into file /opt/keycloak/conf/keycloak.conf
   ## you can add additional configure properties in to this block if not exist
   ## ref: https://www.keycloak.org/server/all-config
-  ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/dist/src/main/content/conf/keycloak.conf
+  ## ref: https://www.keycloak.org/server/configuration#_configuring_sources_for_keycloak
+  ## ref: https://github.com/keycloak/keycloak/blob/26.4.2/quarkus/dist/src/main/content/conf/keycloak.conf
   ##
   configFile:
     ## Database
     ## @param keycloak.configFile.db The database vendor. CLI: --db, Env: KC_DB
     ##
     db: dev-file
-    ## @param keycloak.configFile.db-url-host Sets the hostname of the default JDBC URL of the chosen vendor.
-    ## If the db-url option is set, this option is ignored.
-    ##
-    db-url-host:
-    ## @param keycloak.configFile.db-url-port Sets the port of the default JDBC URL of the chosen vendor.
-    ## If the db-url option is set, this option is ignored.
-    ##
-    db-url-port:
-    ## @param keycloak.configFile.db-url-database Sets the database name of the default JDBC URL of the chosen vendor.
-    ## If the db-url option is set, this option is ignored.
-    ##
-    db-url-database:
-    ## @param keycloak.configFile.db-url The full database JDBC URL.
-    ## If not provided, a default URL is set based on the selected database vendor.
-    ##
-    db-url:
-    ## @param keycloak.configFile.db-username The username of the database user.
-    ##
-    db-username:
-    ## @param keycloak.configFile.db-password The password of the database user.
-    ##
-    db-password:
-    ## Feature
-    ## @param keycloak.configFile.features Enables a set of one or more features
-    ## ref: https://www.keycloak.org/server/features#_supported_features
-    ##
-    features:
-    ## @param keycloak.configFile.features-disabled Disables a set of one or more features
-    ##
-    features-disabled:
     ## Health
     ## @param keycloak.configFile.health-enabled If the server should expose health check endpoints.
     ##
     health-enabled: true
-    ## Metrics
-    ## @param keycloak.configFile.metrics-enabled If the server should expose metrics.
-    ##
-    metrics-enabled: false
     ## HTTP(S)
     ## @param keycloak.configFile.http-enabled Enables the HTTP listener
     ##
@@ -240,43 +275,44 @@ keycloak:
     ## @param keycloak.configFile.http-port The used HTTP port
     ##
     http-port: 8080
-    ## @param keycloak.configFile.https-port The used HTTPS port.
-    ## ref: https://www.keycloak.org/server/enabletls#_switching_the_https_port
-    ##
-    https-port: 8443
-    ## @param keycloak.configFile.https-certificate-file The file path to a server certificate or certificate chain in PEM format.
-    ## ref: https://www.keycloak.org/server/enabletls
-    ##
-    https-certificate-file:
-    ## @param keycloak.configFile.https-certificate-key-file The file path to a private key in PEM format.
-    ##
-    https-certificate-key-file:
-    ## Truststore
-    ## @param keycloak.configFile.truststore-paths List of pkcs12 (p12 or pfx file extensions), PEM files, or directories containing those files that will be used as a system truststore.
-    ## If in PKCS12, the certs must be unencrypted - meaning no password is expected.
-    ## ref: https://www.keycloak.org/server/keycloak-truststore
-    ##
-    truststore-paths:
 
-  ## @param keycloak.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param keycloak.secret secret pass to the container
   ##
-  tls:
-    ## @param keycloak.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
-    ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/container/Dockerfile#L40
-    ## ref: https://github.com/keycloak/keycloak/blob/26.0.7/quarkus/dist/src/main/content/conf/keycloak.conf#L28C27-L28C38
-    ##
-    mountPath: /opt/keycloak/certs
-    ## @param keycloak.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFile above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param keycloak.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  rootCA.crt.pem: ""
-    ##  server.crt.pem: ""
-    ##  server.key.pem: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars:
+      ## @param keycloak.secret.envVars.KC_BOOTSTRAP_ADMIN_CLIENT_SECRET Client secret for the temporary bootstrap admin service account
+      ## ref: https://www.keycloak.org/server/all-config#category-bootstrap_admin
+      ## ref: https://github.com/keycloak/keycloak/blob/26.4.2/docs/documentation/upgrading/topics/changes/changes-26_0_0.adoc?plain=1#L150
+      ##
+      KC_BOOTSTRAP_ADMIN_CLIENT_SECRET: P@ssw0rd
+    ## @param keycloak.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param keycloak.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+      ## ref: https://github.com/keycloak/keycloak/blob/26.4.2/quarkus/container/Dockerfile#L40
+      ## ref: https://github.com/keycloak/keycloak/blob/26.4.2/quarkus/dist/src/main/content/conf/keycloak.conf#L28C27-L28C38
+      ## ref: https://www.keycloak.org/server/keycloak-truststore#_configuring_the_system_truststore
+      ## KC_HOME_DIR = /opt/keycloak
+      ## so, default cert path: /opt/keycloak/conf/truststores
+      ##
+      mountPath: /opt/keycloak/conf/truststores
+      ## @param keycloak.secret.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFile above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  rootCA.crt.pem: ""
+      ##  server.crt.pem: ""
+      ##  server.key.pem: ""
+      ##
+      contents: {}
 
   ## @param keycloak.existingConfigmap The name of an existing ConfigMap with your custom configuration for keycloak
   ##
@@ -286,33 +322,8 @@ keycloak:
   command: []
   ## @param keycloak.args Override default container args (useful when using custom images)
   ##
-  args: []
-  ## @param keycloak.hostAliases keycloak pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param keycloak.podLabels Extra labels for keycloak pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param keycloak.podAnnotations Annotations for keycloak pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param keycloak.autoscaling.enabled Enable autoscaling for keycloak
-  ## @param keycloak.autoscaling.minReplicas Minimum number of keycloak replicas
-  ## @param keycloak.autoscaling.maxReplicas Maximum number of keycloak replicas
-  ## @param keycloak.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param keycloak.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
+  args:
+    - start-dev
 
   ## @param keycloak.extraEnvVars Array with extra environment variables to add to keycloak nodes
   ## e.g:
@@ -327,33 +338,9 @@ keycloak:
   ## @param keycloak.extraEnvVarsSecret Name of existing Secret containing extra env vars for keycloak nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param keycloak.extraVolumes Optionally specify extra list of additional volumes for the keycloak pod(s)
-  ##
-  extraVolumes: []
   ## @param keycloak.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the keycloak container(s)
   ##
   extraVolumeMounts: []
-  ## @param keycloak.sidecars Add additional sidecar containers to the keycloak pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param keycloak.initContainers Add additional init containers to the keycloak pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##
@@ -364,10 +351,10 @@ keycloak:
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
   ##
-  enabled: false
+  enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /opt/keycloak/data/h2
+  mountPath: /opt/keycloak/data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
