@@ -1,0 +1,24 @@
+annotations:
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: v2.44
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: OpenID Connect (OIDC) identity and OAuth 2.0 provider with pluggable connectors
+home: https://github.com/fsdrw08/helm-charts
+icon: https://dexidp.io/favicons/favicon.png
+keywords:
+  - oidc
+  - oauth
+  - identity-provider
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: dex
+sources:
+  - https://github.com/dexidp/dex/blob/v2.44.0/Dockerfile
+  - https://github.com/dexidp/dex/tree/v2.44.0
+  - ...
+version: 0.1.0

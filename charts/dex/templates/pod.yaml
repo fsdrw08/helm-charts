@@ -1,0 +1,5 @@
+{{- if eq .Values.dex.workloadKind "Pod"  -}}
+apiVersion: v1
+kind: Pod
+{{ template "dex.podTemplate" . }}
+{{- end }}
