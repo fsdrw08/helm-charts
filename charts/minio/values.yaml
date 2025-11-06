@@ -32,14 +32,99 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param minio.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section minio Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 minio:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param minio.autoscaling.enabled Enable autoscaling for minio
+  ## @param minio.autoscaling.minReplicas Minimum number of minio replicas
+  ## @param minio.autoscaling.maxReplicas Maximum number of minio replicas
+  ## @param minio.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param minio.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param minio.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param minio.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param minio.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param minio.hostNetwork Specify if host network should be enabled for minio pod
+  ##
+  hostNetwork: true
+  ## @param minio.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/helm/minio/values.yaml#L272-L277
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
+  ## @param minio.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param minio.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param minio.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param minio.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param minio.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param minio.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param minio.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param minio.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## minio image
   ## ref: https://quay.io/repository/minio/minio?tab=tags
   ## @param minio.image.registry minio image registry
@@ -67,35 +152,19 @@ minio:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param minio.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param minio.replicaCount Number of minio replicas to deploy
-  ##
-  replicaCount: 1
   ## @param minio.containerPorts minio container port to expose to host
   ## e.g.
   ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
+  ##   - name: api
+  ##     containerPort: 9000
+  ##     hostPort: 9000
   ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
-  ##     hostIP: 192.168.255.10
+  ##   - name: console
+  ##     containerPort: 9001
+  ##     hostPort: 9001
   ##     protocol: TCP
   ##
-  containerPorts:
-    - name: api
-      containerPort: 9000
-      hostPort: 9000
-      protocol: TCP
-    - name: console
-      containerPort: 9001
-      hostPort: 9001
-      protocol: TCP
+  containerPorts: []
   ## Configure extra options for minio containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param minio.livenessProbe.enabled Enable livenessProbe on minio containers
@@ -160,7 +229,7 @@ minio:
   ## @param minio.resourcesPreset Set minio container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if minio.resources is set (minio.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "medium"
+  resourcesPreset: small
   ## @param minio.resources Set minio container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
@@ -172,15 +241,6 @@ minio:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param minio.podSecurityContext.enabled Enabled minio pods' Security Context
-  ## @param minio.podSecurityContext.fsGroup Set minio pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param minio.containerSecurityContext.enabled Enabled minio containers' Security Context
@@ -205,27 +265,21 @@ minio:
   ##
   config:
     ## @param minio.config.MINIO_OPTS Set a string of parameters to use when starting the MinIO Server.
-    ## ref: https://docs.min.io/community/minio-object-store/reference/minio-server/settings/core.html#envvar.MINIO_OPTS
-    ## ref: https://docs.min.io/community/minio-object-store/reference/minio-server/minio-server.html#minio-server-parameters
+    ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/core/#env-minio-opts
+    ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/#parameters
     ##
     MINIO_OPTS: --address=:9000 --console-address=:9001
     ## @param minio.config.MINIO_VOLUMES The directories or drives the minio server process uses as the storage backend.
     ## Functionally equivalent to setting minio server DIRECTORIES. Use this value when configuring MinIO to run using an environment file.
-    ## ref: https://docs.min.io/community/minio-object-store/reference/minio-server/settings/core.html#envvar.MINIO_VOLUMES
+    ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/core/#env-minio-volumes
     ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/Dockerfile
     ##
     MINIO_VOLUMES: /data
     ## @param minio.config.MINIO_CONFIG_ENV_FILE Specifies the full path to the file the MinIO server process uses for loading environment variables.
     ## Sets a MinIO environment variable pointing to the container-mounted path of the environment file.
-    ## ref: https://docs.min.io/community/minio-object-store/reference/minio-server/settings/core.html#envvar.MINIO_CONFIG_ENV_FILE
+    ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/core/#env-minio-config-env-file
     ##
     MINIO_CONFIG_ENV_FILE: /etc/config.env
-    ## @param minio.config.MINIO_ROOT_USER The access key for the root user.
-    ## @param minio.config.MINIO_ROOT_PASSWORD The secret key for the root user.
-    ## ref: https://docs.min.io/community/minio-object-store/reference/minio-server/settings/root-credentials.html#root-user
-    ##
-    MINIO_ROOT_USER: minioadmin
-    MINIO_ROOT_PASSWORD: minioadmin
     ## @param minio.config.MINIO_UPDATE In place update is true by default if the MINIO_UPDATE is not set or is not set to 'off',
     ## if MINIO_UPDATE is set to 'off' then in-place update is off.
     ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/cmd/common-main.go#L808
@@ -233,41 +287,53 @@ minio:
     MINIO_UPDATE: "off"
   ## @param minio.tls secret setting of cert and key or whatever tls content will set in the container
   ##
-  tls:
-    ## @param minio.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
-    ## to tell minio use this path, add --certs-dir=/etc/minio/certs in MINIO_OPTS
-    ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/helm/minio/values.yaml#L109
-    ## ref: https://min.io/docs/minio/linux/operations/network-encryption.html#enabling-tls
-    ##
-    mountPath: /etc/minio/certs
-    ## @param minio.tls.contents secret content of default domain cert/key and additional domain cert/key and custom CAs tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param minio.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##   public.crt: "xxx"
-    ##   private.key: "xxx"
-    ##   additionalDomains:
-    ##     - name: test
-    ##       public.crt: "xxx"
-    ##       private.key: "xxx"
-    ##   CAs:
-    ##     test.crt: test
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents:
-      {}
-      # ## default domain cert and key
-      # public.crt: "xxx"
-      # private.key: "xxx"
-      # ## additional domain certs and keys
-      # additionalDomains:
-      #   - name: test
-      #     public.crt: "xxx"
-      #     private.key: "xxx"
-      # ## custom CAs
-      # CAs:
-      #   test.crt: "xxx"
+    envVars:
+      ## @param minio.secret.envVars.MINIO_ROOT_USER The access key for the root user.
+      ## @param minio.secret.envVars.MINIO_ROOT_PASSWORD The secret key for the root user.
+      ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/root-credentials/
+      ##
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    tls:
+      ## @param minio.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+      ## to tell minio use this path, add --certs-dir=/etc/minio/certs in MINIO_OPTS
+      ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/helm/minio/values.yaml#L109
+      ## ref: https://docs.min.io/enterprise/aistor-object-store/installation/linux/network-encryption/
+      ##
+      mountPath: /etc/minio/certs
+      ## @param minio.secret.tls.contents secret content of default domain cert/key and additional domain cert/key and custom CAs tls content will set in the container
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##   public.crt: "xxx"
+      ##   private.key: "xxx"
+      ##   additionalDomains:
+      ##     - name: test
+      ##       public.crt: "xxx"
+      ##       private.key: "xxx"
+      ##   CAs:
+      ##     test.crt: test
+      ##
+      contents: {}
+        # ## default domain cert and key
+        # public.crt: "xxx"
+        # private.key: "xxx"
+        # ## additional domain certs and keys
+        # additionalDomains:
+        #   - name: test
+        #     public.crt: "xxx"
+        #     private.key: "xxx"
+        # ## custom CAs
+        # CAs:
+        #   test.crt: "xxx"
   ## @param minio.existingConfigmap The name of an existing ConfigMap with your custom configuration for minio
   ##
   existingConfigmap:
@@ -277,33 +343,6 @@ minio:
   ## @param minio.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param minio.hostAliases minio pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param minio.podLabels Extra labels for minio pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param minio.podAnnotations Annotations for minio pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=1000,gid=1000
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param minio.autoscaling.enabled Enable autoscaling for minio
-  ## @param minio.autoscaling.minReplicas Minimum number of minio replicas
-  ## @param minio.autoscaling.maxReplicas Maximum number of minio replicas
-  ## @param minio.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param minio.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param minio.extraEnvVars Array with extra environment variables to add to minio nodes
   ## e.g:
@@ -318,33 +357,9 @@ minio:
   ## @param minio.extraEnvVarsSecret Name of existing Secret containing extra env vars for minio nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param minio.extraVolumes Optionally specify extra list of additional volumes for the minio pod(s)
-  ##
-  extraVolumes: []
   ## @param minio.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the minio container(s)
   ##
   extraVolumeMounts: []
-  ## @param minio.sidecars Add additional sidecar containers to the minio pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param minio.initContainers Add additional init containers to the minio pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

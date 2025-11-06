@@ -1,6 +1,6 @@
 {{- define "minio.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.minio.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.minio.podAnnotations }}
@@ -18,6 +18,10 @@ spec:
   {{- include "minio.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.minio.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.minio.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.minio.hostNetwork }}
+  {{- if .Values.minio.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.minio.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.minio.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.minio.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -76,10 +80,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.minio.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.minio.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.minio.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.minio.extraEnvVarsSecret "context" $) }}
@@ -111,19 +115,19 @@ spec:
         - name: config
           mountPath: {{ .Values.minio.config.MINIO_CONFIG_ENV_FILE }}
           subPath: {{ base .Values.minio.config.MINIO_CONFIG_ENV_FILE }}
-        {{- if and ( index .Values.minio.tls.contents "public.crt" ) ( index .Values.minio.tls.contents "private.key" ) }}
+        {{- if and ( index .Values.minio.secret.tls.contents "public.crt" ) ( index .Values.minio.secret.tls.contents "private.key" ) }}
         - name: tls-default
-          mountPath: {{ .Values.minio.tls.mountPath }}
+          mountPath: {{ .Values.minio.secret.tls.mountPath }}
         {{- end }}
-        {{- if .Values.minio.tls.contents.additionalDomains }}
-        {{- range $additionalDomain := .Values.minio.tls.contents.additionalDomains }}
+        {{- if .Values.minio.secret.tls.contents.additionalDomains }}
+        {{- range $additionalDomain := .Values.minio.secret.tls.contents.additionalDomains }}
         - name: tls-additional-{{ $additionalDomain.name }}
-          mountPath: {{ $.Values.minio.tls.mountPath }}/{{ $additionalDomain.name }}
+          mountPath: {{ $.Values.minio.secret.tls.mountPath }}/{{ $additionalDomain.name }}
         {{- end }}
         {{- end }}
-        {{- if .Values.minio.tls.contents.CAs }}
+        {{- if .Values.minio.secret.tls.contents.CAs }}
         - name: tls-ca
-          mountPath: {{ $.Values.minio.tls.mountPath }}/CAs
+          mountPath: {{ $.Values.minio.secret.tls.mountPath }}/CAs
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -138,9 +142,9 @@ spec:
     {{- end }}
   volumes:
     - name: config
-      secret: 
-        secretName: {{ template "common.names.fullname" . }}-sec-config
-    {{- if and ( index .Values.minio.tls.contents "public.crt" ) ( index .Values.minio.tls.contents "private.key" ) }}
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- if and ( index .Values.minio.secret.tls.contents "public.crt" ) ( index .Values.minio.secret.tls.contents "private.key" ) }}
     - name: tls-default
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls-default
@@ -150,8 +154,8 @@ spec:
           - key: private.key
             path: private.key
     {{- end }}
-    {{- if .Values.minio.tls.contents.additionalDomains }}
-    {{- range $additionalDomain := .Values.minio.tls.contents.additionalDomains }}
+    {{- if .Values.minio.secret.tls.contents.additionalDomains }}
+    {{- range $additionalDomain := .Values.minio.secret.tls.contents.additionalDomains }}
     - name: tls-additional-{{ $additionalDomain.name }}
       secret:
         secretName: {{ template "common.names.fullname" $ }}-sec-tls-additional
@@ -162,12 +166,12 @@ spec:
             path: private.key
     {{- end }}
     {{- end }}
-    {{- if .Values.minio.tls.contents.CAs }}
+    {{- if .Values.minio.secret.tls.contents.CAs }}
     - name: tls-ca
       secret:
         secretName: {{ template "common.names.fullname" $ }}-sec-tls-ca
         items:
-          {{- range $key, $val := .Values.minio.tls.contents.CAs }}
+          {{- range $key, $val := .Values.minio.secret.tls.contents.CAs }}
           - key: ca.{{ $key }}
             path: {{ $key }}
           {{- end }}
@@ -182,7 +186,7 @@ spec:
     {{- if .Values.minio.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.minio.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.minio.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.minio.podRestartPolicy }}
