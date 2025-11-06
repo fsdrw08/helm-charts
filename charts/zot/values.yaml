@@ -135,7 +135,7 @@ zot:
   image:
     registry: ghcr.io
     repository: project-zot/zot-linux-amd64
-    tag: v2.1.8
+    tag: v2.1.10
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -154,21 +154,11 @@ zot:
   ## e.g.
   ## containerPorts:
   ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
-  ##     hostIP: 192.168.255.10
+  ##     containerPort: 5000
+  ##     hostPort: 5000
   ##     protocol: TCP
   ##
-  containerPorts:
-    - name: http
-      containerPort: 5000
-      hostPort: 5000
-      protocol: TCP
+  containerPorts: []
   ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param zot.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
@@ -258,14 +248,14 @@ zot:
 
   ## @param zot.config config file for zot, content under this block will convert to json file place in /etc/zot/config.json
   ## you can set whatever content under this block, just follow the zot configuration guide
-  ## ref: https://zotregistry.dev/v2.1.8/admin-guide/admin-configuration/
-  ## ref: https://github.com/project-zot/zot/blob/v2.1.8/build/Dockerfile#L14-L26
+  ## ref: https://zotregistry.dev/v2.1.10/admin-guide/admin-configuration/
+  ## ref: https://github.com/project-zot/zot/blob/v2.1.10/build/Dockerfile#L14-L26
   ##
   config:
-    # https://zotregistry.dev/v2.1.8/articles/storage/#configuring-zot-storage
+    # https://zotregistry.dev/v2.1.10/articles/storage/#configuring-zot-storage
     storage:
       rootDirectory: /var/lib/registry
-    # ref: https://zotregistry.dev/v2.1.8/admin-guide/admin-configuration/#network-configuration
+    # ref: https://zotregistry.dev/v2.1.10/admin-guide/admin-configuration/#network-configuration
     http:
       address: "0.0.0.0"
       port: "5000"
