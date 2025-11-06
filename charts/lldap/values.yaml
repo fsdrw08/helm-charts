@@ -32,14 +32,101 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param lldap.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section lldap Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 lldap:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param lldap.autoscaling.enabled Enable autoscaling for lldap
+  ## @param lldap.autoscaling.minReplicas Minimum number of lldap replicas
+  ## @param lldap.autoscaling.maxReplicas Maximum number of lldap replicas
+  ## @param lldap.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param lldap.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param lldap.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param lldap.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param lldap.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param lldap.hostNetwork Specify if host network should be enabled for lldap pod
+  ##
+  hostNetwork: true
+  ## @param lldap.podAnnotations Annotations for lldap pods
+  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
+  ## the userns annotation only work podman v4.9+
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/lldap/lldap/blob/main/Dockerfile
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=10001,gid=10001
+  ## @param lldap.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param lldap.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param lldap.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param lldap.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param lldap.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param lldap.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param lldap.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param lldap.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## lldap image
   ## ref: https://hub.docker.com/r/lldap/lldap/tags/
   ## @param lldap.image.registry lldap image registry
@@ -67,12 +154,6 @@ lldap:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param lldap.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param lldap.replicaCount Number of lldap replicas to deploy
-  ##
-  replicaCount: 1
   ## @param lldap.containerPorts lldap container port to expose to host
   ## e.g.
   ## containerPorts:
@@ -87,7 +168,7 @@ lldap:
   ##     hostIP: 192.168.255.10
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts: []
   ## Configure extra options for lldap containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param lldap.livenessProbe.enabled Enable livenessProbe on lldap containers
@@ -167,15 +248,6 @@ lldap:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param lldap.podSecurityContext.enabled Enabled lldap pods' Security Context
-  ## @param lldap.podSecurityContext.fsGroup Set lldap pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param lldap.containerSecurityContext.enabled Enabled lldap containers' Security Context
@@ -195,8 +267,8 @@ lldap:
 
   ## @param lldap.config default lldap config
   ## below config content will convert to toml and place in /data/lldap_config.toml
-  ## ref: https://github.com/lldap/lldap/blob/31364da6d485329e4ebf4e024f1419fd809aa635/lldap_config.docker_template.toml
-  ## ref: https://github.com/lldap/lldap/blob/31364da6d485329e4ebf4e024f1419fd809aa635/docker-entrypoint-rootless.sh#L4
+  ## ref: https://github.com/lldap/lldap/blob/v0.6.2/lldap_config.docker_template.toml
+  ## ref: https://github.com/lldap/lldap/blob/v0.6.2/docker-entrypoint-rootless.sh#L4
   ##
   config:
     ## @param lldap.config.database_url Database URL.
@@ -208,34 +280,41 @@ lldap:
     ## This can be overridden with the LLDAP_DATABASE_URL env variable.
     ##
     database_url: "sqlite:///data/persistence/users.db?mode=rwc"
-    ## @param lldap.config.key_file set this to empty to empty string to silence the warning message when lldap server start
-    ##
-    key_file: ""
-    ## @param lldap.config.key_seed Seed to generate the server private key, see key_file above.
-    ## Contains the secret private key used to store the passwords safely.
-    ## Note that even with a database dump and the private key, an attacker would still have to perform an (expensive) brute force attack to find each password.
-    ## This can be any random string, the recommendation is that it's at least 12 characters long.
-    ## Env variable: LLDAP_KEY_SEED
-    ##
-    key_seed: "RanD0m STR1ng"
     ## @param lldap.config.ldaps_options Options to configure LDAPS.
     ##
     # ldaps_options:
-    #   cert_file: /data/certs/cert.pem
-    #   key_file: /data/certs/key.pem
-  ## @param lldap.ssl secret setting of cert and key or whatever ssl content will set in the container
+    #   cert_file: /data/secret/certs/cert.pem
+    #   key_file: /data/secret/certs/key.pem
+  ## @param secret.secret secret pass to the container
   ##
-  ssl:
-    ## @param lldap.ssl.mountPath secret mount path setting of keystore or whatever ssl content will set in the container
-    ## the path should also match with the ldaps_options in lldap.config.ldaps_options
-    mountPath: /data/certs
-    ## @param lldap.ssl.contents_b64 base 64 encoded content of keystore object or whatever base 64 encoded ssl content will set in the container
-    ## You can set the content key as whatever file name you like
+  secret:
+    ## @param secret.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##   cert.pem: ""
-    ##   key.pem: ""
-    contents: {}
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
+    ##
+    ##
+    envVars:
+      LLDAP_KEY_SEED: "RanD0m STR1ng"
+    ## @param lldap.secret.ssl secret setting of cert and key or whatever ssl content will set in the container
+    ##
+    ssl:
+      ## @param lldap.secret.ssl.mountPath secret mount path setting of keystore or whatever ssl content will set in the container
+      ## the path should also match with the ldaps_options in lldap.config.ldaps_options
+      mountPath: /data/secret/certs
+      ## @param lldap.secret.ssl.contents_b64 base 64 encoded content of keystore object or whatever base 64 encoded ssl content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## e.g.
+      ## contents:
+      ##   cert.pem: ""
+      ##   key.pem: ""
+      contents: {}
+    ## @param zot.secret.others other secrets pass to the container via secret volume mount
+    ##
+    others:
+      mountPath: /data/secret/others
+      contents: {}
   ## @param lldap.existingConfigmap The name of an existing ConfigMap with your custom configuration for lldap
   ##
   existingConfigmap:
@@ -245,36 +324,6 @@ lldap:
   ## @param lldap.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param lldap.hostAliases lldap pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param lldap.podLabels Extra labels for lldap pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param lldap.podAnnotations Annotations for lldap pods
-  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
-  ## the userns annotation only work podman v4.9+
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/lldap/lldap/blob/main/Dockerfile
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=10001,gid=10001
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param lldap.autoscaling.enabled Enable autoscaling for lldap
-  ## @param lldap.autoscaling.minReplicas Minimum number of lldap replicas
-  ## @param lldap.autoscaling.maxReplicas Maximum number of lldap replicas
-  ## @param lldap.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param lldap.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param lldap.extraEnvVars Array with extra environment variables to add to lldap nodes
   ## e.g:
@@ -289,33 +338,9 @@ lldap:
   ## @param lldap.extraEnvVarsSecret Name of existing Secret containing extra env vars for lldap nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param lldap.extraVolumes Optionally specify extra list of additional volumes for the lldap pod(s)
-  ##
-  extraVolumes: []
   ## @param lldap.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the lldap container(s)
   ##
   extraVolumeMounts: []
-  ## @param lldap.sidecars Add additional sidecar containers to the lldap pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param lldap.initContainers Add additional init containers to the lldap pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

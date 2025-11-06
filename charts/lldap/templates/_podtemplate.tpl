@@ -1,6 +1,6 @@
 {{- define "lldap.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.lldap.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.lldap.podAnnotations }}
@@ -18,6 +18,10 @@ spec:
   {{- include "lldap.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.lldap.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.lldap.hostNetwork }}
+  {{- if .Values.lldap.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.lldap.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.lldap.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -67,10 +71,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.lldap.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.lldap.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.lldap.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.lldap.extraEnvVarsSecret "context" $) }}
@@ -102,9 +106,13 @@ spec:
         - name: config
           mountPath: /data/lldap_config.toml
           subPath: lldap_config.toml
-        {{- if .Values.lldap.ssl.contents }}
-        - name: ssl
-          mountPath: {{ .Values.lldap.ssl.mountPath }}
+        {{- if .Values.lldap.secret.ssl.contents }}
+        - name: secret-ssl
+          mountPath: {{ .Values.lldap.secret.ssl.mountPath }}
+        {{- end }}
+        {{- if .Values.lldap.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.lldap.secret.others.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -119,12 +127,17 @@ spec:
     {{- end }}
   volumes:
     - name: config
-      secret:
-        secretName: {{ template "common.names.fullname" . }}-sec
-    {{- if .Values.lldap.ssl.contents }}
-    - name: ssl
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.lldap.secret.ssl.contents }}
+    - name: secret-ssl
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-ssl
+    {{- end }}
+    {{- if .Values.lldap.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
@@ -136,7 +149,7 @@ spec:
     {{- if .Values.lldap.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.lldap.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.lldap.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.lldap.podRestartPolicy }}
