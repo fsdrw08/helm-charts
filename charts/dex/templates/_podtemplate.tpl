@@ -103,6 +103,13 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.dex.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
+        - name: config
+          mountPath: /etc/dex/config.docker.yaml
+          subPath: config.docker.yaml
+        {{- if .Values.dex.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.dex.secret.tls.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -115,6 +122,14 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.dex.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.dex.secret.tls.contents }}
+    - name: secret-tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:

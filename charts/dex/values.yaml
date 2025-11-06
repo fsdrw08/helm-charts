@@ -78,8 +78,10 @@ dex:
   hostNetwork: true
   ## @param dex.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/dexidp/dex/blob/master/Dockerfile#L82
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=1001,gid=1001
   ## @param dex.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
@@ -175,12 +177,18 @@ dex:
   ## @param dex.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: false
-    initialDelaySeconds: foo
-    periodSeconds: bar
-    timeoutSeconds: foo
-    failureThreshold: bar
-    successThreshold: foo
+    enabled: true
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+    exec:
+      command:
+        - sh
+        - -c
+        - |
+          wget --quiet --tries=1 --output-document=- http://127.0.0.1:5558/healthz/live
   ## @param dex.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
   ## @param dex.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param dex.readinessProbe.periodSeconds Period seconds for readinessProbe
@@ -242,34 +250,61 @@ dex:
   ## @param dex.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
   ## @param dex.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
   ## @param dex.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## ref: https://github.com/dexidp/dex/blob/master/Dockerfile#L82
   ##
   containerSecurityContext:
-    enabled: false
+    enabled: true
     runAsUser: 1001
+    runAsGroup: 1001
     runAsNonRoot: true
-    readOnlyRootFilesystem: false
+    readOnlyRootFilesystem: true
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param dex.config config file which will place in /etc/dex/config.docker.yaml
-  ## ref: https://github.com/dexidp/dex/blob/v2.44.0/Dockerfile
+  ## ref: https://github.com/dexidp/dex/blob/v2.44.0/Dockerfile#L85
   ## ref: https://github.com/dexidp/dex/blob/v2.44.0/config.docker.yaml
+  ## ref: https://github.com/dexidp/dex/blob/v2.44.0/config.yaml.dist
   ##
   config:
+    ## @param dex.config.issuer The base path of Dex and the external name of the OpenID Connect service.
+    ## This is the canonical URL that all clients MUST use to refer to Dex.
+    ## If a path is provided, Dex's HTTP service will listen at a non-root URL.
+    ##
     issuer: http://127.0.0.1:5556/dex
+    ## @param dex.config.storage The storage configuration determines where Dex stores its state.
+    ## Supported options include:
+    ##   - SQL flavors
+    ##   - key-value stores (eg. etcd)
+    ##   - Kubernetes Custom Resources
+    ## See the documentation (https://dexidp.io/docs/storage/) for further information.
+    ##
     storage:
       type: sqlite3
       config:
         file: /var/dex/dex.db
+    ## @param dex.config.web HTTP service configuration
+    ##
     web:
       http: 0.0.0.0:5556
+      ## Uncomment to enable HTTPS endpoint.
+      # https: 127.0.0.1:5554
+      # tlsCert: /etc/dex/tls.crt
+      # tlsKey: /etc/dex/tls.key
+      # tlsMinVersion: 1.2
+      # tlsMaxVersion: 1.3
     expiry:
       deviceRequests: 5m
       signingKeys: 6h
       idTokens: 24h
       authRequests: 24h
+    telemetry:
+      http: 127.0.0.1:5558
     logger:
       level: info
       format: text
+    ## @param dex.config.enablePasswordDB Enable the password database.
+    ## It's a "virtual" connector (identity provider) that stores login credentials in Dex's store.
+    ##
     enablePasswordDB: true
 
   ## @param dex.secret secret pass to the container
@@ -282,6 +317,22 @@ dex:
     ##   SECRET_KEY2: secret_value2
     ##
     envVars: {}
+    ## @param dex.secret.tls tls cert and key secrets pass to the container via secret volume mount
+    ## @param dex.secret.tls.mountPath tls secret volume mount path
+    ## @param dex.secret.content secret content will set in the container
+    ## You can set the content key as whatever file name you want
+    ## But the tls set in configFiles above must match with the settings here
+    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+    ## and also can set htpasswd and ldap bind dn credential secret here
+    ## e.g.
+    ## contents:
+    ##   ca.crt: ""
+    ##   tls.crt: ""
+    ##   tls.key: ""
+    ##
+    tls:
+      mountPath: /etc/ssl/certs/private
+      contents: {}
 
   ## @param dex.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
   ##
@@ -322,7 +373,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/dex/data
+  mountPath: /var/dex
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
