@@ -66,21 +66,21 @@ zot:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param zot.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param zot.extraVolumes Optionally specify extra list of additional volumes for the zot pod(s)
   ##
   extraVolumes: []
-  ## @param zot.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param zot.hostAliases zot pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
   ## @param zot.hostNetwork Specify if host network should be enabled for zot pod
   ##
   hostNetwork: true
-  ## @param zot.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param zot.podAnnotations Annotations for zot pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
-  ## @param zot.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param zot.podLabels Extra labels for zot pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
@@ -89,20 +89,20 @@ zot:
   podRestartPolicy: Never
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param zot.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param zot.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param zot.podSecurityContext.enabled Enabled zot pods' Security Context
+  ## @param zot.podSecurityContext.fsGroup Set zot pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
     enabled: false
     # fsGroup: 1001
-  ## @param zot.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ## @param zot.replicaCount Number of zot replicas to deploy if workloadKind set to deployment
   ##
   replicaCount: 1
   ## @param zot.workloadKind specify the deploy kind： Pod, or Deployment
   ##
   workloadKind: Pod
-  ## @param zot.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param zot.initContainers Add additional init containers to the zot pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -112,7 +112,7 @@ zot:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
-  ## @param zot.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param zot.sidecars Add additional sidecar containers to the zot pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -150,7 +150,7 @@ zot:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param zot.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param zot.containerPorts zot container port to expose to host
   ## e.g.
   ## containerPorts:
   ##   - name: http
@@ -159,9 +159,9 @@ zot:
   ##     protocol: TCP
   ##
   containerPorts: []
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## Configure extra options for zot containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param zot.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param zot.livenessProbe.enabled Enable livenessProbe on zot containers
   ## @param zot.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param zot.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param zot.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -176,7 +176,7 @@ zot:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param zot.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param zot.readinessProbe.enabled Enable readinessProbe on zot containers
   ## @param zot.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param zot.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param zot.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
@@ -191,7 +191,7 @@ zot:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param zot.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param zot.startupProbe.enabled Enable startupProbe on zot containers
   ## @param zot.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param zot.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param zot.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -214,13 +214,13 @@ zot:
   ## @param zot.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## zot resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param zot.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if zot.resources is set (zot.resources is recommended for production).
+  ## @param zot.resourcesPreset Set zot container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if zot.resources is set (zot.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param zot.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## @param zot.resources Set zot container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -233,10 +233,10 @@ zot:
   resources: {}
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param zot.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param zot.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param zot.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param zot.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param zot.containerSecurityContext.enabled Enabled zot containers' Security Context
+  ## @param zot.containerSecurityContext.runAsUser Set zot containers' Security Context runAsUser
+  ## @param zot.containerSecurityContext.runAsNonRoot Set zot containers' Security Context runAsNonRoot
+  ## @param zot.containerSecurityContext.readOnlyRootFilesystem Set zot containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
     enabled: false
@@ -295,7 +295,7 @@ zot:
     others:
       mountPath: /etc/zot/secret
       contents: {}
-  ## @param zot.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param zot.existingConfigmap The name of an existing ConfigMap with your custom configuration for zot
   ##
   existingConfigmap:
   ## @param zot.command Override default container command (useful when using custom images)
@@ -305,20 +305,20 @@ zot:
   ##
   args: []
 
-  ## @param zot.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param zot.extraEnvVars Array with extra environment variables to add to zot nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param zot.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param zot.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for zot nodes
   ##
   extraEnvVarsCM: ""
-  ## @param zot.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param zot.extraEnvVarsSecret Name of existing Secret containing extra env vars for zot nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param zot.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param zot.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the zot container(s)
   ##
   extraVolumeMounts: []
 

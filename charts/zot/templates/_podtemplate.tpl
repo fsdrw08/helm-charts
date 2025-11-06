@@ -19,6 +19,10 @@ spec:
   {{- if .Values.zot.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.zot.hostAliases "context" $) | nindent 4 }}
   {{- end }}
+  hostNetwork: {{ .Values.zot.hostNetwork }}
+  {{- if .Values.zot.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.zot.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
   {{- if .Values.zot.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.zot.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
