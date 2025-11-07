@@ -1,6 +1,6 @@
 {{- define "traefik.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.traefik.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.traefik.podAnnotations }}
@@ -18,6 +18,10 @@ spec:
   {{- include "traefik.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.traefik.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.traefik.hostNetwork }}
+  {{- if .Values.traefik.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.traefik.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.traefik.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -67,6 +71,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.traefik.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{- if .Values.traefik.secret.envVars }}
+        - secretRef:
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.traefik.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.traefik.extraEnvVarsSecret "context" $) }}
@@ -95,14 +103,14 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.traefik.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: config-static
+        - name: config-install
           mountPath: /etc/traefik/traefik.yml
           subPath: traefik.yml
-        - name: config-dynamic-builtin
-          mountPath: {{ .Values.traefik.configFiles.static.providers.file.directory }}/builtin
-        {{- if .Values.traefik.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.traefik.tls.mountPath }}
+        - name: config-routing-builtin
+          mountPath: {{ .Values.traefik.configFiles.install.providers.file.directory }}/builtin
+        {{- if .Values.traefik.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.traefik.secret.tls.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -116,16 +124,16 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.traefik.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: config-static
+    - name: config-install
       configMap:
-        name: {{ template "common.names.fullname" . }}-cm-stat
+        name: {{ template "common.names.fullname" . }}-cm-install
         items:
           - key: traefik.yml
             path: traefik.yml
-    {{- if .Values.traefik.configFiles.dynamic }}
-    - name: config-dynamic-builtin
+    {{- if .Values.traefik.configFiles.routing }}
+    - name: config-routing-builtin
       configMap:
-        name: {{ template "common.names.fullname" . }}-cm-dyn
+        name: {{ template "common.names.fullname" . }}-cm-routing
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
@@ -134,15 +142,15 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{- if .Values.traefik.tls.contents }}
-    - name: tls
+    {{- if .Values.traefik.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
     {{- if .Values.traefik.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.traefik.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.traefik.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.traefik.podRestartPolicy }}

@@ -4,7 +4,7 @@ annotations:
   category: Infrastructure
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v3.5.3
+appVersion: v3.5.4
 dependencies:
   - name: common
     repository: file://../common
@@ -22,4 +22,5 @@ maintainers:
 name: traefik
 sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/traefik
+  - https://github.com/traefik/traefik-library-image/blob/master/v3.5/alpine/Dockerfile
 version: 0.1.0

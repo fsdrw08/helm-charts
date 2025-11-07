@@ -32,14 +32,97 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section traefik Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 traefik:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param traefik.autoscaling.enabled Enable autoscaling for traefik
+  ## @param traefik.autoscaling.minReplicas Minimum number of traefik replicas
+  ## @param traefik.autoscaling.maxReplicas Maximum number of traefik replicas
+  ## @param traefik.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param traefik.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param traefik.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param traefik.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param traefik.hostNetwork Specify if host network should be enabled for traefik pod
+  ##
+  hostNetwork: true
+  ## @param traefik.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param traefik.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param traefik.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param traefik.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param traefik.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param traefik.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param traefik.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param traefik.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param traefik.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## traefik image
   ## ref: https://hub.docker.com/r/bitnami/%%IMAGE_NAME%%/tags/
   ## @param traefik.image.registry traefik image registry
@@ -52,7 +135,7 @@ traefik:
   image:
     registry: docker.io
     repository: library/traefik
-    tag: v3.5.3
+    tag: v3.5.4
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,36 +150,22 @@ traefik:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param traefik.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param traefik.replicaCount Number of traefik replicas to deploy
-  ##
-  replicaCount: 1
   ## @param traefik.containerPorts traefik container port to expose to host
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
-  ##     hostIP: 192.168.255.10
+  ##     hostPort: 80
   ##     protocol: TCP
   ##   - name: https
   ##     containerPort: 443
-  ##     hostIP: 192.168.255.10
+  ##     hostPort: 443
+  ##     protocol: TCP
+  ##   - name: ping
+  ##     containerPort: 8080
+  ##     hostPort: 8080
   ##     protocol: TCP
   ##
-  containerPorts:
-    - name: http
-      containerPort: 80
-      hostPort: 80
-      protocol: TCP
-    - name: https
-      containerPort: 443
-      hostPort: 443
-      protocol: TCP
-    - name: ping
-      containerPort: 8080
-      hostPort: 8080
-      protocol: TCP
+  containerPorts: []
   ## Configure extra options for traefik containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param traefik.livenessProbe.enabled Enable livenessProbe on traefik containers
@@ -161,7 +230,7 @@ traefik:
   customStartupProbe: {}
   ## traefik resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param traefik.resourcesPreset Set traefik container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if %%MAIN_OBJECT_BLOCK%%.resources is set (%%MAIN_OBJECT_BLOCK%%.resources is recommended for production).
+  ## @param traefik.resourcesPreset Set traefik container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if traefik.resources is set (traefik.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
@@ -176,14 +245,6 @@ traefik:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param traefik.podSecurityContext.enabled Enabled traefik pods' Security Context
-  ## @param traefik.podSecurityContext.fsGroup Set traefik pod's Security Context fsGroup
-  ##
-  podSecurityContext:
-    enabled: false
-    fsGroup: 1001
   ## Configure Container Security Context
   ## @param traefik.containerSecurityContext.enabled Enabled traefik containers' Security Context
   ## @param traefik.containerSecurityContext.runAsUser Set traefik containers' Security Context runAsUser
@@ -204,20 +265,21 @@ traefik:
     # readOnlyRootFilesystem: false
 
   ## %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  ## @param traefik.configFiles traefik configs divided to 2 parts: static config and dynamic config
-  ## ref: https://doc.traefik.io/traefik/getting-started/configuration-overview/#configuration-introduction
+  ## @param traefik.configFiles traefik configs divided to 2 parts: install config and routing config
+  ## ref: https://doc.traefik.io/traefik/reference/install-configuration/boot-environment/
   ##
   configFiles:
-    ## @param traefik.configFiles.static The startup configuration for traefik
-    ## static config file which will place in /etc/traefik/traefik.yml and load by traefik when it start
-    ## ref: https://doc.traefik.io/traefik/getting-started/configuration-overview/#the-static-configuration
+    ## @param traefik.configFiles.install Defines parameters that require Traefik to restart when changed.
+    ## This includes entry points, providers, API/dashboard settings, and logging levels.
+    ## install config file which will place in /etc/traefik/traefik.yml and load by traefik when it start
+    ## ref: https://doc.traefik.io/traefik/reference/install-configuration/boot-environment/#file
     ##
-    static:
-      ## @param traefik.configFiles.static.providers
+    install:
+      ## @param traefik.configFiles.install.providers
       ## ref: https://doc.traefik.io/traefik/providers/overview/
       ##
       providers:
-        ## @param traefik.configFiles.static.providers.docker
+        ## @param traefik.configFiles.install.providers.docker
         ## Config docker provider to let traefik understand how to route the traffic by reading docker label information
         ## ref: https://doc.traefik.io/traefik/providers/docker/
         ##
@@ -225,26 +287,26 @@ traefik:
           endpoint: unix:///var/run/docker.sock
           useBindPortIP: false
           exposedByDefault: false
-        ## @param traefik.configFiles.static.providers.file
-        ## @param traefik.configFiles.static.providers.file.directory
+        ## @param traefik.configFiles.install.providers.file
+        ## @param traefik.configFiles.install.providers.file.directory
         ## Config The file provider let traefik understand how to route the traffic by reading the YAML or TOML file
         ## ref: https://doc.traefik.io/traefik/providers/file/
         ##
         file:
-          directory: /etc/traefik/dynamic
+          directory: /etc/traefik/routing
           watch: true
-      ## @param traefik.configFiles.static.serversTransport
+      ## @param traefik.configFiles.install.serversTransport
       ## ref: https://doc.traefik.io/traefik/routing/overview/#transport-configuration
       serversTransport:
         insecureSkipVerify: false
-      ## @param traefik.configFiles.static.globalArguments global arguments
+      ## @param traefik.configFiles.install.globalArguments global arguments
       ## e.g.
       ## globalArguments:
       ##   checkNewVersion: false
       ##   sendAnonymousUsage: false
       ##
       global: {}
-      ## @param traefik.configFiles.static.entryPoints
+      ## @param traefik.configFiles.install.entryPoints
       ## ref: https://doc.traefik.io/traefik/routing/overview/
       ##
       entryPoints:
@@ -262,12 +324,12 @@ traefik:
           # https://www.bboy.app/2020/04/16/traefik%E5%90%8E%E7%AB%AF%E5%BA%94%E7%94%A8%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E7%9C%9F%E5%AE%9Eip/
           forwardedHeaders:
             trustedIPs: []
-      ## @param traefik.configFiles.static.api
+      ## @param traefik.configFiles.install.api
       ## Traefik exposes a number of information through an API handler
       ##
       api:
         dashboard: true
-      ## @param traefik.configFiles.static.certificatesResolvers
+      ## @param traefik.configFiles.install.certificatesResolvers
       ## ref: https://doc.traefik.io/traefik/https/acme/
       ## e.g.
       ## certificatesResolvers:
@@ -287,25 +349,25 @@ traefik:
       ##       tlsChallenge: {}
       ##
       certificatesResolvers: null
-      ## @param traefik.configFiles.static.log
+      ## @param traefik.configFiles.install.log
       ## ref: https://doc.traefik.io/traefik/observability/logs/
       ##
       log:
-        ## @param traefik.configFiles.static.log.level
+        ## @param traefik.configFiles.install.log.level
         ## Alternative logging levels are DEBUG, INFO, WARN, ERROR, FATAL, and PANIC.
         level: ERROR
-      ## @param traefik.configFiles.static.ping Checking the Health of Your Traefik Instances
+      ## @param traefik.configFiles.install.ping Checking the Health of Your Traefik Instances
       ## ref: https://doc.traefik.io/traefik/operations/ping/
       ##
       ping: {}
-    ## @param traefik.configFiles.dynamic file provider for traefik dynamic config
-    ## The file provider lets you define the dynamic configuration in a YAML or TOML file.
-    ## The block define here will put into configMap and let traefik treat as dynamic file configuration file.
+    ## @param traefik.configFiles.routing file provider for traefik routing config
+    ## The file provider lets you define the routing configuration in a YAML or TOML file.
+    ## The block define here will put into configMap and let traefik treat as routing file configuration file.
     ## The values will render as a yaml file put into configmap then mount to the path set in
-    ## {{ .Values.traefik.configFiles.static.providers.file.directory }}/builtin
+    ## {{ .Values.traefik.configFiles.install.providers.file.directory }}/builtin
     ## ref: https://doc.traefik.io/traefik/providers/file/
     ##
-    dynamic:
+    routing:
       mwToHttps.yaml:
         http:
           middlewares:
@@ -318,22 +380,32 @@ traefik:
       #     certificates:
       #       - certFile: /etc/traefik/tls/domain.crt
       #         keyFile: /etc/traefik/tls/domain.key
-  ## @param traefik.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param traefik.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ## @param traefik.secret secret pass to the container
   ##
-  tls:
-    mountPath: /etc/traefik/tls
-    ## @param traefik.tls.content secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param traefik.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  ca.crt: ""
-    ##  tls.crt: ""
-    ##  tls.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param traefik.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ## @param traefik.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      mountPath: /etc/traefik/tls
+      ## @param traefik.secret.tls.content secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  ca.crt: ""
+      ##  tls.crt: ""
+      ##  tls.key: ""
+      ##
+      contents: {}
   ## @param traefik.existingConfigmap The name of an existing ConfigMap with your custom configuration for traefik
   ##
   existingConfigmap:
@@ -343,34 +415,6 @@ traefik:
   ## @param traefik.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param traefik.hostAliases traefik pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param traefik.podLabels Extra labels for traefik pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param traefik.podAnnotations Annotations for traefik pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## e.g.
-  ## podAnnotations:
-  ##  io.podman.annotations.label: disable
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param traefik.autoscaling.enabled Enable autoscaling for traefik
-  ## @param traefik.autoscaling.minReplicas Minimum number of traefik replicas
-  ## @param traefik.autoscaling.maxReplicas Maximum number of traefik replicas
-  ## @param traefik.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param traefik.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param traefik.extraEnvVars Array with extra environment variables to add to traefik nodes
   ## e.g:
@@ -394,49 +438,13 @@ traefik:
   ## @param traefik.extraEnvVarsSecret Name of existing Secret containing extra env vars for traefik nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the traefik pod(s)
-  ## e.g.
-  ## extraVolumes:
-  ##   - name: acmeStorage
-  ##     persistentVolumeClaim:
-  ##       claimName: traefik-pvc
-  ##
-  extraVolumes:
-    - name: docker-socket
-      hostPath:
-        path: /run/user/1001/podman/podman.sock
-        type: Socket
   ## @param traefik.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the traefik container(s)
   ## e.g.
   ## extraVolumeMounts:
   ##   - name: acmeStorage
   ##     mountPath: /mnt/acmeStorage
   ##
-  extraVolumeMounts:
-    - name: docker-socket
-      mountPath: "/var/run/docker.sock"
-      readOnly: true
-  ## @param traefik.sidecars Add additional sidecar containers to the traefik pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param traefik.initContainers Add additional init containers to the traefik pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
+  extraVolumeMounts: []
 
 ## @section Persistence Parameters
 ##

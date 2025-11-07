@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "common.names.fullname" . }}-cm-stat
+  name: {{ template "common.names.fullname" . }}-cm-install
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: traefik
     {{- if .Values.commonLabels }}
@@ -11,14 +11,14 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  traefik.yml: |
-    {{- include "common.tplvalues.render" (dict "value" .Values.traefik.configFiles.static "context" $) | nindent 4 -}}
-{{- if .Values.traefik.configFiles.dynamic }}
+  traefik.yml: {{ print "|" }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.traefik.configFiles.install "context" $) | nindent 4 -}}
+{{- if .Values.traefik.configFiles.routing }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "common.names.fullname" . }}-cm-dyn
+  name: {{ template "common.names.fullname" . }}-cm-routing
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: traefik
     {{- if .Values.commonLabels }}
@@ -28,8 +28,8 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  {{- range $key, $val := .Values.traefik.configFiles.dynamic }}
-  {{ $key }}: |
+  {{- range $key, $val := .Values.traefik.configFiles.routing }}
+  {{ $key }}: {{ print "|" }}
     {{- include "common.tplvalues.render" (dict "value" $val "context" $) | nindent 4 -}}
   {{- end }}
 {{- end -}}

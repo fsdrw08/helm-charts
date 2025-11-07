@@ -1,4 +1,4 @@
-{{- if eq .Values.workloadKind "Pod"  -}}
+{{- if eq .Values.traefik.workloadKind "Pod"  -}}
 apiVersion: v1
 kind: Pod
 {{ template "traefik.podTemplate" . }}
