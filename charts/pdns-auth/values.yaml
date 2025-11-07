@@ -52,7 +52,7 @@ powerdns:
   image:
     registry: docker.io
     repository: powerdns/pdns-auth-50
-    tag: 5.0.0
+    tag: 5.0.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -180,7 +180,7 @@ powerdns:
   ## @param powerdns.containerSecurityContext.runAsUser Set powerdns containers' Security Context runAsUser
   ## @param powerdns.containerSecurityContext.runAsNonRoot Set powerdns containers' Security Context runAsNonRoot
   ## @param powerdns.containerSecurityContext.readOnlyRootFilesystem Set powerdns containers' Security Context runAsNonRoot
-  ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.0/Dockerfile-auth#L93
+  ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.1/Dockerfile-auth#L93
   ##
   containerSecurityContext:
     enabled: true
@@ -194,7 +194,7 @@ powerdns:
   configFiles:
     ## @param powerdns.configFiles.pdns powerdns image builtin config file
     ## which will place in /etc/powerdns/pdns.conf
-    ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.0/dockerdata/pdns.conf
+    ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.1/dockerdata/pdns.conf
     ##
     pdns:
       ## @param powerdns.configFiles.pdns.local-address Local IP addresses to which we bind.
@@ -226,7 +226,7 @@ powerdns:
       include-dir: /etc/powerdns/pdns.d
     ## @param powerdns.configFiles._aipConf powerdns image builtin config file
     ## which will place in /etc/powerdns/pdns.d/_api.conf
-    ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.0/dockerdata/startup.py#L29-L33
+    ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.1/dockerdata/startup.py#L29-L33
     ##
     _api:
       ## @param powerdns.configFiles._aipConf.webserver Start a webserver for monitoring
@@ -290,7 +290,7 @@ powerdns:
   ## the userns annotation only work podman v4.9+
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ## ref: https://github.com/containers/podman/discussions/22378
-  ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.0/Dockerfile-auth#L93
+  ## ref: https://github.com/PowerDNS/pdns/blob/auth-5.0.1/Dockerfile-auth#L93
   ## e.g.
   ## podAnnotations:
   ##   io.podman.annotations.userns: keep-id:uid=953,gid=953
