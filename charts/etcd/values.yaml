@@ -32,58 +32,12 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param etcd.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section etcd Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 etcd:
-  ## @param etcd.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param etcd.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
-  ##
-  replicaCount: 1
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param etcd.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param etcd.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
-  ## @param etcd.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param etcd.hostNetwork Specify if host network should be enabled for etcd pod
-  ##
-  hostNetwork: true
-  ## @param etcd.dnsConfig  Allows users more control on the DNS settings for a Pod.
-  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
-  ## E.g.
-  ## dnsConfig:
-  ##   nameservers:
-  ##     - 192.0.2.1 # this is an example
-  ##   searches:
-  ##     - ns1.svc.cluster-domain.example
-  ##     - my.dns.search.suffix
-  ##   options:
-  ##     - name: ndots
-  ##       value: "2"
-  ##     - name: edns0
-  dnsConfig: {}
-  ## @param etcd.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param etcd.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param etcd.autoscaling.enabled Enable autoscaling for etcd
@@ -98,9 +52,56 @@ etcd:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
+  ## @param etcd.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
   ## @param etcd.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
   ##
   extraVolumes: []
+  ## @param etcd.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param etcd.hostNetwork Specify if host network should be enabled for etcd pod
+  ##
+  hostNetwork: true
+  ## @param etcd.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param etcd.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param etcd.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param etcd.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param etcd.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param etcd.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param etcd.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
   ## @param etcd.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -262,7 +263,8 @@ etcd:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
-  ## @param etcd.configFile An etcd configuration file consists of a YAML map whose keys are command-line flag names and values are the flag values
+  ## @param etcd.configFile An etcd configuration file place in /etc/etcd/etcd.config.yml
+  ## the config file will pass to etcd workload by args --config-file /etc/etcd/etcd.config.yml
   ## ref:
   ##  https://etcd.io/docs/v3.6/op-guide/configuration/
   ##  https://github.com/etcd-io/etcd/blob/main/etcd.conf.yml.sample
@@ -567,33 +569,45 @@ etcd:
     ##
     # unsafe-no-fsync: 'false'
 
-  ## @param etcd.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param etcd.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ## @param etcd.secret secret pass to the container
   ##
-  tls:
-    mountPath: /etc/etcd/pki # https://github.com/etcd-io/jetcd/blob/main/docs/SslConfig.md
-    ## @param etcd.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFile above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param etcd.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  ca.pem: ""
-    ##  server-1.pem: ""
-    ##  server-1-key.pem: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param etcd.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ## @param etcd.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      mountPath: /etc/etcd/pki # https://github.com/etcd-io/jetcd/blob/main/docs/SslConfig.md
+      ## @param etcd.secret.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFile above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  ca.pem: ""
+      ##  server-1.pem: ""
+      ##  server-1-key.pem: ""
+      ##
+      contents: {}
 
   ## @param etcd.existingConfigmap The name of an existing ConfigMap with your custom configuration for etcd
   ##
   existingConfigmap:
   ## @param etcd.command Override default container command (useful when using custom images)
   ##
-  command: []
+  command:
+    - /usr/local/bin/etcd
   ## @param etcd.args Override default container args (useful when using custom images)
   ##
-  args: []
-
+  args:
+    - --config-file
+    - /etc/etcd/etcd.config.yml
   ## @param etcd.extraEnvVars Array with extra environment variables to add to etcd nodes
   ## e.g:
   ## extraEnvVars:

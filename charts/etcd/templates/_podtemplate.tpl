@@ -1,6 +1,6 @@
 {{- define "etcd.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.etcd.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.etcd.podAnnotations }}
@@ -61,16 +61,8 @@ spec:
       {{- end }}
       {{- if .Values.etcd.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.args "context" $) | nindent 8 }}
-      {{/*
-      {{- else }}
-      args: 
-        - --config-file
-        - /etc/etcd/etcd.config.yml
-      */}}
       {{- end }}
       env:
-        - name: ETCD_CONFIG_FILE
-          value: /etc/etcd/etcd.config.yml
         {{- if .Values.etcd.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
@@ -79,10 +71,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.etcd.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.etcd.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.etcd.extraEnvVarsSecret "context" $) }}
@@ -114,9 +106,9 @@ spec:
         - name: config
           mountPath: /etc/etcd/etcd.config.yml
           subPath: etcd.config.yml
-        {{- if .Values.etcd.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.etcd.tls.mountPath }}
+        {{- if .Values.etcd.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.etcd.secret.tls.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -136,8 +128,8 @@ spec:
         items:
           - key: etcd.config.yml
             path: etcd.config.yml
-    {{- if .Values.etcd.tls.contents }}
-    - name: tls
+    {{- if .Values.etcd.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
@@ -151,7 +143,7 @@ spec:
     {{- if .Values.etcd.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.etcd.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.etcd.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.etcd.podRestartPolicy }}

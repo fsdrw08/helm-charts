@@ -11,5 +11,5 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  etcd.config.yml: | 
+  etcd.config.yml: {{ print "|" }}
     {{- include "common.tplvalues.render" (dict "value" .Values.etcd.configFile "context" $) | nindent 4 -}}
