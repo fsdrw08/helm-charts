@@ -269,22 +269,31 @@ minio:
     ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/#parameters
     ##
     MINIO_OPTS: --address=:9000 --console-address=:9001
+    ## @param minio.config.MINIO_CONFIG_ENV_FILE Specifies the full path to the file the MinIO server process uses for loading environment variables.
+    ## Sets a MinIO environment variable pointing to the container-mounted path of the environment file.
+    ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/core/#env-minio-config-env-file
+    ##
+    MINIO_CONFIG_ENV_FILE: /etc/config.env
+    ## @param minio.secret.envVars.MINIO_ROOT_USER The access key for the root user.
+    ## @param minio.secret.envVars.MINIO_ROOT_PASSWORD The secret key for the root user.
+    ## MINIO_ROOT_USER_FILE and MINIO_ROOT_PASSWORD_FILE support custom absolute paths,
+    ## in case Docker secrets are mounted to custom locations or other tools are used to mount secrets into the container.
+    ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/root-credentials/
+    ## ref: https://github.com/minio/minio/blob/master/docs/docker/README.md#minio-custom-access-and-secret-key-files
+    ##
+    MINIO_ROOT_USER_FILE: /etc/minio/secrets/access_key
+    MINIO_ROOT_PASSWORD_FILE: /etc/minio/secrets/secret_key
+    ## @param minio.config.MINIO_UPDATE In place update is true by default if the MINIO_UPDATE is not set or is not set to 'off',
+    ## if MINIO_UPDATE is set to 'off' then in-place update is off.
+    ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/cmd/common-main.go#L808
+    ##
+    MINIO_UPDATE: "off"
     ## @param minio.config.MINIO_VOLUMES The directories or drives the minio server process uses as the storage backend.
     ## Functionally equivalent to setting minio server DIRECTORIES. Use this value when configuring MinIO to run using an environment file.
     ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/core/#env-minio-volumes
     ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/Dockerfile
     ##
     MINIO_VOLUMES: /data
-    ## @param minio.config.MINIO_CONFIG_ENV_FILE Specifies the full path to the file the MinIO server process uses for loading environment variables.
-    ## Sets a MinIO environment variable pointing to the container-mounted path of the environment file.
-    ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/core/#env-minio-config-env-file
-    ##
-    MINIO_CONFIG_ENV_FILE: /etc/config.env
-    ## @param minio.config.MINIO_UPDATE In place update is true by default if the MINIO_UPDATE is not set or is not set to 'off',
-    ## if MINIO_UPDATE is set to 'off' then in-place update is off.
-    ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/cmd/common-main.go#L808
-    ##
-    MINIO_UPDATE: "off"
   ## @param minio.tls secret setting of cert and key or whatever tls content will set in the container
   ##
   secret:
@@ -294,13 +303,7 @@ minio:
     ##   SECRET_KEY1: secret_value1
     ##   SECRET_KEY2: secret_value2
     ##
-    envVars:
-      ## @param minio.secret.envVars.MINIO_ROOT_USER The access key for the root user.
-      ## @param minio.secret.envVars.MINIO_ROOT_PASSWORD The secret key for the root user.
-      ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/root-credentials/
-      ##
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+    envVars: {}
     tls:
       ## @param minio.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
       ## to tell minio use this path, add --certs-dir=/etc/minio/certs in MINIO_OPTS
@@ -334,6 +337,13 @@ minio:
         # ## custom CAs
         # CAs:
         #   test.crt: "xxx"
+    ## @param minio.secret.others other secrets pass to the container via secret volume mount
+    ##
+    others:
+      mountPath: /etc/minio/secrets
+      contents:
+        access_key: minioadmin
+        secret_key: minioadmin
   ## @param minio.existingConfigmap The name of an existing ConfigMap with your custom configuration for minio
   ##
   existingConfigmap:

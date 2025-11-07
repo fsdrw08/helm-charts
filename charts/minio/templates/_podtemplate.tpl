@@ -116,18 +116,22 @@ spec:
           mountPath: {{ .Values.minio.config.MINIO_CONFIG_ENV_FILE }}
           subPath: {{ base .Values.minio.config.MINIO_CONFIG_ENV_FILE }}
         {{- if and ( index .Values.minio.secret.tls.contents "public.crt" ) ( index .Values.minio.secret.tls.contents "private.key" ) }}
-        - name: tls-default
+        - name: secret-tls-default
           mountPath: {{ .Values.minio.secret.tls.mountPath }}
         {{- end }}
         {{- if .Values.minio.secret.tls.contents.additionalDomains }}
         {{- range $additionalDomain := .Values.minio.secret.tls.contents.additionalDomains }}
-        - name: tls-additional-{{ $additionalDomain.name }}
+        - name: secret-tls-additional-{{ $additionalDomain.name }}
           mountPath: {{ $.Values.minio.secret.tls.mountPath }}/{{ $additionalDomain.name }}
         {{- end }}
         {{- end }}
         {{- if .Values.minio.secret.tls.contents.CAs }}
-        - name: tls-ca
+        - name: secret-tls-ca
           mountPath: {{ $.Values.minio.secret.tls.mountPath }}/CAs
+        {{- end }}
+        {{- if .Values.minio.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.minio.secret.others.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -145,7 +149,7 @@ spec:
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
     {{- if and ( index .Values.minio.secret.tls.contents "public.crt" ) ( index .Values.minio.secret.tls.contents "private.key" ) }}
-    - name: tls-default
+    - name: secret-tls-default
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls-default
         items:
@@ -156,7 +160,7 @@ spec:
     {{- end }}
     {{- if .Values.minio.secret.tls.contents.additionalDomains }}
     {{- range $additionalDomain := .Values.minio.secret.tls.contents.additionalDomains }}
-    - name: tls-additional-{{ $additionalDomain.name }}
+    - name: secret-tls-additional-{{ $additionalDomain.name }}
       secret:
         secretName: {{ template "common.names.fullname" $ }}-sec-tls-additional
         items:
@@ -167,7 +171,7 @@ spec:
     {{- end }}
     {{- end }}
     {{- if .Values.minio.secret.tls.contents.CAs }}
-    - name: tls-ca
+    - name: secret-tls-ca
       secret:
         secretName: {{ template "common.names.fullname" $ }}-sec-tls-ca
         items:
@@ -175,6 +179,11 @@ spec:
           - key: ca.{{ $key }}
             path: {{ $key }}
           {{- end }}
+    {{- end }}
+    {{- if .Values.minio.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
