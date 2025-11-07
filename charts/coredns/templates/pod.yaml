@@ -1,4 +1,4 @@
-{{- if eq .Values.workloadKind "Pod"  -}}
+{{- if eq .Values.coredns.workloadKind "Pod"  -}}
 apiVersion: v1
 kind: Pod
 {{ template "coredns.podTemplate" . }}

@@ -32,15 +32,98 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param coredns.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section coredns Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 coredns:
-  ## Bitnami coredns image
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param coredns.autoscaling.enabled Enable autoscaling for coredns
+  ## @param coredns.autoscaling.minReplicas Minimum number of coredns replicas
+  ## @param coredns.autoscaling.maxReplicas Maximum number of coredns replicas
+  ## @param coredns.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param coredns.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param coredns.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param coredns.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param coredns.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param coredns.hostNetwork Specify if host network should be enabled for coredns pod
+  ##
+  hostNetwork: true
+  ## @param coredns.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param coredns.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param coredns.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param coredns.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param coredns.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param coredns.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param coredns.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param coredns.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param coredns.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## coredns image
   ## ref: https://hub.docker.com/r/coredns/coredns/tags/
   ## @param coredns.image.registry coredns image registry
   ## @param coredns.image.repository coredns image repository
@@ -52,7 +135,7 @@ coredns:
   image:
     registry: docker.io
     repository: coredns/coredns
-    tag: 1.12.4
+    tag: 1.13.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,32 +150,19 @@ coredns:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param coredns.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param coredns.replicaCount Number of coredns replicas to deploy
-  ##
-  replicaCount: 1
   ## @param coredns.containerPorts coredns container port to expose to host
   ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostIP: 192.168.255.10
+  ##   - name: dns_tcp
+  ##     containerPort: 53
+  ##     hostPort: 53
   ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
+  ##   - name: dns_udp
+  ##     containerPort: 53
+  ##     hostPort: 53
+  ##     protocol: UDP
   ##
-  containerPorts:
-    - name: dns_tcp
-      containerPort: 53
-      hostPort: 53
-      protocol: TCP
-    - name: dns_udp
-      containerPort: 53
-      hostPort: 53
-      protocol: UDP
+  containerPorts: []
+
   ## Configure extra options for coredns containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## ref: https://github.com/coredns/helm/blob/master/charts/coredns/values.yaml#L360
@@ -105,7 +175,7 @@ coredns:
   ## @param coredns.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: 60
     periodSeconds: 10
     timeoutSeconds: 5
@@ -170,14 +240,6 @@ coredns:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param coredns.podSecurityContext.enabled Enabled coredns pods' Security Context
-  ## @param coredns.podSecurityContext.fsGroup Set coredns pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param coredns.containerSecurityContext.enabled Enabled coredns containers' Security Context
@@ -251,22 +313,32 @@ coredns:
   ## configure custom zone files as per https://coredns.io/2017/05/08/custom-dns-entries-for-kubernetes/
   ##
   zoneFiles: []
-  ## @param coredns.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param coredns.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
-  ## possible use case: need for secure connection with etcd backend
+  # @param coredns.secret secret pass to the container
   ##
-  tls:
-    mountPath: /etc/coredns/tls
-    ## @param coredns.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param coredns.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## content:
-    ##  etcd-client-cert.crt: ""
-    ##  etcd-client-cert.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param coredns.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ## @param coredns.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ## possible use case: need for secure connection with etcd backend
+    ##
+    tls:
+      mountPath: /etc/coredns/tls
+      ## @param coredns.secret.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## content:
+      ##  etcd-client-cert.crt: ""
+      ##  etcd-client-cert.key: ""
+      ##
+      contents: {}
   ## @param coredns.existingConfigmap The name of an existing ConfigMap with your custom configuration for coredns
   ##
   existingConfigmap:
@@ -275,33 +347,9 @@ coredns:
   command: []
   ## @param coredns.args Override default container args (useful when using custom images)
   ##
-  args: ["-conf", "/etc/coredns/Corefile"]
-  ## @param coredns.hostAliases coredns pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param coredns.podLabels Extra labels for coredns pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param coredns.podAnnotations Annotations for coredns pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param coredns.autoscaling.enabled Enable autoscaling for coredns
-  ## @param coredns.autoscaling.minReplicas Minimum number of coredns replicas
-  ## @param coredns.autoscaling.maxReplicas Maximum number of coredns replicas
-  ## @param coredns.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param coredns.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
+  args:
+    - -conf
+    - /etc/coredns/Corefile
 
   ## @param coredns.extraEnvVars Array with extra environment variables to add to coredns nodes
   ## e.g:
@@ -316,33 +364,9 @@ coredns:
   ## @param coredns.extraEnvVarsSecret Name of existing Secret containing extra env vars for coredns nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param coredns.extraVolumes Optionally specify extra list of additional volumes for the coredns pod(s)
-  ##
-  extraVolumes: []
   ## @param coredns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the coredns container(s)
   ##
   extraVolumeMounts: []
-  ## @param coredns.sidecars Add additional sidecar containers to the coredns pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param coredns.initContainers Add additional init containers to the coredns pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

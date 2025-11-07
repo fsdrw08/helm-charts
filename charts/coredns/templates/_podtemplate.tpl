@@ -1,6 +1,6 @@
 {{- define "coredns.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.coredns.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.coredns.podAnnotations }}
@@ -18,6 +18,10 @@ spec:
   {{- include "coredns.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.coredns.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.coredns.hostNetwork }}
+  {{- if .Values.coredns.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.coredns.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.coredns.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -67,6 +71,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.coredns.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{- if .Values.coredns.secret.envVars }}
+        - secretRef:
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.coredns.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.coredns.extraEnvVarsSecret "context" $) }}
@@ -95,11 +103,11 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.coredns.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: config-volume
+        - name: config
           mountPath: /etc/coredns
-        {{- if .Values.coredns.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.coredns.tls.mountPath }}
+        {{- if .Values.coredns.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.coredns.secret.tls.mountPath }}
         {{- end }}
       {{- if .Values.coredns.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.coredns.extraVolumeMounts "context" $) | nindent 8 }}
@@ -108,7 +116,7 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.coredns.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: config-volume
+    - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
         items:
@@ -118,15 +126,15 @@ spec:
         - key: {{ .filename }}
           path: {{ .filename }}
         {{- end }}
-    {{- if .Values.coredns.tls.contents }}
-    - name: tls
+    {{- if .Values.coredns.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
   {{- if .Values.coredns.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.coredns.extraVolumes "context" $) | nindent 4 }}
   {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.coredns.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.coredns.podRestartPolicy }}
