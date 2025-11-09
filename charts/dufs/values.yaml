@@ -32,14 +32,97 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param dufs.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section dufs Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 dufs:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param dufs.autoscaling.enabled Enable autoscaling for dufs
+  ## @param dufs.autoscaling.minReplicas Minimum number of dufs replicas
+  ## @param dufs.autoscaling.maxReplicas Maximum number of dufs replicas
+  ## @param dufs.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param dufs.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param dufs.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param dufs.extraVolumes Optionally specify extra list of additional volumes for the dufs pod(s)
+  ##
+  extraVolumes: []
+  ## @param dufs.hostAliases dufs pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param dufs.hostNetwork Specify if host network should be enabled for dufs pod
+  ##
+  hostNetwork: true
+  ## @param dufs.podAnnotations Annotations for dufs pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param dufs.podLabels Extra labels for dufs pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param dufs.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param dufs.podSecurityContext.enabled Enabled dufs pods' Security Context
+  ## @param dufs.podSecurityContext.fsGroup Set dufs pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param dufs.replicaCount Number of dufs replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param dufs.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param dufs.initContainers Add additional init containers to the dufs pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param dufs.sidecars Add additional sidecar containers to the dufs pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## dufs image
   ## ref: https://hub.docker.com/r/sigoden/dufs/tags
   ## @param dufs.image.registry dufs image registry
@@ -67,12 +150,6 @@ dufs:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param dufs.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param dufs.replicaCount Number of dufs replicas to deploy
-  ##
-  replicaCount: 1
   ## @param dufs.containerPorts dufs container port to expose to host
   ## e.g.
   ## containerPorts:
@@ -159,15 +236,6 @@ dufs:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param dufs.podSecurityContext.enabled Enabled dufs pods' Security Context
-  ## @param dufs.podSecurityContext.fsGroup Set dufs pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param dufs.containerSecurityContext.enabled Enabled dufs containers' Security Context
@@ -184,6 +252,7 @@ dufs:
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param dufs.config
   ## ref: https://github.com/sigoden/dufs?tab=readme-ov-file#configuration-file
+  ##
   config:
     ## @param dufs.config.serve-path Specific path to serve [default: .]
     ##
@@ -258,23 +327,33 @@ dufs:
     ##
     # tls-key: /tls/key_pkcs1.pem
 
-  ## @param dufs.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param dufs.secret secret pass to the container
   ##
-  tls:
-    ## @param dufs.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
-    ##
-    mountPath: /tls
-    ## @param dufs.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param dufs .secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  dufs-agent-ca.pem: ""
-    ##  dc1-server-dufs-1.pem: ""
-    ##  dc1-server-dufs-1-key.pem: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param dufs.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param dufs.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+      ##
+      mountPath: /tls
+      ## @param dufs.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  dufs-agent-ca.pem: ""
+      ##  dc1-server-dufs-1.pem: ""
+      ##  dc1-server-dufs-1-key.pem: ""
+      ##
+      contents: {}
 
   ## @param dufs.existingConfigmap The name of an existing ConfigMap with your custom configuration for dufs
   ##
@@ -285,32 +364,6 @@ dufs:
   ## @param dufs.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param dufs.hostAliases dufs pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param dufs.podLabels Extra labels for dufs pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param dufs.podAnnotations Annotations for dufs pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param dufs.autoscaling.enabled Enable autoscaling for dufs
-  ## @param dufs.autoscaling.minReplicas Minimum number of dufs replicas
-  ## @param dufs.autoscaling.maxReplicas Maximum number of dufs replicas
-  ## @param dufs.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param dufs.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param dufs.extraEnvVars Array with extra environment variables to add to dufs nodes
   ## e.g:
@@ -325,33 +378,9 @@ dufs:
   ## @param dufs.extraEnvVarsSecret Name of existing Secret containing extra env vars for dufs nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param dufs.extraVolumes Optionally specify extra list of additional volumes for the dufs pod(s)
-  ##
-  extraVolumes: []
   ## @param dufs.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the dufs container(s)
   ##
   extraVolumeMounts: []
-  ## @param dufs.sidecars Add additional sidecar containers to the dufs pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param dufs.initContainers Add additional init containers to the dufs pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

@@ -1,6 +1,6 @@
-{{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
+{{- define "dufs.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.dufs.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.dufs.podAnnotations }}
@@ -15,7 +15,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  {{- include "dufs.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.dufs.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.hostAliases "context" $) | nindent 4 }}
   {{- end }}
@@ -25,7 +25,7 @@ spec:
   initContainers:
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
-      image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+      image: {{ include "dufs.volumePermissions.image" . }}
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - %%commands%%
@@ -47,7 +47,7 @@ spec:
     {{- end }}
   containers:
     - name: server
-      image: {{ template "%%TEMPLATE_NAME%%.image" . }}
+      image: {{ template "dufs.image" . }}
       imagePullPolicy: {{ .Values.dufs.image.pullPolicy | quote }}
       {{- if .Values.dufs.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.dufs.containerSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -71,10 +71,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.dufs.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.dufs.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.dufs.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.dufs.extraEnvVarsSecret "context" $) }}
@@ -130,7 +130,7 @@ spec:
     {{- if .Values.dufs.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.dufs.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.dufs.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.dufs.podRestartPolicy }}

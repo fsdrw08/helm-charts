@@ -1,5 +1,5 @@
-{{- if eq .Values.workloadKind "Pod"  -}}
+{{- if eq .Values.dufs.workloadKind "Pod"  -}}
 apiVersion: v1
 kind: Pod
-{{ template "%%TEMPLATE_NAME%%.podTemplate" . }}
+{{ template "dufs.podTemplate" . }}
 {{- end }}
