@@ -40,51 +40,6 @@ workloadKind: Pod
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 exporter:
-  ## @param exporter.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param exporter.replicaCount Number of prometheus-podman-exporter replicas to deploy
-  ##
-  replicaCount: 1
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param exporter.podSecurityContext.enabled Enabled prometheus-podman-exporter pods' Security Context
-  ## @param exporter.podSecurityContext.fsGroup Set prometheus-podman-exporter pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
-  ## @param exporter.hostAliases prometheus-podman-exporter pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param exporter.hostNetwork Specify if host network should be enabled for %%MAIN_OBJECT_BLOCK%% pod
-  ##
-  hostNetwork: true
-  ## @param exporter.dnsConfig  Allows users more control on the DNS settings for a Pod.
-  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
-  ## E.g.
-  ## dnsConfig:
-  ##   nameservers:
-  ##     - 192.0.2.1 # this is an example
-  ##   searches:
-  ##     - ns1.svc.cluster-domain.example
-  ##     - my.dns.search.suffix
-  ##   options:
-  ##     - name: ndots
-  ##       value: "2"
-  ##     - name: edns0
-  dnsConfig: {}
-  ## @param exporter.podLabels Extra labels for prometheus-podman-exporter pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param exporter.podAnnotations Annotations for prometheus-podman-exporter pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=65534,gid=65534
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param exporter.autoscaling.enabled Enable autoscaling for exporter
@@ -99,10 +54,58 @@ exporter:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-podman-exporter pod(s)
+  ## @param exporter.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
   ##
   extraVolumes: []
-  ## @param exporter.initContainers Add additional init containers to the prometheus-podman-exporter pod(s)
+  ## @param exporter.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param exporter.hostNetwork Specify if host network should be enabled for exporter pod
+  ##
+  hostNetwork: true
+  ## @param exporter.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param exporter.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels:
+    io.podman.annotations.userns: keep-id:uid=65534,gid=65534
+  ## @param exporter.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param exporter.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param exporter.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param exporter.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param exporter.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param exporter.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -112,7 +115,7 @@ exporter:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
-  ## @param exporter.sidecars Add additional sidecar containers to the prometheus-podman-exporter pod(s)
+  ## @param exporter.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -250,29 +253,44 @@ exporter:
       type: spc_t
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param exporter.configFile
+  ##
   configFile:
-    ## @param exporter.configFile.web content of web config file
+    ## @param exporter.configFile.web content of web config file, a configuration file to use TLS for confidentiality and/or to enable authentication.
+    ## ref: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md
+    ## ref: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-config.yml
+    ##
     web: {}
-  ## @param exporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+
+  ## @param exporter.secret secret pass to the container
   ##
-  ## @param exporter.tls secret setting of cert and key or whatever tls content will set in the container
-  ##
-  tls:
-    ## @param exporter.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
-    ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
-    ##
-    mountPath: /etc/prometheus/certs
-    ## @param exporter.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param exporter.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  ca.crt: ""
-    ##  exporter.crt: ""
-    ##  exporter.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param exporter.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param exporter.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
+      ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
+      ##
+      mountPath: /etc/prometheus/certs
+      ## @param exporter.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  ca.crt: ""
+      ##  exporter.crt: ""
+      ##  exporter.key: ""
+      ##
+      contents: {}
+
   ## @param exporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for prometheus-podman-exporter
   ##
   existingConfigmap:
