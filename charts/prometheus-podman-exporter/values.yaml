@@ -68,44 +68,51 @@ exporter:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the exporter pod(s)
   ##
-  extraVolumes: []
-  ## @param exporter.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  extraVolumes:
+    - name: podman-socket
+      hostPath:
+        path: /run/podman/podman.sock
+        type: Socket
+  ## @param exporter.hostAliases exporter pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
   ## @param exporter.hostNetwork Specify if host network should be enabled for exporter pod
   ##
   hostNetwork: true
-  ## @param exporter.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param exporter.podAnnotations Annotations for exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
-  podAnnotations: {}
-  ## @param exporter.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels:
+  podAnnotations:
     io.podman.annotations.userns: keep-id:uid=65534,gid=65534
+  ## @param exporter.podLabels Extra labels for exporter pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ## ref: https://github.com/containers/prometheus-podman-exporter/blob/v1.19.0/Containerfile
+  ## nobody uid=65534
+  ##
+  podLabels: {}
   ## @param exporter.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
+  ##
   podRestartPolicy: Never
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param exporter.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param exporter.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param exporter.podSecurityContext.enabled Enabled exporter pods' Security Context
+  ## @param exporter.podSecurityContext.fsGroup Set exporter pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
     enabled: false
     # fsGroup: 1001
-  ## @param exporter.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ## @param exporter.replicaCount Number of exporter replicas to deploy if workloadKind set to deployment
   ##
   replicaCount: 1
   ## @param exporter.workloadKind specify the deploy kind： Pod, or Deployment
   ##
   workloadKind: Pod
-  ## @param exporter.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param exporter.initContainers Add additional init containers to the exporter pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -115,7 +122,7 @@ exporter:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
-  ## @param exporter.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param exporter.sidecars Add additional sidecar containers to the exporter pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -138,7 +145,7 @@ exporter:
   image:
     registry: quay.io
     repository: navidys/prometheus-podman-exporter
-    tag: v1.18.1
+    tag: v1.19.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -257,6 +264,7 @@ exporter:
   ##
   configFile:
     ## @param exporter.configFile.web content of web config file, a configuration file to use TLS for confidentiality and/or to enable authentication.
+    ## this file will place in the path which config in the value of exporter.flags.web.config.file
     ## ref: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md
     ## ref: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-config.yml
     ##
@@ -297,7 +305,8 @@ exporter:
   ## @param exporter.command Override default container command (useful when using custom images)
   ##
   command: []
-  ## @param exporter.flags flags to launch prometheus-podman-exporter
+  ## @param exporter.flags command flags to launch prometheus-podman-exporter
+  ##
   flags:
     collector:
       ## @param exporter.flags.collector.cache_duration Duration (seconds) to retrieve container, size and refresh the cache. (default 3600)
@@ -336,6 +345,10 @@ exporter:
     web:
       config:
         ## @param exporter.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
+        ## the content of this file is config in exporter.configFile.web
+        ## ref: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md
+        ## ref: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-config.yml
+        ##
         file: # /etc/exporter/web.yaml
       ## @param exporter.flags.web.Exclude metrics about the exporter itself (promhttp_*, process_*, go_*).
       disable-exporter-metrics: false
@@ -347,7 +360,7 @@ exporter:
       telemetry-path: /metrics
   ## @param exporter.args Override default container args (useful when using custom images)
   ##
-  args: []
+  args: '{{- include "processFlags" (dict "values" .Values.exporter.flags) | trim -}}'
 
   ## @param exporter.extraEnvVars Array with extra environment variables to add to prometheus-podman-exporter nodes
   ## e.g:
@@ -355,7 +368,9 @@ exporter:
   ##   - name: FOO
   ##     value: "bar"
   ##
-  extraEnvVars: []
+  extraEnvVars:
+    - name: CONTAINER_HOST
+      value: unix:///run/podman/podman.sock
   ## @param exporter.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for prometheus-podman-exporter nodes
   ##
   extraEnvVarsCM: ""
@@ -364,7 +379,10 @@ exporter:
   extraEnvVarsSecret: ""
   ## @param exporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-podman-exporter container(s)
   ##
-  extraVolumeMounts: []
+  extraVolumeMounts:
+    - name: podman-socket
+      mountPath: /run/podman/podman.sock
+      readOnly: true
 
 ## @section Persistence Parameters
 ##
@@ -378,7 +396,7 @@ persistence:
   enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/exporter/data
+  mountPath: /data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

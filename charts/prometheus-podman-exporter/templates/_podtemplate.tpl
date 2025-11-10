@@ -61,9 +61,6 @@ spec:
       {{- end }}
       {{- if .Values.exporter.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.args "context" $) | nindent 8 }}
-      {{- else }}
-      args:
-      {{- include "processFlags" (dict "values" .Values.exporter.flags) | trim | nindent 8 -}}
       {{- end }}
       env:
         {{- if .Values.exporter.extraEnvVars }}
@@ -74,10 +71,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.exporter.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.exporter.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.exporter.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.exporter.extraEnvVarsSecret "context" $) }}
@@ -107,13 +104,13 @@ spec:
       {{- end }}
       volumeMounts:
         {{- if .Values.exporter.flags.web.config.file }}
-        - name: web
+        - name: config-web
           mountPath: {{ .Values.exporter.flags.web.config.file }}
           subPath: {{ base .Values.exporter.flags.web.config.file }}
         {{- end }}
-        {{- if .Values.exporter.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.exporter.tls.mountPath }}
+        {{- if .Values.exporter.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.exporter.secret.tls.mountPath }}
         {{- end }}
       {{- if .Values.exporter.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.exporter.extraVolumeMounts "context" $) | nindent 8 }}
@@ -122,6 +119,16 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.exporter.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    {{- if .Values.exporter.configFile.web }}
+    - name: config-web
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- end }}
+    {{- if .Values.exporter.secret.tls.contents }}
+    - name: secret-tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     {{- if .Values.exporter.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.exporter.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
