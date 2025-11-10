@@ -32,58 +32,12 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param cockpit.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section cockpit Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 cockpit:
-  ## @param cockpit.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param cockpit.replicaCount Number of cockpit replicas to deploy
-  ##
-  replicaCount: 1
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param cockpit.podSecurityContext.enabled Enabled cockpit pods' Security Context
-  ## @param cockpit.podSecurityContext.fsGroup Set cockpit pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
-  ## @param cockpit.hostAliases cockpit pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param cockpit.hostNetwork Specify if host network should be enabled for cockpit pod
-  ##
-  hostNetwork: true
-  ## @param cockpit.dnsConfig  Allows users more control on the DNS settings for a Pod.
-  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
-  ## E.g.
-  ## dnsConfig:
-  ##   nameservers:
-  ##     - 192.0.2.1 # this is an example
-  ##   searches:
-  ##     - ns1.svc.cluster-domain.example
-  ##     - my.dns.search.suffix
-  ##   options:
-  ##     - name: ndots
-  ##       value: "2"
-  ##     - name: edns0
-  dnsConfig: {}
-  ## @param cockpit.podLabels Extra labels for cockpit pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param cockpit.podAnnotations Annotations for cockpit pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations: {}
   ## Autoscaling configuration
   ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   ## @param cockpit.autoscaling.enabled Enable autoscaling for cockpit
@@ -98,10 +52,57 @@ cockpit:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param cockpit.extraVolumes Optionally specify extra list of additional volumes for the cockpit pod(s)
+  ## @param cockpit.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param cockpit.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
   ##
   extraVolumes: []
-  ## @param cockpit.initContainers Add additional init containers to the cockpit pod(s)
+  ## @param cockpit.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param cockpit.hostNetwork Specify if host network should be enabled for cockpit pod
+  ##
+  hostNetwork: true
+  ## @param cockpit.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param cockpit.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param cockpit.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param cockpit.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param cockpit.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param cockpit.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param cockpit.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param cockpit.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -111,7 +112,7 @@ cockpit:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
-  ## @param cockpit.sidecars Add additional sidecar containers to the cockpit pod(s)
+  ## @param cockpit.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -248,36 +249,43 @@ cockpit:
   ## ref: https://cockpit-project.org/guide/latest/cockpit.conf.5.html
   ## ref: https://github.com/cockpit-project/cockpit/blob/346/doc/authentication.md
   ##
-  config: |
-    [WebService]
-    ProtocolHeader = X-Forwarded-Proto
-    LoginTitle = Cockpit Bastion
-    RequireHost = true
-
-    [Negotiate]
-    action = none
-
-    [Basic]
-    Command = /container/cockpit-auth-ssh-key
-
-    [Ssh-Login]
-    Command = /container/cockpit-auth-ssh-key
-  ## @param cockpit.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param cockpit.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  config:
+    WebService:
+      ProtocolHeader: X-Forwarded-Proto
+      LoginTitle: Cockpit Bastion
+      RequireHost: true
+    Negotiate:
+      action: none
+    Basic:
+      Command: /container/cockpit-auth-ssh-key
+    Ssh-Login:
+      Command: /container/cockpit-auth-ssh-key
+  ## @param cockpit.secret secret pass to the container
   ##
-  tls:
-    mountPath: /etc/cockpit/ws-certs.d
-    ## @param cockpit.tls.content secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param cockpit.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  ca.crt: ""
-    ##  tls.crt: ""
-    ##  tls.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param cockpit.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ## @param cockpit.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      mountPath: /etc/cockpit/ws-certs.d
+      ## @param cockpit.secret.tls.content secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  ca.crt: ""
+      ##  tls.crt: ""
+      ##  tls.key: ""
+      ##
+      contents: {}
   ## @param cockpit.existingConfigmap The name of an existing ConfigMap with your custom configuration for cockpit
   ##
   existingConfigmap:

@@ -14,5 +14,12 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  cockpit.conf: |
-{{ .Values.cockpit.config | indent 4 }}
+  cockpit.conf: {{ print "|" }}
+{{- range $node, $config := .Values.cockpit.config }}
+{{- if kindIs "map" $config }}
+    [{{ $node }}]
+    {{- range $key, $value := $config }}
+    {{ $key }} = {{ $value }}
+    {{- end }}
+{{- end }}
+{{- end }}

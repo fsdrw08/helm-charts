@@ -1,6 +1,6 @@
 {{- define "cockpit.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.cockpit.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.cockpit.podAnnotations }}
@@ -71,10 +71,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.cockpit.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.cockpit.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.cockpit.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.cockpit.extraEnvVarsSecret "context" $) }}
@@ -106,9 +106,9 @@ spec:
         - name: config
           mountPath: /etc/cockpit/cockpit.conf
           subPath: cockpit.conf
-        {{- if .Values.cockpit.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.cockpit.tls.mountPath }}
+        {{- if .Values.cockpit.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.cockpit.secret.tls.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -125,8 +125,8 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.cockpit.tls.contents }}
-    - name: tls
+    {{- if .Values.cockpit.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
@@ -140,7 +140,7 @@ spec:
     {{- if .Values.cockpit.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.cockpit.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.cockpit.podRestartPolicy }}
