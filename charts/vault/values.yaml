@@ -32,14 +32,99 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param vault.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section vault Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 vault:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param vault.autoscaling.enabled Enable autoscaling for vault
+  ## @param vault.autoscaling.minReplicas Minimum number of vault replicas
+  ## @param vault.autoscaling.maxReplicas Maximum number of vault replicas
+  ## @param vault.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param vault.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param vault.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param vault.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
+  ## @param vault.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param vault.hostNetwork Specify if host network should be enabled for vault pod
+  ##
+  hostNetwork: true
+  ## @param vault.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=100,gid=1000
+  ## @param vault.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param vault.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param vault.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param vault.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    runAsUser: 100
+    runAsGroup: 1000
+  ## @param vault.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param vault.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param vault.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param vault.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## hashicorp vault image
   ## ref: https://hub.docker.com/r/hashicorp/vault/tags/
   ## @param vault.image.registry vault image registry
@@ -52,7 +137,7 @@ vault:
   image:
     registry: docker.io
     repository: hashicorp/vault
-    tag: 1.20.3
+    tag: 1.21.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,32 +152,18 @@ vault:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param vault.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param vault.replicaCount Number of vault replicas to deploy
-  ##
-  replicaCount: 1
   ## @param vault.containerPorts vault container port to expose to host
   ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostIP: 192.168.255.10
+  ##   - name: api
+  ##     containerPort: 8200
+  ##     hostPort: 8200
   ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostIP: 192.168.255.10
+  ##   - name: cluster
+  ##     containerPort: 8201
+  ##     hostPort: 8201
   ##     protocol: TCP
   ##
-  containerPorts:
-    - name: api
-      containerPort: 8200
-      hostPort: 8200
-      protocol: TCP
-    - name: cluster
-      containerPort: 8201
-      hostPort: 8201
-      protocol: TCP
+  containerPorts: []
   ## Configure extra options for vault containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## ref: https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L101
@@ -123,6 +194,7 @@ vault:
   ## @param vault.readinessProbe.failureThreshold Failure threshold for readinessProbe
   ## @param vault.readinessProbe.successThreshold Success threshold for readinessProbe
   ## there is no readinessProbe in podman currently
+  ##
   readinessProbe:
     enabled: false
     initialDelaySeconds: 180
@@ -172,19 +244,9 @@ vault:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param vault.podSecurityContext.enabled Enabled vault pods' Security Context
-  ## @param vault.podSecurityContext.runAsUser Set vault pods' Security Context runAsUser
-  ## @param vault.podSecurityContext.runAsNonRoot Set vault pods' Security Context runAsNonRoot
-  ##
-  podSecurityContext:
-    enabled: false
-    runAsUser: 100
-    runAsGroup: 1000
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## ref: https://github.com/hashicorp/vault/blob/v1.20.3/Dockerfile
+  ## ref: https://github.com/hashicorp/vault/blob/v1.21.0/Dockerfile
   ## @param vault.containerSecurityContext.enabled Enabled vault containers' Security Context
   ## @param vault.containerSecurityContext.runAsUser Set vault containers' Security Context runAsUser
   ## @param vault.containerSecurityContext.runAsNonRoot Set vault containers' Security Context runAsNonRoot
@@ -202,7 +264,7 @@ vault:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
-  ## @param vault.configFiles config file to start vault, the sub config block will convert to json and injected as ConfigMap
+  ## @param vault.configFiles config file to start vault, the sub config block will convert to json and injected as ConfigMap and mount to /vault/config
   ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/vault/docs/configuration
   ## ref: https://developer.hashicorp.com/vault/tutorials/operations/configure-vault#config
@@ -214,6 +276,22 @@ vault:
       ## @param vault.configFiles.main.disable_mlock Disables the server from executing the mlock syscall
       ##
       disable_mlock: true
+      ## @param vault.configFiles.main.listener Configures how Vault is listening for API requests.
+      ## https://developer.hashicorp.com/vault/docs/configuration/listener/tcp
+      ## https://github.com/hashicorp/vault/blob/v1.21.0/command/server/test-fixtures/config4.hcl.json#L6
+      ## https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L931
+      ##
+      listener:
+        - tcp:
+            tls_disable: true
+            address: "[::]:8200"
+            cluster_address: "[::]:8201"
+            # https://github.com/hashicorp/web-unified-docs/blob/main/content/vault/v1.21.x/content/docs/deploy/kubernetes/helm/examples/standalone-tls.mdx?plain=1#L191
+            # cert and key must put in the same dir: https://github.com/containers/podman/blob/22ca67a7536e2f8e8554e734c102fe1ae181fbb5/pkg/specgen/specgen.go#L641
+            # the tls file should better set together with below vault.secret.tls block
+            tls_cert_file: /vault/userconfig/vault-server-tls/tls.crt
+            tls_key_file: /vault/userconfig/vault-server-tls/tls.key
+            tls_disable_client_certs: true
       log_level: info
       ## @param vault.configFiles.main.storage storage config for server
       ## The storage stanza configures the storage backend, which represents the location for the durable storage of Vault's information
@@ -231,39 +309,34 @@ vault:
       ## For more information, please see the https://developer.hashicorp.com/vault/docs/configuration/ui.
       ##
       ui: true
-      ## @param vault.configFiles.main.listener Configures how Vault is listening for API requests.
-      ## https://developer.hashicorp.com/vault/docs/configuration/listener/tcp
-      ## https://github.com/hashicorp/vault/blob/v1.20.3/command/server/test-fixtures/config4.hcl.json#L6
-      ## https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L931
-      ##
-      listener:
-        - tcp:
-            tls_disable: true
-            address: "[::]:8200"
-            cluster_address: "[::]:8201"
-            # https://github.com/hashicorp/vault/blob/v1.20.3/website/content/docs/deploy/kubernetes/helm/examples/standalone-tls.mdx?plain=1#L191
-            # cert and key must put in the same dir: https://github.com/containers/podman/blob/22ca67a7536e2f8e8554e734c102fe1ae181fbb5/pkg/specgen/specgen.go#L641
-            # the tls file should better set together with below vault.tls block
-            tls_cert_file: /vault/userconfig/vault-server-tls/tls.crt
-            tls_key_file: /vault/userconfig/vault-server-tls/tls.key
-            tls_disable_client_certs: true
 
-  ## @param vault.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param vault.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ## @param vault.secret secret pass to the container
   ##
-  tls:
-    mountPath: /vault/userconfig/vault-server-tls
-    ## @param vault.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param vault.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## content:
-    ##  ca.crt: ""
-    ##  tls.crt: ""
-    ##  tls.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param vault.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ## @param vault.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      mountPath: /vault/userconfig/vault-server-tls
+      ## @param vault.secret.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## content:
+      ##  ca.crt: ""
+      ##  tls.crt: ""
+      ##  tls.key: ""
+      ##
+      contents: {}
+
   ## @param vault.existingConfigmap The name of an existing ConfigMap with your custom configuration for vault
   ##
   existingConfigmap:
@@ -274,37 +347,6 @@ vault:
   ##
   args:
     - server
-  ## @param vault.hostAliases vault pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param vault.podLabels Extra labels for vault pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param vault.podAnnotations Annotations for vault pods
-  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
-  ## the userns annotation only work podman v4.9+
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/containers/podman/discussions/22378
-  ## ref: https://github.com/hashicorp/vault/blob/v1.20.3/Dockerfile#L121-L123
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=100,gid=1000
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param vault.autoscaling.enabled Enable autoscaling for vault
-  ## @param vault.autoscaling.minReplicas Minimum number of vault replicas
-  ## @param vault.autoscaling.maxReplicas Maximum number of vault replicas
-  ## @param vault.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param vault.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param vault.extraEnvVars Array with extra environment variables to add to vault nodes
   ## e.g:
@@ -313,7 +355,7 @@ vault:
   ##     value: "bar"
   ##
   extraEnvVars:
-    # https://github.com/hashicorp/vault/blob/v1.20.3/.release/docker/docker-entrypoint.sh
+    # https://github.com/hashicorp/vault/blob/v1.21.0/.release/docker/docker-entrypoint.sh
     # https://github.com/elihe2011/summary/blob/1603f477212f552a4c64ab8a0729539a52a1bd27/edgex/edgex/edgex_security/ok/02.edgex-vault.yaml#L64
     - name: SKIP_CHOWN
       value: "true"
@@ -325,9 +367,6 @@ vault:
   ## @param vault.extraEnvVarsSecret Name of existing Secret containing extra env vars for vault nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param vault.extraVolumes Optionally specify extra list of additional volumes for the vault pod(s)
-  ##
-  extraVolumes: []
   ## @param vault.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the vault container(s)
   ##
   extraVolumeMounts: []
@@ -409,28 +448,6 @@ vault:
       - name: SECRET_THRESHOLD
         value: 3
 
-  ## @param vault.sidecars Add additional sidecar containers to the vault pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param vault.initContainers Add additional init containers to the vault pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
-
 ## @section Persistence Parameters
 ##
 
@@ -511,7 +528,7 @@ volumePermissions:
   ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "nano"
+  resourcesPreset: "small"
   ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:

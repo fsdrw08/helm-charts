@@ -19,6 +19,10 @@ spec:
       {{- if .Values.vault.autoUnseal.hostAliases }}
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.hostAliases "context" $) | nindent 8 }}
       {{- end }}
+      hostNetwork: {{ .Values.vault.hostNetwork }}
+      {{- if .Values.vault.dnsConfig }}
+      dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.vault.dnsConfig "context" $) | nindent 4 -}}
+      {{- end }}
       containers:
         - name: unseal
           image: {{ template "vault.autoUnseal.image" . }}

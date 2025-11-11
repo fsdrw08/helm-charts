@@ -1,6 +1,6 @@
 {{- define "vault.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.vault.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.vault.podAnnotations }}
@@ -18,6 +18,10 @@ spec:
   {{- include "vault.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.vault.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.vault.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.vault.hostNetwork }}
+  {{- if .Values.vault.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.vault.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.vault.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.vault.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -67,15 +71,14 @@ spec:
         {{- if .Values.vault.extraEnvVars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraEnvVars "context" $) | nindent 8 }}
         {{- end }}
-        {{/*
-        {{- if .Values.vault.autoUnseal.enabled }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.env "context" $) | nindent 8 }}
-        {{- end }}
-        */}}
       envFrom:
         {{- if .Values.vault.extraEnvVarsCM }}
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.vault.extraEnvVarsCM "context" $) }}
+        {{- end }}
+        {{- if .Values.vault.secret.envVars }}
+        - secretRef:
+            name: {{ template "common.names.fullname" . }}-sec-envVars
         {{- end }}
         {{- if .Values.vault.extraEnvVarsSecret }}
         - secretRef:
@@ -99,20 +102,6 @@ spec:
       {{- else if .Values.vault.readinessProbe.enabled }}
       readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.vault.readinessProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
-      {{/*
-      {{- if .Values.vault.autoUnseal.enabled }}
-      startupProbe:
-        initialDelaySeconds: 5
-        periodSeconds: 10
-        timeoutSeconds: 20
-        failureThreshold: 3
-        successThreshold: 1
-        exec:
-          command:
-            - /bin/sh
-            - /vault/config/Unseal-Vault.sh
-      {{- else if .Values.vault.customStartupProbe }}
-      */}}
       {{- if .Values.vault.customStartupProbe }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.vault.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.vault.startupProbe.enabled }}
@@ -125,9 +114,9 @@ spec:
           mountPath: {{ .Values.persistence.mountPath.storage }}
         - name: logs
           mountPath: {{ .Values.persistence.mountPath.logs }}
-        {{- if .Values.vault.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.vault.tls.mountPath }}
+        {{- if .Values.vault.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.vault.secret.tls.mountPath }}
         {{- end }}
       {{- if .Values.vault.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumeMounts "context" $) | nindent 8 }}
@@ -135,30 +124,6 @@ spec:
     {{- if .Values.vault.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.vault.sidecars "context" $) | nindent 4 }}
     {{- end }}
-    {{/*
-    {{- if .Values.vault.autoUnseal.enabled }}
-    - name: unseal
-      image: {{ template "vault.autoUnseal.image" . }}
-      imagePullPolicy: {{ .Values.vault.autoUnseal.pullPolicy | quote }}
-      {{- if .Values.vault.autoUnseal.containerSecurityContext.enabled -}}
-      securityContext: {{- omit .Values.autoUnseal.containerSecurityContext "enabled" | toYaml | nindent 8 }}
-      {{- end }}
-      command: 
-        - /bin/sh
-        - -c
-        - "chmod +x /vault/unseal/Unseal-Vault.sh && . /vault/unseal/Unseal-Vault.sh"
-      env:
-        {{- if .Values.vault.autoUnseal.env }}
-        {{- include "common.tplvalues.render" (dict "value" .Values.vault.autoUnseal.env "context" $) | nindent 8 }}
-        {{- end }}
-      volumeMounts:
-        - name: config
-          mountPath: /vault/unseal/Unseal-Vault.sh
-          subPath: Unseal-Vault.sh
-        - name: unseal
-          mountPath: {{ .Values.persistence.mountPath.unseal }}
-    {{- end }}
-    */}}
     {{- if .Values.vault.sidecars }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.vault.sidecars "context" $) | nindent 4 }}
     {{- end }}
@@ -166,6 +131,11 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.vault.secret.tls.contents }}
+    - name: secret-tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
     - name: storage
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
@@ -180,26 +150,10 @@ spec:
     {{- else }}
       emptyDir: {}
     {{- end }}
-    {{- if .Values.vault.tls.contents }}
-    - name: tls
-      secret:
-        secretName: {{ template "common.names.fullname" . }}-sec-tls
-    {{- end }}
-    {{/*
-    {{- if .Values.vault.autoUnseal.enabled }}
-    - name: unseal
-    {{- if .Values.persistence.enabled }}
-      persistentVolumeClaim:
-        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc-unseal" ) .Values.persistence.existingClaim }}
-    {{- end }}
-    {{- else }}
-      emptyDir: {}
-    {{- end }}
-    */}}
     {{- if .Values.vault.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.vault.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.vault.podRestartPolicy }}
