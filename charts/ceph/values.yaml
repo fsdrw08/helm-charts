@@ -339,12 +339,12 @@ ceph:
     ## @param ceph.mon.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
     ##
     extraEnvVarsSecret: ""
-    ## @param ceph.mon.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-    ##
-    extraVolumes: []
     ## @param ceph.mon.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
     ##
     extraVolumeMounts: []
+    ## @param ceph.mon.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+    ##
+    extraVolumes: []
   osd:
     ## @param ceph.osd.enabled enabled ceph osd daemon container
     ## ref: https://github.com/ceph/ceph-container/tree/main/src/daemon#deploy-an-osd
@@ -510,12 +510,12 @@ ceph:
     ## @param ceph.osd.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
     ##
     extraEnvVarsSecret: ""
-    ## @param ceph.osd.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-    ##
-    extraVolumes: []
     ## @param ceph.osd.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
     ##
     extraVolumeMounts: []
+    ## @param ceph.osd.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+    ##
+    extraVolumes: []
   ## @param ceph.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## e.g:
   ## sidecars:

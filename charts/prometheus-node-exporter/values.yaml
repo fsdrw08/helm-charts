@@ -274,12 +274,12 @@ exporter:
   ## @param exporter.extraEnvVarsSecret Name of existing Secret containing extra env vars for prometheus-node-exporter nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-node-exporter pod(s)
-  ##
-  extraVolumes: []
   ## @param exporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-node-exporter container(s)
   ##
   extraVolumeMounts: []
+  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-node-exporter pod(s)
+  ##
+  extraVolumes: []
   ## @param exporter.sidecars Add additional sidecar containers to the prometheus-node-exporter pod(s)
   ## e.g:
   ## sidecars:

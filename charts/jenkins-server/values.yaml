@@ -477,12 +477,12 @@ controller:
   ## @param controller.extraEnvVarsSecret Name of existing Secret containing extra env vars for jenkins nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param controller.extraVolumes Optionally specify extra list of additional volumes for the jenkins pod(s)
-  ##
-  extraVolumes: []
   ## @param controller.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the jenkins container(s)
   ##
   extraVolumeMounts: []
+  ## @param controller.extraVolumes Optionally specify extra list of additional volumes for the jenkins pod(s)
+  ##
+  extraVolumes: []
   ## @param controller.sidecars Add additional sidecar containers to the jenkins pod(s)
   ## e.g:
   ## sidecars:

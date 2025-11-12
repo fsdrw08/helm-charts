@@ -294,12 +294,12 @@ redisInsight:
   ## @param redisInsight.extraEnvVarsSecret Name of existing Secret containing extra env vars for RedisInsight nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param redisInsight.extraVolumes Optionally specify extra list of additional volumes for the RedisInsight pod(s)
-  ##
-  extraVolumes: []
   ## @param redisInsight.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the RedisInsight container(s)
   ##
   extraVolumeMounts: []
+  ## @param redisInsight.extraVolumes Optionally specify extra list of additional volumes for the RedisInsight pod(s)
+  ##
+  extraVolumes: []
   ## @param redisInsight.sidecars Add additional sidecar containers to the RedisInsight pod(s)
   ## e.g:
   ## sidecars:

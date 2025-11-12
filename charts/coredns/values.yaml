@@ -66,9 +66,6 @@ coredns:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param coredns.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-  ##
-  extraVolumes: []
   ## @param coredns.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -367,6 +364,9 @@ coredns:
   ## @param coredns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the coredns container(s)
   ##
   extraVolumeMounts: []
+  ## @param coredns.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

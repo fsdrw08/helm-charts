@@ -66,9 +66,6 @@ vault:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param vault.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-  ##
-  extraVolumes: []
   ## @param vault.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -370,6 +367,9 @@ vault:
   ## @param vault.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the vault container(s)
   ##
   extraVolumeMounts: []
+  ## @param vault.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
 
   ## @param vault.autoUnseal run auto unseal process in a sidecar container
   ## ref: https://hub.docker.com/r/apteno/alpine-jq/tags/

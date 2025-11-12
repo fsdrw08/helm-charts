@@ -96,9 +96,6 @@ redis:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param redis.extraVolumes Optionally specify extra list of additional volumes for the redis pod(s)
-  ##
-  extraVolumes: []
   ## @param redis.initContainers Add additional init containers to the redis pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -577,6 +574,9 @@ redis:
       ## @param redis.containers.sentinel.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the redis container(s)
       ##
       extraVolumeMounts: []
+  ## @param redis.extraVolumes Optionally specify extra list of additional volumes for the redis pod(s)
+  ##
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

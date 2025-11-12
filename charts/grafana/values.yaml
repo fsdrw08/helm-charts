@@ -378,12 +378,12 @@ grafana:
   ## @param grafana.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param grafana.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-  ##
-  extraVolumes: []
   ## @param grafana.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
   ##
   extraVolumeMounts: []
+  ## @param grafana.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
   ## @param grafana.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## e.g:
   ## sidecars:

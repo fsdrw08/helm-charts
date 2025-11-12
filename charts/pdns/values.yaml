@@ -82,9 +82,6 @@ powerdns:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param powerdns.extraVolumes Optionally specify extra list of additional volumes for the powerdns pod(s)
-  ##
-  extraVolumes: []
   ## @param powerdns.initContainers Add additional init containers to the powerdns pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -528,6 +525,9 @@ powerdns:
   ##
   tls:
     mountPath: /consul/config/certs
+  ## @param powerdns.extraVolumes Optionally specify extra list of additional volumes for the powerdns pod(s)
+  ##
+  extraVolumes: []
 ## @section Persistence Parameters
 ##
 

@@ -1,26 +1,18 @@
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 traefik:
-  ## @param traefik.containerPorts traefik container port to expose to host
-  ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
+  ## @param traefik.podLabels Extra labels for traefik pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
-  containerPorts:
-    - name: http
-      containerPort: 80
-      hostPort: 80
-      protocol: TCP
-    - name: https
-      containerPort: 443
-      hostPort: 443
-      protocol: TCP
+  podLabels:
+    traefik.enable: true
+    traefik.http.middlewares.userpass.basicauth.users: admin:$apr1$/F5ai.wT$7nFJWh4F7ZA0qoY.JZ69l1
+    traefik.http.middlewares.tohttps.redirectscheme.scheme: https
+    traefik.http.middlewares.tohttps.redirectscheme.permanent: true
+    traefik.http.routers.dashboard.rule: "Host(`dev-traefik.service.consul`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+    traefik.http.routers.dashboard.service: api@internal
+    traefik.http.routers.dashboard.entryPoints: websecure
+    traefik.http.routers.dashboard.tls.certresolver: internal
   ## traefik resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ## @param traefik.resources.limits The resources limits for the traefik containers
@@ -127,46 +119,36 @@ traefik:
   ## @param traefik.customRootCA set up a custom root CA to trust (for private ACME)
   ## ref: https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/index.html#traefik-v2
   customRootCA: ""
-  ## @param traefik.podLabels Extra labels for traefik pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels:
-    traefik.enable: true
-    traefik.http.middlewares.userpass.basicauth.users: admin:$apr1$/F5ai.wT$7nFJWh4F7ZA0qoY.JZ69l1
-    traefik.http.middlewares.tohttps.redirectscheme.scheme: https
-    traefik.http.middlewares.tohttps.redirectscheme.permanent: true
-    traefik.http.routers.dashboard.rule: "Host(`dev-traefik.service.consul`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-    traefik.http.routers.dashboard.service: api@internal
-    traefik.http.routers.dashboard.entryPoints: websecure
-    traefik.http.routers.dashboard.tls.certresolver: internal
   ## @param traefik.extraEnvVars Array with extra environment variables to add to traefik nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
-  extraEnvVars: 
+  extraEnvVars:
     - name: TZ
       value: Asia/Shanghai
+  ## @param traefik.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the traefik container(s)
+  ## e.g.
+  ## extraVolumeMounts:
+  ##   - name: acmeStorage
+  ##     mountPath: /mnt/acmeStorage
+  ##
+  extraVolumeMounts:
+    - name: docker-socket
+      mountPath: "/var/run/docker.sock"
   ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the traefik pod(s)
   ## e.g.
   ## extraVolumes:
   ##   - name: acmeStorage
   ##     persistentVolumeClaim:
   ##       claimName: traefik-pvc
+  ##
   extraVolumes:
     - name: docker-socket
       hostPath:
         path: /run/user/1001/podman/podman.sock
         type: Socket
-  ## @param traefik.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the traefik container(s)
-  ## e.g.
-  ## extraVolumeMounts:
-  ##   - name: acmeStorage
-  ##     mountPath: /mnt/acmeStorage
-  extraVolumeMounts:
-    - name: docker-socket
-      mountPath: "/var/run/docker.sock"
 
 ## @section Persistence Parameters
 ##

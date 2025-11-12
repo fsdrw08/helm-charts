@@ -66,9 +66,6 @@ lldap:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param lldap.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-  ##
-  extraVolumes: []
   ## @param lldap.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -341,6 +338,9 @@ lldap:
   ## @param lldap.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the lldap container(s)
   ##
   extraVolumeMounts: []
+  ## @param lldap.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

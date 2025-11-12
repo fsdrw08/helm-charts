@@ -223,12 +223,12 @@ socat:
   ## @param socat.extraEnvVarsSecret Name of existing Secret containing extra env vars for socat nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param socat.extraVolumes Optionally specify extra list of additional volumes for the socat pod(s)
-  ##
-  extraVolumes: []
   ## @param socat.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the socat container(s)
   ##
   extraVolumeMounts: []
+  ## @param socat.extraVolumes Optionally specify extra list of additional volumes for the socat pod(s)
+  ##
+  extraVolumes: []
   ## @param socat.sidecars Add additional sidecar containers to the socat pod(s)
   ## e.g:
   ## sidecars:

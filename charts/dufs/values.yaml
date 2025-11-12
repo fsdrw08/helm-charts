@@ -66,9 +66,6 @@ dufs:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param dufs.extraVolumes Optionally specify extra list of additional volumes for the dufs pod(s)
-  ##
-  extraVolumes: []
   ## @param dufs.hostAliases dufs pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -381,6 +378,9 @@ dufs:
   ## @param dufs.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the dufs container(s)
   ##
   extraVolumeMounts: []
+  ## @param dufs.extraVolumes Optionally specify extra list of additional volumes for the dufs pod(s)
+  ##
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

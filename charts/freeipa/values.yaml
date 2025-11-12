@@ -333,12 +333,12 @@ freeipa:
   ## @param freeipa.extraEnvVarsSecret Name of existing Secret containing extra env vars for freeipa nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param freeipa.extraVolumes Optionally specify extra list of additional volumes for the freeipa pod(s)
-  ##
-  extraVolumes: []
   ## @param freeipa.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the freeipa container(s)
   ##
   extraVolumeMounts: []
+  ## @param freeipa.extraVolumes Optionally specify extra list of additional volumes for the freeipa pod(s)
+  ##
+  extraVolumes: []
   ## @param freeipa.additionalSecrets Add additional secret data to freeipa
   ## e.g.
   ## additionalSecrets:

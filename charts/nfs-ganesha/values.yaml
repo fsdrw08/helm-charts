@@ -98,9 +98,6 @@ nfs:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param nfs.extraVolumes Optionally specify extra list of additional volumes for the nfs-ganesha pod(s)
-  ##
-  extraVolumes: []
   ## @param nfs.initContainers Add additional init containers to the nfs-ganesha pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -342,6 +339,9 @@ nfs:
   ## @param nfs.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the nfs-ganesha container(s)
   ##
   extraVolumeMounts: []
+  ## @param nfs.extraVolumes Optionally specify extra list of additional volumes for the nfs-ganesha pod(s)
+  ##
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

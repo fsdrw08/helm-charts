@@ -66,9 +66,6 @@ traefik:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-  ##
-  extraVolumes: []
   ## @param traefik.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -439,12 +436,11 @@ traefik:
   ##
   extraEnvVarsSecret: ""
   ## @param traefik.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the traefik container(s)
-  ## e.g.
-  ## extraVolumeMounts:
-  ##   - name: acmeStorage
-  ##     mountPath: /mnt/acmeStorage
   ##
   extraVolumeMounts: []
+  ## @param traefik.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

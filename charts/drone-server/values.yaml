@@ -351,12 +351,12 @@ droneServer:
   ## @param droneServer.extraEnvVarsSecret Name of existing Secret containing extra env vars for droneServer nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param droneServer.extraVolumes Optionally specify extra list of additional volumes for the droneServer pod(s)
-  ##
-  extraVolumes: []
   ## @param droneServer.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the droneServer container(s)
   ##
   extraVolumeMounts: []
+  ## @param droneServer.extraVolumes Optionally specify extra list of additional volumes for the droneServer pod(s)
+  ##
+  extraVolumes: []
   ## @param droneServer.sidecars Add additional sidecar containers to the droneServer pod(s)
   ## e.g:
   ## sidecars:

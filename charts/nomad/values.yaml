@@ -396,12 +396,12 @@ nomad:
   ## @param nomad.extraEnvVarsSecret Name of existing Secret containing extra env vars for nomad nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param nomad.extraVolumes Optionally specify extra list of additional volumes for the nomad pod(s)
-  ##
-  extraVolumes: []
   ## @param nomad.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the nomad container(s)
   ##
   extraVolumeMounts: []
+  ## @param nomad.extraVolumes Optionally specify extra list of additional volumes for the nomad pod(s)
+  ##
+  extraVolumes: []
   ## @param nomad.sidecars Add additional sidecar containers to the nomad pod(s)
   ## e.g:
   ## sidecars:

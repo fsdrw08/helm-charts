@@ -101,9 +101,6 @@ sftpgo:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param sftpgo.extraVolumes Optionally specify extra list of additional volumes for the sftpgo pod(s)
-  ##
-  extraVolumes: []
   ## @param sftpgo.initContainers Add additional init containers to the sftpgo pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -308,6 +305,9 @@ sftpgo:
   ## @param sftpgo.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the sftpgo container(s)
   ##
   extraVolumeMounts: []
+  ## @param sftpgo.extraVolumes Optionally specify extra list of additional volumes for the sftpgo pod(s)
+  ##
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

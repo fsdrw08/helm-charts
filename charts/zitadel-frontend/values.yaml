@@ -66,9 +66,6 @@ zitadelLogin:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param zitadelLogin.extraVolumes Optionally specify extra list of additional volumes for the zitadel-login pod(s)
-  ##
-  extraVolumes: []
   ## @param zitadelLogin.hostAliases zitadel-login pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -318,6 +315,9 @@ zitadelLogin:
   ## @param zitadelLogin.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the zitadel-login container(s)
   ##
   extraVolumeMounts: []
+  ## @param zitadelLogin.extraVolumes Optionally specify extra list of additional volumes for the zitadel-login pod(s)
+  ##
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

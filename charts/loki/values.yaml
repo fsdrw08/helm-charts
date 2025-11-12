@@ -313,12 +313,12 @@ loki:
   ## @param loki.extraEnvVarsSecret Name of existing Secret containing extra env vars for loki nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param loki.extraVolumes Optionally specify extra list of additional volumes for the loki pod(s)
-  ##
-  extraVolumes: []
   ## @param loki.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the loki container(s)
   ##
   extraVolumeMounts: []
+  ## @param loki.extraVolumes Optionally specify extra list of additional volumes for the loki pod(s)
+  ##
+  extraVolumes: []
   ## @param loki.sidecars Add additional sidecar containers to the loki pod(s)
   ## e.g:
   ## sidecars:

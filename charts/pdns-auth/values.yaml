@@ -324,12 +324,12 @@ powerdns:
   ## @param powerdns.extraEnvVarsSecret Name of existing Secret containing extra env vars for powerdns nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param powerdns.extraVolumes Optionally specify extra list of additional volumes for the powerdns pod(s)
-  ##
-  extraVolumes: []
   ## @param powerdns.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the powerdns container(s)
   ##
   extraVolumeMounts: []
+  ## @param powerdns.extraVolumes Optionally specify extra list of additional volumes for the powerdns pod(s)
+  ##
+  extraVolumes: []
   ## @param powerdns.sidecars Add additional sidecar containers to the powerdns pod(s)
   ## e.g:
   ## sidecars:

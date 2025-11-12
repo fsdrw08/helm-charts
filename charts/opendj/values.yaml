@@ -327,12 +327,12 @@ opendj:
   ## @param opendj.extraEnvVarsSecret Name of existing Secret containing extra env vars for opendj nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param opendj.extraVolumes Optionally specify extra list of additional volumes for the opendj pod(s)
-  ##
-  extraVolumes: []
   ## @param opendj.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the opendj container(s)
   ##
   extraVolumeMounts: []
+  ## @param opendj.extraVolumes Optionally specify extra list of additional volumes for the opendj pod(s)
+  ##
+  extraVolumes: []
   ## @param opendj.sidecars Add additional sidecar containers to the opendj pod(s)
   ## e.g:
   ## sidecars:

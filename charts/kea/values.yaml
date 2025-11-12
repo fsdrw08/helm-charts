@@ -82,9 +82,6 @@ kea:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param kea.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
-  ##
-  extraVolumes: []
   ## @param kea.sidecars Add additional sidecar containers to the kea pod(s)
   ## e.g:
   ## sidecars:
@@ -717,6 +714,9 @@ kea:
   ##
   tls:
     mountPath: /etc/kea/certs
+  ## @param kea.extraVolumes Optionally specify extra list of additional volumes for the kea pod(s)
+  ##
+  extraVolumes: []
 ## @section Persistence Parameters
 ##
 

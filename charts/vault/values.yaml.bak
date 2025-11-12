@@ -322,12 +322,12 @@ vault:
   ## @param vault.extraEnvVarsSecret Name of existing Secret containing extra env vars for vault nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param vault.extraVolumes Optionally specify extra list of additional volumes for the vault pod(s)
-  ##
-  extraVolumes: []
   ## @param vault.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the vault container(s)
   ##
   extraVolumeMounts: []
+  ## @param vault.extraVolumes Optionally specify extra list of additional volumes for the vault pod(s)
+  ##
+  extraVolumes: []
 
   ## @param vault.autoUnseal run auto unseal process in startupProbe
   autoUnseal:

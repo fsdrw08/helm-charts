@@ -81,9 +81,6 @@ prometheus:
     maxReplicas: ""
     targetCPU: ""
     targetMemory: ""
-  ## @param prometheus.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
-  ##
-  extraVolumes: []
   ## @param prometheus.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -1170,6 +1167,9 @@ prometheus:
       ## @param prometheus.containers.server.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
       ##
       extraVolumeMounts: []
+  ## @param prometheus.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ##
+  extraVolumes: []
 ## @section Persistence Parameters
 ##
 

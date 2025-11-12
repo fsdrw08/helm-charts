@@ -68,13 +68,6 @@ exporter:
   ##       value: "2"
   ##     - name: edns0
   dnsConfig: {}
-  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the exporter pod(s)
-  ##
-  extraVolumes:
-    - name: podman-socket
-      hostPath:
-        path: /run/podman/podman.sock
-        type: Socket
   ## @param exporter.hostAliases exporter pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -383,6 +376,13 @@ exporter:
     - name: podman-socket
       mountPath: /run/podman/podman.sock
       readOnly: true
+  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the exporter pod(s)
+  ##
+  extraVolumes:
+    - name: podman-socket
+      hostPath:
+        path: /run/podman/podman.sock
+        type: Socket
 
 ## @section Persistence Parameters
 ##
