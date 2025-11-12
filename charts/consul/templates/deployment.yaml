@@ -1,4 +1,4 @@
-{{- if eq .Values.workloadKind "Deployment"  -}}
+{{- if eq .Values.consul.workloadKind "Deployment"  -}}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:

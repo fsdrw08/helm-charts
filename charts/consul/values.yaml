@@ -32,14 +32,97 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param consul.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section consul Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 consul:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param consul.autoscaling.enabled Enable autoscaling for consul
+  ## @param consul.autoscaling.minReplicas Minimum number of consul replicas
+  ## @param consul.autoscaling.maxReplicas Maximum number of consul replicas
+  ## @param consul.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param consul.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param consul.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param consul.hostAliases consul pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param consul.hostNetwork Specify if host network should be enabled for consul pod
+  ##
+  hostNetwork: true
+  ## @param consul.podAnnotations Annotations for consul pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/containers/podman/discussions/22378
+  ## ref: https://github.com/hashicorp/consul/blob/v1.20.2/Dockerfile#L271-L273
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=100,gid=1000
+  ## @param consul.podLabels Extra labels for consul pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param consul.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param consul.podSecurityContext.enabled Enabled consul pods' Security Context
+  ## @param consul.podSecurityContext.fsGroup Set consul pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param consul.replicaCount Number of consul replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param consul.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param consul.initContainers Add additional init containers to the consul pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param consul.sidecars Add additional sidecar containers to the consul pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## hashicorp consul image
   ## ref: https://hub.docker.com/r/hashicorp/consul/tags/
   ## @param consul.image.registry consul image registry
@@ -52,7 +135,7 @@ consul:
   image:
     registry: docker.io
     repository: hashicorp/consul
-    tag: "1.21.4"
+    tag: "1.22.0"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -68,49 +151,45 @@ consul:
     ##
     pullSecrets: []
 
-  ## @param consul.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param consul.replicaCount Number of consul replicas to deploy
-  ##
-  replicaCount: 1
   ## @param consul.containerPorts consul container port to expose to host
   ## suggest to use host network, consul needs to detect host ip address
   ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#ports
+  ## e.g.
+  ## containerPorts:
+  ##   - name: server
+  ##     containerPort: 8300
+  ##     hostPort: 8300
+  ##     protocol: TCP
+  ##   - name: serf_lan-tcp
+  ##     containerPort: 8301
+  ##     hostPort: 8301
+  ##     protocol: TCP
+  ##   - name: serf_lan-udp
+  ##     containerPort: 8301
+  ##     hostPort: 8301
+  ##     protocol: UDP
+  ##   - name: http
+  ##     containerPort: 8500
+  ##     hostPort: 8500
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 8501
+  ##     hostPort: 8501
+  ##     protocol: TCP
+  ##   - name: grpc_tls
+  ##     containerPort: 8503
+  ##     hostPort: 8503
+  ##     protocol: TCP
+  ##   - name: dns-udp
+  ##     containerPort: 8600
+  ##     hostPort: 8600
+  ##     protocol: UDP
+  ##   - name: dns-tcp
+  ##     containerPort: 8600
+  ##     hostPort: 8600
+  ##     protocol: TCP
   ##
   containerPorts: []
-    # - name: server
-    #   containerPort: 8300
-    #   hostPort: 8300
-    #   protocol: TCP
-    # - name: serf_lan-tcp
-    #   containerPort: 8301
-    #   hostPort: 8301
-    #   protocol: TCP
-    # - name: serf_lan-udp
-    #   containerPort: 8301
-    #   hostPort: 8301
-    #   protocol: UDP
-    # - name: http
-    #   containerPort: 8500
-    #   hostPort: 8500
-    #   protocol: TCP
-    # - name: https
-    #   containerPort: 8501
-    #   hostPort: 8501
-    #   protocol: TCP
-    # - name: grpc_tls
-    #   containerPort: 8503
-    #   hostPort: 8503
-    #   protocol: TCP
-    # - name: dns-udp
-    #   containerPort: 8600
-    #   hostPort: 8600
-    #   protocol: UDP
-    # - name: dns-tcp
-    #   containerPort: 8600
-    #   hostPort: 8600
-    #   protocol: TCP
   ## Configure extra options for consul containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param consul.livenessProbe.enabled Enable livenessProbe on consul containers
@@ -188,16 +267,9 @@ consul:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param consul.podSecurityContext.enabled Enabled consul pods' Security Context
-  ## @param consul.podSecurityContext.fsGroup Set consul pod's Security Context fsGroup
-  ##
-  podSecurityContext:
-    enabled: false
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## ref: https://github.com/hashicorp/consul/blob/v1.21.4/Dockerfile
+  ## ref: https://github.com/hashicorp/consul/blob/v1.22.0/Dockerfile#L311
   ## ref: https://github.com/hashicorp/consul-k8s/blob/main/charts/consul/values.yaml#L1126
   ## @param consul.containerSecurityContext.enabled Enabled consul containers' Security Context
   ## @param consul.containerSecurityContext.runAsUser Set consul containers' Security Context runAsUser
@@ -218,7 +290,7 @@ consul:
   ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general
   ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#general-parameters
-  ## ref: https://github.com/hashicorp/consul/blob/v1.21.4/.release/docker/docker-entrypoint.sh#L54
+  ## ref: https://github.com/hashicorp/consul/blob/v1.22.0/.release/docker/docker-entrypoint.sh#L54
   ##
   configFiles:
     ## @param consul.configFiles.main Main config for server and client agent
@@ -268,7 +340,7 @@ consul:
       ## @param consul.configFiles.main.data_dir This flag provides a data directory for the agent to store state. This is required for all agents.
       ## data_dir is set in official container entrypoint, no need to set in config file
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
-      ## ref: https://github.com/hashicorp/consul/blob/v1.21.4/.release/docker/docker-entrypoint.sh#L50
+      ## ref: https://github.com/hashicorp/consul/blob/v1.22.0/.release/docker/docker-entrypoint.sh#L50
       ##
       # data_dir: /consul/data
       ## @param consul.configFiles.main.disable_update_check Disables automatic checking for security bulletins and new version releases. This is disabled in Consul Enterprise
@@ -300,7 +372,7 @@ consul:
       ##
       server: true
       ## @param consul.configFiles.main.tls
-      ## this block should better set together with below consul.tls block
+      ## this block should better set together with below consul.secret.tls block
       ## e.g.
       ## tls:
       ##   defaults:
@@ -323,22 +395,39 @@ consul:
         ##
         content_path: /ui/
 
-  ## @param consul.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param consul.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+  ## @param consul.secret secret pass to the container
   ##
-  tls:
-    mountPath: /consul/config/certs
-    ## @param consul.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param consul.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  consul-agent-ca.pem: ""
-    ##  dc1-server-consul-1.pem: ""
-    ##  dc1-server-consul-1-key.pem: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param consul.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ## @param consul.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      mountPath: /consul/secret/certs
+      ## @param consul.secret.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  consul-agent-ca.pem: ""
+      ##  dc1-server-consul-1.pem: ""
+      ##  dc1-server-consul-1-key.pem: ""
+      ##
+      contents: {}
+    ## @param consul.secret.others other secrets pass to the container via secret volume mount
+    ## @param consul.secret.others.mountPath secret mount path of other secrets pass to the container via secret volume mount
+    ## @param consul.secret.others.content secret content of other secrets pass to the container via secret volume mount
+    ##
+    others:
+      mountPath: /consul/secret/others
+      contents: {}
 
   ## @param consul.existingConfigmap The name of an existing ConfigMap with your custom configuration for consul
   ##
@@ -347,45 +436,11 @@ consul:
   ##
   command: []
   ## @param consul.args Override default container args (useful when using custom images)
-  ## ref: https://github.com/hashicorp/consul/blob/v1.21.4/.release/docker/docker-entrypoint.sh#L70-L85
+  ## ref: https://github.com/hashicorp/consul/blob/v1.22.0/.release/docker/docker-entrypoint.sh#L70-L85
   ##
   args: []
   ## @param consul.hostNetwork hostNetwork mode in consul, only set this key to true can make container hostname set the host hostname
   ##
-  hostNetwork: true
-  ## @param consul.hostAliases consul pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param consul.podLabels Extra labels for consul pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param consul.podAnnotations Annotations for consul pods
-  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
-  ## the userns annotation only work podman v4.9+
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/containers/podman/discussions/22378
-  ## ref: https://github.com/hashicorp/consul/blob/v1.20.2/Dockerfile#L271-L273
-  ## e.g.
-  ## podAnnotations:
-  ##   io.podman.annotations.userns: keep-id:uid=100,gid=1000
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param consul.autoscaling.enabled Enable autoscaling for consul
-  ## @param consul.autoscaling.minReplicas Minimum number of consul replicas
-  ## @param consul.autoscaling.maxReplicas Maximum number of consul replicas
-  ## @param consul.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param consul.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param consul.extraEnvVars Array with extra environment variables to add to consul nodes
   ## e.g:
@@ -403,33 +458,12 @@ consul:
   ## @param consul.extraEnvVarsSecret Name of existing Secret containing extra env vars for consul nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param consul.extraVolumes Optionally specify extra list of additional volumes for the consul pod(s)
-  ##
-  extraVolumes: []
   ## @param consul.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the consul container(s)
   ##
   extraVolumeMounts: []
-  ## @param consul.sidecars Add additional sidecar containers to the consul pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
+  ## @param consul.extraVolumes Optionally specify extra list of additional volumes for the consul pod(s)
   ##
-  sidecars: []
-  ## @param consul.initContainers Add additional init containers to the consul pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
+  extraVolumes: []
 
 ## @section Persistence Parameters
 ##

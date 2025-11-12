@@ -1,7 +1,14 @@
 global:
   imageRegistry: zot.day0.sololab
 consul:
-  containerPorts: []
+  podLabels:
+    traefik.enable: true
+    traefik.tcp.routers.consul-web.entrypoints: webSecure
+    traefik.tcp.routers.consul-web.rule: HostSNI(`consul.day0.sololab`)
+    traefik.tcp.routers.consul-web.tls.passthrough: true
+    traefik.tcp.routers.consul-web.service: consul-web
+    traefik.tcp.services.consul-web.loadbalancer.server.port: 8501
+
   ## @param consul.configFiles
   ##
   configFiles:
@@ -10,10 +17,6 @@ consul:
         enabled: true
         default_policy: deny
         enable_token_persistence: true
-        tokens:
-          initial_management: e95b599e-166e-7d80-08ad-aee76e7ddf19
-          agent: e95b599e-166e-7d80-08ad-aee76e7ddf19
-          config_file_service_registration: e95b599e-166e-7d80-08ad-aee76e7ddf19
       auto_config:
         authorization:
           enabled: true
@@ -50,42 +53,32 @@ consul:
         internal_rpc:
           # verify_incoming: true
           verify_server_hostname: true
-  ## @param consul.tls secret setting of cert and key or whatever tls content will set in the container
-  ## @param consul.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
-  ##
-  tls:
-    mountPath: /consul/config/certs
-    ## @param consul.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ##
-    contents:
-      ca.crt: xxxx
-      server.crt: xxxx
-      server.key: xxxx
+
+  secret:
+    tls:
+      mountPath: /consul/config/certs
+      contents:
+        ca.crt: xxxx
+        server.crt: xxxx
+        server.key: xxxx
+    others:
+      mountPath: /consul/secret/others
+      contents:
+        encrypt.json:
+          encrypt: aPuGh+5UDskRAbkLaXRzFoSOcSM+5vAK+NEYOWHJH7w=
+        acl_tokens.json:
+          acl:
+            tokens:
+              initial_management: e95b599e-166e-7d80-08ad-aee76e7ddf19
+              agent: e95b599e-166e-7d80-08ad-aee76e7ddf19
+              config_file_service_registration: e95b599e-166e-7d80-08ad-aee76e7ddf19
+
   ## @param consul.args add additional config-dir for file service registry
   ##
   args:
     - agent
     - -config-dir=/consul/services
-  ## @param consul.podAnnotations Annotations for consul pods
-  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
-  ## the userns annotation only work podman v4.9+
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/containers/podman/discussions/22378
-  ## ref: https://github.com/hashicorp/consul/blob/v1.20.2/Dockerfile#L271-L273
-  ## e.g.
-  ## podAnnotations:
-  ##   io.podman.annotations.userns: keep-id:uid=100,gid=1000
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=100,gid=1000
-
-  podLabels:
-    traefik.enable: true
-    traefik.tcp.routers.consul-web.entrypoints: webSecure
-    traefik.tcp.routers.consul-web.rule: HostSNI(`consul.day0.sololab`)
-    traefik.tcp.routers.consul-web.tls.passthrough: true
-    traefik.tcp.routers.consul-web.service: consul-web
-    traefik.tcp.services.consul-web.loadbalancer.server.port: 8501
+    - -config-dir=/consul/secret/others
 
   extraEnvVars:
     - name: CONSUL_DISABLE_PERM_MGMT

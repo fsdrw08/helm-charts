@@ -1,6 +1,6 @@
 {{- define "consul.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.consul.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.consul.podAnnotations }}
@@ -16,9 +16,12 @@ metadata:
     {{- end }}
 spec:
   {{- include "consul.imagePullSecrets" . | nindent 2 }}
-  hostNetwork: {{ .Values.consul.hostNetwork }}
   {{- if .Values.consul.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.consul.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.consul.hostNetwork }}
+  {{- if .Values.consul.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.consul.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.consul.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.consul.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -73,6 +76,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.consul.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{- if .Values.consul.secret.envVars }}
+        - secretRef:
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.consul.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.consul.extraEnvVarsSecret "context" $) }}
@@ -103,9 +110,13 @@ spec:
       volumeMounts:
         - name: config
           mountPath: /consul/config
-        {{- if .Values.consul.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.consul.tls.mountPath }}
+        {{- if .Values.consul.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.consul.secret.tls.mountPath }}
+        {{- end }}
+        {{- if .Values.consul.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.consul.secret.others.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -122,10 +133,15 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.consul.tls.contents }}
-    - name: tls
+    {{- if .Values.consul.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    {{- if .Values.consul.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
@@ -137,7 +153,7 @@ spec:
     {{- if .Values.consul.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.consul.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.consul.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.consul.podRestartPolicy }}
