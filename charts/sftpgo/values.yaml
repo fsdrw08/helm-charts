@@ -75,6 +75,7 @@ sftpgo:
   ##     - name: ndots
   ##       value: "2"
   ##     - name: edns0
+  ##
   dnsConfig: {}
   ## @param sftpgo.podLabels Extra labels for sftpgo pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/

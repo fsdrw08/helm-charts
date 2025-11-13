@@ -75,6 +75,7 @@ nfs:
   ##     - name: ndots
   ##       value: "2"
   ##     - name: edns0
+  ##
   dnsConfig: {}
   ## @param nfs.podLabels Extra labels for nfs-ganesha pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/

@@ -65,6 +65,7 @@ zot:
   ##     - name: ndots
   ##       value: "2"
   ##     - name: edns0
+  ##
   dnsConfig: {}
   ## @param zot.hostAliases zot pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/

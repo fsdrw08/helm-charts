@@ -65,6 +65,7 @@ consul:
   ##     - name: ndots
   ##       value: "2"
   ##     - name: edns0
+  ##
   dnsConfig: {}
   ## @param consul.hostAliases consul pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/

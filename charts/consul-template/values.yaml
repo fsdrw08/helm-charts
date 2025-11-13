@@ -75,6 +75,7 @@ consulTemplate:
   ##     - name: ndots
   ##       value: "2"
   ##     - name: edns0
+  ##
   dnsConfig: {}
   ## @param consulTemplate.podLabels Extra labels for consulTemplate pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
