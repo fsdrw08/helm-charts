@@ -32,14 +32,94 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param nomad.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section nomad Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 nomad:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param nomad.autoscaling.enabled Enable autoscaling for nomad
+  ## @param nomad.autoscaling.minReplicas Minimum number of nomad replicas
+  ## @param nomad.autoscaling.maxReplicas Maximum number of nomad replicas
+  ## @param nomad.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param nomad.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param nomad.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  dnsConfig: {}
+  ## @param nomad.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param nomad.hostNetwork Specify if host network should be enabled for nomad pod
+  ##
+  hostNetwork: true
+  ## @param nomad.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param nomad.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param nomad.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param nomad.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param nomad.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param nomad.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param nomad.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param nomad.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param nomad.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## hashicorp nomad image
   ## ref: https://hub.docker.com/r/hashicorp/nomad/tags/
   ## @param nomad.image.registry nomad image registry
@@ -68,12 +148,6 @@ nomad:
     ##
     pullSecrets: []
 
-  ## @param nomad.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param nomad.replicaCount Number of nomad replicas to deploy
-  ##
-  replicaCount: 1
   ## @param nomad.containerPorts nomad container port to expose to host
   ## ref: https://developer.hashicorp.com/nomad/docs/configuration
   ## e.g.:
@@ -176,13 +250,6 @@ nomad:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param nomad.podSecurityContext.enabled Enabled nomad pods' Security Context
-  ## @param nomad.podSecurityContext.fsGroup Set nomad pod's Security Context fsGroup
-  ##
-  podSecurityContext:
-    enabled: false
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param nomad.containerSecurityContext.enabled Enabled nomad containers' Security Context
@@ -302,7 +369,7 @@ nomad:
         enabled: true
       ## @param nomad.configFiles.tls configuring secure communication in the tls block of a Nomad agent configuration.
       ## Enable TLS on Raft traffic and RFC and HTTP endpoints.
-      ## This block should better set together with below nomad.tls block
+      ## This block should better set together with below nomad.secret.tls block
       ## ref: https://developer.hashicorp.com/nomad/docs/configuration/tls
       ##
       tls:
@@ -318,23 +385,33 @@ nomad:
         ## ref: https://developer.hashicorp.com/nomad/docs/configuration/tls#rpc
         rpc: false
 
-  ## @param nomad.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param nomad.secret secret pass to the container
   ##
-  tls:
-    ## @param nomad.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
-    ##
-    mountPath: /nomad/config/certs
-    ## @param nomad.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param nomad.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  nomad-agent-ca.pem: ""
-    ##  dc1-server-nomad-1.pem: ""
-    ##  dc1-server-nomad-1-key.pem: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param nomad.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param nomad.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+      ##
+      mountPath: /nomad/config/certs
+      ## @param nomad.secret.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  nomad-agent-ca.pem: ""
+      ##  dc1-server-nomad-1.pem: ""
+      ##  dc1-server-nomad-1-key.pem: ""
+      ##
+      contents: {}
 
   ## @param nomad.existingConfigmap The name of an existing ConfigMap with your custom configuration for nomad
   ##
@@ -347,41 +424,6 @@ nomad:
   args:
     - agent
     - -config=/nomad/config
-  ## @param nomad.hostNetwork hostNetwork mode in consul, only set this key to true can make container hostname set the host hostname
-  ##
-  hostNetwork: true
-  ## @param nomad.hostAliases nomad pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param nomad.podLabels Extra labels for nomad pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param nomad.podAnnotations Annotations for nomad pods
-  ## to keep container user as same permission as host user, set keep-id point to the container user and group id
-  ## the userns annotation only work podman v4.9+
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/containers/podman/discussions/22378
-  ## e.g.
-  ## podAnnotations:
-  ##   io.podman.annotations.userns: keep-id:uid=100,gid=1000
-  ##
-  podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param nomad.autoscaling.enabled Enable autoscaling for nomad
-  ## @param nomad.autoscaling.minReplicas Minimum number of nomad replicas
-  ## @param nomad.autoscaling.maxReplicas Maximum number of nomad replicas
-  ## @param nomad.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param nomad.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param nomad.extraEnvVars Array with extra environment variables to add to nomad nodes
   ## e.g:
@@ -402,27 +444,6 @@ nomad:
   ## @param nomad.extraVolumes Optionally specify extra list of additional volumes for the nomad pod(s)
   ##
   extraVolumes: []
-  ## @param nomad.sidecars Add additional sidecar containers to the nomad pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param nomad.initContainers Add additional init containers to the nomad pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

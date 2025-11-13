@@ -1,6 +1,6 @@
 {{- define "nomad.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.nomad.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.nomad.podAnnotations }}
@@ -73,6 +73,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.nomad.extraEnvVarsCM "context" $) }}
         {{- end }}
+        {{- if .Values.nomad.secret.envVars }}
+        - secretRef:
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.nomad.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.nomad.extraEnvVarsSecret "context" $) }}
@@ -103,9 +107,9 @@ spec:
       volumeMounts:
         - name: config
           mountPath: /nomad/config
-        {{- if .Values.nomad.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.nomad.tls.mountPath }}
+        {{- if .Values.nomad.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.nomad.secret.tls.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -122,8 +126,8 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.nomad.tls.contents }}
-    - name: tls
+    {{- if .Values.nomad.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
@@ -137,7 +141,7 @@ spec:
     {{- if .Values.nomad.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.nomad.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.nomad.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.nomad.podRestartPolicy }}
