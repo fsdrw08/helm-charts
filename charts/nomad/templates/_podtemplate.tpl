@@ -16,9 +16,12 @@ metadata:
     {{- end }}
 spec:
   {{- include "nomad.imagePullSecrets" . | nindent 2 }}
-  hostNetwork: {{ .Values.nomad.hostNetwork }}
   {{- if .Values.nomad.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.nomad.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.nomad.hostNetwork }}
+  {{- if .Values.nomad.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.nomad.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.nomad.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.nomad.podSecurityContext "enabled" | toYaml | nindent 4 }}
