@@ -111,6 +111,10 @@ spec:
         - name: secret-tls
           mountPath: {{ .Values.nomad.secret.tls.mountPath }}
         {{- end }}
+        {{- if .Values.nomad.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.nomad.secret.others.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -130,6 +134,11 @@ spec:
     - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    {{- if .Values.nomad.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
