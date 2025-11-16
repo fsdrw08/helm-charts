@@ -49,3 +49,20 @@ data:
   {{- end -}}
 {{- end -}}
 
+
+{{- if .Values.grafana.configFiles.ldap }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "common.names.fullname" . }}-cm-ldap
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: grafana
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+data:
+  ldap.toml: |
+{{ toToml .Values.grafana.configFiles.ldap | b64enc | indent 4 }}
+{{- end }}

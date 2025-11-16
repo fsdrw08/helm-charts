@@ -32,14 +32,96 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param grafana.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section grafana Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 grafana:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param grafana.autoscaling.enabled Enable autoscaling for grafana
+  ## @param grafana.autoscaling.minReplicas Minimum number of grafana replicas
+  ## @param grafana.autoscaling.maxReplicas Maximum number of grafana replicas
+  ## @param grafana.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param grafana.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param grafana.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  ##
+  dnsConfig: {}
+  ## @param grafana.hostAliases grafana pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param grafana.hostNetwork Specify if host network should be enabled for grafana pod
+  ##
+  hostNetwork: true
+  ## @param grafana.podAnnotations Annotations for grafana pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=472,gid=0
+  ## @param grafana.podLabels Extra labels for grafana pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param grafana.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param grafana.podSecurityContext.enabled Enabled grafana pods' Security Context
+  ## @param grafana.podSecurityContext.fsGroup Set grafana pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param grafana.replicaCount Number of grafana replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param grafana.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param grafana.initContainers Add additional init containers to the grafana pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param grafana.sidecars Add additional sidecar containers to the grafana pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## Grafana image
   ## ref: https://hub.docker.com/r/grafana/grafana/tags
   ## @param grafana.image.registry grafana image registry
@@ -52,7 +134,7 @@ grafana:
   image:
     registry: docker.io
     repository: grafana/grafana
-    tag: 12.1.1
+    tag: 12.2.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,34 +149,18 @@ grafana:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param grafana.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param grafana.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
-  ##
-  replicaCount: 1
-  ## @param grafana.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param grafana.containerPorts grafana container port to expose to host
   ## e.g.
   ## containerPorts:
   ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
-  ##     hostIP: 192.168.255.10
+  ##     containerPort: 3000
+  ##     hostPort: 3000
   ##     protocol: TCP
   ##
-  containerPorts:
-    - name: http
-      containerPort: 3000
-      hostPort: 3000
-      protocol: TCP
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  containerPorts: []
+  ## Configure extra options for grafana containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param grafana.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param grafana.livenessProbe.enabled Enable livenessProbe on grafana containers
   ## @param grafana.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param grafana.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param grafana.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -111,7 +177,7 @@ grafana:
     httpGet:
       path: /api/health
       port: 3000
-  ## @param grafana.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param grafana.readinessProbe.enabled Enable readinessProbe on grafana containers
   ## @param grafana.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param grafana.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param grafana.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
@@ -126,7 +192,7 @@ grafana:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param grafana.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param grafana.startupProbe.enabled Enable startupProbe on grafana containers
   ## @param grafana.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param grafana.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param grafana.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -149,13 +215,13 @@ grafana:
   ## @param grafana.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## grafana resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param grafana.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if grafana.resources is set (grafana.resources is recommended for production).
+  ## @param grafana.resourcesPreset Set grafana container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if grafana.resources is set (grafana.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param grafana.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## @param grafana.resources Set grafana container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -166,22 +232,13 @@ grafana:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param grafana.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param grafana.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param grafana.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param grafana.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param grafana.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param grafana.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## ref: https://github.com/grafana/grafana/blob/v12.1.1/Dockerfile#L129
+  ## @param grafana.containerSecurityContext.enabled Enabled grafana containers' Security Context
+  ## @param grafana.containerSecurityContext.runAsUser Set grafana containers' Security Context runAsUser
+  ## @param grafana.containerSecurityContext.runAsNonRoot Set grafana containers' Security Context runAsNonRoot
+  ## @param grafana.containerSecurityContext.readOnlyRootFilesystem Set grafana containers' Security Context runAsNonRoot
+  ## ref: https://github.com/grafana/grafana/blob/v12.2.1/Dockerfile#L129
   ##
   containerSecurityContext:
     enabled: true
@@ -197,10 +254,10 @@ grafana:
   configFiles:
     ## @param grafana.configFiles.grafana configuration file which will place in /etc/grafana/grafana.ini
     ## you can add whatever config under this block according to https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/#variable-expansion
-    ## ref: https://github.com/grafana/grafana/blob/v12.1.1/conf/defaults.ini
+    ## ref: https://github.com/grafana/grafana/blob/v12.2.1/conf/defaults.ini
     ##
     grafana:
-      ## @param grafana.configFile.custome.app_mode Options are production and development. Default is production.
+      ## @param grafana.configFile.grafana.app_mode Options are production and development. Default is production.
       ## Don’t change this option unless you are working on Grafana development.
       ##
       app_mode: production
@@ -311,24 +368,39 @@ grafana:
     ##         email: "email"
     ldap: {}
 
-  ## @param grafana.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param grafana.secret secret pass to the container
   ##
-  tls:
-    ## @param grafana.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
-    ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
-    ##
-    mountPath: /etc/grafana/certs
-    ## @param grafana.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param grafana.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  grafana.crt: ""
-    ##  grafana.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
-  ## @param grafana.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+    envVars: {}
+    ## @param grafana.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param grafana.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
+      ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
+      ##
+      mountPath: /etc/grafana/certs
+      ## @param grafana.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  grafana.crt: ""
+      ##  grafana.key: ""
+      ##
+      contents: {}
+    ## @param grafana.secret.others other secrets pass to the container via secret volume mount
+    ##
+    others:
+      mountPath: /etc/grafana/secret
+      contents: {}
+  ## @param grafana.existingConfigmap The name of an existing ConfigMap with your custom configuration for grafana
   ##
   existingConfigmap:
   ## @param grafana.command Override default container command (useful when using custom images)
@@ -337,74 +409,26 @@ grafana:
   ## @param grafana.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param grafana.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param grafana.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param grafana.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=472,gid=0
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param grafana.autoscaling.enabled Enable autoscaling for grafana
-  ## @param grafana.autoscaling.minReplicas Minimum number of grafana replicas
-  ## @param grafana.autoscaling.maxReplicas Maximum number of grafana replicas
-  ## @param grafana.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param grafana.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
-  ## @param grafana.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param grafana.extraEnvVars Array with extra environment variables to add to grafana nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param grafana.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param grafana.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for grafana nodes
   ##
   extraEnvVarsCM: ""
-  ## @param grafana.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param grafana.extraEnvVarsSecret Name of existing Secret containing extra env vars for grafana nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param grafana.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param grafana.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the grafana container(s)
   ##
   extraVolumeMounts: []
-  ## @param grafana.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param grafana.extraVolumes Optionally specify extra list of additional volumes for the grafana pod(s)
   ##
   extraVolumes: []
-  ## @param grafana.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param grafana.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

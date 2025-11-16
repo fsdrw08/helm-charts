@@ -1,6 +1,6 @@
 {{- define "grafana.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.grafana.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.grafana.podAnnotations }}
@@ -18,6 +18,10 @@ spec:
   {{- include "grafana.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.grafana.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.grafana.hostNetwork }}
+  {{- if .Values.grafana.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.grafana.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.grafana.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -67,10 +71,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.grafana.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.grafana.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.grafana.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.grafana.extraEnvVarsSecret "context" $) }}
@@ -99,21 +103,21 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.grafana.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        - name: custom
+        - name: config-custom
           mountPath: /etc/grafana/grafana.ini
           subPath: grafana.ini
         {{- if .Values.grafana.configFiles.dataSource }}
-        - name: dataSource
+        - name: config-dataSource
           mountPath: {{ .Values.grafana.configFiles.custom.paths.provisioning }}/datasources
         {{- end }}
         {{- if .Values.grafana.configFiles.ldap }}
-        - name: ldap
+        - name: config-ldap
           mountPath: /etc/grafana/ldap.toml
           subPath: ldap.toml
         {{- end }}
-        {{- if .Values.grafana.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.grafana.tls.mountPath }}
+        {{- if .Values.grafana.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.grafana.secret.tls.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.grafana.configFiles.grafana.paths.data }}
@@ -124,24 +128,24 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.grafana.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    - name: custom
+    - name: config-custom
       configMap:
         name: {{ template "common.names.fullname" . }}-cm-custom
     {{- if .Values.grafana.configFiles.dataSource }}
-    - name: dataSource
+    - name: config-dataSource
       configMap:
         name: {{ include "common.names.fullname" . }}-cm-datasource
     {{- end }}
     {{- if .Values.grafana.configFiles.ldap }}
-    - name: ldap
+    - name: config-ldap
       secret:
         secretName: {{ include "common.names.fullname" . }}-sec-ldap
         items:
           - key: ldap.toml
             path: ldap.toml
     {{- end }}
-    {{- if .Values.grafana.tls.contents }}
-    - name: tls
+    {{- if .Values.grafana.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
@@ -155,7 +159,7 @@ spec:
     {{- if .Values.grafana.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.grafana.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.grafana.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.grafana.podRestartPolicy }}
