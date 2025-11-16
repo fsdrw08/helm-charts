@@ -94,9 +94,9 @@ data:
       printf "Unseal Done\n"
     }
 
+    sleep 5s 
     wait_started
 
-    sleep 5s 
     echo "is_inited"
     is_inited
 
