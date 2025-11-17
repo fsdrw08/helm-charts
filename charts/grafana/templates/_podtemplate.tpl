@@ -119,6 +119,10 @@ spec:
         - name: secret-tls
           mountPath: {{ .Values.grafana.secret.tls.mountPath }}
         {{- end }}
+        {{- if .Values.grafana.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.grafana.secret.others.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.grafana.configFiles.grafana.paths.data }}
       {{- if .Values.grafana.extraVolumeMounts }}
@@ -148,6 +152,11 @@ spec:
     - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    {{- if .Values.grafana.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
     {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}

@@ -319,7 +319,8 @@ grafana:
     dataSource: {}
     ## @param grafana.configFiles.ldap Grafana's LDAP configuration
     ## by default, the ldap config will place in /etc/grafana/ldap.toml
-    ## ref: https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/ldap/
+    ## ref: https://grafana.com/docs/grafana/v12.2/setup-grafana/configure-security/configure-authentication/ldap/
+    ## ref: https://grafana.com/docs/grafana/v12.2/setup-grafana/configure-grafana/#variable-expansion
     ## ref: https://github.com/grafana/grafana/blob/v12.1.1/conf/defaults.ini#L945C15-L945C37
     ## e.g.
     ## ldap:
