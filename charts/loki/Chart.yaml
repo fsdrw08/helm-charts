@@ -4,7 +4,7 @@ annotations:
   category: Infrastructure
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v3.5.3
+appVersion: v3.5.8
 dependencies:
   - name: common
     repository: file://../common
@@ -28,5 +28,5 @@ name: loki
 sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/loki
   - https://github.com/grafana/loki
-  - https://github.com/grafana/loki/blob/main/cmd/loki/Dockerfile
+  - https://github.com/grafana/loki/blob/v3.5.8/cmd/loki/Dockerfile
 version: 0.1.0

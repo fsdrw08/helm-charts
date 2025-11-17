@@ -1,6 +1,6 @@
 {{- define "loki.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.loki.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.loki.podAnnotations }}
@@ -18,6 +18,10 @@ spec:
   {{- include "loki.imagePullSecrets" . | nindent 2 }}
   {{- if .Values.loki.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.loki.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.loki.hostNetwork }}
+  {{- if .Values.loki.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.loki.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.loki.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.loki.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -102,9 +106,9 @@ spec:
         - name: config
           mountPath: /etc/loki/local-config.yaml
           subPath: local-config.yaml
-        {{- if .Values.loki.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.loki.tls.mountPath }}
+        {{- if .Values.loki.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.loki.secret.tls.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
@@ -121,8 +125,8 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.loki.tls.contents }}
-    - name: tls
+    {{- if .Values.loki.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
@@ -136,7 +140,7 @@ spec:
     {{- if .Values.loki.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.loki.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.loki.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.loki.podRestartPolicy }}

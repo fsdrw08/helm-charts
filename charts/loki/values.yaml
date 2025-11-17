@@ -32,27 +32,109 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param loki.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
-## @section %%MAIN_CONTAINER%% Parameters
+## @section loki Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 loki:
-  ## Bitnami %%MAIN_CONTAINER%% image
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param loki.autoscaling.enabled Enable autoscaling for loki
+  ## @param loki.autoscaling.minReplicas Minimum number of loki replicas
+  ## @param loki.autoscaling.maxReplicas Maximum number of loki replicas
+  ## @param loki.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param loki.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param loki.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  ##
+  dnsConfig: {}
+  ## @param loki.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param loki.hostNetwork Specify if host network should be enabled for loki pod
+  ##
+  hostNetwork: true
+  ## @param loki.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=10001,gid=10001
+  ## @param loki.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param loki.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param loki.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
+  ## @param loki.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param loki.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param loki.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param loki.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param loki.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## Grafana loki image
   ## ref: https://hub.docker.com/r/grafana/loki/tags/
-  ## @param loki.image.registry %%MAIN_CONTAINER%% image registry
-  ## @param loki.image.repository %%MAIN_CONTAINER%% image repository
-  ## @param loki.image.tag %%MAIN_CONTAINER%% image tag (immutable tags are recommended)
-  ## @param loki.image.digest %%MAIN_CONTAINER%% image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
-  ## @param loki.image.pullPolicy %%MAIN_CONTAINER%% image pull policy
-  ## @param loki.image.pullSecrets %%MAIN_CONTAINER%% image pull secrets
+  ## @param loki.image.registry loki image registry
+  ## @param loki.image.repository loki image repository
+  ## @param loki.image.tag loki image tag (immutable tags are recommended)
+  ## @param loki.image.digest loki image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param loki.image.pullPolicy loki image pull policy
+  ## @param loki.image.pullSecrets loki image pull secrets
   ##
   image:
     registry: docker.io
     repository: grafana/loki
-    tag: 3.5.3
+    tag: 3.5.8
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,12 +149,6 @@ loki:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param loki.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param loki.replicaCount Number of loki replicas to deploy
-  ##
-  replicaCount: 1
   ## @param loki.containerPorts loki container port to expose to host
   ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#server:~:text=%2Dserver.http%2Dlisten%2Dport
   ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#server:~:text=listen%2Dport%0A%5B-,grpc_listen_port,-%3A%20%3Cint%3E
@@ -81,18 +157,14 @@ loki:
   ##   - name: http
   ##     containerPort: 3100
   ##     hostPort: 3100
-  ##     hostIP: 192.168.255.10
+  ##     protocol: TCP
+  ##   - name: grpc
+  ##     containerPort: 9095
+  ##     hostPort: 9095
   ##     protocol: TCP
   ##
   containerPorts:
-    - name: http
-      containerPort: 3100
-      hostPort: 3100
-      protocol: TCP
-    - name: grpc
-      containerPort: 9095
-      hostPort: 9095
-      protocol: TCP
+
   ## Configure extra options for loki containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## ref: https://community.grafana.com/t/loki-healthcheck-in-docker-compose/117767
@@ -171,15 +243,6 @@ loki:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param loki.podSecurityContext.enabled Enabled loki pods' Security Context
-  ## @param loki.podSecurityContext.fsGroup Set loki pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
   ## @param loki.containerSecurityContext.enabled Enabled loki containers' Security Context
@@ -195,8 +258,8 @@ loki:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param loki.config loki config file which will host in /etc/loki/local-config.yaml
-  ## ref: https://github.com/grafana/loki/blob/v3.5.3/cmd/loki/Dockerfile#L22
-  ## ref: https://github.com/grafana/loki/blob/v3.5.3/cmd/loki/loki-docker-config.yaml
+  ## ref: https://github.com/grafana/loki/blob/v3.5.8/cmd/loki/Dockerfile#L22
+  ## ref: https://github.com/grafana/loki/blob/v3.5.8/cmd/loki/loki-docker-config.yaml
   ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#supported-contents-and-default-values-of-lokiyaml
   ## ref: https://grafana.com/docs/loki/latest/get-started/deployment-modes/
   ##
@@ -208,10 +271,10 @@ loki:
     ## @param loki.config.common Common configuration to be shared between multiple modules.
     ## If a more specific configuration is given in other sections, the related configuration within this section will be ignored.
     ## ref: https://grafana.com/docs/loki/v3.5.x/configure/#common
-    ## ref: https://github.com/grafana/loki/blob/v3.5.3/production/helm/loki/values.yaml
+    ## ref: https://github.com/grafana/loki/blob/v3.5.8/production/helm/loki/values.yaml
     ##
     common:
-      instance_addr: 127.0.0.1
+      # instance_addr: 127.0.0.1
       path_prefix: /var/loki
       ## @param loki.config.common.storage config storage backend for the general storage
       ##
@@ -245,23 +308,33 @@ loki:
     server:
       http_listen_port: 3100
 
-  ## @param loki.tls secret setting of cert and key or whatever tls content will set in the container
+  ## @param loki.secret secret pass to the container
   ##
-  tls:
-    ## @param loki.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
-    ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
-    ##
-    mountPath: /etc/loki/certs
-    ## @param loki.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param loki.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  loki.crt: ""
-    ##  loki.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param loki.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param loki.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
+      ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
+      ##
+      mountPath: /etc/loki/certs
+      ## @param loki.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  loki.crt: ""
+      ##  loki.key: ""
+      ##
+      contents: {}
   ## @param loki.existingConfigmap The name of an existing ConfigMap with your custom configuration for loki
   ##
   existingConfigmap:
@@ -271,34 +344,6 @@ loki:
   ## @param loki.args Override default container args (useful when using custom images)
   ##
   args: []
-  ## @param loki.hostAliases loki pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param loki.podLabels Extra labels for loki pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param loki.podAnnotations Annotations for loki pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/grafana/loki/blob/v3.5.3/cmd/loki/Dockerfile#L26-L27
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=10001,gid=10001
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param loki.autoscaling.enabled Enable autoscaling for loki
-  ## @param loki.autoscaling.minReplicas Minimum number of loki replicas
-  ## @param loki.autoscaling.maxReplicas Maximum number of loki replicas
-  ## @param loki.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param loki.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
 
   ## @param loki.extraEnvVars Array with extra environment variables to add to loki nodes
   ## e.g:
@@ -319,27 +364,6 @@ loki:
   ## @param loki.extraVolumes Optionally specify extra list of additional volumes for the loki pod(s)
   ##
   extraVolumes: []
-  ## @param loki.sidecars Add additional sidecar containers to the loki pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param loki.initContainers Add additional init containers to the loki pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##
