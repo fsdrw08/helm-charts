@@ -32,14 +32,96 @@ commonLabels: {}
 ##
 commonAnnotations: {}
 
-## @param alloy.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section alloy Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 alloy:
+  ## Autoscaling configuration
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  ## @param alloy.autoscaling.enabled Enable autoscaling for alloy
+  ## @param alloy.autoscaling.minReplicas Minimum number of alloy replicas
+  ## @param alloy.autoscaling.maxReplicas Maximum number of alloy replicas
+  ## @param alloy.autoscaling.targetCPU Target CPU utilization percentage
+  ## @param alloy.autoscaling.targetMemory Target Memory utilization percentage
+  ##
+  autoscaling:
+    enabled: false
+    minReplicas: ""
+    maxReplicas: ""
+    targetCPU: ""
+    targetMemory: ""
+  ## @param alloy.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  ##
+  dnsConfig: {}
+  ## @param alloy.hostAliases alloy pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param alloy.hostNetwork Specify if host network should be enabled for alloy pod
+  ##
+  hostNetwork: true
+  ## @param alloy.podAnnotations Annotations for alloy pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=473,gid=473
+  ## @param alloy.podLabels Extra labels for alloy pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param alloy.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
+  ## available options: Always, OnFailure, Never
+  podRestartPolicy: Never
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param alloy.podSecurityContext.enabled Enabled alloy pods' Security Context
+  ## @param alloy.podSecurityContext.fsGroup Set alloy pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## @param alloy.replicaCount Number of alloy replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param alloy.workloadKind specify the deploy kind： Pod, or Deployment
+  ##
+  workloadKind: Pod
+  ## @param alloy.initContainers Add additional init containers to the alloy pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+  ## @param alloy.sidecars Add additional sidecar containers to the alloy pod(s)
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
   ## grafana alloy image
   ## ref: https://hub.docker.com/r/grafana/alloy/tags
   ## @param alloy.image.registry alloy image registry
@@ -52,7 +134,7 @@ alloy:
   image:
     registry: docker.io
     repository: grafana/alloy
-    tag: v1.10.2
+    tag: v1.11.3
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,13 +149,7 @@ alloy:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param alloy.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param alloy.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy
-  ##
-  replicaCount: 1
-  ## @param alloy.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
+  ## @param alloy.containerPorts alloy container port to expose to host
   ## e.g.
   ## containerPorts:
   ##   - name: http
@@ -88,9 +164,9 @@ alloy:
   ##     protocol: TCP
   ##
   containerPorts: {}
-  ## Configure extra options for %%MAIN_CONTAINER_NAME%% containers' liveness and readiness probes
+  ## Configure extra options for alloy containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-  ## @param alloy.livenessProbe.enabled Enable livenessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param alloy.livenessProbe.enabled Enable livenessProbe on alloy containers
   ## @param alloy.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
   ## @param alloy.livenessProbe.periodSeconds Period seconds for livenessProbe
   ## @param alloy.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
@@ -104,7 +180,7 @@ alloy:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param alloy.readinessProbe.enabled Enable readinessProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param alloy.readinessProbe.enabled Enable readinessProbe on alloy containers
   ## @param alloy.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
   ## @param alloy.readinessProbe.periodSeconds Period seconds for readinessProbe
   ## @param alloy.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
@@ -119,7 +195,7 @@ alloy:
     timeoutSeconds: foo
     failureThreshold: bar
     successThreshold: foo
-  ## @param alloy.startupProbe.enabled Enable startupProbe on %%MAIN_CONTAINER_NAME%% containers
+  ## @param alloy.startupProbe.enabled Enable startupProbe on alloy containers
   ## @param alloy.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param alloy.startupProbe.periodSeconds Period seconds for startupProbe
   ## @param alloy.startupProbe.timeoutSeconds Timeout seconds for startupProbe
@@ -142,13 +218,13 @@ alloy:
   ## @param alloy.customStartupProbe Custom startupProbe that overrides the default one
   ##
   customStartupProbe: {}
-  ## %%MAIN_CONTAINER_NAME%% resource requests and limits
+  ## alloy resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param alloy.resourcesPreset Set %%MAIN_CONTAINER_NAME%% container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if alloy.resources is set (alloy.resources is recommended for production).
+  ## @param alloy.resourcesPreset Set alloy container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if alloy.resources is set (alloy.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
-  ## @param alloy.resources Set %%MAIN_CONTAINER_NAME%% container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## @param alloy.resources Set alloy container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
   ##   requests:
@@ -159,21 +235,12 @@ alloy:
   ##     memory: 1024Mi
   ##
   resources: {}
-  ## Configure Pods Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param alloy.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param alloy.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
-  ## note: podman kube play does not support fsGroup yet
-  ##
-  podSecurityContext:
-    enabled: false
-    # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param alloy.containerSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% containers' Security Context
-  ## @param alloy.containerSecurityContext.runAsUser Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsUser
-  ## @param alloy.containerSecurityContext.runAsNonRoot Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
-  ## @param alloy.containerSecurityContext.readOnlyRootFilesystem Set %%MAIN_CONTAINER_NAME%% containers' Security Context runAsNonRoot
+  ## @param alloy.containerSecurityContext.enabled Enabled alloy containers' Security Context
+  ## @param alloy.containerSecurityContext.runAsUser Set alloy containers' Security Context runAsUser
+  ## @param alloy.containerSecurityContext.runAsNonRoot Set alloy containers' Security Context runAsNonRoot
+  ## @param alloy.containerSecurityContext.readOnlyRootFilesystem Set alloy containers' Security Context runAsNonRoot
   ##
   containerSecurityContext:
     enabled: true
@@ -189,7 +256,7 @@ alloy:
   config:
     ## @param alloy.config.fromYAML alloy configuration convert from yaml
     ## component: https://grafana.com/docs/alloy/latest/get-started/configuration-syntax/components/
-    ## ref: https://github.com/grafana/alloy/blob/v1.10.2/example-config.alloy
+    ## ref: https://github.com/grafana/alloy/blob/v1.11.3/example-config.alloy
     ## e.g.
     ## follow values:
     ## - component: logging
@@ -328,32 +395,43 @@ alloy:
     #       target_label = "systemd_transport"
     #     }
     #   }
-  ## @param alloy.tls secret setting of cert and key or whatever tls content will set in the container
+
+  ## @param alloy.secret secret pass to the container
   ##
-  tls:
-    ## @param alloy.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
-    ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
-    ##
-    mountPath: /etc/alloy/certs
-    ## @param alloy.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param alloy.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  ca.crt: ""
-    ##  alloy.crt: ""
-    ##  alloy.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
-  ## @param alloy.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+    envVars: {}
+    ## @param alloy.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param alloy.secret.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
+      ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
+      ##
+      mountPath: /etc/alloy/certs
+      ## @param alloy.secret.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  ca.crt: ""
+      ##  alloy.crt: ""
+      ##  alloy.key: ""
+      ##
+      contents: {}
+  ## @param alloy.existingConfigmap The name of an existing ConfigMap with your custom configuration for alloy
   ##
   existingConfigmap:
   ## @param alloy.command Override default container command (aka ENTRYPOINT in dockerfile, useful when using custom images)
   ##
   command: []
   ## @param alloy.flags flags for `alloy run` command
-  ## ref: https://grafana.com/docs/alloy/v1.8/reference/cli/run/
+  ## ref: https://grafana.com/docs/alloy/v1.11/reference/cli/run/
   ##
   flags:
     server:
@@ -447,85 +525,29 @@ alloy:
         ## @param alloy.flags.feature.community-components.enabled: Enable community components (default false).
         ##
         enabled: false
-      prometheus:
-        ## @param alloy.flags.feature.prometheus.metric-validation-scheme: Prometheus metric validation scheme to use. Supported values: legacy, utf-8.
-        ## NOTE: this is an experimental flag and may be removed in future releases (default "legacy").
-        ##
-        metric-validation-scheme: legacy
   ## @param alloy.args Override default container args, if set, will also ignore flags set in alloy.flags (useful when using custom images)
   ##
-  args: []
-  ## @param alloy.hostNetwork hostNetwork mode in alloy, only set this key to true can make container hostname set the host hostname
-  ##
-  hostNetwork: true
-  ## @param alloy.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
-  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
-  ##
-  hostAliases: []
-  ## @param alloy.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  ##
-  podLabels: {}
-  ## @param alloy.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
-  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ##
-  podAnnotations:
-    io.podman.annotations.userns: keep-id:uid=473,gid=473
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param alloy.autoscaling.enabled Enable autoscaling for alloy
-  ## @param alloy.autoscaling.minReplicas Minimum number of alloy replicas
-  ## @param alloy.autoscaling.maxReplicas Maximum number of alloy replicas
-  ## @param alloy.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param alloy.autoscaling.targetMemory Target Memory utilization percentage
-  ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
+  args: '{{ print "- run\n- /etc/alloy/config.alloy\n" }} {{- include "processFlags" (dict "values" .Values.alloy.flags) | trim -}}"'
 
-  ## @param alloy.extraEnvVars Array with extra environment variables to add to %%MAIN_CONTAINER_NAME%% nodes
+  ## @param alloy.extraEnvVars Array with extra environment variables to add to alloy nodes
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param alloy.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param alloy.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for alloy nodes
   ##
   extraEnvVarsCM: ""
-  ## @param alloy.extraEnvVarsSecret Name of existing Secret containing extra env vars for %%MAIN_CONTAINER_NAME%% nodes
+  ## @param alloy.extraEnvVarsSecret Name of existing Secret containing extra env vars for alloy nodes
   ##
   extraEnvVarsSecret: ""
-  ## @param alloy.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the %%MAIN_CONTAINER_NAME%% container(s)
+  ## @param alloy.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the alloy container(s)
   ##
   extraVolumeMounts: []
-  ## @param alloy.extraVolumes Optionally specify extra list of additional volumes for the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param alloy.extraVolumes Optionally specify extra list of additional volumes for the alloy pod(s)
   ##
   extraVolumes: []
-  ## @param alloy.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## e.g:
-  ## sidecars:
-  ##   - name: your-image-name
-  ##     image: your-image
-  ##     imagePullPolicy: Always
-  ##     ports:
-  ##       - name: portname
-  ##         containerPort: 1234
-  ##
-  sidecars: []
-  ## @param alloy.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
-  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## e.g:
-  ## initContainers:
-  ##  - name: your-image-name
-  ##    image: your-image
-  ##    imagePullPolicy: Always
-  ##    command: ['sh', '-c', 'echo "hello world"']
-  ##
-  initContainers: []
 
 ## @section Persistence Parameters
 ##

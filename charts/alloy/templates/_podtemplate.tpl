@@ -1,6 +1,6 @@
 {{- define "alloy.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- if eq .Values.alloy.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.alloy.podAnnotations }}
@@ -16,9 +16,12 @@ metadata:
     {{- end }}
 spec:
   {{- include "alloy.imagePullSecrets" . | nindent 2 }}
-  hostNetwork: {{ .Values.alloy.hostNetwork }}
   {{- if .Values.alloy.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  hostNetwork: {{ .Values.alloy.hostNetwork }}
+  {{- if .Values.alloy.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
   {{- if .Values.alloy.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.alloy.podSecurityContext "enabled" | toYaml | nindent 4 }}
@@ -73,10 +76,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.alloy.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.alloy.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.alloy.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.alloy.extraEnvVarsSecret "context" $) }}
@@ -108,9 +111,9 @@ spec:
         - name: config
           mountPath: /etc/alloy/config.alloy
           subPath: config.alloy
-        {{- if .Values.alloy.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.alloy.tls.mountPath }}
+        {{- if .Values.alloy.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.alloy.secret.tls.mountPath }}
         {{- end }}
         - name: data
           mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $)  }}
@@ -127,8 +130,8 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
-    {{- if .Values.alloy.tls.contents }}
-    - name: tls
+    {{- if .Values.alloy.secret.tls.contents }}
+    - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
@@ -142,7 +145,7 @@ spec:
     {{- if .Values.alloy.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.alloy.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if eq .Values.alloy.workloadKind "Deployment" }}
   restartPolicy: Always
   {{- else -}}
   restartPolicy: {{ .Values.alloy.podRestartPolicy }}
