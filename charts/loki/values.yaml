@@ -31,6 +31,17 @@ commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 ##
 commonAnnotations: {}
+## Diagnostic mode
+## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+## @param diagnosticMode.command Command to override all containers in the chart release
+## @param diagnosticMode.args Args to override all containers in the chart release
+##
+diagnosticMode:
+  enabled: false
+  command:
+    - sleep
+  args:
+    - infinity
 
 ## @section loki Parameters
 ##
@@ -38,20 +49,9 @@ commonAnnotations: {}
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 loki:
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param loki.autoscaling.enabled Enable autoscaling for loki
-  ## @param loki.autoscaling.minReplicas Minimum number of loki replicas
-  ## @param loki.autoscaling.maxReplicas Maximum number of loki replicas
-  ## @param loki.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param loki.autoscaling.targetMemory Target Memory utilization percentage
+  ## @param loki.automountServiceAccountToken Mount Service Account token in %%MAIN_CONTAINER_NAME%% pods
   ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
+  automountServiceAccountToken: false
   ## @param loki.dnsConfig  Allows users more control on the DNS settings for a Pod.
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
   ## E.g.
@@ -67,41 +67,77 @@ loki:
   ##     - name: edns0
   ##
   dnsConfig: {}
-  ## @param loki.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
+  ## @param loki.dnsPolicy Deployment pod DNS policy
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+  ## E.g.
+  ## dnsPolicy: ClusterFirstWithHostNet
+  ##
+  dnsPolicy: ""
+  ## @param loki.hostAliases loki pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
   ## @param loki.hostNetwork Specify if host network should be enabled for loki pod
   ##
   hostNetwork: true
-  ## @param loki.podAnnotations Annotations for %%MAIN_CONTAINER_NAME%% pods
+  ## @param loki.podAnnotations Annotations for loki pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=10001,gid=10001
-  ## @param loki.podLabels Extra labels for %%MAIN_CONTAINER_NAME%% pods
+  ## @param loki.podLabels Extra labels for loki pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
+  ## @param loki.podAffinityPreset Pod affinity preset. Ignored if `loki.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param loki.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `loki.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node loki.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param loki.nodeAffinityPreset.type Node affinity preset type. Ignored if `loki.affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param loki.nodeAffinityPreset.key Node label key to match. Ignored if `loki.affinity` is set
+    ##
+    key: ""
+    ## @param loki.nodeAffinityPreset.values Node label values to match. Ignored if `loki.affinity` is set
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param loki.affinity Affinity for %%MAIN_CONTAINER_NAME%% pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## NOTE: `loki.podAffinityPreset`, `loki.podAntiAffinityPreset`, and `loki.nodeAffinityPreset` will be ignored when it's set
+  ##
+  affinity: {}
   ## @param loki.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
   podRestartPolicy: Never
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-  ## @param loki.podSecurityContext.enabled Enabled %%MAIN_CONTAINER_NAME%% pods' Security Context
-  ## @param loki.podSecurityContext.fsGroup Set %%MAIN_CONTAINER_NAME%% pod's Security Context fsGroup
+  ## @param loki.podSecurityContext.enabled Enabled loki pods' Security Context
+  ## @param loki.podSecurityContext.fsGroup Set loki pod's Security Context fsGroup
   ## note: podman kube play does not support fsGroup yet
   ##
   podSecurityContext:
     enabled: false
     # fsGroup: 1001
-  ## @param loki.replicaCount Number of %%MAIN_CONTAINER_NAME%% replicas to deploy if workloadKind set to deployment
-  ##
-  replicaCount: 1
   ## @param loki.workloadKind specify the deploy kind： Pod, or Deployment
   ##
   workloadKind: Pod
-  ## @param loki.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param loki.replicaCount Number of loki replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param loki.initContainers Add additional init containers to the loki pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -111,7 +147,7 @@ loki:
   ##    command: ['sh', '-c', 'echo "hello world"']
   ##
   initContainers: []
-  ## @param loki.sidecars Add additional sidecar containers to the %%MAIN_CONTAINER_NAME%% pod(s)
+  ## @param loki.sidecars Add additional sidecar containers to the loki pod(s)
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -405,64 +441,91 @@ persistence:
 ## @section Init Container Parameters
 ##
 
-## 'volumePermissions' init container parameters
-## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
-##   based on the *podSecurityContext/*containerSecurityContext parameters
-##
-volumePermissions:
-  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
-  ##
-  enabled: false
-  ## OS Shell + Utility image
-  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
-  ## @param volumePermissions.image.registry OS Shell + Utility image registry
-  ## @param volumePermissions.image.repository OS Shell + Utility image repository
-  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
-  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
-  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
-  ##
-  image:
-    registry: docker.io
-    repository: bitnami/os-shell
-    tag: 11-debian-11-r%%IMAGE_REVISION%%
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    ##
-    pullSecrets: []
-  ## Init container's resource requests and limits
-  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
-  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
-  ##
-  resourcesPreset: "nano"
-  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
-  ## Example:
-  ## resources:
-  ##   requests:
-  ##     cpu: 2
-  ##     memory: 512Mi
-  ##   limits:
-  ##     cpu: 3
-  ##     memory: 1024Mi
-  ##
-  resources: {}
-  ## Init container Container Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
-  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
-  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
-  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
-  ##
-  containerSecurityContext:
-    runAsUser: 0
+## @section Default init containers Parameters
 
-## @section Other Parameters
+defaultInitContainers:
+  ## 'volume-permissions' init container
+  ## Changes the owner and group of the persistent volume mount(s) point(s) to runAsUser:fsGroup values
+  ##   based on the *podSecurityContext/*containerSecurityContext parameters
+  ##
+  volumePermissions:
+    ## @param defaultInitContainers.volumePermissions.enabled Enable init container that adapts the owner/group of the PV mount(s) point(s)
+    ##
+    enabled: false
+    ## OS Shell + Utility image
+    ## ref: https://hub.docker.com/r/bitnami/os-shell
+    ## @param defaultInitContainers.volumePermissions.image.registry [default: REGISTRY_NAME] "volume-permissions" init-containers' image registry
+    ## @param defaultInitContainers.volumePermissions.image.repository [default: REPOSITORY_NAME/os-shell] "volume-permissions" init-containers' image repository
+    ## @skip defaultInitContainers.volumePermissions.image.tag "volume-permissions" init-containers' image tag (immutable tags are recommended)
+    ## @param defaultInitContainers.volumePermissions.image.digest "volume-permissions" init-containers' image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+    ## @param defaultInitContainers.volumePermissions.image.pullPolicy "volume-permissions" init-containers' image pull policy
+    ## @param defaultInitContainers.volumePermissions.image.pullSecrets "volume-permissions" init-containers' image pull secrets
+    ##
+    image:
+      registry: docker.io
+      repository: bitnami/os-shell
+      tag: 12-debian-12-r46
+      digest: ""
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## Example:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+    ## Configure "volume-permissions" init-container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.enabled Enabled "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.runAsUser Set runAsUser in "volume-permissions" init-containers' Security Context
+    ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+    ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+    ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.privileged Set privileged in "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.capabilities.add List of capabilities to be added in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.capabilities.drop List of capabilities to be dropped in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.seccompProfile.type Set seccomp profile in "volume-permissions" init-containers
+    ##
+    containerSecurityContext:
+      enabled: true
+      seLinuxOptions: {}
+      runAsUser: 0
+      privileged: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: []
+        drop: ["ALL"]
+      seccompProfile:
+        type: "RuntimeDefault"
+    ## "volume-permissions" init container resource requests and limits
+    ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param defaultInitContainers.volumePermissions.resourcesPreset Set "volume-permissions" init container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if defaultInitContainers.volumePermissions.resources is set (defaultInitContainers.volumePermissions.resources is recommended for production).
+    ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+    ##
+    resourcesPreset: "nano"
+    ## @param defaultInitContainers.volumePermissions.resources Set "volume-permissions" init container requests and limits for different resources like CPU or memory (essential for production workloads)
+    ## E.g:
+    ## resources:
+    ##   requests:
+    ##     cpu: 2
+    ##     memory: 512Mi
+    ##   limits:
+    ##     cpu: 3
+    ##     memory: 1024Mi
+    ##
+    resources: {}
+
+## ServiceAccount configuration
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 ##
+serviceAccount:
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
 
 ## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
 ##

@@ -16,9 +16,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.loki.autoscaling.hpa.enabled }}
   replicas: {{ .Values.loki.replicaCount }}
-  {{- end }}
   {{- if .Values.loki.updateStrategy }}
   strategy: {{- toYaml .Values.loki.updateStrategy | nindent 4 }}
   {{- end }}
@@ -26,5 +24,6 @@ spec:
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
       app.kubernetes.io/component: loki
-  template:
+  template: 
+    {{- include "loki.podTemplate" . | nindent 4 }}
 {{- end }}

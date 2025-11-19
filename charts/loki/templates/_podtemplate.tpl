@@ -1,5 +1,6 @@
 {{- define "loki.podTemplate" -}}
 metadata:
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.loki.podLabels .Values.commonLabels ) "context" . ) }}
   {{- if eq .Values.loki.workloadKind "Pod" }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
@@ -15,36 +16,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "loki.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.loki.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.loki.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.loki.hostNetwork }}
   {{- if .Values.loki.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.loki.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.loki.podSecurityContext.enabled -}}
-  securityContext: {{- omit .Values.loki.podSecurityContext "enabled" | toYaml | nindent 4 }}
+  {{- if .Values.loki.dnsPolicy }}
+  dnsPolicy: {{ .Values.loki.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "loki.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.loki.automountServiceAccountToken }}
+  {{- if .Values.loki.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.loki.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.loki.affinity }}
+  affinity: {{- include "common.tplvalues.render" (dict "value" .Values.loki.affinity "context" $) | nindent 4 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.loki.podAffinityPreset "component" "loki" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.loki.podAntiAffinityPreset "component" "loki" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.loki.nodeAffinityPreset.type "key" .Values.loki.nodeAffinityPreset.key "values" .Values.loki.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.loki.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.loki.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.loki.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.loki.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.loki.priorityClassName }}
+  priorityClassName: {{ .Values.loki.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.loki.schedulerName }}
+  schedulerName: {{ .Values.loki.schedulerName }}
+  {{- end }}
+  {{- if .Values.loki.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.loki.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.loki.podSecurityContext.enabled }}
+  securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.loki.podSecurityContext "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.loki.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.loki.terminationGracePeriodSeconds }}
   {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "loki.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "loki.defaultInitContainers.volumePermissions" (dict "context" . "component" "loki") | nindent 4 }}
     {{- end }}
     {{- if .Values.loki.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.loki.initContainers "context" $) | nindent 4 }}
@@ -56,7 +72,9 @@ spec:
       {{- if .Values.loki.containerSecurityContext.enabled }}
       securityContext: {{- omit .Values.loki.containerSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      {{- if .Values.loki.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.loki.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.loki.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.loki.args }}
@@ -101,6 +119,9 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.loki.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.loki.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.loki.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.loki.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.loki.lifecycleHooks "context" $) | nindent 12 }}
       {{- end }}
       volumeMounts:
         - name: config

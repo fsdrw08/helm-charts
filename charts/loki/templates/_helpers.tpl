@@ -21,19 +21,9 @@ Return the proper image name (for the init container volume-permissions image)
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "loki.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.loki.image .Values.volumePermissions.image) "context" $) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.loki.image .Values.defaultInitContainers.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "loki.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
 
 {{/*
 Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
