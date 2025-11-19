@@ -15,13 +15,18 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.%%MAIN_OBJECT_BLOCK%%.hostNetwork }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
+  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.dnsPolicy }}
+  dnsPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "%%TEMPLATE_NAME%%.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.%%MAIN_OBJECT_BLOCK%%.automountServiceAccountToken }}
+  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.hostAliases "context" $) | nindent 4 }}
   {{- end }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext.enabled -}}
   securityContext: {{- omit .Values.%%MAIN_OBJECT_BLOCK%%.podSecurityContext "enabled" | toYaml | nindent 4 }}

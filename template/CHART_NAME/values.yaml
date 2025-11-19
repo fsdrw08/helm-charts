@@ -38,20 +38,9 @@ commonAnnotations: {}
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 %%MAIN_OBJECT_BLOCK%%:
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.enabled Enable autoscaling for %%MAIN_OBJECT_BLOCK%%
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.minReplicas Minimum number of %%MAIN_OBJECT_BLOCK%% replicas
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.maxReplicas Maximum number of %%MAIN_OBJECT_BLOCK%% replicas
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param %%MAIN_OBJECT_BLOCK%%.autoscaling.targetMemory Target Memory utilization percentage
+  ## @param %%MAIN_OBJECT_BLOCK%%.automountServiceAccountToken Mount Service Account token in %%MAIN_CONTAINER_NAME%% pods
   ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
+  automountServiceAccountToken: false
   ## @param %%MAIN_OBJECT_BLOCK%%.dnsConfig  Allows users more control on the DNS settings for a Pod.
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
   ## E.g.
@@ -67,6 +56,12 @@ commonAnnotations: {}
   ##     - name: edns0
   ##
   dnsConfig: {}
+  ## @param %%MAIN_OBJECT_BLOCK%%.dnsPolicy Deployment pod DNS policy
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+  ## E.g.
+  ## dnsPolicy: ClusterFirstWithHostNet
+  ##
+  dnsPolicy: ""
   ## @param %%MAIN_OBJECT_BLOCK%%.hostAliases %%MAIN_CONTAINER_NAME%% pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
@@ -82,8 +77,39 @@ commonAnnotations: {}
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
   podLabels: {}
+  ## @param %%MAIN_OBJECT_BLOCK%%.podAffinityPreset Pod affinity preset. Ignored if `%%MAIN_OBJECT_BLOCK%%.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param %%MAIN_OBJECT_BLOCK%%.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `%%MAIN_OBJECT_BLOCK%%.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node %%MAIN_OBJECT_BLOCK%%.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param %%MAIN_OBJECT_BLOCK%%.nodeAffinityPreset.type Node affinity preset type. Ignored if `%%MAIN_OBJECT_BLOCK%%.affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param %%MAIN_OBJECT_BLOCK%%.nodeAffinityPreset.key Node label key to match. Ignored if `%%MAIN_OBJECT_BLOCK%%.affinity` is set
+    ##
+    key: ""
+    ## @param %%MAIN_OBJECT_BLOCK%%.nodeAffinityPreset.values Node label values to match. Ignored if `%%MAIN_OBJECT_BLOCK%%.affinity` is set
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param %%MAIN_OBJECT_BLOCK%%.affinity Affinity for %%MAIN_CONTAINER_NAME%% pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## NOTE: `%%MAIN_OBJECT_BLOCK%%.podAffinityPreset`, `%%MAIN_OBJECT_BLOCK%%.podAntiAffinityPreset`, and `%%MAIN_OBJECT_BLOCK%%.nodeAffinityPreset` will be ignored when it's set
+  ##
+  affinity: {}
   ## @param %%MAIN_OBJECT_BLOCK%%.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
   ## available options: Always, OnFailure, Never
+  ##
   podRestartPolicy: Never
   ## Configure Pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
@@ -100,6 +126,12 @@ commonAnnotations: {}
   ## @param %%MAIN_OBJECT_BLOCK%%.workloadKind specify the deploy kind： Pod, or Deployment
   ##
   workloadKind: Pod
+  ## ONLY FOR DEPLOYMENTS:
+  ## @param %%MAIN_OBJECT_BLOCK%%.updateStrategy.type %%MAIN_CONTAINER_NAME%% deployment strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  ## 
+  updateStrategy: 
+    type: RollingUpdate
   ## @param %%MAIN_OBJECT_BLOCK%%.initContainers Add additional init containers to the %%MAIN_CONTAINER_NAME%% pod(s)
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
@@ -388,6 +420,15 @@ volumePermissions:
 
 ## @section Other Parameters
 ##
+
+## ServiceAccount configuration
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+##
+serviceAccount:
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
 
 ## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
 ##
