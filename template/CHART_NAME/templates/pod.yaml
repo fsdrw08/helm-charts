@@ -1,4 +1,4 @@
-{{- if eq .Values.%%TEMPLATE_NAME%%.workloadKind "Pod"  -}}
+{{- if .Values.%%TEMPLATE_NAME%%.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "%%TEMPLATE_NAME%%.podTemplate" . }}
