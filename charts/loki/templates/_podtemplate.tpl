@@ -165,7 +165,7 @@ spec:
     {{- end }}
   {{- if .Values.loki.pod.enabled }}
   restartPolicy: {{ .Values.loki.pod.restartPolicy }}
-  {{- else -}}
+  {{- else }}
   restartPolicy: Always
   {{- end }}
 {{- end -}}
