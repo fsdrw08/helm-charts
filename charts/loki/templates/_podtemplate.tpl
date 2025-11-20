@@ -1,7 +1,7 @@
 {{- define "loki.podTemplate" -}}
 metadata:
   {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.loki.podLabels .Values.commonLabels ) "context" . ) }}
-  {{- if eq .Values.loki.workloadKind "Pod" }}
+  {{- if .Values.loki.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.loki.podAnnotations }}
@@ -70,7 +70,7 @@ spec:
       image: {{ template "loki.image" . }}
       imagePullPolicy: {{ .Values.loki.image.pullPolicy | quote }}
       {{- if .Values.loki.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.loki.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.loki.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.diagnosticMode.enabled }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
@@ -89,10 +89,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.loki.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.loki.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.loki.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.loki.extraEnvVarsSecret "context" $) }}
@@ -105,6 +105,7 @@ spec:
       {{- if .Values.loki.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.loki.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.loki.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.loki.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.loki.livenessProbe.enabled }}
@@ -120,8 +121,9 @@ spec:
       {{- else if .Values.loki.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.loki.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
+      {{- end }}
       {{- if .Values.loki.lifecycleHooks }}
-      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.loki.lifecycleHooks "context" $) | nindent 12 }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.loki.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -161,9 +163,9 @@ spec:
     {{- if .Values.loki.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.loki.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.loki.workloadKind "Deployment" }}
-  restartPolicy: Always
+  {{- if .Values.loki.pod.enabled }}
+  restartPolicy: {{ .Values.loki.pod.restartPolicy }}
   {{- else -}}
-  restartPolicy: {{ .Values.loki.podRestartPolicy }}
+  restartPolicy: Always
   {{- end }}
 {{- end -}}

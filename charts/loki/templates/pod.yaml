@@ -1,4 +1,4 @@
-{{- if eq .Values.loki.workloadKind "Pod"  -}}
+{{- if .Values.loki.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "loki.podTemplate" . }}
