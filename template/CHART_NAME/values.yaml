@@ -31,6 +31,17 @@ commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 ##
 commonAnnotations: {}
+## Diagnostic mode
+## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+## @param diagnosticMode.command Command to override all containers in the chart release
+## @param diagnosticMode.args Args to override all containers in the chart release
+##
+diagnosticMode:
+  enabled: false
+  command:
+    - sleep
+  args:
+    - infinity
 
 ## @section %%MAIN_CONTAINER%% Parameters
 ##
@@ -96,7 +107,7 @@ commonAnnotations: {}
   ##
   replicaCount: 1
   ## @param %%MAIN_OBJECT_BLOCK%%.containerPorts %%MAIN_CONTAINER_NAME%% container port to expose to host
-  ## e.g. 
+  ## e.g.
   ## containerPorts:
   ##   - name: http
   ##     containerPort: 80
@@ -120,7 +131,7 @@ commonAnnotations: {}
   ## @param %%MAIN_OBJECT_BLOCK%%.livenessProbe.successThreshold Success threshold for livenessProbe
   ##
   livenessProbe:
-    enabled: true
+    enabled: false
     initialDelaySeconds: foo
     periodSeconds: bar
     timeoutSeconds: foo
@@ -494,4 +505,4 @@ serviceAccount:
 # %%SUBCHART_NAME%%:
 SUBCHART_NAME:
   enabled: false
-  %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

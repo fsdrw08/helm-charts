@@ -149,7 +149,7 @@ spec:
     {{- end }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.pod.enabled }}
   restartPolicy: {{ .Values.%%MAIN_OBJECT_BLOCK%%.pod.restartPolicy }}
-  {{- else -}}
+  {{- else }}
   {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
   {{- end }}
