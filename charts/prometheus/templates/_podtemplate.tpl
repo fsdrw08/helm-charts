@@ -1,13 +1,14 @@
 {{- define "prometheus.podTemplate" -}}
 metadata:
-  {{- if eq .Values.prometheus.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.prometheus.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.prometheus.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
   {{- end }}
   {{- if .Values.prometheus.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
+    app.kubernetes.io/component: prometheus
     {{- if .Values.prometheus.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.podLabels "context" $) | nindent 4 }}
     {{- end }}
@@ -15,36 +16,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "prometheus.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.prometheus.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.prometheus.hostNetwork }}
   {{- if .Values.prometheus.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.prometheus.podSecurityContext.enabled -}}
+  {{- if .Values.prometheus.dnsPolicy }}
+  dnsPolicy: {{ .Values.prometheus.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "prometheus.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.prometheus.automountServiceAccountToken }}
+  {{- if .Values.prometheus.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.prometheus.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.prometheus.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prometheus.podAffinityPreset "component" "prometheus" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.prometheus.podAntiAffinityPreset "component" "prometheus" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.prometheus.nodeAffinityPreset.type "key" .Values.prometheus.nodeAffinityPreset.key "values" .Values.prometheus.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.prometheus.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.prometheus.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.prometheus.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.prometheus.priorityClassName }}
+  priorityClassName: {{ .Values.prometheus.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.prometheus.schedulerName }}
+  schedulerName: {{ .Values.prometheus.schedulerName }}
+  {{- end }}
+  {{- if .Values.prometheus.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.prometheus.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.prometheus.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.prometheus.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.prometheus.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "prometheus.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "%%TEMPLATE_NAME%%.defaultInitContainers.volumePermissions" (dict "context" . "component" "prometheus") | nindent 4 }}
     {{- end }}
     {{- if .Values.prometheus.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.initContainers "context" $) | nindent 4 }}
@@ -54,9 +70,11 @@ spec:
       image: {{ template "prometheus.image" . }}
       imagePullPolicy: {{ .Values.prometheus.image.pullPolicy | quote }}
       {{- if .Values.prometheus.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.prometheus.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.prometheus.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.prometheus.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.prometheus.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.prometheus.args }}
@@ -87,6 +105,7 @@ spec:
       {{- if .Values.prometheus.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.prometheus.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.prometheus.livenessProbe.enabled }}
@@ -102,6 +121,10 @@ spec:
       {{- else if .Values.prometheus.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.prometheus.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
+      {{- end }}
+      {{- if .Values.prometheus.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.lifecycleHooks "context" $) | nindent 8 }}
+      {{- end }}
       volumeMounts:
         - name: config
           mountPath: {{ .Values.prometheus.flags.config.file }}
@@ -116,7 +139,7 @@ spec:
           mountPath: {{ .Values.prometheus.secret.tls.mountPath }}
         {{- end }}
         - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
+          mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $) }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
@@ -137,9 +160,10 @@ spec:
     {{- if .Values.prometheus.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{ if .Values.prometheus.pod.enabled }}
+  restartPolicy: {{ .Values.prometheus.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.prometheus.podRestartPolicy }}
   {{- end }}
 {{- end -}}

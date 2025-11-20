@@ -5,35 +5,25 @@ SPDX-License-Identifier: APACHE-2.0
 
 {{/*
 Return the proper prometheus image name
+*/}}
 {{- define "prometheus.image" -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.prometheus.image "global" .Values.global) }}
 {{- end -}}
-*/}}
 
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "prometheus.volumePermissions.image" -}}
-{{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
+{{- define "prometheus.defaultInitContainers.image" -}}
+{{- include "common.images.image" ( dict "imageRoot" .Values.defaultInitContainers.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "prometheus.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.prometheus.image .Values.volumePermissions.image) "context" $) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.prometheus.image .Values.defaultInitContainers.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "prometheus.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
 
 {{/*
 Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations

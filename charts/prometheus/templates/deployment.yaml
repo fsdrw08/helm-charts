@@ -3,7 +3,7 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if eq .Values.prometheus.workloadKind "Deployment"  -}}
+{{- if not .Values.prometheus.pod.enabled -}}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
@@ -24,5 +24,6 @@ spec:
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
       app.kubernetes.io/component: prometheus
-  template: {{ template "prometheus.podTemplate" . }}
+  template:
+    {{- include "prometheus.podTemplate" . | nindent 4 }}
 {{- end }}
