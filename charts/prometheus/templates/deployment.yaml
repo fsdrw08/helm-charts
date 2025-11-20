@@ -3,7 +3,7 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if eq .Values.workloadKind "Deployment"  -}}
+{{- if eq .Values.prometheus.workloadKind "Deployment"  -}}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
@@ -16,9 +16,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.prometheus.autoscaling.hpa.enabled }}
   replicas: {{ .Values.prometheus.replicaCount }}
-  {{- end }}
   {{- if .Values.prometheus.updateStrategy }}
   strategy: {{- toYaml .Values.prometheus.updateStrategy | nindent 4 }}
   {{- end }}
@@ -26,5 +24,5 @@ spec:
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
       app.kubernetes.io/component: prometheus
-  template:
+  template: {{ template "prometheus.podTemplate" . }}
 {{- end }}
