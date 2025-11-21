@@ -3,6 +3,7 @@ metadata:
   {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.prometheus.podLabels .Values.commonLabels ) "context" . ) }}
   {{- if .Values.prometheus.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.prometheus.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.podAnnotations "context" $) | nindent 4 }}
