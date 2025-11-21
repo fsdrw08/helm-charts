@@ -1,4 +1,4 @@
-{{- if .Values.%%TEMPLATE_NAME%%.pod.enabled -}}
+{{- if .Values.%%MAIN_OBJECT_BLOCK%%.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "%%TEMPLATE_NAME%%.podTemplate" . }}

@@ -49,6 +49,11 @@ diagnosticMode:
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 %%MAIN_OBJECT_BLOCK%%:
+  ## @param %%MAIN_OBJECT_BLOCK%%.pod Pod configuration
+  ## @param %%MAIN_OBJECT_BLOCK%%.pod.enabled Run %%MAIN_CONTAINER%% as a Pod rather than a Deployment
+  ## @param %%MAIN_OBJECT_BLOCK%%.pod.restartPolicy %%MAIN_CONTAINER%% pod container restart policy.
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy
+  ##
   pod:
     enabled: true
     restartPolicy: Never
