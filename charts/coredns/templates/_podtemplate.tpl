@@ -1,7 +1,9 @@
 {{- define "coredns.podTemplate" -}}
 metadata:
-  {{- if eq .Values.coredns.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.coredns.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.coredns.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.coredns.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "coredns.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.coredns.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.coredns.hostNetwork }}
   {{- if .Values.coredns.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.coredns.podSecurityContext.enabled -}}
+  {{- if .Values.coredns.dnsPolicy }}
+  dnsPolicy: {{ .Values.coredns.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "coredns.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.coredns.automountServiceAccountToken }}
+  {{- if .Values.coredns.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.coredns.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.coredns.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.coredns.podAffinityPreset "component" "coredns" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.coredns.podAntiAffinityPreset "component" "coredns" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.coredns.nodeAffinityPreset.type "key" .Values.coredns.nodeAffinityPreset.key "values" .Values.coredns.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.coredns.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.coredns.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.coredns.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.coredns.priorityClassName }}
+  priorityClassName: {{ .Values.coredns.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.coredns.schedulerName }}
+  schedulerName: {{ .Values.coredns.schedulerName }}
+  {{- end }}
+  {{- if .Values.coredns.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.coredns.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.coredns.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.coredns.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.coredns.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "coredns.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "coredns.defaultInitContainers.volumePermissions" (dict "context" . "component" "coredns") | nindent 4 }}
     {{- end }}
     {{- if .Values.coredns.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.coredns.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "coredns.image" . }}
       imagePullPolicy: {{ .Values.coredns.image.pullPolicy | quote }}
       {{- if .Values.coredns.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.coredns.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.coredns.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.coredns.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.coredns.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.coredns.args }}
@@ -87,6 +106,7 @@ spec:
       {{- if .Values.coredns.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.coredns.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.coredns.livenessProbe.enabled }}
@@ -101,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.coredns.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.coredns.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.coredns.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.coredns.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -134,9 +158,10 @@ spec:
   {{- if .Values.coredns.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.coredns.extraVolumes "context" $) | nindent 4 }}
   {{- end }}
-  {{ if eq .Values.coredns.workloadKind "Deployment" }}
+  {{- if .Values.coredns.pod.enabled }}
+  restartPolicy: {{ .Values.coredns.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.coredns.podRestartPolicy }}
   {{- end }}
 {{- end -}}
