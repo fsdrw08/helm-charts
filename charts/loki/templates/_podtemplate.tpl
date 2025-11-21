@@ -3,6 +3,7 @@ metadata:
   {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.loki.podLabels .Values.commonLabels ) "context" . ) }}
   {{- if .Values.loki.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.loki.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.loki.podAnnotations "context" $) | nindent 4 }}
