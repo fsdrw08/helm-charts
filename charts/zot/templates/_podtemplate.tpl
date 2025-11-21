@@ -1,7 +1,9 @@
 {{- define "zot.podTemplate" -}}
 metadata:
-  {{- if eq .Values.zot.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.zot.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.zot.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.zot.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.zot.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "zot.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.zot.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.zot.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.zot.hostNetwork }}
   {{- if .Values.zot.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.zot.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.zot.podSecurityContext.enabled -}}
+  {{- if .Values.zot.dnsPolicy }}
+  dnsPolicy: {{ .Values.zot.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "zot.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.zot.automountServiceAccountToken }}
+  {{- if .Values.zot.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.zot.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.zot.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.zot.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.zot.podAffinityPreset "component" "zot" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.zot.podAntiAffinityPreset "component" "zot" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.zot.nodeAffinityPreset.type "key" .Values.zot.nodeAffinityPreset.key "values" .Values.zot.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.zot.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.zot.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.zot.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.zot.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.zot.priorityClassName }}
+  priorityClassName: {{ .Values.zot.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.zot.schedulerName }}
+  schedulerName: {{ .Values.zot.schedulerName }}
+  {{- end }}
+  {{- if .Values.zot.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.zot.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.zot.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.zot.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.zot.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.zot.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "zot.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "zot.defaultInitContainers.volumePermissions" (dict "context" . "component" "zot") | nindent 4 }}
     {{- end }}
     {{- if .Values.zot.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.zot.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "zot.image" . }}
       imagePullPolicy: {{ .Values.zot.image.pullPolicy | quote }}
       {{- if .Values.zot.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.zot.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.zot.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.zot.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.zot.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.zot.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.zot.args }}
@@ -87,6 +106,7 @@ spec:
       {{- if .Values.zot.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.zot.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.zot.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.zot.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.zot.livenessProbe.enabled }}
@@ -101,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.zot.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.zot.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.zot.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.zot.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.zot.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -168,9 +192,10 @@ spec:
     {{- if .Values.zot.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.zot.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{- if .Values.zot.pod.enabled }}
+  restartPolicy: {{ .Values.zot.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.zot.podRestartPolicy }}
   {{- end }}
 {{- end -}}
