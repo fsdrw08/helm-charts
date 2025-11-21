@@ -1,7 +1,9 @@
 {{- define "%%TEMPLATE_NAME%%.podTemplate" -}}
 metadata:
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.%%MAIN_OBJECT_BLOCK%%.podLabels .Values.commonLabels ) "context" . ) }}
   {{- if .Values.%%TEMPLATE_NAME%%.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.%%MAIN_OBJECT_BLOCK%%.podAnnotations "context" $) | nindent 4 }}
