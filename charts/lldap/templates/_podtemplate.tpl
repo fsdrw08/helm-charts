@@ -1,7 +1,9 @@
 {{- define "lldap.podTemplate" -}}
 metadata:
-  {{- if eq .Values.lldap.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.lldap.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.lldap.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.lldap.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "lldap.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.lldap.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.lldap.hostNetwork }}
   {{- if .Values.lldap.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.lldap.podSecurityContext.enabled -}}
+  {{- if .Values.lldap.dnsPolicy }}
+  dnsPolicy: {{ .Values.lldap.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "lldap.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.lldap.automountServiceAccountToken }}
+  {{- if .Values.lldap.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.lldap.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.lldap.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.lldap.podAffinityPreset "component" "lldap" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.lldap.podAntiAffinityPreset "component" "lldap" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.lldap.nodeAffinityPreset.type "key" .Values.lldap.nodeAffinityPreset.key "values" .Values.lldap.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.lldap.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.lldap.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.lldap.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.lldap.priorityClassName }}
+  priorityClassName: {{ .Values.lldap.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.lldap.schedulerName }}
+  schedulerName: {{ .Values.lldap.schedulerName }}
+  {{- end }}
+  {{- if .Values.lldap.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.lldap.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.lldap.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.lldap.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.lldap.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "lldap.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "lldap.defaultInitContainers.volumePermissions" (dict "context" . "component" "lldap") | nindent 4 }}
     {{- end }}
     {{- if .Values.lldap.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.lldap.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "lldap.image" . }}
       imagePullPolicy: {{ .Values.lldap.image.pullPolicy | quote }}
       {{- if .Values.lldap.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.lldap.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.lldap.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.lldap.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.lldap.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.lldap.args }}
@@ -87,6 +106,7 @@ spec:
       {{- if .Values.lldap.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.lldap.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.lldap.livenessProbe.enabled }}
@@ -101,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.lldap.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.lldap.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.lldap.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lldap.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -149,9 +173,10 @@ spec:
     {{- if .Values.lldap.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.lldap.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.lldap.workloadKind "Deployment" }}
+  {{- if .Values.lldap.pod.enabled }}
+  restartPolicy: {{ .Values.lldap.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.lldap.podRestartPolicy }}
   {{- end }}
 {{- end -}}

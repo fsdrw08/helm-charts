@@ -3,7 +3,7 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if eq .Values.lldap.workloadKind "Deployment"  -}}
+{{- if not .Values.lldap.pod.enabled -}}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
@@ -16,9 +16,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.lldap.autoscaling.hpa.enabled }}
   replicas: {{ .Values.lldap.replicaCount }}
-  {{- end }}
   {{- if .Values.lldap.updateStrategy }}
   strategy: {{- toYaml .Values.lldap.updateStrategy | nindent 4 }}
   {{- end }}
@@ -27,4 +25,5 @@ spec:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
       app.kubernetes.io/component: lldap
   template:
+    {{- include "lldap.podTemplate" . | nindent 4 }}
 {{- end }}

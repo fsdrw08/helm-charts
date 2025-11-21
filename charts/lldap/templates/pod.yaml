@@ -1,4 +1,4 @@
-{{- if eq .Values.lldap.workloadKind "Pod"  -}}
+{{- if .Values.lldap.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "lldap.podTemplate" . }}
