@@ -1,7 +1,9 @@
 {{- define "traefik.podTemplate" -}}
 metadata:
-  {{- if eq .Values.traefik.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.traefik.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.traefik.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.traefik.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "traefik.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.traefik.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.traefik.hostNetwork }}
   {{- if .Values.traefik.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.traefik.podSecurityContext.enabled -}}
+  {{- if .Values.traefik.dnsPolicy }}
+  dnsPolicy: {{ .Values.traefik.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "traefik.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.traefik.automountServiceAccountToken }}
+  {{- if .Values.traefik.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.traefik.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.traefik.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.traefik.podAffinityPreset "component" "traefik" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.traefik.podAntiAffinityPreset "component" "traefik" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.traefik.nodeAffinityPreset.type "key" .Values.traefik.nodeAffinityPreset.key "values" .Values.traefik.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.traefik.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.traefik.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.traefik.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.traefik.priorityClassName }}
+  priorityClassName: {{ .Values.traefik.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.traefik.schedulerName }}
+  schedulerName: {{ .Values.traefik.schedulerName }}
+  {{- end }}
+  {{- if .Values.traefik.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.traefik.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.traefik.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.traefik.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.traefik.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "traefik.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "traefik.defaultInitContainers.volumePermissions" (dict "context" . "component" "traefik") | nindent 4 }}
     {{- end }}
     {{- if .Values.traefik.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.traefik.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "traefik.image" . }}
       imagePullPolicy: {{ .Values.traefik.image.pullPolicy | quote }}
       {{- if .Values.traefik.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.traefik.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.traefik.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.traefik.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.traefik.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.traefik.args }}
@@ -87,6 +106,7 @@ spec:
       {{- if .Values.traefik.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.traefik.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.traefik.livenessProbe.enabled }}
@@ -101,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.traefik.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.traefik.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.traefik.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.traefik.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config-install
@@ -150,9 +174,10 @@ spec:
     {{- if .Values.traefik.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.traefik.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.traefik.workloadKind "Deployment" }}
+  {{- if .Values.traefik.pod.enabled }}
+  restartPolicy: {{ .Values.traefik.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.traefik.podRestartPolicy }}
   {{- end }}
 {{- end -}}
