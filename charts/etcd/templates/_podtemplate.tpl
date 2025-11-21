@@ -1,7 +1,9 @@
 {{- define "etcd.podTemplate" -}}
 metadata:
-  {{- if eq .Values.etcd.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.etcd.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.etcd.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.etcd.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "etcd.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.etcd.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.etcd.hostNetwork }}
   {{- if .Values.etcd.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.etcd.podSecurityContext.enabled -}}
+  {{- if .Values.etcd.dnsPolicy }}
+  dnsPolicy: {{ .Values.etcd.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "etcd.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.etcd.automountServiceAccountToken }}
+  {{- if .Values.etcd.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.etcd.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.etcd.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.etcd.podAffinityPreset "component" "etcd" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.etcd.podAntiAffinityPreset "component" "etcd" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.etcd.nodeAffinityPreset.type "key" .Values.etcd.nodeAffinityPreset.key "values" .Values.etcd.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.etcd.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.etcd.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.etcd.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.etcd.priorityClassName }}
+  priorityClassName: {{ .Values.etcd.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.etcd.schedulerName }}
+  schedulerName: {{ .Values.etcd.schedulerName }}
+  {{- end }}
+  {{- if .Values.etcd.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.etcd.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.etcd.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.etcd.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.etcd.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "etcd.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "etcd.defaultInitContainers.volumePermissions" (dict "context" . "component" "etcd") | nindent 4 }}
     {{- end }}
     {{- if .Values.etcd.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.etcd.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "etcd.image" . }}
       imagePullPolicy: {{ .Values.etcd.image.pullPolicy | quote }}
       {{- if .Values.etcd.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.etcd.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.etcd.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.etcd.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.etcd.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.etcd.args }}
@@ -87,6 +106,7 @@ spec:
       {{- if .Values.etcd.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.etcd.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.etcd.livenessProbe.enabled }}
@@ -101,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.etcd.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.etcd.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.etcd.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.etcd.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -143,9 +167,10 @@ spec:
     {{- if .Values.etcd.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.etcd.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.etcd.workloadKind "Deployment" }}
-  restartPolicy: Always
+  {{ if .Values.etcd.pod.enabled }}
+  restartPolicy: {{ .Values.etcd.pod.restartPolicy }}
   {{- else -}}
-  restartPolicy: {{ .Values.etcd.podRestartPolicy }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
+  restartPolicy: Always
   {{- end }}
 {{- end -}}

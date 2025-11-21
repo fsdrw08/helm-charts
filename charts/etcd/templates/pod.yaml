@@ -1,4 +1,4 @@
-{{- if eq .Values.etcd.workloadKind "Pod"  -}}
+{{- if .Values.etcd.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "etcd.podTemplate" . }}

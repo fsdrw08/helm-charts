@@ -1,4 +1,9 @@
 {{/*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{/*
 Return the proper etcd image name
 */}}
 {{- define "etcd.image" -}}
@@ -16,7 +21,7 @@ Return the proper image name (for the init container volume-permissions image)
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "etcd.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.etcd.image .Values.volumePermissions.image) "context" $) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.etcd.image .Values.defaultInitContainers.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
 {{/*
