@@ -312,11 +312,6 @@ diagnosticMode:
     ## Can be set to RollingUpdate or OnDelete
     ##
     type: RollingUpdate
-  ## ONLY FOR STATEFULSETS:
-  ## @param %%MAIN_OBJECT_BLOCK%%.podManagementPolicy Pod management policy for %%MAIN_CONTAINER_NAME%% statefulset
-  ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
-  ##
-  podManagementPolicy: OrderedReady
   ## @param %%MAIN_OBJECT_BLOCK%%.priorityClassName %%MAIN_CONTAINER_NAME%% pods' priorityClassName
   ##
   priorityClassName: ""

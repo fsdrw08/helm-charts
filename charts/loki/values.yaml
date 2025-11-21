@@ -385,11 +385,6 @@ loki:
     ## Can be set to RollingUpdate or OnDelete
     ##
     type: RollingUpdate
-  ## ONLY FOR STATEFULSETS:
-  ## @param loki.podManagementPolicy Pod management policy for loki statefulset
-  ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
-  ##
-  podManagementPolicy: OrderedReady
   ## @param loki.priorityClassName loki pods' priorityClassName
   ##
   priorityClassName: ""

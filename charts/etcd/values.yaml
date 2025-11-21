@@ -642,11 +642,6 @@ etcd:
     ## Can be set to RollingUpdate or OnDelete
     ##
     type: RollingUpdate
-  ## ONLY FOR STATEFULSETS:
-  ## @param etcd.podManagementPolicy Pod management policy for etcd statefulset
-  ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
-  ##
-  podManagementPolicy: OrderedReady
   ## @param etcd.priorityClassName etcd pods' priorityClassName
   ##
   priorityClassName: ""
