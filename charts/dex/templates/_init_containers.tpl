@@ -8,10 +8,10 @@ SPDX-License-Identifier: APACHE-2.0
 {{/*
 Returns an init-container that changes the owner and group of the persistent volume(s) mountpoint(s) to 'runAsUser:fsGroup' on each node
 */}}
-{{- define "%%TEMPLATE_NAME%%.defaultInitContainers.volumePermissions" -}}
+{{- define "dex.defaultInitContainers.volumePermissions" -}}
 {{- $componentValues := index .context.Values .component -}}
 - name: volume-permissions
-  image: {{ include "%%TEMPLATE_NAME%%.volumePermissions.image" . }}
+  image: {{ include "dex.volumePermissions.image" . }}
   imagePullPolicy: {{ .context.Values.defaultInitContainers.volumePermissions.image.pullPolicy | quote }}
   {{- if .context.Values.defaultInitContainers.volumePermissions.containerSecurityContext.enabled }}
   securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .context.Values.defaultInitContainers.volumePermissions.containerSecurityContext "context" .context) | nindent 4 }}
