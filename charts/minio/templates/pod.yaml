@@ -1,4 +1,4 @@
-{{- if eq .Values.minio.workloadKind "Pod"  -}}
+{{- if .Values.minio.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "minio.podTemplate" . }}

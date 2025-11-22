@@ -1,7 +1,9 @@
 {{- define "minio.podTemplate" -}}
 metadata:
-  {{- if eq .Values.minio.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.minio.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.minio.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.minio.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.minio.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "minio.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.minio.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.minio.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.minio.hostNetwork }}
   {{- if .Values.minio.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.minio.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.minio.podSecurityContext.enabled -}}
+  {{- if .Values.minio.dnsPolicy }}
+  dnsPolicy: {{ .Values.minio.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "minio.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.minio.automountServiceAccountToken }}
+  {{- if .Values.minio.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.minio.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.minio.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.minio.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.minio.podAffinityPreset "component" "minio" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.minio.podAntiAffinityPreset "component" "minio" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.minio.nodeAffinityPreset.type "key" .Values.minio.nodeAffinityPreset.key "values" .Values.minio.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.minio.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.minio.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.minio.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.minio.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.minio.priorityClassName }}
+  priorityClassName: {{ .Values.minio.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.minio.schedulerName }}
+  schedulerName: {{ .Values.minio.schedulerName }}
+  {{- end }}
+  {{- if .Values.minio.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.minio.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.minio.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.minio.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.minio.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.minio.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "minio.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "minio.defaultInitContainers.volumePermissions" (dict "context" . "component" "minio") | nindent 4 }}
     {{- end }}
     {{- if .Values.minio.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.minio.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "minio.image" . }}
       imagePullPolicy: {{ .Values.minio.image.pullPolicy | quote }}
       {{- if .Values.minio.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.minio.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.minio.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.minio.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.minio.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.minio.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.minio.args }}
@@ -100,6 +119,7 @@ spec:
       {{- if .Values.minio.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.minio.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.minio.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.minio.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.minio.livenessProbe.enabled }}
@@ -114,6 +134,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.minio.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.minio.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.minio.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.minio.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.minio.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -199,9 +223,10 @@ spec:
     {{- if .Values.minio.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.minio.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.minio.workloadKind "Deployment" }}
+  {{- if .Values.minio.pod.enabled }}
+  restartPolicy: {{ .Values.minio.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.minio.podRestartPolicy }}
   {{- end }}
 {{- end -}}
