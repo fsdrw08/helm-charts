@@ -1,7 +1,9 @@
 {{- define "dufs.podTemplate" -}}
 metadata:
-  {{- if eq .Values.dufs.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.dufs.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.dufs.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.dufs.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.podAnnotations "context" $) | nindent 4 }}
@@ -15,32 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
+  hostNetwork: {{ .Values.dufs.hostNetwork }}
+  {{- if .Values.dufs.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
+  {{- if .Values.dufs.dnsPolicy }}
+  dnsPolicy: {{ .Values.dufs.dnsPolicy | quote }}
+  {{- end }}
   {{- include "dufs.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.dufs.automountServiceAccountToken }}
   {{- if .Values.dufs.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.hostAliases "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.dufs.podSecurityContext.enabled -}}
+  {{- if .Values.dufs.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.dufs.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.dufs.podAffinityPreset "component" "dufs" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.dufs.podAntiAffinityPreset "component" "dufs" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.dufs.nodeAffinityPreset.type "key" .Values.dufs.nodeAffinityPreset.key "values" .Values.dufs.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.dufs.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.dufs.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.dufs.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.dufs.priorityClassName }}
+  priorityClassName: {{ .Values.dufs.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.dufs.schedulerName }}
+  schedulerName: {{ .Values.dufs.schedulerName }}
+  {{- end }}
+  {{- if .Values.dufs.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.dufs.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.dufs.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.dufs.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.dufs.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "dufs.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "dufs.defaultInitContainers.volumePermissions" (dict "context" . "component" "dufs") | nindent 4 }}
     {{- end }}
     {{- if .Values.dufs.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.dufs.initContainers "context" $) | nindent 4 }}
@@ -50,17 +71,15 @@ spec:
       image: {{ template "dufs.image" . }}
       imagePullPolicy: {{ .Values.dufs.image.pullPolicy | quote }}
       {{- if .Values.dufs.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.dufs.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.dufs.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.dufs.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.dufs.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.dufs.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.args "context" $) | nindent 8 }}
-      {{- else }}
-      args: 
-        - --config
-        - /etc/dufs/config.yaml
       {{- end }}
       env:
         {{- if .Values.dufs.extraEnvVars }}
@@ -87,6 +106,7 @@ spec:
       {{- if .Values.dufs.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.dufs.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.dufs.livenessProbe.enabled }}
@@ -101,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.dufs.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.dufs.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.dufs.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.dufs.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -130,9 +154,10 @@ spec:
     {{- if .Values.dufs.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.dufs.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.dufs.workloadKind "Deployment" }}
+  {{- if .Values.dufs.pod.enabled }}
+  restartPolicy: {{ .Values.dufs.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.dufs.podRestartPolicy }}
   {{- end }}
 {{- end -}}
