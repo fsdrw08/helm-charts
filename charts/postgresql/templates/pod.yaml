@@ -1,4 +1,4 @@
-{{- if eq .Values.postgresql.workloadKind "Pod"  -}}
+{{- if .Values.postgresql.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "postgresql.podTemplate" . }}

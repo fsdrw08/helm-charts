@@ -19,6 +19,7 @@ data:
   {{ $env }}: {{ $var }}
   {{- end }}
   {{- end }}
+
 {{- range $key, $val := .Values.postgresql.extending }}
 {{- if $val }}
 ---

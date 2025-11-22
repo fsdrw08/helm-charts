@@ -1,7 +1,9 @@
 {{- define "postgresql.podTemplate" -}}
 metadata:
-  {{- if eq .Values.postgresql.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.postgresql.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.postgresql.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.postgresql.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "postgresql.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.postgresql.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.postgresql.hostNetwork }}
   {{- if .Values.postgresql.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.postgresql.podSecurityContext.enabled -}}
+  {{- if .Values.postgresql.dnsPolicy }}
+  dnsPolicy: {{ .Values.postgresql.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "postgresql.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.postgresql.automountServiceAccountToken }}
+  {{- if .Values.postgresql.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.postgresql.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.postgresql.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.postgresql.podAffinityPreset "component" "postgresql" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.postgresql.podAntiAffinityPreset "component" "postgresql" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.postgresql.nodeAffinityPreset.type "key" .Values.postgresql.nodeAffinityPreset.key "values" .Values.postgresql.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.postgresql.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.postgresql.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.postgresql.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.postgresql.priorityClassName }}
+  priorityClassName: {{ .Values.postgresql.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.postgresql.schedulerName }}
+  schedulerName: {{ .Values.postgresql.schedulerName }}
+  {{- end }}
+  {{- if .Values.postgresql.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.postgresql.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.postgresql.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.postgresql.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.postgresql.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "postgresql.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "postgresql.defaultInitContainers.volumePermissions" (dict "context" . "component" "postgresql") | nindent 4 }}
     {{- end }}
     {{- if .Values.postgresql.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "postgresql.image" . }}
       imagePullPolicy: {{ .Values.postgresql.image.pullPolicy | quote }}
       {{- if .Values.postgresql.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.postgresql.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.postgresql.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.postgresql.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.postgresql.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.postgresql.args }}
@@ -89,6 +108,7 @@ spec:
       {{- if .Values.postgresql.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.postgresql.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.postgresql.livenessProbe.enabled }}
@@ -103,6 +123,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.postgresql.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.postgresql.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.postgresql.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         {{- range $key, $val := .Values.postgresql.extending }}
@@ -150,9 +174,10 @@ spec:
     {{- if .Values.postgresql.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.postgresql.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.postgresql.workloadKind "Deployment" }}
+  {{- if .Values.postgresql.pod.enabled }}
+  restartPolicy: {{ .Values.postgresql.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.postgresql.podRestartPolicy }}
   {{- end }}
 {{- end -}}
