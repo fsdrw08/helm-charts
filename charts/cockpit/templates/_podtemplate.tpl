@@ -1,7 +1,9 @@
 {{- define "cockpit.podTemplate" -}}
 metadata:
-  {{- if eq .Values.cockpit.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.cockpit.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.cockpit.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.cockpit.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
+  hostNetwork: {{ .Values.cockpit.hostNetwork }}
+  {{- if .Values.cockpit.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
+  {{- if .Values.cockpit.dnsPolicy }}
+  dnsPolicy: {{ .Values.cockpit.dnsPolicy | quote }}
+  {{- end }}
   {{- include "cockpit.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.cockpit.automountServiceAccountToken }}
   {{- if .Values.cockpit.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.hostAliases "context" $) | nindent 4 }}
   {{- end }}
-  hostNetwork: {{ .Values.cockpit.hostNetwork }}
-   {{- if .Values.cockpit.dnsConfig }}
-  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.dnsConfig "context" $) | nindent 4 -}}
+  {{- if .Values.cockpit.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.cockpit.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.cockpit.podAffinityPreset "component" "cockpit" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.cockpit.podAntiAffinityPreset "component" "cockpit" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.cockpit.nodeAffinityPreset.type "key" .Values.cockpit.nodeAffinityPreset.key "values" .Values.cockpit.nodeAffinityPreset.values) | nindent 6 }}
   {{- end }}
-  {{- if .Values.cockpit.podSecurityContext.enabled -}}
+  {{- if .Values.cockpit.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.cockpit.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.cockpit.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.cockpit.priorityClassName }}
+  priorityClassName: {{ .Values.cockpit.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.cockpit.schedulerName }}
+  schedulerName: {{ .Values.cockpit.schedulerName }}
+  {{- end }}
+  {{- if .Values.cockpit.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.cockpit.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.cockpit.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.cockpit.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.cockpit.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "cockpit.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "cockpit.defaultInitContainers.volumePermissions" (dict "context" . "component" "cockpit") | nindent 4 }}
     {{- end }}
     {{- if .Values.cockpit.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "cockpit.image" . }}
       imagePullPolicy: {{ .Values.cockpit.image.pullPolicy | quote }}
       {{- if .Values.cockpit.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.cockpit.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.cockpit.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.cockpit.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.cockpit.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.cockpit.args }}
@@ -87,6 +106,7 @@ spec:
       {{- if .Values.cockpit.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.cockpit.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.cockpit.livenessProbe.enabled }}
@@ -101,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.cockpit.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.cockpit.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.cockpit.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -140,9 +164,10 @@ spec:
     {{- if .Values.cockpit.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.cockpit.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.cockpit.workloadKind "Deployment" }}
+  {{- if .Values.cockpit.pod.enabled }}
+  restartPolicy: {{ .Values.cockpit.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.cockpit.podRestartPolicy }}
   {{- end }}
 {{- end -}}

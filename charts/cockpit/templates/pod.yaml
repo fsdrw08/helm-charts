@@ -1,4 +1,4 @@
-{{- if eq .Values.cockpit.workloadKind "Pod"  -}}
+{{- if .Values.cockpit.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "cockpit.podTemplate" . }}
