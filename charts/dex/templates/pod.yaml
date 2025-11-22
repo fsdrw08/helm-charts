@@ -1,4 +1,4 @@
-{{- if eq .Values.dex.workloadKind "Pod"  -}}
+{{- if .Values.dex.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "dex.podTemplate" . }}
