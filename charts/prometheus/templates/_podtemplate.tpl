@@ -61,7 +61,7 @@ spec:
   {{- end }}
   initContainers:
     {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
-    {{- include "%%TEMPLATE_NAME%%.defaultInitContainers.volumePermissions" (dict "context" . "component" "prometheus") | nindent 4 }}
+    {{- include "prometheus.defaultInitContainers.volumePermissions" (dict "context" . "component" "prometheus") | nindent 4 }}
     {{- end }}
     {{- if .Values.prometheus.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.initContainers "context" $) | nindent 4 }}

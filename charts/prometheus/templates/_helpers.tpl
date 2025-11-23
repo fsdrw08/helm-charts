@@ -13,8 +13,8 @@ Return the proper prometheus image name
 {{/*
 Return the proper image name (for the init container volume-permissions image)
 */}}
-{{- define "prometheus.defaultInitContainers.image" -}}
-{{- include "common.images.image" ( dict "imageRoot" .Values.defaultInitContainers.image "global" .Values.global ) -}}
+{{- define "prometheus.volumePermissions.image" -}}
+{{- include "common.images.image" ( dict "imageRoot" .Values.defaultInitContainers.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*

@@ -50,7 +50,7 @@ diagnosticMode:
 ##
 prometheus:
   pod:
-    enabled: false
+    enabled: true
     restartPolicy: Never
   ## @param prometheus.hostNetwork Specify if host network should be enabled for prometheus pod
   ##
@@ -215,13 +215,15 @@ prometheus:
     readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param prometheus.configFiles Configuration files for prometheus, will be create in ConfigMap and mount under path /etc/prometheus/<key>.yaml in the container
+  ##
   configFiles:
     ## @param prometheus.configFiles.main the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
     ## The config file will presents in the path which specify in prometheus.flags.config.file, default: /etc/prometheus/prometheus.yml
     ## ref: https://github.com/prometheus/prometheus/blob/v3.4.0/documentation/examples/prometheus.yml
     ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/
     ##
-    main:
+    prometheus:
       ## @param prometheus.configFiles.main.global The global configuration specifies parameters that are valid in all other configuration contexts.
       ## They also serve as defaults for other configuration sections.
       ##
@@ -652,7 +654,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: "{{ .Values.prometheus.flags.storage.tsdb.path }}"
+  mountPath: /prometheus
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
