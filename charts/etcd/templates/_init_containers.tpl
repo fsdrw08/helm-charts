@@ -11,7 +11,7 @@ Returns an init-container that changes the owner and group of the persistent vol
 {{- define "etcd.defaultInitContainers.volumePermissions" -}}
 {{- $componentValues := index .context.Values .component -}}
 - name: volume-permissions
-  image: {{ include "etcd.volumePermissions.image" . }}
+  image: {{ include "etcd.volumePermissions.image" .context }}
   imagePullPolicy: {{ .context.Values.defaultInitContainers.volumePermissions.image.pullPolicy | quote }}
   {{- if .context.Values.defaultInitContainers.volumePermissions.containerSecurityContext.enabled }}
   securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .context.Values.defaultInitContainers.volumePermissions.containerSecurityContext "context" .context) | nindent 4 }}
