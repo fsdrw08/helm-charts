@@ -1,7 +1,9 @@
 {{- define "vault.podTemplate" -}}
 metadata:
-  {{- if eq .Values.vault.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.vault.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.vault.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.vault.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.vault.podAnnotations "context" $) | nindent 4 }}
@@ -15,24 +17,54 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "vault.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.vault.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.vault.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.vault.hostNetwork }}
   {{- if .Values.vault.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.vault.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.vault.podSecurityContext.enabled -}}
+  {{- if .Values.vault.dnsPolicy }}
+  dnsPolicy: {{ .Values.vault.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "vault.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.vault.automountServiceAccountToken }}
+  {{- if .Values.vault.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.vault.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.vault.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.vault.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.vault.podAffinityPreset "component" "vault" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.vault.podAntiAffinityPreset "component" "vault" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.vault.nodeAffinityPreset.type "key" .Values.vault.nodeAffinityPreset.key "values" .Values.vault.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.vault.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.vault.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.vault.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.vault.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.vault.priorityClassName }}
+  priorityClassName: {{ .Values.vault.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.vault.schedulerName }}
+  schedulerName: {{ .Values.vault.schedulerName }}
+  {{- end }}
+  {{- if .Values.vault.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.vault.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.vault.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.vault.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.vault.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.vault.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
+    {{- /*
     {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
     - name: volume-permissions
       image: {{ include "vault.volumePermissions.image" . }}
-      {{/*
-      https://github.com/cello-proj/cello/blob/d00b16e337af4fa131146fd63c43863097ac36ed/scripts/quickstart_manifest.yaml#L420
-      */}}
+      {{- /* https://github.com/cello-proj/cello/blob/d00b16e337af4fa131146fd63c43863097ac36ed/scripts/quickstart_manifest.yaml#L420 
       imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
       command:
         - chown
@@ -50,6 +82,9 @@ spec:
           mountPath: {{ .Values.persistence.mountPath.storage }}
         - name: logs
           mountPath: {{ .Values.persistence.mountPath.logs }}
+    */}}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "vault.defaultInitContainers.volumePermissions" (dict "context" . "component" "vault") | nindent 4 }}
     {{- end }}
     {{- if .Values.vault.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.initContainers "context" $) | nindent 4 }}
@@ -59,9 +94,11 @@ spec:
       image: {{ template "vault.image" . }}
       imagePullPolicy: {{ .Values.vault.image.pullPolicy | quote }}
       {{- if .Values.vault.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.vault.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.vault.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.vault.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.vault.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.vault.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.vault.args }}
@@ -92,6 +129,7 @@ spec:
       {{- if .Values.vault.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.vault.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.vault.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.vault.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.vault.livenessProbe.enabled }}
@@ -106,6 +144,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.vault.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.vault.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.vault.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.vault.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.vault.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -153,9 +195,10 @@ spec:
     {{- if .Values.vault.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.vault.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.vault.workloadKind "Deployment" }}
+  {{- if .Values.vault.pod.enabled }}
+  restartPolicy: {{ .Values.vault.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.vault.podRestartPolicy }}
   {{- end }}
 {{- end -}}

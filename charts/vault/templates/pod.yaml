@@ -1,4 +1,4 @@
-{{- if eq .Values.vault.workloadKind "Pod"  -}}
+{{- if .Values.vault.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "vault.podTemplate" . }}

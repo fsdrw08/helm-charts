@@ -1,4 +1,9 @@
 {{/*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{/*
 Return the proper vault image name
 */}}
 {{- define "vault.image" -}}
@@ -16,14 +21,14 @@ Return the proper auth proxy image name
 Return the proper image name (for the init container volume-permissions image)
 */}}
 {{- define "vault.volumePermissions.image" -}}
-{{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
+{{- include "common.images.image" ( dict "imageRoot" .Values.defaultInitContainers.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "vault.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.vault.image .Values.vault.autoUnseal.image .Values.volumePermissions.image) "context" $) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.vault.image .Values.vault.autoUnseal.image .Values.defaultInitContainers.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
 {{/*

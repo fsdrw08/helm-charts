@@ -1,12 +1,15 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ template "common.names.fullname" . }}-cm
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: vault
-    {{- if .Values.commonLabels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
-    {{- end }}
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
@@ -20,18 +23,7 @@ data:
     #!/bin/sh
 
     function wait_started {
-      counter=0
-      until STATUS=$(curl -k -X GET "$VAULT_ADDR/v1/sys/health" 2>&1); [ $? -ne 1 ]
-      do
-        if [ $counter -lt 20 ]; then
-          echo "Waiting for vault to come up, $(($counter*5))s passed"
-          sleep 5
-          ((counter++))
-        else
-          echo "check vault stauts manually"
-          exit 1
-        fi
-      done
+      until http_code=$(curl -s -k -o /dev/null -w "%{http_code}" "$VAULT_ADDR/v1/sys/health"); do sleep 5; done
       echo "Vault is started"
     }
 
@@ -94,7 +86,6 @@ data:
       printf "Unseal Done\n"
     }
 
-    sleep 2s 
     wait_started
 
     echo "is_inited"
