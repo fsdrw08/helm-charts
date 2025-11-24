@@ -14,7 +14,7 @@ Return the proper loki image name
 Return the proper image name (for the init container volume-permissions image)
 */}}
 {{- define "loki.volumePermissions.image" -}}
-{{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
+{{- include "common.images.image" ( dict "imageRoot" .Values.defaultInitContainers.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
