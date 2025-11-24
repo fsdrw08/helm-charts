@@ -88,7 +88,7 @@ prometheus:
   image:
     registry: quay.io
     repository: prometheus/prometheus
-    tag: v3.5.0
+    tag: v3.7.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -654,7 +654,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /prometheus
+  mountPath: "{{ .Values.prometheus.flags.storage.tsdb.path }}" # /prometheus
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

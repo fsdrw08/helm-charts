@@ -34,7 +34,7 @@ Returns an init-container that changes the owner and group of the persistent vol
       {{- end }}
   volumeMounts:
     - name: data
-      mountPath: {{ .context.Values.persistence.mountPath }}
+      mountPath: {{ include "common.tplvalues.render" (dict "value" .context.Values.persistence.mountPath "context" .context) }}
       {{- if .context.Values.persistence.subPath }}
       subPath: {{ .context.Values.persistence.subPath }}
       {{- end }}
