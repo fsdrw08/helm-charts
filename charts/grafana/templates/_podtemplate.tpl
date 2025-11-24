@@ -1,7 +1,9 @@
 {{- define "grafana.podTemplate" -}}
 metadata:
-  {{- if eq .Values.grafana.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.grafana.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.grafana.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.grafana.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "grafana.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.grafana.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.grafana.hostNetwork }}
   {{- if .Values.grafana.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.grafana.podSecurityContext.enabled -}}
+  {{- if .Values.grafana.dnsPolicy }}
+  dnsPolicy: {{ .Values.grafana.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "grafana.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.grafana.automountServiceAccountToken }}
+  {{- if .Values.grafana.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.grafana.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.grafana.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.grafana.podAffinityPreset "component" "grafana" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.grafana.podAntiAffinityPreset "component" "grafana" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.grafana.nodeAffinityPreset.type "key" .Values.grafana.nodeAffinityPreset.key "values" .Values.grafana.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.grafana.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.grafana.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.grafana.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.grafana.priorityClassName }}
+  priorityClassName: {{ .Values.grafana.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.grafana.schedulerName }}
+  schedulerName: {{ .Values.grafana.schedulerName }}
+  {{- end }}
+  {{- if .Values.grafana.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.grafana.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.grafana.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.grafana.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.grafana.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "grafana.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "grafana.defaultInitContainers.volumePermissions" (dict "context" . "component" "grafana") | nindent 4 }}
     {{- end }}
     {{- if .Values.grafana.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.grafana.initContainers "context" $) | nindent 4 }}
@@ -54,9 +71,11 @@ spec:
       image: {{ template "grafana.image" . }}
       imagePullPolicy: {{ .Values.grafana.image.pullPolicy | quote }}
       {{- if .Values.grafana.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.grafana.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.grafana.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.grafana.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.grafana.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.grafana.args }}
@@ -87,6 +106,7 @@ spec:
       {{- if .Values.grafana.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.grafana.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.grafana.livenessProbe.enabled }}
@@ -101,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.grafana.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.grafana.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.grafana.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.grafana.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config-custom
@@ -124,7 +148,7 @@ spec:
           mountPath: {{ .Values.grafana.secret.others.mountPath }}
         {{- end }}
         - name: data
-          mountPath: {{ .Values.grafana.configFiles.grafana.paths.data }}
+          mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $) }}
       {{- if .Values.grafana.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.grafana.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -168,9 +192,10 @@ spec:
     {{- if .Values.grafana.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.grafana.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.grafana.workloadKind "Deployment" }}
+  {{- if .Values.grafana.pod.enabled }}
+  restartPolicy: {{ .Values.grafana.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.grafana.podRestartPolicy }}
   {{- end }}
 {{- end -}}

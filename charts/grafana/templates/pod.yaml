@@ -1,4 +1,4 @@
-{{- if eq .Values.grafana.workloadKind "Pod"  -}}
+{{- if .Values.grafana.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "grafana.podTemplate" . }}
