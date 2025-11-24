@@ -1,7 +1,9 @@
 {{- define "consul.podTemplate" -}}
 metadata:
-  {{- if eq .Values.consul.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.consul.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.consul.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.consul.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.consul.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "consul.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.consul.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.consul.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.consul.hostNetwork }}
   {{- if .Values.consul.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.consul.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.consul.podSecurityContext.enabled -}}
+  {{- if .Values.consul.dnsPolicy }}
+  dnsPolicy: {{ .Values.consul.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "consul.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.consul.automountServiceAccountToken }}
+  {{- if .Values.consul.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.consul.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.consul.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.consul.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.consul.podAffinityPreset "component" "consul" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.consul.podAntiAffinityPreset "component" "consul" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.consul.nodeAffinityPreset.type "key" .Values.consul.nodeAffinityPreset.key "values" .Values.consul.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.consul.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.consul.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.consul.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.consul.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.consul.priorityClassName }}
+  priorityClassName: {{ .Values.consul.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.consul.schedulerName }}
+  schedulerName: {{ .Values.consul.schedulerName }}
+  {{- end }}
+  {{- if .Values.consul.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.consul.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.consul.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.consul.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.consul.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.consul.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "consul.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: data
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "consul.defaultInitContainers.volumePermissions" (dict "context" . "component" "consul") | nindent 4 }}
     {{- end }}
     {{- if .Values.consul.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.consul.initContainers "context" $) | nindent 4 }}
@@ -54,18 +71,15 @@ spec:
       image: {{ template "consul.image" . }}
       imagePullPolicy: {{ .Values.consul.image.pullPolicy | quote }}
       {{- if .Values.consul.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.consul.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.consul.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.consul.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.consul.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.consul.command "context" $) | nindent 8 }}
-      {{- else }}
-      command:
       {{- end }}
       {{- if .Values.consul.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.consul.args "context" $) | nindent 8 }}
-      {{- else }}
-      args:
-        - agent
       {{- end }}
       env:
         {{- if .Values.consul.extraEnvVars }}
@@ -92,6 +106,7 @@ spec:
       {{- if .Values.consul.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.consul.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.consul.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.consul.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.consul.livenessProbe.enabled }}
@@ -106,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.consul.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.consul.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.consul.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.consul.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.consul.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -153,9 +172,10 @@ spec:
     {{- if .Values.consul.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.consul.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.consul.workloadKind "Deployment" }}
+  {{- if .Values.consul.pod.enabled }}
+  restartPolicy: {{ .Values.consul.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.consul.podRestartPolicy }}
   {{- end }}
 {{- end -}}
