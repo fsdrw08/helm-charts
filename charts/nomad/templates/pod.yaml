@@ -1,4 +1,4 @@
-{{- if eq .Values.nomad.workloadKind "Pod"  -}}
+{{- if .Values.nomad.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "nomad.podTemplate" . }}
