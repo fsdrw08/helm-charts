@@ -1,7 +1,9 @@
 {{- define "alloy.podTemplate" -}}
 metadata:
-  {{- if eq .Values.alloy.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.alloy.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.alloy.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.alloy.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.podAnnotations "context" $) | nindent 4 }}
@@ -15,36 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
-  {{- include "alloy.imagePullSecrets" . | nindent 2 }}
-  {{- if .Values.alloy.hostAliases }}
-  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.hostAliases "context" $) | nindent 4 }}
-  {{- end }}
   hostNetwork: {{ .Values.alloy.hostNetwork }}
   {{- if .Values.alloy.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
-  {{- if .Values.alloy.podSecurityContext.enabled -}}
+  {{- if .Values.alloy.dnsPolicy }}
+  dnsPolicy: {{ .Values.alloy.dnsPolicy | quote }}
+  {{- end }}
+  {{- include "alloy.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.alloy.automountServiceAccountToken }}
+  {{- if .Values.alloy.hostAliases }}
+  hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.hostAliases "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.alloy.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.alloy.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.alloy.podAffinityPreset "component" "alloy" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.alloy.podAntiAffinityPreset "component" "alloy" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.alloy.nodeAffinityPreset.type "key" .Values.alloy.nodeAffinityPreset.key "values" .Values.alloy.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.alloy.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.alloy.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.alloy.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.alloy.priorityClassName }}
+  priorityClassName: {{ .Values.alloy.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.alloy.schedulerName }}
+  schedulerName: {{ .Values.alloy.schedulerName }}
+  {{- end }}
+  {{- if .Values.alloy.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.alloy.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.alloy.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.alloy.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.alloy.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "alloy.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "alloy.defaultInitContainers.volumePermissions" (dict "context" . "component" "alloy") | nindent 4 }}
     {{- end }}
     {{- if .Values.alloy.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.alloy.initContainers "context" $) | nindent 4 }}
@@ -54,18 +71,15 @@ spec:
       image: {{ template "alloy.image" . }}
       imagePullPolicy: {{ .Values.alloy.image.pullPolicy | quote }}
       {{- if .Values.alloy.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.alloy.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.alloy.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.alloy.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.alloy.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.alloy.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.args "context" $) | nindent 8 }}
-      {{- else }}
-      args:
-        - run
-        - /etc/alloy/config.alloy
-        {{- include "processFlags" (dict "values" .Values.alloy.flags) | trim | nindent 8 -}}
       {{- end }}
       env:
         {{- if .Values.alloy.extraEnvVars }}
@@ -92,6 +106,7 @@ spec:
       {{- if .Values.alloy.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.alloy.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.alloy.livenessProbe.enabled }}
@@ -106,6 +121,10 @@ spec:
       startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.customStartupProbe "context" $) | nindent 8 }}
       {{- else if .Values.alloy.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.alloy.startupProbe "enabled") "context" $) | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.alloy.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.alloy.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
         - name: config
@@ -145,9 +164,10 @@ spec:
     {{- if .Values.alloy.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.alloy.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.alloy.workloadKind "Deployment" }}
+  {{- if .Values.alloy.pod.enabled }}
+  restartPolicy: {{ .Values.alloy.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.alloy.podRestartPolicy }}
   {{- end }}
 {{- end -}}

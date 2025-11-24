@@ -3,7 +3,7 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if eq .Values.alloy.workloadKind "Deployment"  -}}
+{{- if not .Values.alloy.pod.enabled -}}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
@@ -16,9 +16,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  {{- if not .Values.alloy.autoscaling.hpa.enabled }}
   replicas: {{ .Values.alloy.replicaCount }}
-  {{- end }}
   {{- if .Values.alloy.updateStrategy }}
   strategy: {{- toYaml .Values.alloy.updateStrategy | nindent 4 }}
   {{- end }}
@@ -27,4 +25,5 @@ spec:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
       app.kubernetes.io/component: alloy
   template:
+    {{- include "alloy.podTemplate" . | nindent 4 }}
 {{- end }}
