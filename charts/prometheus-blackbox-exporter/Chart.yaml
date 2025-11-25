@@ -1,0 +1,23 @@
+annotations:
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: v0.27.0
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS, DNS, TCP, ICMP and gRPC.
+home: https://github.com/fsdrw08/helm-charts
+icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/prometheus/img/prometheus-stack-220x234.png
+keywords:
+  - monitoring
+  - observability
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: prometheus-blackbox-exporter
+sources:
+  - https://github.com/prometheus/blackbox_exporter
+  - ...
+version: 0.1.0
