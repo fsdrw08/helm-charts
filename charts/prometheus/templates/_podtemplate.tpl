@@ -139,6 +139,10 @@ spec:
         - name: secret-tls
           mountPath: {{ .Values.prometheus.secret.tls.mountPath }}
         {{- end }}
+        {{- if .Values.prometheus.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.prometheus.secret.others.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ include "common.tplvalues.render" (dict "value" .Values.persistence.mountPath "context" $) }}
           {{- if .Values.persistence.subPath }}
@@ -151,6 +155,30 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.prometheus.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    - name: config
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+        items:
+          - key: prometheus.yml
+            path: {{ base .Values.prometheus.flags.config.file }}
+    {{- if and .Values.prometheus.configFiles.web .Values.prometheus.flags.web.config.file }}
+    - name: config-web
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+        items:
+          - key: web.yml
+            path: {{ base .Values.prometheus.flags.web.config.file }}
+    {{- end }}
+    {{- if .Values.prometheus.secret.tls.contents }}
+    - name: secret-tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    {{- if .Values.prometheus.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:

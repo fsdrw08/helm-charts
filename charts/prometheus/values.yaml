@@ -218,20 +218,20 @@ prometheus:
   ## @param prometheus.configFiles Configuration files for prometheus, will be create in ConfigMap and mount under path /etc/prometheus/<key>.yaml in the container
   ##
   configFiles:
-    ## @param prometheus.configFiles.main the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
+    ## @param prometheus.configFiles.prometheus the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
     ## The config file will presents in the path which specify in prometheus.flags.config.file, default: /etc/prometheus/prometheus.yml
     ## ref: https://github.com/prometheus/prometheus/blob/v3.4.0/documentation/examples/prometheus.yml
     ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/
     ##
     prometheus:
-      ## @param prometheus.configFiles.main.global The global configuration specifies parameters that are valid in all other configuration contexts.
+      ## @param prometheus.configFiles.prometheus.global The global configuration specifies parameters that are valid in all other configuration contexts.
       ## They also serve as defaults for other configuration sections.
       ##
       global:
         scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
         evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
         # scrape_timeout is set to the global default (10s).
-      ## @param prometheus.configFiles.main.alerting Alerting specifies settings related to the Alertmanager
+      ## @param prometheus.configFiles.prometheus.alerting Alerting specifies settings related to the Alertmanager
       ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/#alertmanager_config
       ##
       alerting:
@@ -239,12 +239,12 @@ prometheus:
           - static_configs:
               - targets:
                 # - alertmanager:9093
-      ## @param prometheus.configFiles.main.rule_files Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+      ## @param prometheus.configFiles.prometheus.rule_files Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
       ##
       rule_files:
         # - "first_rules.yml"
         # - "second_rules.yml"
-      ## @param prometheus.configFiles.main.scrape_configs A scrape configuration containing exactly one endpoint to scrape:
+      ## @param prometheus.configFiles.prometheus.scrape_configs A scrape configuration containing exactly one endpoint to scrape:
       ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/#scrape_config
       ##
       scrape_configs:
@@ -265,8 +265,8 @@ prometheus:
     ## e.g.
     ## web:
     ##  tls_server_config:
-    ##    cert_file: /etc/prometheus/certs/prometheus.crt
-    ##    key_file: /etc/prometheus/certs/prometheus.key
+    ##    cert_file: /etc/prometheus/secrets/certs/prometheus.crt
+    ##    key_file: /etc/prometheus/secrets/certs/prometheus.key
     ##
     web: {}
 
@@ -284,9 +284,10 @@ prometheus:
     ##
     tls:
       ## @param prometheus.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
-      ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
+      ## this config should match with config under
+      ## prometheus.configFiles.web.tls_server_config.cert_file and prometheus.configFiles.web.tls_server_config.key_file
       ##
-      mountPath: /etc/prometheus/certs
+      mountPath: /etc/prometheus/secrets/certs
       ## @param prometheus.tls.contents secret content of cert and key or whatever tls content will set in the container
       ## You can set the content key as whatever file name you like
       ## But the tls set in configFiles above must match with the settings here
@@ -297,6 +298,11 @@ prometheus:
       ##  prometheus.crt: ""
       ##  prometheus.key: ""
       ##
+      contents: {}
+    ## @param prometheus.secret.others other secrets pass to the container via secret volume mount
+    ##
+    others:
+      mountPath: /etc/prometheus/secrets/others
       contents: {}
 
   ## @param prometheus.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
@@ -335,12 +341,11 @@ prometheus:
     ## @param prometheus.flags.auto-gomemlimit.ratio The ratio of reserved GOMEMLIMIT memory to the detected maximum container or system memory 0.9
     ##
     auto-gomemlimit.ratio:
+    ## @param prometheus.flags.config.file Prometheus configuration file path.
+    ## @param prometheus.flags.config.auto-reload-interval Specifies the interval for checking and automatically reloading the Prometheus configuration file upon detecting changes.
+    ##
     config:
-      ## @param prometheus.flags.config.file Prometheus configuration file path.
-      ##
       file: /etc/prometheus/prometheus.yml
-      ## @param prometheus.flags.config.auto-reload-interval Specifies the interval for checking and automatically reloading the Prometheus configuration file upon detecting changes.
-      ##
       auto-reload-interval: 30s
     ## @param prometheus.flags.enable-feature Comma separated feature names to enable. Valid options:
     ## exemplar-storage, expand-external-labels, memory-snapshot-on-shutdown, promql-per-step-stats, promql-experimental-functions,

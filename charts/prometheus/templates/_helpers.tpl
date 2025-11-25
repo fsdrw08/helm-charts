@@ -63,22 +63,16 @@ Compile all warnings into a single message.
     {{- else -}}
     {{- /* https://github.com/prometheus/prometheus/pull/7410#issuecomment-718696715 */}}
       {{- if (kindIs "bool" $value) }}
-      {{- if $value }}
+        {{- if $value }}
 - --{{ $fullPath }}
-      {{- end -}}
+        {{- end -}}
+      {{- else if (kindIs "slice" $value) }}
+        {{- range $item := $value }}
+- --{{ $fullPath }}={{ $item }}
+        {{- end }}
       {{- else if not (kindIs "invalid" $value) }}
 - --{{ $fullPath }}={{ $value }}
       {{- end -}}
     {{- end -}}
   {{- end -}}
-{{- end -}}
-
-{{- define "checkTlsEnabled" -}}
-{{- $tlsEnabled := "" -}}
-{{- range $key, $val := .Values.prometheus.containers }}
-  {{- if and $val.enabled $val.tls.contents -}}
-    {{- $tlsEnabled = "1" -}}
-  {{- end -}}
-{{- end -}}
-{{- $tlsEnabled -}}
 {{- end -}}
