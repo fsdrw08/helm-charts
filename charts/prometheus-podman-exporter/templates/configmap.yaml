@@ -3,7 +3,7 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if .Values.exporter.configFile.web }}
+{{- if .Values.exporter.configFiles.web }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -15,6 +15,8 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  web.yaml: {{ print "|" }}
-{{- include "common.tplvalues.render" (dict "value" .Values.exporter.configFile.web "context" $) | nindent 4 -}}
-{{- end -}}
+{{- range $key, $val := .Values.exporter.configFiles }}
+  {{ $key }}.yml: {{ print "|" }}
+    {{- include "common.tplvalues.render" (dict "value" $val "context" $) | nindent 4 -}}
+{{- end }}
+{{- end }}

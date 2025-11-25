@@ -127,7 +127,7 @@ spec:
       lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.lifecycleHooks "context" $) | nindent 8 }}
       {{- end }}
       volumeMounts:
-        {{- if .Values.exporter.flags.web.config.file }}
+        {{- if and .Values.exporter.configFiles.web .Values.exporter.flags.web.config.file }}
         - name: config-web
           mountPath: {{ .Values.exporter.flags.web.config.file }}
           subPath: {{ base .Values.exporter.flags.web.config.file }}
@@ -136,6 +136,11 @@ spec:
         - name: secret-tls
           mountPath: {{ .Values.exporter.secret.tls.mountPath }}
         {{- end }}
+        - name: data
+          mountPath: {{ .Values.persistence.mountPath }}
+          {{- if .Values.persistence.subPath }}
+          subPath: {{ .Values.persistence.subPath }}
+          {{- end }}
       {{- if .Values.exporter.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.exporter.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -143,7 +148,7 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.exporter.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
-    {{- if .Values.exporter.configFile.web }}
+    {{- if and .Values.exporter.configFiles.web .Values.exporter.flags.web.config.file }}
     - name: config-web
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
@@ -152,6 +157,13 @@ spec:
     - name: secret-tls
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    - name: data
+    {{- if .Values.persistence.enabled }}
+      persistentVolumeClaim:
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
+    {{- else }}
+      emptyDir: {}
     {{- end }}
     {{- if .Values.exporter.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.exporter.extraVolumes "context" $) | nindent 4 }}
