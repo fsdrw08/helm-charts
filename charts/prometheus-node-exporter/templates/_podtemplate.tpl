@@ -1,13 +1,15 @@
 {{- define "exporter.podTemplate" -}}
 metadata:
-  {{- if eq .Values.workloadKind "Pod" }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.exporter.podLabels .Values.commonLabels ) "context" . ) }}
+  {{- if .Values.exporter.pod.enabled }}
   name: {{ template "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
   {{- end }}
   {{- if .Values.exporter.podAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.podAnnotations "context" $) | nindent 4 }}
   {{- end }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
-    app.kubernetes.io/component: prometheus-podman-exporter
+    app.kubernetes.io/component: prometheus-node-exporter
     {{- if .Values.exporter.podLabels }}
     {{- include "common.tplvalues.render" (dict "value" .Values.exporter.podLabels "context" $) | nindent 4 }}
     {{- end }}
@@ -15,32 +17,51 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
 spec:
+  hostNetwork: {{ .Values.exporter.hostNetwork }}
+  {{- if .Values.exporter.dnsConfig }}
+  dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.dnsConfig "context" $) | nindent 4 -}}
+  {{- end }}
+  {{- if .Values.exporter.dnsPolicy }}
+  dnsPolicy: {{ .Values.exporter.dnsPolicy | quote }}
+  {{- end }}
   {{- include "exporter.imagePullSecrets" . | nindent 2 }}
+  serviceAccountName: {{ .Values.serviceAccount.name }}
+  automountServiceAccountToken: {{ .Values.exporter.automountServiceAccountToken }}
   {{- if .Values.exporter.hostAliases }}
   hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.hostAliases "context" $) | nindent 4 }}
   {{- end }}
-  {{- if .Values.exporter.podSecurityContext.enabled -}}
+  {{- if .Values.exporter.affinity }}
+  affinity: {{- include "common.tplvalues.render" ( dict "value" .Values.exporter.affinity "context" $) | nindent 8 }}
+  {{- else }}
+  affinity:
+    podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.exporter.podAffinityPreset "component" "prometheus-node-exporter" "customLabels" $podLabels "context" $) | nindent 6 }}
+    podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.exporter.podAntiAffinityPreset "component" "prometheus-node-exporter" "customLabels" $podLabels "context" $) | nindent 6 }}
+    nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.exporter.nodeAffinityPreset.type "key" .Values.exporter.nodeAffinityPreset.key "values" .Values.exporter.nodeAffinityPreset.values) | nindent 6 }}
+  {{- end }}
+  {{- if .Values.exporter.nodeSelector }}
+  nodeSelector: {{- include "common.tplvalues.render" ( dict "value" .Values.exporter.nodeSelector "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.exporter.tolerations }}
+  tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.tolerations "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.exporter.priorityClassName }}
+  priorityClassName: {{ .Values.exporter.priorityClassName | quote }}
+  {{- end }}
+  {{- if .Values.exporter.schedulerName }}
+  schedulerName: {{ .Values.exporter.schedulerName }}
+  {{- end }}
+  {{- if .Values.exporter.topologySpreadConstraints }}
+  topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.topologySpreadConstraints "context" $) | nindent 4 }}
+  {{- end }}
+  {{- if .Values.exporter.podSecurityContext.enabled }}
   securityContext: {{- omit .Values.exporter.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.exporter.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ .Values.exporter.terminationGracePeriodSeconds }}
+  {{- end }}
   initContainers:
-    {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
-    - name: volume-permissions
-      image: {{ include "exporter.volumePermissions.image" . }}
-      imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
-      command:
-        - %%commands%%
-      securityContext: {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.containerSecurityContext "context" $) | nindent 8 }}
-      {{- if .Values.volumePermissions.resources }}
-      resources: {{- toYaml .Values.volumePermissions.resources | nindent 8 }}
-      {{- else if ne .Values.volumePermissions.resourcesPreset "none" }}
-      resources: {{- include "common.resources.preset" (dict "type" .Values.volumePermissions.resourcesPreset) | nindent 8 }}
-      {{- end }}
-      volumeMounts:
-        - name: foo
-          mountPath: {{ .Values.persistence.mountPath }}
-          {{- if .Values.persistence.subPath }}
-          subPath: {{ .Values.persistence.subPath }}
-          {{- end }}
+    {{- if and .Values.defaultInitContainers.volumePermissions.enabled .Values.persistence.enabled }}
+    {{- include "exporter.defaultInitContainers.volumePermissions" (dict "context" . "component" "exporter") | nindent 4 }}
     {{- end }}
     {{- if .Values.exporter.initContainers }}
     {{- include "common.tplvalues.render" (dict "value" .Values.exporter.initContainers "context" $) | nindent 4 }}
@@ -50,16 +71,15 @@ spec:
       image: {{ template "exporter.image" . }}
       imagePullPolicy: {{ .Values.exporter.image.pullPolicy | quote }}
       {{- if .Values.exporter.containerSecurityContext.enabled }}
-      securityContext: {{- omit .Values.exporter.containerSecurityContext "enabled" | toYaml | nindent 8 }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.exporter.containerSecurityContext "context" $) | nindent 8 }}
       {{- end }}
-      {{- if .Values.exporter.command }}
+      {{- if .Values.diagnosticMode.enabled }}
+      command: {{- include "common.tplvalues.render" (dict "value" .Values.diagnosticMode.command "context" $) | nindent 8 }}
+      {{- else if .Values.exporter.command }}
       command: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.command "context" $) | nindent 8 }}
       {{- end }}
       {{- if .Values.exporter.args }}
       args: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.args "context" $) | nindent 8 }}
-      {{- else }}
-      args:
-      {{- include "processFlags" (dict "values" .Values.exporter.flags) | trim | nindent 8 -}}
       {{- end }}
       env:
         {{- if .Values.exporter.extraEnvVars }}
@@ -70,10 +90,10 @@ spec:
         - configMapRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.exporter.extraEnvVarsCM "context" $) }}
         {{- end }}
-        {{- /*
+        {{- if .Values.exporter.secret.envVars }}
         - secretRef:
-            name: {{ template "common.names.fullname" . }}
-        */}}
+            name: {{ template "common.names.fullname" . }}-sec-envVars
+        {{- end }}
         {{- if .Values.exporter.extraEnvVarsSecret }}
         - secretRef:
             name: {{ include "common.tplvalues.render" (dict "value" .Values.exporter.extraEnvVarsSecret "context" $) }}
@@ -86,6 +106,7 @@ spec:
       {{- if .Values.exporter.containerPorts }}
       ports: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.containerPorts "context" $) | nindent 8 -}}
       {{- end }}
+      {{- if not .Values.diagnosticMode.enabled }}
       {{- if .Values.exporter.customLivenessProbe }}
       livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.customLivenessProbe "context" $) | nindent 8 }}
       {{- else if .Values.exporter.livenessProbe.enabled }}
@@ -101,16 +122,25 @@ spec:
       {{- else if .Values.exporter.startupProbe.enabled }}
       startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.exporter.startupProbe "enabled") "context" $) | nindent 8 }}
       {{- end }}
+      {{- end }}
+      {{- if .Values.exporter.lifecycleHooks }}
+      lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.lifecycleHooks "context" $) | nindent 8 }}
+      {{- end }}
       volumeMounts:
-        {{- if .Values.exporter.flags.web.config.file }}
-        - name: web
+        {{- if and .Values.exporter.configFiles.web .Values.exporter.flags.web.config.file }}
+        - name: config-web
           mountPath: {{ .Values.exporter.flags.web.config.file }}
           subPath: {{ base .Values.exporter.flags.web.config.file }}
         {{- end }}
-        {{- if .Values.exporter.tls.contents }}
-        - name: tls
-          mountPath: {{ .Values.exporter.tls.mountPath }}
+        {{- if .Values.exporter.secret.tls.contents }}
+        - name: secret-tls
+          mountPath: {{ .Values.exporter.secret.tls.mountPath }}
         {{- end }}
+        - name: data
+          mountPath: {{ .Values.persistence.mountPath }}
+          {{- if .Values.persistence.subPath }}
+          subPath: {{ .Values.persistence.subPath }}
+          {{- end }}
       {{- if .Values.exporter.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.exporter.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -118,12 +148,30 @@ spec:
     {{- include "common.tplvalues.render" ( dict "value" .Values.exporter.sidecars "context" $) | nindent 4 }}
     {{- end }}
   volumes:
+    {{- if and .Values.exporter.configFiles.web .Values.exporter.flags.web.config.file }}
+    - name: config-web
+      configMap:
+        name: {{ template "common.names.fullname" . }}-cm
+    {{- end }}
+    {{- if .Values.exporter.secret.tls.contents }}
+    - name: secret-tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    - name: data
+    {{- if .Values.persistence.enabled }}
+      persistentVolumeClaim:
+        claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
+    {{- else }}
+      emptyDir: {}
+    {{- end }}
     {{- if .Values.exporter.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.exporter.extraVolumes "context" $) | nindent 4 }}
     {{- end }}
-  {{ if eq .Values.workloadKind "Deployment" }}
+  {{- if .Values.exporter.pod.enabled }}
+  restartPolicy: {{ .Values.exporter.pod.restartPolicy }}
+  {{- else }}
+  {{- /* https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#pod-template */}}
   restartPolicy: Always
-  {{- else -}}
-  restartPolicy: {{ .Values.exporter.podRestartPolicy }}
   {{- end }}
 {{- end -}}

@@ -3,18 +3,18 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if .Values.exporter.configFile.web }}
+{{- if .Values.exporter.configFiles.web }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ template "common.names.fullname" . }}-cm
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-    app.kubernetes.io/component: prometheus-podman-exporter
+    app.kubernetes.io/component: prometheus-node-exporter
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
   web.yaml: {{ print "|" }}
-{{- include "common.tplvalues.render" (dict "value" .Values.exporter.configFile.web "context" $) | nindent 4 -}}
+{{- include "common.tplvalues.render" (dict "value" .Values.exporter.configFiles.web "context" $) | nindent 4 -}}
 {{- end -}}

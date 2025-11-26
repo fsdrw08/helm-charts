@@ -14,14 +14,14 @@ Return the proper exporter image name
 Return the proper image name (for the init container volume-permissions image)
 */}}
 {{- define "exporter.volumePermissions.image" -}}
-{{- include "common.images.image" ( dict "imageRoot" .Values.volumePermissions.image "global" .Values.global ) -}}
+{{- include "common.images.image" ( dict "imageRoot" .Values.defaultInitContainers.volumePermissions.image "global" .Values.global ) -}}
 {{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "exporter.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.exporter.image .Values.volumePermissions.image) "context" $) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.exporter.image .Values.defaultInitContainers.volumePermissions.image) "context" $) -}}
 {{- end -}}
 
 {{/*
@@ -36,16 +36,6 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
-Return true if cert-manager required annotations for TLS signed certificates are set in the Ingress annotations
-Ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
-*/}}
-{{- define "exporter.ingress.certManagerRequest" -}}
-{{ if or (hasKey . "cert-manager.io/cluster-issuer") (hasKey . "cert-manager.io/issuer") }}
-    {{- true -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Compile all warnings into a single message.
 */}}
 {{- define "exporter.validateValues" -}}
@@ -54,6 +44,7 @@ Compile all warnings into a single message.
 {{- $messages := append $messages (include "exporter.validateValues.bar" .) -}}
 {{- $messages := without $messages "" -}}
 {{- $message := join "\n" $messages -}}
+
 
 {{- if $message -}}
 {{-   printf "\nVALUES VALIDATION:\n%s" $message -}}
@@ -73,9 +64,13 @@ Compile all warnings into a single message.
     {{- else -}}
     {{- /* https://github.com/prometheus/prometheus/pull/7410#issuecomment-718696715 */}}
       {{- if (kindIs "bool" $value) }}
-      {{- if $value }}
+        {{- if $value }}
 - --{{ $fullPath }}
-      {{- end -}}
+        {{- end -}}
+      {{- else if (kindIs "slice" $value) }}
+        {{- range $item := $value }}
+- --{{ $fullPath }}={{ $item }}
+        {{- end }}
       {{- else if not (kindIs "invalid" $value) }}
 - --{{ $fullPath }}={{ $value }}
       {{- end -}}

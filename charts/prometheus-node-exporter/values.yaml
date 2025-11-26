@@ -31,15 +31,56 @@ commonLabels: {}
 ## @param commonAnnotations Annotations to add to all deployed objects
 ##
 commonAnnotations: {}
+## Diagnostic mode
+## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+## @param diagnosticMode.command Command to override all containers in the chart release
+## @param diagnosticMode.args Args to override all containers in the chart release
+##
+diagnosticMode:
+  enabled: false
+  command:
+    - sleep
+  args:
+    - infinity
 
-## @param exporter.workloadKind specify the deploy kind： Pod, or Deployment
-workloadKind: Pod
 ## @section prometheus-node-exporter Parameters
 ##
 
 ## %%MAIN_CONTAINER/POD_DESCRIPTION%%
 ##
 exporter:
+  ## @param exporter.pod Pod configuration
+  ## @param exporter.pod.enabled Run %%MAIN_CONTAINER%% as a Pod rather than a Deployment
+  ## @param exporter.pod.restartPolicy %%MAIN_CONTAINER%% pod container restart policy.
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy
+  ##
+  pod:
+    enabled: true
+    restartPolicy: Never
+  ## @param exporter.hostNetwork Specify if host network should be enabled for exporter pod
+  ##
+  hostNetwork: true
+  ## @param exporter.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  ##
+  dnsConfig: {}
+  ## @param exporter.dnsPolicy Deployment pod DNS policy
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+  ## E.g.
+  ## dnsPolicy: ClusterFirstWithHostNet
+  ##
+  dnsPolicy: ""
   ## prometheus-node-exporter image
   ## ref: https://quay.io/repository/prometheus/node-exporter?tab=tags
   ## @param exporter.image.registry prometheus-node-exporter image registry
@@ -52,7 +93,7 @@ exporter:
   image:
     registry: quay.io
     repository: prometheus/node-exporter
-    tag: v1.9.1
+    tag: v1.10.2
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -67,27 +108,19 @@ exporter:
     ##   - myRegistryKeySecretName
     ##
     pullSecrets: []
-  ## @param exporter.podRestartPolicy specify the pod restart policy if workloadKind set to Pod
-  ## available options: Always, OnFailure, Never
-  podRestartPolicy: Never
-  ## @param exporter.replicaCount Number of prometheus-node-exporter replicas to deploy
+  ## @param exporter.replicaCount Number of prometheus-node-exporter replicas to deploy if workloadKind set to deployment
   ##
   replicaCount: 1
   ## @param exporter.containerPorts prometheus-node-exporter container port to expose to host
   ## e.g.
   ## containerPorts:
-  ##   - name: http
-  ##     containerPort: 80
-  ##     hostPort: 80
-  ##     hostIP: 192.168.255.10
-  ##     protocol: TCP
-  ##   - name: https
-  ##     containerPort: 443
-  ##     hostPort: 443
-  ##     hostIP: 192.168.255.10
+  ##   - name: exporter
+  ##     containerPort: 9882
+  ##     hostPort: 9882
+  ##     hostIP: 127.0.0.1
   ##     protocol: TCP
   ##
-  containerPorts: {}
+  containerPorts: []
   ## Configure extra options for prometheus-node-exporter containers' liveness and readiness probes
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
   ## @param exporter.livenessProbe.enabled Enable livenessProbe on prometheus-node-exporter containers
@@ -147,7 +180,7 @@ exporter:
   ## @param exporter.resourcesPreset Set prometheus-node-exporter container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if exporter.resources is set (exporter.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "small"
+  resourcesPreset: "nano"
   ## @param exporter.resources Set prometheus-node-exporter container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
@@ -178,33 +211,43 @@ exporter:
   containerSecurityContext:
     enabled: false
     runAsUser: 1001
-    # runAsNonRoot: true
-    # readOnlyRootFilesystem: false
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
-  configFile:
-    ## @param exporter.configFile.web content of web config file
+  configFiles:
+    ## @param exporter.configFiles.web content of web config file
+    ##
     web: {}
-  ## @param exporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for %%MAIN_CONTAINER_NAME%%
+  ## @param exporter.secret secret pass to the container
   ##
-  ## @param exporter.tls secret setting of cert and key or whatever tls content will set in the container
-  ##
-  tls:
-    ## @param exporter.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
-    ## this config should match with config under grafana.configFile.server.cert_key and grafana.configFile.server.cert_file if any
-    ##
-    mountPath: /etc/prometheus/certs
-    ## @param exporter.tls.contents secret content of cert and key or whatever tls content will set in the container
-    ## You can set the content key as whatever file name you like
-    ## But the tls set in configFiles above must match with the settings here
-    ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+  secret:
+    ## @param exporter.secret.envVars secret content pass to container via environment variable
     ## e.g.
-    ## contents:
-    ##  ca.crt: ""
-    ##  exporter.crt: ""
-    ##  exporter.key: ""
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
     ##
-    contents: {}
+    envVars: {}
+    ## @param exporter.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param exporter.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
+      ## this config should match with config under exporter.configFiles.web.tls_server_config.cert_file and prometheus.configFiles.web.tls_server_config.key_file
+      ##
+      mountPath: /etc/exporter/secrets/certs
+      ## @param exporter.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  ca.crt: ""
+      ##  exporter.crt: ""
+      ##  exporter.key: ""
+      ##
+      contents: {}
+
   ## @param exporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for prometheus-node-exporter
   ##
   existingConfigmap:
@@ -222,22 +265,34 @@ exporter:
     web:
       config:
         ## @param exporter.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
+        ##
         file: # /etc/exporter/web.yaml
       ## @param exporter.flags.web.Exclude metrics about the exporter itself (promhttp_*, process_*, go_*).
+      ##
       disable-exporter-metrics: false
       ## @param exporter.flags.web.Address on which to expose metrics and web interface. (default ":9882")
+      ##
       listen-address: :9882
       ## @param exporter.flags.web.Maximum number of parallel scrape requests. Use 0 to disable (default 40)
+      ##
       max-requests: 40
       ## @param exporter.flags.web.Path under which to expose metrics. (default "/metrics")
+      ##
       telemetry-path: /metrics
   ## @param exporter.args Override default container args (useful when using custom images)
   ##
-  args: []
+  args: '{{- include "processFlags" (dict "values" .Values.exporter.flags) | trim -}}'
+  ## @param exporter.automountServiceAccountToken Mount Service Account token in prometheus-node-exporter pods
+  ##
+  automountServiceAccountToken: false
   ## @param exporter.hostAliases prometheus-node-exporter pods host aliases
   ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
   ##
   hostAliases: []
+  ## @param exporter.deploymentAnnotations Annotations for prometheus-node-exporter deployment
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  deploymentAnnotations: {}
   ## @param exporter.podLabels Extra labels for prometheus-node-exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   ##
@@ -246,41 +301,96 @@ exporter:
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   ##
   podAnnotations: {}
-  ## Autoscaling configuration
-  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
-  ## @param exporter.autoscaling.enabled Enable autoscaling for exporter
-  ## @param exporter.autoscaling.minReplicas Minimum number of exporter replicas
-  ## @param exporter.autoscaling.maxReplicas Maximum number of exporter replicas
-  ## @param exporter.autoscaling.targetCPU Target CPU utilization percentage
-  ## @param exporter.autoscaling.targetMemory Target Memory utilization percentage
+  ## @param exporter.podAffinityPreset Pod affinity preset. Ignored if `exporter.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
   ##
-  autoscaling:
-    enabled: false
-    minReplicas: ""
-    maxReplicas: ""
-    targetCPU: ""
-    targetMemory: ""
-
-  ## @param exporter.extraEnvVars Array with extra environment variables to add to prometheus-node-exporter nodes
+  podAffinityPreset: ""
+  ## @param exporter.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `exporter.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node exporter.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param exporter.nodeAffinityPreset.type Node affinity preset type. Ignored if `exporter.affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param exporter.nodeAffinityPreset.key Node label key to match. Ignored if `exporter.affinity` is set
+    ##
+    key: ""
+    ## @param exporter.nodeAffinityPreset.values Node label values to match. Ignored if `exporter.affinity` is set
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param exporter.affinity Affinity for prometheus-node-exporter pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## NOTE: `exporter.podAffinityPreset`, `exporter.podAntiAffinityPreset`, and `exporter.nodeAffinityPreset` will be ignored when it's set
+  ##
+  affinity: {}
+  ## @param exporter.nodeSelector Node labels for prometheus-node-exporter pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ##
+  nodeSelector: {}
+  ## @param exporter.tolerations Tolerations for prometheus-node-exporter pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  ## ONLY FOR DEPLOYMENTS:
+  ## @param exporter.updateStrategy.type prometheus-node-exporter deployment strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  ## ONLY FOR STATEFULSETS:
+  ## @param exporter.updateStrategy.type prometheus-node-exporter statefulset strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  ##
+  updateStrategy:
+    ## ONLY FOR DEPLOYMENTS:
+    ## Can be set to RollingUpdate or Recreate
+    ## ONLY FOR STATEFULSETS:
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  ## @param exporter.priorityClassName prometheus-node-exporter pods' priorityClassName
+  ##
+  priorityClassName: ""
+  ## @param exporter.topologySpreadConstraints Topology Spread Constraints for prometheus-node-exporter pod assignment spread across your cluster among failure-domains
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  ##
+  topologySpreadConstraints: []
+  ## @param exporter.schedulerName Name of the k8s scheduler (other than default) for prometheus-node-exporter pods
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+  ## @param exporter.terminationGracePeriodSeconds Seconds prometheus-node-exporter pods need to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ##
+  terminationGracePeriodSeconds: ""
+  ## @param exporter.lifecycleHooks for prometheus-node-exporter containers to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+  ## @param exporter.extraEnvVars Array with extra environment variables to add to prometheus-node-exporter containers
   ## e.g:
   ## extraEnvVars:
   ##   - name: FOO
   ##     value: "bar"
   ##
   extraEnvVars: []
-  ## @param exporter.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for prometheus-node-exporter nodes
+  ## @param exporter.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for prometheus-node-exporter containers
   ##
   extraEnvVarsCM: ""
-  ## @param exporter.extraEnvVarsSecret Name of existing Secret containing extra env vars for prometheus-node-exporter nodes
+  ## @param exporter.extraEnvVarsSecret Name of existing Secret containing extra env vars for prometheus-node-exporter containers
   ##
   extraEnvVarsSecret: ""
-  ## @param exporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-node-exporter container(s)
-  ##
-  extraVolumeMounts: []
-  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-node-exporter pod(s)
+  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-node-exporter pods
   ##
   extraVolumes: []
-  ## @param exporter.sidecars Add additional sidecar containers to the prometheus-node-exporter pod(s)
+  ## @param exporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-node-exporter containers
+  ##
+  extraVolumeMounts: []
+  ## @param exporter.sidecars Add additional sidecar containers to the prometheus-node-exporter pods
   ## e.g:
   ## sidecars:
   ##   - name: your-image-name
@@ -291,7 +401,7 @@ exporter:
   ##         containerPort: 1234
   ##
   sidecars: []
-  ## @param exporter.initContainers Add additional init containers to the prometheus-node-exporter pod(s)
+  ## @param exporter.initContainers Add additional init containers to the prometheus-node-exporter pods
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   ## e.g:
   ## initContainers:
@@ -306,7 +416,7 @@ exporter:
 ##
 
 ## Enable persistence using Persistent Volume Claims
-## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 ##
 persistence:
   ## @param persistence.enabled Enable persistence using Persistent Volume Claims
@@ -336,70 +446,111 @@ persistence:
   ## @param persistence.size Size of data volume
   ##
   size: 8Gi
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
   ## @param persistence.existingClaim The name of an existing PVC to use for persistence
   ##
   existingClaim: ""
+  ## @param persistence.selector Selector to match an existing Persistent Volume for exporter data PVC
+  ## If set, the PVC can't have a PV dynamically provisioned for it
+  ## E.g.
+  ## selector:
+  ##   matchLabels:
+  ##     app: my-app
+  ##
+  selector: {}
 ## @section Init Container Parameters
 ##
 
-## 'volumePermissions' init container parameters
-## Changes the owner and group of the persistent volume mount point to runAsUser:fsGroup values
-##   based on the *podSecurityContext/*containerSecurityContext parameters
-##
-volumePermissions:
-  ## @param volumePermissions.enabled Enable init container that changes the owner/group of the PV mount point to `runAsUser:fsGroup`
+## @section Default init containers Parameters
+
+defaultInitContainers:
+  ## 'volume-permissions' init container
+  ## Changes the owner and group of the persistent volume mount(s) point(s) to runAsUser:fsGroup values
+  ##   based on the *podSecurityContext/*containerSecurityContext parameters
   ##
-  enabled: false
-  ## OS Shell + Utility image
-  ## ref: https://hub.docker.com/r/bitnami/os-shell/tags/
-  ## @param volumePermissions.image.registry OS Shell + Utility image registry
-  ## @param volumePermissions.image.repository OS Shell + Utility image repository
-  ## @param volumePermissions.image.tag OS Shell + Utility image tag (immutable tags are recommended)
-  ## @param volumePermissions.image.pullPolicy OS Shell + Utility image pull policy
-  ## @param volumePermissions.image.pullSecrets OS Shell + Utility image pull secrets
-  ##
-  image:
-    registry: docker.io
-    repository: bitnami/os-shell
-    tag: 11-debian-11-r%%IMAGE_REVISION%%
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
+  volumePermissions:
+    ## @param defaultInitContainers.volumePermissions.enabled Enable init container that adapts the owner/group of the PV mount(s) point(s)
     ##
-    pullSecrets: []
-  ## Init container's resource requests and limits
-  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param volumePermissions.resourcesPreset Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
-  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
-  ##
-  resourcesPreset: "nano"
-  ## @param volumePermissions.resources Set init container requests and limits for different resources like CPU or memory (essential for production workloads)
-  ## Example:
-  ## resources:
-  ##   requests:
-  ##     cpu: 2
-  ##     memory: 512Mi
-  ##   limits:
-  ##     cpu: 3
-  ##     memory: 1024Mi
-  ##
-  resources: {}
-  ## Init container Container Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param volumePermissions.containerSecurityContext.runAsUser Set init container's Security Context runAsUser
-  ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
-  ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
-  ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
-  ##
-  containerSecurityContext:
-    runAsUser: 0
+    enabled: false
+    ## OS Shell + Utility image
+    ## ref: https://hub.docker.com/r/bitnami/os-shell
+    ## @param defaultInitContainers.volumePermissions.image.registry [default: REGISTRY_NAME] "volume-permissions" init-containers' image registry
+    ## @param defaultInitContainers.volumePermissions.image.repository [default: REPOSITORY_NAME/os-shell] "volume-permissions" init-containers' image repository
+    ## @skip defaultInitContainers.volumePermissions.image.tag "volume-permissions" init-containers' image tag (immutable tags are recommended)
+    ## @param defaultInitContainers.volumePermissions.image.digest "volume-permissions" init-containers' image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+    ## @param defaultInitContainers.volumePermissions.image.pullPolicy "volume-permissions" init-containers' image pull policy
+    ## @param defaultInitContainers.volumePermissions.image.pullSecrets "volume-permissions" init-containers' image pull secrets
+    ##
+    image:
+      registry: docker.io
+      repository: bitnami/os-shell
+      tag: 12-debian-12-r46
+      digest: ""
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## Example:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+    ## Configure "volume-permissions" init-container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.enabled Enabled "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.runAsUser Set runAsUser in "volume-permissions" init-containers' Security Context
+    ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+    ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+    ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.privileged Set privileged in "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.capabilities.add List of capabilities to be added in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.capabilities.drop List of capabilities to be dropped in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.seccompProfile.type Set seccomp profile in "volume-permissions" init-containers
+    ##
+    containerSecurityContext:
+      enabled: true
+      seLinuxOptions: {}
+      runAsUser: 0
+      privileged: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: []
+        drop: ["ALL"]
+      seccompProfile:
+        type: "RuntimeDefault"
+    ## "volume-permissions" init container resource requests and limits
+    ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param defaultInitContainers.volumePermissions.resourcesPreset Set "volume-permissions" init container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if defaultInitContainers.volumePermissions.resources is set (defaultInitContainers.volumePermissions.resources is recommended for production).
+    ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+    ##
+    resourcesPreset: "nano"
+    ## @param defaultInitContainers.volumePermissions.resources Set "volume-permissions" init container requests and limits for different resources like CPU or memory (essential for production workloads)
+    ## E.g:
+    ## resources:
+    ##   requests:
+    ##     cpu: 2
+    ##     memory: 512Mi
+    ##   limits:
+    ##     cpu: 3
+    ##     memory: 1024Mi
+    ##
+    resources: {}
 
 ## @section Other Parameters
 ##
+
+## ServiceAccount configuration
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+##
+serviceAccount:
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
 
 ## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
 ##
