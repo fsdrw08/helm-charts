@@ -226,9 +226,9 @@ vault:
     runAsGroup: 1000
     runAsNonRoot: true
     readOnlyRootFilesystem: false
-    # capabilities:
-    #   add:
-    #     - "IPC_LOCK"
+    capabilities:
+      add:
+        - "IPC_LOCK"
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 

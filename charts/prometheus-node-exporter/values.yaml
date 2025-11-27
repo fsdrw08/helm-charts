@@ -60,6 +60,9 @@ exporter:
   ## @param exporter.hostNetwork Specify if host network should be enabled for exporter pod
   ##
   hostNetwork: true
+  ## @param exporter.hostPID Use the host's pid namespace.
+  ##
+  hostPID: true
   ## @param exporter.dnsConfig  Allows users more control on the DNS settings for a Pod.
   ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
   ## E.g.
@@ -115,8 +118,8 @@ exporter:
   ## e.g.
   ## containerPorts:
   ##   - name: exporter
-  ##     containerPort: 9882
-  ##     hostPort: 9882
+  ##     containerPort: 9100
+  ##     hostPort: 9100
   ##     hostIP: 127.0.0.1
   ##     protocol: TCP
   ##
@@ -262,6 +265,15 @@ exporter:
         ##
     ## @param exporter.flags.debug Set log level to debug.
     debug: false
+    ## @param exporter.flags.path specify path.xxx arguments for host monitoring
+    ## ref: https://github.com/prometheus/node_exporter/tree/v1.10.2?tab=readme-ov-file#docker
+    ## ref: https://github.com/prometheus/node_exporter/blob/v1.10.2/collector/paths.go#L24
+    ##
+    path:
+      procfs: /host/proc
+      sysfs: /host/sys
+      rootfs: /host
+      udevfs: /host/run/udev/data
     web:
       config:
         ## @param exporter.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
@@ -272,7 +284,7 @@ exporter:
       disable-exporter-metrics: false
       ## @param exporter.flags.web.Address on which to expose metrics and web interface. (default ":9882")
       ##
-      listen-address: :9882
+      listen-address: :9100
       ## @param exporter.flags.web.Maximum number of parallel scrape requests. Use 0 to disable (default 40)
       ##
       max-requests: 40
@@ -299,8 +311,10 @@ exporter:
   podLabels: {}
   ## @param exporter.podAnnotations Annotations for prometheus-node-exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/prometheus/node_exporter/blob/v1.10.2/Dockerfile#L11
   ##
-  podAnnotations: {}
+  podAnnotations:
+    io.podman.annotations.userns: keep-id:uid=65534,gid=65534
   ## @param exporter.podAffinityPreset Pod affinity preset. Ignored if `exporter.affinity` is set. Allowed values: `soft` or `hard`
   ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
   ##
@@ -386,10 +400,34 @@ exporter:
   extraEnvVarsSecret: ""
   ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-node-exporter pods
   ##
-  extraVolumes: []
+  extraVolumes:
+    - name: root
+      hostPath:
+        path: /
+    - name: proc
+      hostPath:
+        path: /proc
+    - name: sys
+      hostPath:
+        path: /sys
+    - name: udev
+      hostPath:
+        path: /run/udev/data
   ## @param exporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-node-exporter containers
   ##
-  extraVolumeMounts: []
+  extraVolumeMounts:
+    - name: root
+      mountPath: /host/root
+      readOnly: true
+    - name: proc
+      mountPath: /host/proc
+      readOnly: true
+    - name: sys
+      mountPath: /host/sys
+      readOnly: true
+    - name: udev
+      mountPath: /host/udev
+      readOnly: true
   ## @param exporter.sidecars Add additional sidecar containers to the prometheus-node-exporter pods
   ## e.g:
   ## sidecars:
@@ -424,7 +462,7 @@ persistence:
   enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/exporter/data
+  mountPath: null
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

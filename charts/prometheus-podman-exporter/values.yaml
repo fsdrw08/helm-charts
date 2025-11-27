@@ -345,6 +345,7 @@ exporter:
   podLabels: {}
   ## @param exporter.podAnnotations Annotations for exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ## ref: https://github.com/containers/prometheus-podman-exporter/blob/v1.19.0/Containerfile
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=65534,gid=65534
@@ -480,7 +481,7 @@ persistence:
   enabled: false
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /data
+  mountPath: null
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""

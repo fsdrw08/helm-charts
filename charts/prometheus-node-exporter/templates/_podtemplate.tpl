@@ -18,6 +18,7 @@ metadata:
     {{- end }}
 spec:
   hostNetwork: {{ .Values.exporter.hostNetwork }}
+  hostPID: {{ .Values.exporter.hostPID }}
   {{- if .Values.exporter.dnsConfig }}
   dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.exporter.dnsConfig "context" $) | nindent 4 -}}
   {{- end }}
@@ -136,11 +137,13 @@ spec:
         - name: secret-tls
           mountPath: {{ .Values.exporter.secret.tls.mountPath }}
         {{- end }}
+        {{- if .Values.persistence.mountPath }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
           subPath: {{ .Values.persistence.subPath }}
           {{- end }}
+        {{- end }}
       {{- if .Values.exporter.extraVolumeMounts }}
       {{- include "common.tplvalues.render" (dict "value" .Values.exporter.extraVolumeMounts "context" $) | nindent 8 }}
       {{- end }}
@@ -158,12 +161,14 @@ spec:
       secret:
         secretName: {{ template "common.names.fullname" . }}-sec-tls
     {{- end }}
+    {{- if .Values.persistence.mountPath }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
         claimName: {{ default ( print (include "common.names.fullname" .) "-pvc" ) .Values.persistence.existingClaim }}
     {{- else }}
       emptyDir: {}
+    {{- end }}
     {{- end }}
     {{- if .Values.exporter.extraVolumes }}
     {{- include "common.tplvalues.render" (dict "value" .Values.exporter.extraVolumes "context" $) | nindent 4 }}
