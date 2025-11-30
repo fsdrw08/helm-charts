@@ -191,7 +191,7 @@ vault:
   ## @param vault.resourcesPreset Set vault container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if vault.resources is set (vault.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "nano"
+  resourcesPreset: "small"
   ## @param vault.resources Set vault container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
@@ -226,9 +226,9 @@ vault:
     runAsGroup: 1000
     runAsNonRoot: true
     readOnlyRootFilesystem: false
-    capabilities:
-      add:
-        - "IPC_LOCK"
+    # capabilities:
+    #   add:
+    #     - "IPC_LOCK"
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
