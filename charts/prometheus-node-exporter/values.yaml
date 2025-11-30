@@ -273,7 +273,8 @@ exporter:
       procfs: /host/proc
       sysfs: /host/sys
       rootfs: /host
-      udevfs: /host/run/udev/data
+      udev:
+        data: /host/run/udev/data
     web:
       config:
         ## @param exporter.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
