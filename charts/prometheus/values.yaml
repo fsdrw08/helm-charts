@@ -228,8 +228,8 @@ prometheus:
       ## They also serve as defaults for other configuration sections.
       ##
       global:
-        scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-        evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+        scrape_interval: 60s # Set the scrape interval to every 60 seconds. Default is every 1 minute.
+        evaluation_interval: 60s # Evaluate rules every 60 seconds. The default is every 1 minute.
         # scrape_timeout is set to the global default (10s).
       ## @param prometheus.configFiles.prometheus.alerting Alerting specifies settings related to the Alertmanager
       ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/configuration/#alertmanager_config
