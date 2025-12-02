@@ -136,7 +136,7 @@ vault:
   livenessProbe:
     enabled: true
     initialDelaySeconds: 3
-    periodSeconds: 300
+    periodSeconds: 600
     timeoutSeconds: 10
     failureThreshold: 3
     successThreshold: 1
