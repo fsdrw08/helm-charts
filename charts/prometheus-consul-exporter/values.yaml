@@ -1,0 +1,620 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+## Diagnostic mode
+## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+## @param diagnosticMode.command Command to override all containers in the chart release
+## @param diagnosticMode.args Args to override all containers in the chart release
+##
+diagnosticMode:
+  enabled: false
+  command:
+    - sleep
+  args:
+    - infinity
+
+## @section prometheus-consul-exporter Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+exporter:
+  ## @param exporter.pod Pod configuration
+  ## @param exporter.pod.enabled Run prometheus-consul-exporter as a Pod rather than a Deployment
+  ## @param exporter.pod.restartPolicy prometheus-consul-exporter pod container restart policy.
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy
+  ##
+  pod:
+    enabled: true
+    restartPolicy: Never
+  ## @param exporter.hostNetwork Specify if host network should be enabled for exporter pod
+  ##
+  hostNetwork: true
+  ## @param exporter.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  ##
+  dnsConfig: {}
+  ## @param exporter.dnsPolicy Deployment pod DNS policy
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+  ## E.g.
+  ## dnsPolicy: ClusterFirstWithHostNet
+  ##
+  dnsPolicy: ""
+  ## prometheus-consul-exporter image
+  ## ref: https://hub.docker.com/r/bitnami/%%IMAGE_NAME%%/tags/
+  ## @param exporter.image.registry prometheus-consul-exporter image registry
+  ## @param exporter.image.repository prometheus-consul-exporter image repository
+  ## @param exporter.image.tag prometheus-consul-exporter image tag (immutable tags are recommended)
+  ## @param exporter.image.digest prometheus-consul-exporter image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param exporter.image.pullPolicy prometheus-consul-exporter image pull policy
+  ## @param exporter.image.pullSecrets prometheus-consul-exporter image pull secrets
+  ##
+  image:
+    registry: quay.io
+    repository: prometheus/consul-exporter
+    tag: v0.13.0
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param exporter.replicaCount Number of prometheus-consul-exporter replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param exporter.containerPorts prometheus-consul-exporter container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 9107
+  ##     hostPort: 9107
+  ##     hostIP: 127.0.0.1
+  ##     protocol: TCP
+  ##
+  containerPorts: []
+  ## Configure extra options for prometheus-consul-exporter containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param exporter.livenessProbe.enabled Enable livenessProbe on prometheus-consul-exporter containers
+  ## @param exporter.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param exporter.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param exporter.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param exporter.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param exporter.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param exporter.readinessProbe.enabled Enable readinessProbe on prometheus-consul-exporter containers
+  ## @param exporter.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param exporter.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param exporter.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param exporter.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param exporter.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param exporter.startupProbe.enabled Enable startupProbe on prometheus-consul-exporter containers
+  ## @param exporter.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param exporter.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param exporter.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param exporter.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param exporter.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param exporter.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param exporter.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param exporter.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## prometheus-consul-exporter resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param exporter.resourcesPreset Set prometheus-consul-exporter container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if exporter.resources is set (exporter.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param exporter.resources Set prometheus-consul-exporter container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param exporter.podSecurityContext.enabled Enabled prometheus-consul-exporter pods' Security Context
+  ## @param exporter.podSecurityContext.fsGroup Set prometheus-consul-exporter pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param exporter.containerSecurityContext.enabled Enabled prometheus-consul-exporter containers' Security Context
+  ## @param exporter.containerSecurityContext.runAsUser Set prometheus-consul-exporter containers' Security Context runAsUser
+  ## @param exporter.containerSecurityContext.runAsNonRoot Set prometheus-consul-exporter containers' Security Context runAsNonRoot
+  ## @param exporter.containerSecurityContext.readOnlyRootFilesystem Set prometheus-consul-exporter containers' Security Context runAsNonRoot
+  ## ref: https://github.com/prometheus/consul_exporter/blob/v0.13.0/Dockerfile#L10
+  ##
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 65534
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+  ## @param exporter.configFiles Configuration files for prometheus-consul-exporter, will be create in ConfigMap and mount under path /etc/prometheus/<key>.yaml in the container
+  ##
+  configFiles:
+    ## @param exporter.configFiles.web basic authentication and TLS config
+    ## The config file will presents in the path which specify in exporter.flags.web.config.file, default: /etc/prometheus/web.yml
+    ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/https/
+    ## e.g.
+    ## web:
+    ##  tls_server_config:
+    ##    cert_file: /etc/consul_exporter/secrets/certs/consulExporter.crt
+    ##    key_file: /etc/consul_exporter/secrets/certs/consulExporter.key
+    ##
+    web: {}
+  ## @param exporter.secret secret pass to the container
+  ##
+  secret:
+    ## @param exporter.secret.envVars secret content pass to container via environment variable
+    ## e.g.
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
+    ##
+    envVars: {}
+    ## @param exporter.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      ## @param exporter.tls.mountPath secret mount path (dir) setting of cert and key or whatever tls content will set in the container
+      ## this config should match with config under exporter.configFiles.web.tls_server_config.cert_file and exporter.configFiles.web.tls_server_config.key_file if any
+      ##
+      mountPath: /etc/exporter/secrets/certs
+      ## @param exporter.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFiles above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  ca.crt: ""
+      ##  consulExporter.crt: ""
+      ##  consulExporter.key: ""
+      ##
+      contents: {}
+
+  ## @param exporter.existingConfigmap The name of an existing ConfigMap with your custom configuration for prometheus-consul-exporter
+  ##
+  existingConfigmap:
+  ## @param exporter.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param exporter.flags flags for prometheus-consul-exporter command
+  ## ref: https://github.com/prometheus/consul_exporter/tree/v0.13.0?tab=readme-ov-file#flags
+  ##
+  flags:
+    consul:
+      ## @param exporter.flags.consul.agent-only Only export metrics about services registered on local agent.
+      ##
+      agent-only: false
+      ## @param exporter.flags.consul.allow-stale Allow any Consul server (non-leader) to service a read.
+      ##
+      allow_stale: false
+      ## @param exporter.flags.consul.ca-file File path to a PEM-encoded certificate authority used to validate the authenticity of a server certificate.
+      ##
+      ca-file:
+      ## @param exporter.flags.consul.cert-file File path to a PEM-encoded certificate used with the private key to verify the exporter's authenticity.
+      ##
+      cert-file:
+      ## @param exporter.flags.consul.key-file File path to a PEM-encoded private key used with the certificate to verify the exporter's authenticity.
+      ##
+      key-file:
+      ## @param exporter.flags.consul.health-summary Collects information about each registered service and exports consul_catalog_service_node_healthy.
+      ## This requires n+1 Consul API queries to gather all information about each service. Health check information are available via consul_health_service_status as well, but only for services which have a health check configured.
+      ## Defaults to true. Disable using --no-consul.heatlh-summary.
+      ##
+      health-summary: true
+      ## @param exporter.flags.consul.insecure Disable TLS host verification
+      ##
+      insecure: false
+      ## @param exporter.flags.consul.require-consistent Forces the read to be fully consistent
+      ##
+      require-consistent: false
+      ## @param exporter.flags.consul.server-address Address (host and port) of the Consul instance we should connect to. This could be a local agent (localhost:8500, for instance), or the address of a Consul server.
+      ##
+      server-address: http://localhost:8500
+      ## @param exporter.flags.consul.server-name When provided, this overrides the hostname for the TLS certificate. It can be used to ensure that the certificate name matches the hostname we declare.
+      ##
+      server-name:
+      ## @param exporter.flags.consul.timeout Timeout on HTTP requests to consul.
+      ##
+      timeout: 5s
+      ## @param exporter.flags.consul.request-limit Limit the maximum number of concurrent requests to consul, 0 means no limit.
+      ##
+      request-limit: 0
+    log:
+      ## @param exporter.flags.log.format Set the log target and format. Example: logger:syslog?appname=bob&local=7 or logger:stdout?json=true
+      ##
+      format:
+      ## @param exporter.flags.log.level Logging level. info by default.
+      ##
+      level: info
+    ## @param exporter.flags.web exporter web config
+    ## ref: https://github.com/prometheus/exporter-toolkit/blob/master/docs/web-configuration.md
+    ##
+    web:
+      config:
+        ## @param exporter.flags.web.config.file [EXPERIMENTAL] Path to configuration file that can enable TLS or authentication.
+        ## the content of this file is config in exporter.configFiles.web
+        ##
+        file: # /etc/consul_exporter/web.yml
+      ## @param exporter.flags.web.listen-address Address to listen on for UI, API, and telemetry. Can be repeated.
+      ##
+      listen-address: :9107
+      ## @param exporter.flags.web.telemetry-path Path under which to expose metrics.
+      ##
+      telemetry-path: /metrics
+    ## @param exporter.flags.kv This exporter supports grabbing key/value pairs from Consul's KV store and exposing them to Prometheus.
+    ## This can be useful, for instance, if you use Consul KV to store your intended cluster size, and want to graph that value against the actual value found via monitoring.
+    ##
+    kv:
+      ## @param exporter.flags.kv.filter Filter to apply to the keys.
+      ##
+      filter:
+      ## @param exporter.flags.kv.prefix Prefix under which to look for KV pairs.
+      ##
+      prefix:
+  ## @param exporter.args Override default container args (useful when using custom images)
+  ##
+  args: '{{- include "processFlags" (dict "values" .Values.exporter.flags) | trim -}}'
+  ## @param exporter.automountServiceAccountToken Mount Service Account token in prometheus-consul-exporter pods
+  ##
+  automountServiceAccountToken: false
+  ## @param exporter.hostAliases prometheus-consul-exporter pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param exporter.deploymentAnnotations Annotations for prometheus-consul-exporter deployment
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  deploymentAnnotations: {}
+  ## @param exporter.podLabels Extra labels for prometheus-consul-exporter pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param exporter.podAnnotations Annotations for prometheus-consul-exporter pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param exporter.podAffinityPreset Pod affinity preset. Ignored if `exporter.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param exporter.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `exporter.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node exporter.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param exporter.nodeAffinityPreset.type Node affinity preset type. Ignored if `exporter.affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param exporter.nodeAffinityPreset.key Node label key to match. Ignored if `exporter.affinity` is set
+    ##
+    key: ""
+    ## @param exporter.nodeAffinityPreset.values Node label values to match. Ignored if `exporter.affinity` is set
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param exporter.affinity Affinity for prometheus-consul-exporter pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## NOTE: `exporter.podAffinityPreset`, `exporter.podAntiAffinityPreset`, and `exporter.nodeAffinityPreset` will be ignored when it's set
+  ##
+  affinity: {}
+  ## @param exporter.nodeSelector Node labels for prometheus-consul-exporter pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ##
+  nodeSelector: {}
+  ## @param exporter.tolerations Tolerations for prometheus-consul-exporter pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  ## ONLY FOR DEPLOYMENTS:
+  ## @param exporter.updateStrategy.type prometheus-consul-exporter deployment strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  ## ONLY FOR STATEFULSETS:
+  ## @param exporter.updateStrategy.type prometheus-consul-exporter statefulset strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  ##
+  updateStrategy:
+    ## ONLY FOR DEPLOYMENTS:
+    ## Can be set to RollingUpdate or Recreate
+    ## ONLY FOR STATEFULSETS:
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  ## @param exporter.priorityClassName prometheus-consul-exporter pods' priorityClassName
+  ##
+  priorityClassName: ""
+  ## @param exporter.topologySpreadConstraints Topology Spread Constraints for prometheus-consul-exporter pod assignment spread across your cluster among failure-domains
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  ##
+  topologySpreadConstraints: []
+  ## @param exporter.schedulerName Name of the k8s scheduler (other than default) for prometheus-consul-exporter pods
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+  ## @param exporter.terminationGracePeriodSeconds Seconds prometheus-consul-exporter pods need to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ##
+  terminationGracePeriodSeconds: ""
+  ## @param exporter.lifecycleHooks for prometheus-consul-exporter containers to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+  ## @param exporter.extraEnvVars Array with extra environment variables to add to prometheus-consul-exporter containers
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param exporter.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for prometheus-consul-exporter containers
+  ##
+  extraEnvVarsCM: ""
+  ## @param exporter.extraEnvVarsSecret Name of existing Secret containing extra env vars for prometheus-consul-exporter containers
+  ##
+  extraEnvVarsSecret: ""
+  ## @param exporter.extraVolumes Optionally specify extra list of additional volumes for the prometheus-consul-exporter pods
+  ##
+  extraVolumes: []
+  ## @param exporter.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the prometheus-consul-exporter containers
+  ##
+  extraVolumeMounts: []
+  ## @param exporter.sidecars Add additional sidecar containers to the prometheus-consul-exporter pods
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param exporter.initContainers Add additional init containers to the prometheus-consul-exporter pods
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: false
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: null
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+  ## @param persistence.selector Selector to match an existing Persistent Volume for exporter data PVC
+  ## If set, the PVC can't have a PV dynamically provisioned for it
+  ## E.g.
+  ## selector:
+  ##   matchLabels:
+  ##     app: my-app
+  ##
+  selector: {}
+## @section Init Container Parameters
+##
+
+## @section Default init containers Parameters
+
+defaultInitContainers:
+  ## 'volume-permissions' init container
+  ## Changes the owner and group of the persistent volume mount(s) point(s) to runAsUser:fsGroup values
+  ##   based on the *podSecurityContext/*containerSecurityContext parameters
+  ##
+  volumePermissions:
+    ## @param defaultInitContainers.volumePermissions.enabled Enable init container that adapts the owner/group of the PV mount(s) point(s)
+    ##
+    enabled: false
+    ## OS Shell + Utility image
+    ## ref: https://hub.docker.com/r/bitnami/os-shell
+    ## @param defaultInitContainers.volumePermissions.image.registry [default: REGISTRY_NAME] "volume-permissions" init-containers' image registry
+    ## @param defaultInitContainers.volumePermissions.image.repository [default: REPOSITORY_NAME/os-shell] "volume-permissions" init-containers' image repository
+    ## @skip defaultInitContainers.volumePermissions.image.tag "volume-permissions" init-containers' image tag (immutable tags are recommended)
+    ## @param defaultInitContainers.volumePermissions.image.digest "volume-permissions" init-containers' image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+    ## @param defaultInitContainers.volumePermissions.image.pullPolicy "volume-permissions" init-containers' image pull policy
+    ## @param defaultInitContainers.volumePermissions.image.pullSecrets "volume-permissions" init-containers' image pull secrets
+    ##
+    image:
+      registry: docker.io
+      repository: bitnami/os-shell
+      tag: 12-debian-12-r46
+      digest: ""
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## Example:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+    ## Configure "volume-permissions" init-container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.enabled Enabled "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.runAsUser Set runAsUser in "volume-permissions" init-containers' Security Context
+    ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+    ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+    ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.privileged Set privileged in "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.capabilities.add List of capabilities to be added in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.capabilities.drop List of capabilities to be dropped in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.seccompProfile.type Set seccomp profile in "volume-permissions" init-containers
+    ##
+    containerSecurityContext:
+      enabled: true
+      seLinuxOptions: {}
+      runAsUser: 0
+      privileged: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: []
+        drop: ["ALL"]
+      seccompProfile:
+        type: "RuntimeDefault"
+    ## "volume-permissions" init container resource requests and limits
+    ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param defaultInitContainers.volumePermissions.resourcesPreset Set "volume-permissions" init container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if defaultInitContainers.volumePermissions.resources is set (defaultInitContainers.volumePermissions.resources is recommended for production).
+    ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+    ##
+    resourcesPreset: "nano"
+    ## @param defaultInitContainers.volumePermissions.resources Set "volume-permissions" init container requests and limits for different resources like CPU or memory (essential for production workloads)
+    ## E.g:
+    ## resources:
+    ##   requests:
+    ##     cpu: 2
+    ##     memory: 512Mi
+    ##   limits:
+    ##     cpu: 3
+    ##     memory: 1024Mi
+    ##
+    resources: {}
+
+## @section Other Parameters
+##
+
+## ServiceAccount configuration
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+##
+serviceAccount:
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%

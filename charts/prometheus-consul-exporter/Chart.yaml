@@ -1,0 +1,23 @@
+annotations:
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: 0.13.0
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: Exporter for Consul metrics
+home: https://github.com/fsdrw08/helm-charts
+icon: https://avatars.githubusercontent.com/u/3380462?s=48&v=4
+keywords:
+  - monitoring
+  - observability
+  - podman kube play
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: prometheus-consul-exporter
+sources:
+  - https://github.com/prometheus/consul_exporter
+  - ...
+version: 0.1.0

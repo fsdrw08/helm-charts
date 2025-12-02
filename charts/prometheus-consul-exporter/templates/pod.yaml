@@ -1,0 +1,5 @@
+{{- if .Values.exporter.pod.enabled -}}
+apiVersion: v1
+kind: Pod
+{{ template "exporter.podTemplate" . }}
+{{- end }}
