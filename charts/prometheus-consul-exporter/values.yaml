@@ -297,7 +297,7 @@ exporter:
       require-consistent: false
       ## @param exporter.flags.consul.server-address Address (host and port) of the Consul instance we should connect to. This could be a local agent (localhost:8500, for instance), or the address of a Consul server.
       ##
-      server-address: http://localhost:8500
+      server: http://localhost:8500
       ## @param exporter.flags.consul.server-name When provided, this overrides the hostname for the TLS certificate. It can be used to ensure that the certificate name matches the hostname we declare.
       ##
       server-name:
