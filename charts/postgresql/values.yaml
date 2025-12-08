@@ -280,8 +280,10 @@ postgresql:
     ##     chmod og-rwx certs/tls.key
     ##
     pre-start: {}
-    ## @param postgresql.extending.cfg Configuration files (`*.conf`) contained in this directory (postgresql-cfg/) will be included at the end of the image's postgresql.conf file.
+    ## @param postgresql.extending.cfg Configuration files (`*.conf`) contained in this directory ("${APP_DATA}"/src/postgresql-cfg/, ${APP_DATA} default to /opt/app-root ) will be included at the end of the image's postgresql.conf file.
     ## ref: https://github.com/sclorg/postgresql-container/blob/master/16/root/usr/share/container-scripts/postgresql/README.md#postgresql-cfg
+    ## ref: https://github.com/sclorg/postgresql-container/blob/1e8796fa71e6f9920c7c12c870567d137ce332b9/16/root/usr/share/container-scripts/postgresql/common.sh#L168
+    ## ref: https://github.com/sclorg/postgresql-container/blob/1e8796fa71e6f9920c7c12c870567d137ce332b9/src/Dockerfile#L19
     ## e.g.
     ## cfg:
     ##   ssl.conf: |
