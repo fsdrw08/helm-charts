@@ -179,10 +179,10 @@ alloy:
   customStartupProbe: {}
   ## alloy resource requests and limits
   ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-  ## @param alloy.resourcesPreset Set alloy container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if alloy.resources is set (alloy.resources is recommended for production).
+  ## @param alloy.resourcesPreset Set alloy container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if alloy.resources is set (alloy.resources is recommended for production).
   ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
-  resourcesPreset: "nano"
+  resourcesPreset: "micro"
   ## @param alloy.resources Set alloy container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## Example:
   ## resources:
