@@ -93,7 +93,7 @@ nomad:
   image:
     registry: docker.io
     repository: hashicorp/nomad
-    tag: "1.11.0"
+    tag: "1.11.1"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
