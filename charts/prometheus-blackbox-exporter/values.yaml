@@ -93,7 +93,7 @@ exporter:
   image:
     registry: quay.io
     repository: prometheus/blackbox-exporter
-    tag: v0.27.0
+    tag: v0.28.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -226,11 +226,11 @@ exporter:
   configFiles:
     ## @param exporter.configFiles.config the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
     ## The config file will presents in the path which specify in exporter.flags.config.file, default: /etc/prometheus/prometheus.yml
-    ## ref: https://github.com/prometheus/blackbox_exporter/blob/v0.27.0/blackbox.yml
+    ## ref: https://github.com/prometheus/blackbox_exporter/blob/v0.28.0/blackbox.yml
     ##
     config:
       ## @param exporter.configFiles.config.global The global configuration specifies parameters that are valid in all other configuration contexts.
-      ## ref: https://github.com/prometheus/blackbox_exporter/blob/v0.27.0/CONFIGURATION.md
+      ## ref: https://github.com/prometheus/blackbox_exporter/blob/v0.28.0/CONFIGURATION.md
       ##
       modules:
         http_2xx:
@@ -341,7 +341,7 @@ exporter:
   ##
   command: []
   ## @param exporter.flags flags for blackbox_exporter command
-  ## ref: https://github.com/prometheus/blackbox_exporter/blob/v0.27.0/main.go
+  ## ref: https://github.com/prometheus/blackbox_exporter/blob/v0.28.0/main.go
   ##
   flags:
     config:
