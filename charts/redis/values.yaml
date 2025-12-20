@@ -134,7 +134,7 @@ redis:
       image:
         registry: docker.io
         repository: library/redis
-        tag: 8.4.0-alpine
+        tag: 8.4.0
         digest: ""
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -398,7 +398,7 @@ redis:
       image:
         registry: docker.io
         repository: library/redis
-        tag: 8.4.0-alpine
+        tag: 8.4.0
         digest: ""
         ## Specify a imagePullPolicy
         ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
