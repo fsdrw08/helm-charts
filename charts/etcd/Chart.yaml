@@ -4,7 +4,7 @@ annotations:
   category: Database
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v3.6.6
+appVersion: v3.6.7
 dependencies:
   - name: common
     repository: file://../common
