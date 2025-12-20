@@ -93,7 +93,7 @@ consul:
   image:
     registry: docker.io
     repository: hashicorp/consul
-    tag: "1.22.1"
+    tag: "1.22.2"
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -238,7 +238,7 @@ consul:
     # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## ref: https://github.com/hashicorp/consul/blob/v1.22.1/Dockerfile#L311
+  ## ref: https://github.com/hashicorp/consul/blob/v1.22.2/Dockerfile#L311
   ## ref: https://github.com/hashicorp/consul-k8s/blob/main/charts/consul/values.yaml#L1126
   ## @param consul.containerSecurityContext.enabled Enabled consul containers' Security Context
   ## @param consul.containerSecurityContext.runAsUser Set consul containers' Security Context runAsUser
@@ -259,7 +259,7 @@ consul:
   ## You can add whatever sub items under this block
   ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general
   ## ref: https://developer.hashicorp.com/consul/docs/reference/agent/configuration-file/general#general-parameters
-  ## ref: https://github.com/hashicorp/consul/blob/v1.22.1/.release/docker/docker-entrypoint.sh#L54
+  ## ref: https://github.com/hashicorp/consul/blob/v1.22.2/.release/docker/docker-entrypoint.sh#L54
   ##
   configFiles:
     ## @param consul.configFiles.main Main config for server and client agent
@@ -309,7 +309,7 @@ consul:
       ## @param consul.configFiles.main.data_dir This flag provides a data directory for the agent to store state. This is required for all agents.
       ## data_dir is set in official container entrypoint, no need to set in config file
       ## ref: https://developer.hashicorp.com/consul/docs/agent/config/cli-flags#_data_dir
-      ## ref: https://github.com/hashicorp/consul/blob/v1.22.1/.release/docker/docker-entrypoint.sh#L50
+      ## ref: https://github.com/hashicorp/consul/blob/v1.22.2/.release/docker/docker-entrypoint.sh#L50
       ##
       # data_dir: /consul/data
       ## @param consul.configFiles.main.disable_update_check Disables automatic checking for security bulletins and new version releases. This is disabled in Consul Enterprise
