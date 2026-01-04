@@ -1,4 +1,4 @@
-{{- if eq .Values.workloadKind "Pod"  -}}
+{{- if .Values.redis.pod.enabled -}}
 apiVersion: v1
 kind: Pod
 {{ template "redis.podTemplate" . }}

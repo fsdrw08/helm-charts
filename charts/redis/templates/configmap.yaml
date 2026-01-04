@@ -14,9 +14,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-{{- range $key, $val := .Values.redis.containers }}
-{{- if $val.enabled }}
-{{- range $name, $items := $val.configFiles }}
+{{- range $name, $items := .Values.redis.configFiles }}
   {{ $name }}.conf: |-
 {{- range $setting, $value := $items }}
   {{- if kindIs "slice" $value -}}
@@ -26,7 +24,5 @@ data:
   {{- else }}
     {{ $setting }} {{ $value }}
   {{- end }}
-{{- end }}
-{{- end }}
 {{- end }}
 {{- end }}
