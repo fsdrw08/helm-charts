@@ -2,10 +2,10 @@
 
 # prometheus
 
-%%DESCRIPTION%% (check existing examples)
+Prometheus is an open source monitoring and alerting system. It enables sysadmins to monitor their infrastructures by collecting metrics from configured targets at given intervals.
 
 ## TL;DR
-
+For podman kube play
 ```console
 helm template %%HELM_REGISTRY%% --name-template=prometheus | podman kube play -
 ```
