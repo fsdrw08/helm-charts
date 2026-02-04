@@ -1,7 +1,7 @@
 annotations:
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v0.41.3
+appVersion: v0.41.4
 dependencies:
   - name: common
     repository: file://../common
@@ -20,5 +20,5 @@ name: consul-template
 sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/consul-template
   - https://github.com/hashicorp/consul-template
-  - https://github.com/hashicorp/consul-template/blob/v0.41.3/Dockerfile
+  - https://github.com/hashicorp/consul-template/blob/v0.41.4/Dockerfile
 version: 0.1.0

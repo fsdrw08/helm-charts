@@ -91,7 +91,7 @@ loki:
   image:
     registry: docker.io
     repository: grafana/loki
-    tag: 3.6.3
+    tag: 3.6.4
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -133,7 +133,7 @@ loki:
   ## @param loki.livenessProbe.failureThreshold Failure threshold for livenessProbe
   ## @param loki.livenessProbe.successThreshold Success threshold for livenessProbe
   ## ref: https://community.grafana.com/t/loki-healthcheck-in-docker-compose/117767
-  ## update: start from 3.6.3, loki use distroless image, so we cannot use wget or curl in the livenessProbe exec command
+  ## update: start from 3.6.4, loki use distroless image, so we cannot use wget or curl in the livenessProbe exec command
   ## ref: https://github.com/grafana/loki/commit/f2ba692f7659b684fb39cf0a89c66678e33ec9bd
   ##
   livenessProbe:
@@ -228,8 +228,8 @@ loki:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param loki.config loki config file which will host in /etc/loki/local-config.yaml
-  ## ref: https://github.com/grafana/loki/blob/v3.6.3/cmd/loki/Dockerfile#L32
-  ## ref: https://github.com/grafana/loki/blob/v3.6.3/cmd/loki/loki-docker-config.yaml
+  ## ref: https://github.com/grafana/loki/blob/v3.6.4/cmd/loki/Dockerfile#L32
+  ## ref: https://github.com/grafana/loki/blob/v3.6.4/cmd/loki/loki-docker-config.yaml
   ## ref: https://grafana.com/docs/loki/v3.6.x/configure/#supported-contents-and-default-values-of-lokiyaml
   ## ref: https://grafana.com/docs/loki/latest/get-started/deployment-modes/
   ##
@@ -241,7 +241,7 @@ loki:
     ## @param loki.config.common Common configuration to be shared between multiple modules.
     ## If a more specific configuration is given in other sections, the related configuration within this section will be ignored.
     ## ref: https://grafana.com/docs/loki/v3.6.x/configure/#common
-    ## ref: https://github.com/grafana/loki/blob/v3.6.3/production/helm/loki/values.yaml
+    ## ref: https://github.com/grafana/loki/blob/v3.6.4/production/helm/loki/values.yaml
     ##
     common:
       # instance_addr: 127.0.0.1

@@ -24,6 +24,6 @@ sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/alertmanager
   - https://github.com/prometheus/alertmanager
   - https://github.com/prometheus-community/helm-charts
-  - https://github.com/prometheus/alertmanager/blob/v0.30.0/Dockerfile
+  - https://github.com/prometheus/alertmanager/blob/v0.31.0/Dockerfile
   - ...
 version: 0.1.0

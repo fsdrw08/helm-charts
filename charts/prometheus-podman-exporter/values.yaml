@@ -92,7 +92,7 @@ exporter:
   image:
     registry: quay.io
     repository: navidys/prometheus-podman-exporter
-    tag: v1.19.0
+    tag: v1.20.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -345,7 +345,7 @@ exporter:
   podLabels: {}
   ## @param exporter.podAnnotations Annotations for exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/containers/prometheus-podman-exporter/blob/v1.19.0/Containerfile
+  ## ref: https://github.com/containers/prometheus-podman-exporter/blob/v1.20.0/Containerfile
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=65534,gid=65534

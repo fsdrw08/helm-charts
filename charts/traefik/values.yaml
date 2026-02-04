@@ -93,7 +93,7 @@ traefik:
   image:
     registry: docker.io
     repository: library/traefik
-    tag: v3.6.6
+    tag: v3.6.7
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'

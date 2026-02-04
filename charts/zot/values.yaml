@@ -93,7 +93,7 @@ zot:
   image:
     registry: ghcr.io
     repository: project-zot/zot-linux-amd64
-    tag: v2.1.11
+    tag: v2.1.14
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'

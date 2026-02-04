@@ -117,7 +117,7 @@ alertmanager:
   image:
     registry: quay.io
     repository: prometheus/alertmanager
-    tag: v0.30.0
+    tag: v0.31.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -245,7 +245,7 @@ alertmanager:
   configFiles:
     ## @param alertmanager.configFiles.main the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
     ## The config file will presents in the path which specify in alertmanager.flags.config.file, default: /etc/prometheus/prometheus.yml
-    ## ref: https://github.com/prometheus/alertmanager/blob/v0.30.0/examples/ha/alertmanager.yml
+    ## ref: https://github.com/prometheus/alertmanager/blob/v0.31.0/examples/ha/alertmanager.yml
     ## ref: https://prometheus.io/docs/alerting/0.28/configuration/
     ##
     main:
@@ -336,7 +336,7 @@ alertmanager:
       file: /etc/alertmanager/alertmanager.yml
     ## @param alertmanager.flags.cluster To create a highly available cluster of the Alertmanager the instances need to be configured to communicate with each other.
     ## This is configured using the --cluster.* flags.
-    ## ref: https://github.com/prometheus/alertmanager/tree/v0.30.0?tab=readme-ov-file#high-availability
+    ## ref: https://github.com/prometheus/alertmanager/tree/v0.31.0?tab=readme-ov-file#high-availability
     ##
     cluster:
       ## @param alertmanager.flags.cluster.listen-address string: cluster listen address (default "0.0.0.0:9094"; empty string disables HA mode)
@@ -381,7 +381,7 @@ alertmanager:
 
     ## @param alertmanager.flags.enable-feature Comma separated feature names to enable. Valid options:
     ## FeatureReceiverNameInMetrics, FeatureClassicMode, FeatureUTF8StrictMode, FeatureAutoGOMEMLIMIT, FeatureAutoGOMAXPROCS,
-    ## See https://github.com/prometheus/alertmanager/blob/v0.30.0/featurecontrol/featurecontrol.go#L31-L37 for more details.
+    ## See https://github.com/prometheus/alertmanager/blob/v0.31.0/featurecontrol/featurecontrol.go#L31-L37 for more details.
     ##
     enable-feature:
     ## @param alertmanager.flags.log.level Only log messages with the given severity or above. One of: [debug, info, warn, error]

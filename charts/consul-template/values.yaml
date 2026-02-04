@@ -135,7 +135,7 @@ consulTemplate:
   image:
     registry: docker.io
     repository: hashicorp/consul-template
-    tag: 0.41.3
+    tag: 0.41.4
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -260,7 +260,7 @@ consulTemplate:
   configFiles:
     ## @param consulTemplate.configFiles.main Main config consul-template
     ## The config under this node will convert to json file and place in /consul-template/config/main.json
-    ## https://github.com/hashicorp/consul-template/tree/v0.41.3?tab=readme-ov-file#docker-image-use
+    ## https://github.com/hashicorp/consul-template/tree/v0.41.4?tab=readme-ov-file#docker-image-use
     ##
     main:
       ## @param consulTemplate.configFiles.main.block_query_wait This is amount of time in seconds to do a blocking query for.
