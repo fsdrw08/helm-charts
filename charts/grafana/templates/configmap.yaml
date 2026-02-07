@@ -14,7 +14,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-{{- /* https://github.com/grafana/helm-charts/blob/main/charts/grafana/templates/_config.tpl */}}
+{{- /* https://github.com/grafana-community/helm-charts/blob/grafana-11.0.1/charts/grafana/templates/_config.tpl */}}
   grafana.ini: |
 {{- range $node, $config := .Values.grafana.configFiles.custom }}
 {{- if not (kindIs "map" $config) }}
@@ -25,7 +25,17 @@ data:
 {{- if kindIs "map" $config }}
     [{{ $node }}]
     {{- range $key, $value := $config }}
+    {{- if kindIs "invalid" $value }}
+    {{ $key }} =
+    {{- else if kindIs "slice" $value }}
+    {{- with $value }}
+    {{ $key }} = {{ join "," . }}
+    {{- end -}}
+    {{- else if kindIs "string" $value }}
+    {{ $key }} = {{ tpl $value $ }}
+    {{- else }}
     {{ $key }} = {{ $value }}
+    {{- end }}
     {{- end }}
 {{- end }}
 {{- end }}
