@@ -82,7 +82,7 @@ minio:
   ##
   dnsPolicy: ""
   ## minio image
-  ## ref: https://quay.io/repository/minio/minio?tab=tags
+  ## ref: https://hub.docker.com/r/pgsty/minio
   ## @param minio.image.registry minio image registry
   ## @param minio.image.repository minio image repository
   ## @param minio.image.tag minio image tag (immutable tags are recommended)
@@ -91,9 +91,9 @@ minio:
   ## @param minio.image.pullSecrets minio image pull secrets
   ##
   image:
-    registry: quay.io
-    repository: minio/minio
-    tag: RELEASE.2025-04-22T22-12-26Z
+    registry: docker.io
+    repository: pgsty/minio
+    tag: RELEASE.2026-03-25T00-00-00Z
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -217,7 +217,7 @@ minio:
   ## @param minio.containerSecurityContext.runAsUser Set minio containers' Security Context runAsUser
   ## @param minio.containerSecurityContext.runAsNonRoot Set minio containers' Security Context runAsNonRoot
   ## @param minio.containerSecurityContext.readOnlyRootFilesystem Set minio containers' Security Context runAsNonRoot
-  ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/helm/minio/values.yaml#L272-L277
+  ## ref: https://github.com/pgsty/minio/blob/RELEASE.2026-03-25T00-00-00Z/helm/minio/values.yaml#L272-L277
   ##
   containerSecurityContext:
     enabled: true
@@ -255,13 +255,13 @@ minio:
     MINIO_ROOT_PASSWORD_FILE: /etc/minio/secrets/secret_key
     ## @param minio.config.MINIO_UPDATE In place update is true by default if the MINIO_UPDATE is not set or is not set to 'off',
     ## if MINIO_UPDATE is set to 'off' then in-place update is off.
-    ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/cmd/common-main.go#L808
+    ## ref: https://github.com/minio/minio/blob/RELEASE.2026-03-25T00-00-00Z/cmd/common-main.go#L808
     ##
     MINIO_UPDATE: "off"
     ## @param minio.config.MINIO_VOLUMES The directories or drives the minio server process uses as the storage backend.
     ## Functionally equivalent to setting minio server DIRECTORIES. Use this value when configuring MinIO to run using an environment file.
     ## ref: https://docs.min.io/enterprise/aistor-object-store/reference/aistor-server/settings/core/#env-minio-volumes
-    ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/Dockerfile
+    ## ref: https://github.com/minio/minio/blob/RELEASE.2026-03-25T00-00-00Z/Dockerfile
     ##
     MINIO_VOLUMES: /data
   ## @param minio.tls secret setting of cert and key or whatever tls content will set in the container
@@ -277,7 +277,7 @@ minio:
     tls:
       ## @param minio.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
       ## to tell minio use this path, add --certs-dir=/etc/minio/certs in MINIO_OPTS
-      ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/helm/minio/values.yaml#L109
+      ## ref: https://github.com/minio/minio/blob/RELEASE.2026-03-25T00-00-00Z/helm/minio/values.yaml#L109
       ## ref: https://docs.min.io/enterprise/aistor-object-store/installation/linux/network-encryption/
       ##
       mountPath: /etc/minio/certs
@@ -341,7 +341,7 @@ minio:
   podLabels: {}
   ## @param minio.podAnnotations Annotations for minio pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/minio/minio/blob/RELEASE.2025-04-22T22-12-26Z/helm/minio/values.yaml#L272-L277
+  ## ref: https://github.com/minio/minio/blob/RELEASE.2026-03-25T00-00-00Z/helm/minio/values.yaml#L272-L277
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=1000,gid=1000

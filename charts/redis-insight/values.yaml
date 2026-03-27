@@ -93,7 +93,7 @@ redisInsight:
   image:
     registry: docker.io
     repository: redis/redisinsight
-    tag: 3.0.2
+    tag: 3.2.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -224,7 +224,7 @@ redisInsight:
   ## ref: https://redis.io/docs/latest/operate/redisinsight/configuration/
   ##
   config:
-    # https://github.com/redis/RedisInsight/blob/3.0.2/Dockerfile#L55
+    # https://github.com/redis/RedisInsight/blob/3.2.0/Dockerfile#L55
     RI_APP_FOLDER_ABSOLUTE_PATH: /data
     RI_APP_HOST: 127.0.0.1
     RI_APP_PORT: 5540

@@ -6,15 +6,17 @@ annotations:
 apiVersion: v2
 # don't upgrade to newer version, as it may break compatibility with the existing configuration
 # ref: OPENID/OIDC related login option disappeared in web UI https://github.com/minio/minio/issues/21324
-appVersion: RELEASE.2025-04-22T22-12-26Z
+appVersion: RELEASE.2026-03-25T00-00-00Z
 dependencies:
   - name: common
     repository: file://../common
     version: 2.x.x
 description: |
   MinIO(R) is an object storage server, compatible with Amazon S3 cloud storage service, mainly used for storing unstructured data (such as photos, videos, log files, etc.).
-  Don't upgrade to version newer than RELEASE.2025-04-22T22-12-26Z, as it may break compatibility with the existing configuration
-  ref: [OPENID/OIDC related login option disappeared in web UI](https://github.com/minio/minio/issues/21324)
+  Use https://github.com/pgsty/minio instead of https://github.com/minio/minio.
+# Don't upgrade to version newer than RELEASE.2025-04-22T22-12-26Z, as it may break compatibility with the existing configuration
+# ref: [OPENID/OIDC related login option disappeared in web UI](https://github.com/minio/minio/issues/21324)
+
 home: https://github.com/fsdrw08/helm-charts
 icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/minio/img/minio-stack-220x234.png
 keywords:
@@ -30,5 +32,5 @@ maintainers:
 name: minio
 sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/minio
-  - https://github.com/minio/minio
+  - https://github.com/pgsty/minio
 version: 0.1.0
