@@ -4,15 +4,14 @@ annotations:
   category: Database
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: 8.6.2
+appVersion: 8.6.3
 dependencies:
   - name: common
     repository: file://../common
     version: 2.x.x
-description:
-  Redis(R) is an open source, advanced key-value store. It is often referred
-  to as a data structure server since keys can contain strings, hashes, lists, sets
-  and sorted sets.
+description: Redis(R) is an open source, advanced key-value store. It is often
+  referred to as a data structure server since keys can contain strings, hashes,
+  lists, sets and sorted sets.
 home: https://github.com/fsdrw08/helm-charts
 icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/redis/img/redis-stack-220x234.png
 keywords:
