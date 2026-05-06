@@ -4,12 +4,14 @@ annotations:
   category: Database
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v3.6.7
+appVersion: v3.6.11
 dependencies:
   - name: common
     repository: file://../common
     version: 2.x.x
-description: etcd is a distributed key-value store designed to securely store data across a cluster. etcd is widely used in production on account of its reliability, fault-tolerance and ease of use.
+description: etcd is a distributed key-value store designed to securely store
+  data across a cluster. etcd is widely used in production on account of its
+  reliability, fault-tolerance and ease of use.
 home: https://github.com/fsdrw08/helm-charts
 icon: https://bitnami.com/assets/stacks/etcd/img/etcd-stack-220x234.png
 keywords:

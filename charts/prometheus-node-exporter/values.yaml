@@ -96,7 +96,7 @@ exporter:
   image:
     registry: quay.io
     repository: prometheus/node-exporter
-    tag: v1.10.2
+    tag: v1.11.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -266,8 +266,8 @@ exporter:
     ## @param exporter.flags.debug Set log level to debug.
     debug: false
     ## @param exporter.flags.path specify path.xxx arguments for host monitoring
-    ## ref: https://github.com/prometheus/node_exporter/tree/v1.10.2?tab=readme-ov-file#docker
-    ## ref: https://github.com/prometheus/node_exporter/blob/v1.10.2/collector/paths.go#L24
+    ## ref: https://github.com/prometheus/node_exporter/tree/v1.11.1?tab=readme-ov-file#docker
+    ## ref: https://github.com/prometheus/node_exporter/blob/v1.11.1/collector/paths.go#L24
     ##
     path:
       procfs: /host/proc
@@ -312,7 +312,7 @@ exporter:
   podLabels: {}
   ## @param exporter.podAnnotations Annotations for prometheus-node-exporter pods
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  ## ref: https://github.com/prometheus/node_exporter/blob/v1.10.2/Dockerfile#L11
+  ## ref: https://github.com/prometheus/node_exporter/blob/v1.11.1/Dockerfile#L11
   ##
   podAnnotations:
     io.podman.annotations.userns: keep-id:uid=65534,gid=65534
@@ -558,7 +558,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: ["ALL"]
+        drop: [ "ALL" ]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits

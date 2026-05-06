@@ -88,7 +88,7 @@ etcd:
   image:
     registry: quay.io
     repository: coreos/etcd
-    tag: v3.6.7
+    tag: v3.6.11
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -498,7 +498,7 @@ etcd:
     logger: zap
     ## @param etcd.configFile.log-outputs Specify 'stdout' or 'stderr' to skip journald logging even when running under systemd, or list of comma separated output targets.
     ##
-    log-outputs: [stderr]
+    log-outputs: [ stderr ]
     ## @param etcd.configFile.log-level Configures log level. Only supports debug, info, warn, error, panic, or fatal.
     ##
     log-level: info
@@ -808,7 +808,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: ["ALL"]
+        drop: [ "ALL" ]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits

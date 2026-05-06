@@ -93,7 +93,7 @@ lldap:
   image:
     registry: docker.io
     repository: lldap/lldap
-    tag: v0.6.2-alpine-rootless
+    tag: v0.6.3-alpine-rootless
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -531,7 +531,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: ["ALL"]
+        drop: [ "ALL" ]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits

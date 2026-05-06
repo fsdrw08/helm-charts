@@ -93,7 +93,7 @@ traefik:
   image:
     registry: docker.io
     repository: library/traefik
-    tag: v3.6.12
+    tag: v3.7.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -624,7 +624,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: ["ALL"]
+        drop: [ "ALL" ]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits
