@@ -93,7 +93,7 @@ cockpit:
   image:
     registry: quay.io
     repository: cockpit/ws
-    tag: 358
+    tag: 360.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -200,13 +200,13 @@ cockpit:
   podSecurityContext:
     enabled: false
     # fsGroup: 1001
-  ## Configure Container Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param cockpit.containerSecurityContext.enabled Enabled cockpit containers' Security Context
-  ## @param cockpit.containerSecurityContext.runAsUser Set cockpit containers' Security Context runAsUser
-  ## @param cockpit.containerSecurityContext.runAsNonRoot Set cockpit containers' Security Context runAsNonRoot
-  ## @param cockpit.containerSecurityContext.readOnlyRootFilesystem Set cockpit containers' Security Context runAsNonRoot
-  ##
+    ## Configure Container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## @param cockpit.containerSecurityContext.enabled Enabled cockpit containers' Security Context
+    ## @param cockpit.containerSecurityContext.runAsUser Set cockpit containers' Security Context runAsUser
+    ## @param cockpit.containerSecurityContext.runAsNonRoot Set cockpit containers' Security Context runAsNonRoot
+    ## @param cockpit.containerSecurityContext.readOnlyRootFilesystem Set cockpit containers' Security Context runAsNonRoot
+    ##
   containerSecurityContext:
     enabled: false
     runAsUser: 1001
@@ -215,9 +215,9 @@ cockpit:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
   ## @param cockpit.config the cockpit web server config, which will place in /etc/cockpit/cockpit.conf
-  ## ref: https://github.com/cockpit-project/cockpit/blob/358/containers/ws/default-bastion.conf
+  ## ref: https://github.com/cockpit-project/cockpit/blob/360.1/containers/ws/default-bastion.conf
   ## ref: https://cockpit-project.org/guide/latest/cockpit.conf.5.html
-  ## ref: https://github.com/cockpit-project/cockpit/blob/358/doc/authentication.md
+  ## ref: https://github.com/cockpit-project/cockpit/blob/360.1/doc/authentication.md
   ##
   config:
     WebService:
@@ -503,7 +503,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: ["ALL"]
+        drop: [ "ALL" ]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits

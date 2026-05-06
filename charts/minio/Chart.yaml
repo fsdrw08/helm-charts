@@ -6,7 +6,7 @@ annotations:
 apiVersion: v2
 # don't upgrade to newer version, as it may break compatibility with the existing configuration
 # ref: OPENID/OIDC related login option disappeared in web UI https://github.com/minio/minio/issues/21324
-appVersion: RELEASE.2026-03-25T00-00-00Z
+appVersion: RELEASE.2026-04-17T00-00-00Z
 dependencies:
   - name: common
     repository: file://../common
