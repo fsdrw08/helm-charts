@@ -2,15 +2,14 @@ annotations:
   category: Analytics
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v3.10.0
+appVersion: v3.11.3
 dependencies:
   - name: common
     repository: file://../common
     version: 2.x.x
-description:
-  Prometheus is an open source monitoring and alerting system. It enables
-  sysadmins to monitor their infrastructures by collecting metrics from configured
-  targets at given intervals.
+description: Prometheus is an open source monitoring and alerting system. It
+  enables sysadmins to monitor their infrastructures by collecting metrics from
+  configured targets at given intervals.
 home: https://github.com/prometheus/prometheus
 icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/prometheus/img/prometheus-stack-220x234.png
 keywords:
@@ -25,6 +24,6 @@ sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/prometheus
   - https://github.com/prometheus/prometheus
   - https://github.com/prometheus-community/helm-charts
-  - https://github.com/prometheus/prometheus/blob/v3.10.0/Dockerfile
+  - https://github.com/prometheus/prometheus/blob/v3.11.3/Dockerfile
   - ...
 version: 0.1.0

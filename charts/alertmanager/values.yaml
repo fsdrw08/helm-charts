@@ -117,7 +117,7 @@ alertmanager:
   image:
     registry: quay.io
     repository: prometheus/alertmanager
-    tag: v0.31.0
+    tag: v0.32.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -245,7 +245,7 @@ alertmanager:
   configFiles:
     ## @param alertmanager.configFiles.main the configuration file defines everything related to scraping jobs and their instances, as well as which rule files to load.
     ## The config file will presents in the path which specify in alertmanager.flags.config.file, default: /etc/prometheus/prometheus.yml
-    ## ref: https://github.com/prometheus/alertmanager/blob/v0.31.0/examples/ha/alertmanager.yml
+    ## ref: https://github.com/prometheus/alertmanager/blob/v0.32.1/examples/ha/alertmanager.yml
     ## ref: https://prometheus.io/docs/alerting/0.28/configuration/
     ##
     main:
@@ -261,7 +261,7 @@ alertmanager:
         ## This effectively disables aggregation entirely, passing through all alerts as-is.
         ## This is unlikely to be what you want, unless you have a very low alert volume or your upstream notification system performs its own grouping.
         ##
-        group_by: ["alertname"]
+        group_by: [ "alertname" ]
         ## @param alertmanager.configFiles.main.route.group_wait How long to initially wait to send a notification for a group of alerts.
         ## Allows to wait for an inhibiting alert to arrive or collect more initial alerts for the same group. (Usually ~0s to few minutes.)
         ## If omitted, child routes inherit the group_wait of the parent route.
@@ -290,7 +290,7 @@ alertmanager:
             severity: "critical"
           target_match:
             severity: "warning"
-          equal: ["alertname", "dev", "instance"]
+          equal: [ "alertname", "dev", "instance" ]
     ## @param alertmanager.configFiles.web basic authentication and TLS config
     ## The config file will presents in the path which specify in alertmanager.flags.web.config.file, default: /etc/prometheus/web.yml
     ## ref: https://prometheus.io/docs/prometheus/3.4/configuration/https/
@@ -336,7 +336,7 @@ alertmanager:
       file: /etc/alertmanager/alertmanager.yml
     ## @param alertmanager.flags.cluster To create a highly available cluster of the Alertmanager the instances need to be configured to communicate with each other.
     ## This is configured using the --cluster.* flags.
-    ## ref: https://github.com/prometheus/alertmanager/tree/v0.31.0?tab=readme-ov-file#high-availability
+    ## ref: https://github.com/prometheus/alertmanager/tree/v0.32.1?tab=readme-ov-file#high-availability
     ##
     cluster:
       ## @param alertmanager.flags.cluster.listen-address string: cluster listen address (default "0.0.0.0:9094"; empty string disables HA mode)
@@ -381,7 +381,7 @@ alertmanager:
 
     ## @param alertmanager.flags.enable-feature Comma separated feature names to enable. Valid options:
     ## FeatureReceiverNameInMetrics, FeatureClassicMode, FeatureUTF8StrictMode, FeatureAutoGOMEMLIMIT, FeatureAutoGOMAXPROCS,
-    ## See https://github.com/prometheus/alertmanager/blob/v0.31.0/featurecontrol/featurecontrol.go#L31-L37 for more details.
+    ## See https://github.com/prometheus/alertmanager/blob/v0.32.1/featurecontrol/featurecontrol.go#L31-L37 for more details.
     ##
     enable-feature:
     ## @param alertmanager.flags.log.level Only log messages with the given severity or above. One of: [debug, info, warn, error]

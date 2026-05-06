@@ -4,15 +4,14 @@ annotations:
   category: Infrastructure
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v3.7.0
+appVersion: v3.7.1
 dependencies:
   - name: common
     repository: file://../common
     version: 2.x.x
-description:
-  Grafana Loki is a horizontally scalable, highly available, and multi-tenant
-  log aggregation system. It provides real-time long tailing and full persistence
-  to object storage.
+description: Grafana Loki is a horizontally scalable, highly available, and
+  multi-tenant log aggregation system. It provides real-time long tailing and
+  full persistence to object storage.
 home: https://github.com/fsdrw08/helm-charts
 icon: https://bitnami.com/assets/stacks/%%IMAGE_NAME%%/img/%%IMAGE_NAME%%-stack-220x234.png
 keywords:
@@ -28,5 +27,5 @@ name: loki
 sources:
   - https://github.com/fsdrw08/helm-charts/tree/main/charts/loki
   - https://github.com/grafana/loki
-  - https://github.com/grafana/loki/blob/v3.7.0/cmd/loki/Dockerfile
+  - https://github.com/grafana/loki/blob/v3.7.1/cmd/loki/Dockerfile
 version: 0.1.0

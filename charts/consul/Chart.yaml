@@ -4,7 +4,7 @@ annotations:
   category: DeveloperTools
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: "1.22.6"
+appVersion: "1.22.7"
 dependencies:
   - name: common
     repository: file://../common
