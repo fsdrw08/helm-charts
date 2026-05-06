@@ -4,12 +4,13 @@ annotations:
   category: Infrastructure
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v2.1.15
+appVersion: v2.1.16
 dependencies:
   - name: common
     repository: file://../common
     version: 2.x.x
-description: zot - A scale-out production-ready vendor-neutral OCI-native container image/artifact registry
+description: zot - A scale-out production-ready vendor-neutral OCI-native
+  container image/artifact registry
 home: https://github.com/fsdrw08/helm-charts
 icon: https://github.com/project-zot/project-zot.github.io/blob/ed4be26e6e4ce408b4bfdd83408ed511d815730b/docs/assets/images/logo.png
 keywords:

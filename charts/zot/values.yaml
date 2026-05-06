@@ -93,7 +93,7 @@ zot:
   image:
     registry: ghcr.io
     repository: project-zot/zot-linux-amd64
-    tag: v2.1.15
+    tag: v2.1.16
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -201,13 +201,13 @@ zot:
   podSecurityContext:
     enabled: false
     # fsGroup: 1001
-  ## Configure Container Security Context
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## @param zot.containerSecurityContext.enabled Enabled zot containers' Security Context
-  ## @param zot.containerSecurityContext.runAsUser Set zot containers' Security Context runAsUser
-  ## @param zot.containerSecurityContext.runAsNonRoot Set zot containers' Security Context runAsNonRoot
-  ## @param zot.containerSecurityContext.readOnlyRootFilesystem Set zot containers' Security Context runAsNonRoot
-  ##
+    ## Configure Container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## @param zot.containerSecurityContext.enabled Enabled zot containers' Security Context
+    ## @param zot.containerSecurityContext.runAsUser Set zot containers' Security Context runAsUser
+    ## @param zot.containerSecurityContext.runAsNonRoot Set zot containers' Security Context runAsNonRoot
+    ## @param zot.containerSecurityContext.readOnlyRootFilesystem Set zot containers' Security Context runAsNonRoot
+    ##
   containerSecurityContext:
     enabled: false
     runAsUser: 1001
@@ -268,8 +268,8 @@ zot:
 
   ## @param zot.existingConfigmap The name of an existing ConfigMap with your custom configuration for zot
   ##
-  existingConfigmap:
-  ## @param zot.command Override default container command (useful when using custom images)
+  existingConfigmap: ## @param zot.command Override default container command (useful when using custom images)
+
   ##
   command: []
   ## @param zot.args Override default container args (useful when using custom images)
@@ -512,7 +512,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: ["ALL"]
+        drop: [ "ALL" ]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits
