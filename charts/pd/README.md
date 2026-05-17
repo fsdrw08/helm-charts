@@ -15,7 +15,7 @@ helm template . --name-template=pd | podman kube play -
 
 ## Introduction
 
-%%INTRODUCTION%% (check existing examples)
+PD is the abbreviation for Placement Driver. It manages and schedules TiKV clusters.
 
 ## Prerequisites
 

@@ -224,8 +224,8 @@ pd:
 
   # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
 
-  ## @param pd.configFile An etcd configuration file place in /etc/etcd/etcd.config.yml
-  ## the config file will pass to etcd workload by args --config-file /etc/etcd/etcd.config.yml
+  ## @param pd.configFile An PD configuration file place in /etc/pd/config.toml
+  ## the config file will pass to PD workload by args --config-file /etc/pd/config.toml
   ## ref:
   ##  https://github.com/tikv/pd/blob/v8.5.6/conf/config.toml
   ##
