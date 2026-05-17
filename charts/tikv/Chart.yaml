@@ -1,0 +1,22 @@
+annotations:
+  licenses: Apache-2.0
+apiVersion: v2
+appVersion: v8.5.6
+dependencies:
+  - name: common
+    repository: file://../common
+    version: 2.x.x
+description: Distributed transactional key-value database, originally created to complement TiDB
+home: https://github.com/fsdrw08/helm-charts
+icon: https://tikv.org/img/logos/horizontal/white/tikv-horizontal-white.svg
+keywords:
+  - podman kube play
+  - tikv
+maintainers:
+  - name: Windom WU
+    url: https://github.com/fsdrw08/helm-charts
+name: tikv
+sources:
+  - https://github.com/fsdrw08/helm-charts/tree/main/charts/tikv
+  - https://github.com/tikv/tikv/tree/main/charts/tikv
+version: 0.1.0

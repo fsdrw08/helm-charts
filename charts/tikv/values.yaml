@@ -1,0 +1,595 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+##
+## @param nameOverride String to partially override common.names.name
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override common.names.fullname
+##
+fullnameOverride: ""
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: {}
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: {}
+## Diagnostic mode
+## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+## @param diagnosticMode.command Command to override all containers in the chart release
+## @param diagnosticMode.args Args to override all containers in the chart release
+##
+diagnosticMode:
+  enabled: false
+  command:
+    - sleep
+  args:
+    - infinity
+
+## @section tikv Parameters
+##
+
+## %%MAIN_CONTAINER/POD_DESCRIPTION%%
+##
+tikv:
+  ## @param tikv.pod Pod configuration
+  ## @param tikv.pod.enabled Run tikv as a Pod rather than a Deployment
+  ## @param tikv.pod.restartPolicy tikv pod container restart policy.
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy
+  ##
+  pod:
+    enabled: true
+    restartPolicy: Never
+  ## @param tikv.hostNetwork Specify if host network should be enabled for tikv pod
+  ##
+  hostNetwork: true
+  ## @param tikv.dnsConfig  Allows users more control on the DNS settings for a Pod.
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+  ## E.g.
+  ## dnsConfig:
+  ##   nameservers:
+  ##     - 192.0.2.1 # this is an example
+  ##   searches:
+  ##     - ns1.svc.cluster-domain.example
+  ##     - my.dns.search.suffix
+  ##   options:
+  ##     - name: ndots
+  ##       value: "2"
+  ##     - name: edns0
+  ##
+  dnsConfig: {}
+  ## @param tikv.dnsPolicy Deployment pod DNS policy
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+  ## E.g.
+  ## dnsPolicy: ClusterFirstWithHostNet
+  ##
+  dnsPolicy: ""
+  ## tikv image
+  ## ref: https://hub.docker.com/r/bitnami/%%IMAGE_NAME%%/tags/
+  ## @param tikv.image.registry tikv image registry
+  ## @param tikv.image.repository tikv image repository
+  ## @param tikv.image.tag tikv image tag (immutable tags are recommended)
+  ## @param tikv.image.digest tikv image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag image tag (immutable tags are recommended)
+  ## @param tikv.image.pullPolicy tikv image pull policy
+  ## @param tikv.image.pullSecrets tikv image pull secrets
+  ##
+  image:
+    registry: docker.io
+    repository: pingcap/tikv
+    tag: v8.5.6
+    digest: ""
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+  ## @param tikv.replicaCount Number of tikv replicas to deploy if workloadKind set to deployment
+  ##
+  replicaCount: 1
+  ## @param tikv.containerPorts tikv container port to expose to host
+  ## e.g.
+  ## containerPorts:
+  ##   - name: http
+  ##     containerPort: 80
+  ##     hostPort: 80
+  ##     hostIP: 127.0.0.1
+  ##     protocol: TCP
+  ##   - name: https
+  ##     containerPort: 443
+  ##     hostPort: 443
+  ##     hostIP: 127.0.0.1
+  ##     protocol: TCP
+  ##
+  containerPorts: []
+  ## Configure extra options for tikv containers' liveness and readiness probes
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  ## @param tikv.livenessProbe.enabled Enable livenessProbe on tikv containers
+  ## @param tikv.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+  ## @param tikv.livenessProbe.periodSeconds Period seconds for livenessProbe
+  ## @param tikv.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+  ## @param tikv.livenessProbe.failureThreshold Failure threshold for livenessProbe
+  ## @param tikv.livenessProbe.successThreshold Success threshold for livenessProbe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 3
+    periodSeconds: 600
+    timeoutSeconds: 10
+    failureThreshold: 5
+    successThreshold: 1
+    httpGet:
+      path: /status
+      port: 20180
+  ## @param tikv.readinessProbe.enabled Enable readinessProbe on tikv containers
+  ## @param tikv.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+  ## @param tikv.readinessProbe.periodSeconds Period seconds for readinessProbe
+  ## @param tikv.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+  ## @param tikv.readinessProbe.failureThreshold Failure threshold for readinessProbe
+  ## @param tikv.readinessProbe.successThreshold Success threshold for readinessProbe
+  ## note: podman not support readinessProbe currently
+  ##
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param tikv.startupProbe.enabled Enable startupProbe on tikv containers
+  ## @param tikv.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+  ## @param tikv.startupProbe.periodSeconds Period seconds for startupProbe
+  ## @param tikv.startupProbe.timeoutSeconds Timeout seconds for startupProbe
+  ## @param tikv.startupProbe.failureThreshold Failure threshold for startupProbe
+  ## @param tikv.startupProbe.successThreshold Success threshold for startupProbe
+  ##
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: foo
+    periodSeconds: bar
+    timeoutSeconds: foo
+    failureThreshold: bar
+    successThreshold: foo
+  ## @param tikv.customLivenessProbe Custom livenessProbe that overrides the default one
+  ##
+  customLivenessProbe: {}
+  ## @param tikv.customReadinessProbe Custom readinessProbe that overrides the default one
+  ##
+  customReadinessProbe: {}
+  ## @param tikv.customStartupProbe Custom startupProbe that overrides the default one
+  ##
+  customStartupProbe: {}
+  ## tikv resource requests and limits
+  ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  ## @param tikv.resourcesPreset Set tikv container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if tikv.resources is set (tikv.resources is recommended for production).
+  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+  ##
+  resourcesPreset: "nano"
+  ## @param tikv.resources Set tikv container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Example:
+  ## resources:
+  ##   requests:
+  ##     cpu: 2
+  ##     memory: 512Mi
+  ##   limits:
+  ##     cpu: 3
+  ##     memory: 1024Mi
+  ##
+  resources: {}
+  ## Configure Pods Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+  ## @param tikv.podSecurityContext.enabled Enabled tikv pods' Security Context
+  ## @param tikv.podSecurityContext.fsGroup Set tikv pod's Security Context fsGroup
+  ## note: podman kube play does not support fsGroup yet
+  ##
+  podSecurityContext:
+    enabled: false
+    # fsGroup: 1001
+  ## Configure Container Security Context
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+  ## @param tikv.containerSecurityContext.enabled Enabled tikv containers' Security Context
+  ## @param tikv.containerSecurityContext.runAsUser Set tikv containers' Security Context runAsUser
+  ## @param tikv.containerSecurityContext.runAsNonRoot Set tikv containers' Security Context runAsNonRoot
+  ## @param tikv.containerSecurityContext.readOnlyRootFilesystem Set tikv containers' Security Context runAsNonRoot
+  ##
+  containerSecurityContext:
+    enabled: false
+    runAsUser: 1001
+    runAsNonRoot: true
+    readOnlyRootFilesystem: false
+
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_CONTAINER/POD%%
+
+  ## @param tikv.configFile tikv config file An PD configuration file place in /etc/pd/config.toml
+  ## the config file will pass to PD workload by args --config-file /etc/pd/config.toml
+  ## ref:
+  ##  https://github.com/tikv/tikv/blob/v8.5.6/etc/config-template.toml
+  ##
+  configFile:
+    log:
+      ## @param tikv.configFile.log. Log levels: debug, info, warn, error, fatal.
+      ## Note that `debug` is only available in development builds.
+      ##
+      level: "info"
+      ## @param tikv.configFile.log.format Log format, one of json, text.
+      ## Default to text.
+      ##
+      format: "text"
+      file:
+        ## @param tikv.configFile.log.file.filename Log file name. Usually it is set through command line.
+        ##
+        filename: null
+        ## @param tikv.configFile.log.file.max-size Max log file size in MB (upper limit to 4096MB)
+        ##
+        # max-size = 300
+        ## @param tikv.configFile.log.file.max-days Max log file keep days
+        ##
+        # max-days = 0
+        ## @param tikv.configFile.log.file.max-backups Maximum number of old log files to retain
+        ##
+        # max-backups = 0
+    pd:
+      ## @param tikv.configFile.pd.endpoint PD endpoint
+      ##
+      endpoints: ["127.0.0.1:2379"]
+    server:
+      ## @param tikv.configFile.server.addr Listening address
+      ##
+      addr: "127.0.0.1:20160"
+      ## @param tikv.configFile.server.advertise-addr Advertise listening address for client communication.
+      ## If not set, `addr` will be used.
+      ##
+      advertise-addr: null
+      ## @param tikv.configFile.server.status-addr This is used for reporting the status of TiKV directly through
+      ## the HTTP address. Notice that there is a risk of leaking status
+      ## information if this port is exposed to the public.
+      ## Empty string means disabling it.
+      ##
+      status-addr: "127.0.0.1:20180"
+    storage:
+      ## @param tikv.configFile.storage.data-dir The path to RocksDB directory.
+      ##
+      data-dir: "/data"
+      ## @param tikv.configFile.storage.engine ## Specifies the engine type. This configuration can only be specified when creating a new cluster
+      ## and cannot be modifies once being specified.
+      ## Available types are:
+      ## "raft-kv": The default engine type in versions earlier than TiDB v6.6.0.
+      ## "partitioned-raft-kv": The new storage engine type introduced in TiDB v6.6.0.
+      ##
+      engine: "partitioned-raft-kv"
+  ## @param tikv.secret secret pass to the container
+  ##
+  secret:
+    ## @param tikv.secret.envVars secret content pass to container via environment variable
+    ## e.g.
+    ## envVars:
+    ##   SECRET_KEY1: secret_value1
+    ##   SECRET_KEY2: secret_value2
+    ##
+    envVars: {}
+    ## @param tikv.secret.tls secret setting of cert and key or whatever tls content will set in the container
+    ## @param tikv.secret.tls.mountPath secret mount path setting of cert and key or whatever tls content will set in the container
+    ##
+    tls:
+      mountPath: /etc/tikv/pki
+      ## @param tikv.secret.tls.contents secret content of cert and key or whatever tls content will set in the container
+      ## You can set the content key as whatever file name you like
+      ## But the tls set in configFile above must match with the settings here
+      ## key and certificate should start with -----BEGIN CERTIFICATE----- or -----BEGIN RSA PRIVATE KEY-----
+      ## e.g.
+      ## contents:
+      ##  ca.pem: ""
+      ##  server-1.pem: ""
+      ##  server-1-key.pem: ""
+      ##
+      contents: {}
+
+  ## @param tikv.existingConfigmap The name of an existing ConfigMap with your custom configuration for tikv
+  ##
+  existingConfigmap:
+  ## @param tikv.command Override default container command (useful when using custom images)
+  ##
+  command: []
+  ## @param tikv.args Override default container args (useful when using custom images)
+  ##
+  args: []
+  ## @param tikv.automountServiceAccountToken Mount Service Account token in tikv pods
+  ##
+  automountServiceAccountToken: false
+  ## @param tikv.hostAliases tikv pods host aliases
+  ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+  ##
+  hostAliases: []
+  ## @param tikv.deploymentAnnotations Annotations for tikv deployment
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  deploymentAnnotations: {}
+  ## @param tikv.podLabels Extra labels for tikv pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  ##
+  podLabels: {}
+  ## @param tikv.podAnnotations Annotations for tikv pods
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  ##
+  podAnnotations: {}
+  ## @param tikv.podAffinityPreset Pod affinity preset. Ignored if `tikv.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAffinityPreset: ""
+  ## @param tikv.podAntiAffinityPreset Pod anti-affinity preset. Ignored if `tikv.affinity` is set. Allowed values: `soft` or `hard`
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+  ##
+  podAntiAffinityPreset: soft
+  ## Node tikv.affinity preset
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+  ##
+  nodeAffinityPreset:
+    ## @param tikv.nodeAffinityPreset.type Node affinity preset type. Ignored if `tikv.affinity` is set. Allowed values: `soft` or `hard`
+    ##
+    type: ""
+    ## @param tikv.nodeAffinityPreset.key Node label key to match. Ignored if `tikv.affinity` is set
+    ##
+    key: ""
+    ## @param tikv.nodeAffinityPreset.values Node label values to match. Ignored if `tikv.affinity` is set
+    ## E.g.
+    ## values:
+    ##   - e2e-az1
+    ##   - e2e-az2
+    ##
+    values: []
+  ## @param tikv.affinity Affinity for tikv pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ## NOTE: `tikv.podAffinityPreset`, `tikv.podAntiAffinityPreset`, and `tikv.nodeAffinityPreset` will be ignored when it's set
+  ##
+  affinity: {}
+  ## @param tikv.nodeSelector Node labels for tikv pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+  ##
+  nodeSelector: {}
+  ## @param tikv.tolerations Tolerations for tikv pods assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+  ## ONLY FOR DEPLOYMENTS:
+  ## @param tikv.updateStrategy.type tikv deployment strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  ## ONLY FOR STATEFULSETS:
+  ## @param tikv.updateStrategy.type tikv statefulset strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+  ##
+  updateStrategy:
+    ## ONLY FOR DEPLOYMENTS:
+    ## Can be set to RollingUpdate or Recreate
+    ## ONLY FOR STATEFULSETS:
+    ## Can be set to RollingUpdate or OnDelete
+    ##
+    type: RollingUpdate
+  ## @param tikv.priorityClassName tikv pods' priorityClassName
+  ##
+  priorityClassName: ""
+  ## @param tikv.topologySpreadConstraints Topology Spread Constraints for tikv pod assignment spread across your cluster among failure-domains
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+  ##
+  topologySpreadConstraints: []
+  ## @param tikv.schedulerName Name of the k8s scheduler (other than default) for tikv pods
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  schedulerName: ""
+  ## @param tikv.terminationGracePeriodSeconds Seconds tikv pods need to terminate gracefully
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+  ##
+  terminationGracePeriodSeconds: ""
+  ## @param tikv.lifecycleHooks for tikv containers to automate configuration before or after startup
+  ##
+  lifecycleHooks: {}
+  ## @param tikv.extraEnvVars Array with extra environment variables to add to tikv containers
+  ## e.g:
+  ## extraEnvVars:
+  ##   - name: FOO
+  ##     value: "bar"
+  ##
+  extraEnvVars: []
+  ## @param tikv.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for tikv containers
+  ##
+  extraEnvVarsCM: ""
+  ## @param tikv.extraEnvVarsSecret Name of existing Secret containing extra env vars for tikv containers
+  ##
+  extraEnvVarsSecret: ""
+  ## @param tikv.extraVolumes Optionally specify extra list of additional volumes for the tikv pods
+  ##
+  extraVolumes: []
+  ## @param tikv.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the tikv containers
+  ##
+  extraVolumeMounts: []
+  ## @param tikv.sidecars Add additional sidecar containers to the tikv pods
+  ## e.g:
+  ## sidecars:
+  ##   - name: your-image-name
+  ##     image: your-image
+  ##     imagePullPolicy: Always
+  ##     ports:
+  ##       - name: portname
+  ##         containerPort: 1234
+  ##
+  sidecars: []
+  ## @param tikv.initContainers Add additional init containers to the tikv pods
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## e.g:
+  ## initContainers:
+  ##  - name: your-image-name
+  ##    image: your-image
+  ##    imagePullPolicy: Always
+  ##    command: ['sh', '-c', 'echo "hello world"']
+  ##
+  initContainers: []
+
+## @section Persistence Parameters
+##
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable persistence using Persistent Volume Claims
+  ##
+  enabled: true
+  ## @param persistence.mountPath Path to mount the volume at.
+  ##
+  mountPath: /bitnami/tikv/data
+  ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
+  ##
+  subPath: ""
+  ## @param persistence.storageClass Storage class of backing PVC
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.annotations Persistent Volume Claim annotations
+  ##
+  annotations: {}
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## @param persistence.size Size of data volume
+  ##
+  size: 8Gi
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
+  ## @param persistence.existingClaim The name of an existing PVC to use for persistence
+  ##
+  existingClaim: ""
+  ## @param persistence.selector Selector to match an existing Persistent Volume for tikv data PVC
+  ## If set, the PVC can't have a PV dynamically provisioned for it
+  ## E.g.
+  ## selector:
+  ##   matchLabels:
+  ##     app: my-app
+  ##
+  selector: {}
+## @section Init Container Parameters
+##
+
+## @section Default init containers Parameters
+
+defaultInitContainers:
+  ## 'volume-permissions' init container
+  ## Changes the owner and group of the persistent volume mount(s) point(s) to runAsUser:fsGroup values
+  ##   based on the *podSecurityContext/*containerSecurityContext parameters
+  ##
+  volumePermissions:
+    ## @param defaultInitContainers.volumePermissions.enabled Enable init container that adapts the owner/group of the PV mount(s) point(s)
+    ##
+    enabled: false
+    ## OS Shell + Utility image
+    ## ref: https://hub.docker.com/r/bitnami/os-shell
+    ## @param defaultInitContainers.volumePermissions.image.registry [default: REGISTRY_NAME] "volume-permissions" init-containers' image registry
+    ## @param defaultInitContainers.volumePermissions.image.repository [default: REPOSITORY_NAME/os-shell] "volume-permissions" init-containers' image repository
+    ## @skip defaultInitContainers.volumePermissions.image.tag "volume-permissions" init-containers' image tag (immutable tags are recommended)
+    ## @param defaultInitContainers.volumePermissions.image.digest "volume-permissions" init-containers' image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
+    ## @param defaultInitContainers.volumePermissions.image.pullPolicy "volume-permissions" init-containers' image pull policy
+    ## @param defaultInitContainers.volumePermissions.image.pullSecrets "volume-permissions" init-containers' image pull secrets
+    ##
+    image:
+      registry: docker.io
+      repository: bitnami/os-shell
+      tag: 12-debian-12-r46
+      digest: ""
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets.
+      ## Secrets must be manually created in the namespace.
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## Example:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+    ## Configure "volume-permissions" init-container Security Context
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.enabled Enabled "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.runAsUser Set runAsUser in "volume-permissions" init-containers' Security Context
+    ## NOTE: when runAsUser is set to special value "auto", init container will try to chown the
+    ##   data folder to auto-determined user&group, using commands: `id -u`:`id -G | cut -d" " -f2`
+    ##   "auto" is especially useful for OpenShift which has scc with dynamic user ids (and 0 is not allowed)
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.privileged Set privileged in "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.allowPrivilegeEscalation Set allowPrivilegeEscalation in "volume-permissions" init-containers' Security Context
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.capabilities.add List of capabilities to be added in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.capabilities.drop List of capabilities to be dropped in "volume-permissions" init-containers
+    ## @param defaultInitContainers.volumePermissions.containerSecurityContext.seccompProfile.type Set seccomp profile in "volume-permissions" init-containers
+    ##
+    containerSecurityContext:
+      enabled: true
+      seLinuxOptions: {}
+      runAsUser: 0
+      privileged: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        add: []
+        drop: ["ALL"]
+      seccompProfile:
+        type: "RuntimeDefault"
+    ## "volume-permissions" init container resource requests and limits
+    ## ref: http://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ## @param defaultInitContainers.volumePermissions.resourcesPreset Set "volume-permissions" init container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if defaultInitContainers.volumePermissions.resources is set (defaultInitContainers.volumePermissions.resources is recommended for production).
+    ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+    ##
+    resourcesPreset: "nano"
+    ## @param defaultInitContainers.volumePermissions.resources Set "volume-permissions" init container requests and limits for different resources like CPU or memory (essential for production workloads)
+    ## E.g:
+    ## resources:
+    ##   requests:
+    ##     cpu: 2
+    ##     memory: 512Mi
+    ##   limits:
+    ##     cpu: 3
+    ##     memory: 1024Mi
+    ##
+    resources: {}
+
+## @section Other Parameters
+##
+
+## ServiceAccount configuration
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+##
+serviceAccount:
+  ## @param serviceAccount.name The name of the ServiceAccount to use.
+  ## If not set and create is true, a name is generated using the common.names.fullname template
+  ##
+  name: ""
+
+## %%SUBCHART_CONTAINER/POD_DESCRIPTION%%
+##
+# %%SUBCHART_NAME%%:
+SUBCHART_NAME:
+  enabled: false
+  # %%OTHER_PARAMETERS_RELATED_TO_THIS_SUBCHART%%
