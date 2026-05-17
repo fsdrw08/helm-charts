@@ -230,7 +230,7 @@ etcd:
   ## the config file will pass to etcd workload by args --config-file /etc/etcd/etcd.config.yml
   ## ref:
   ##  https://etcd.io/docs/v3.6/op-guide/configuration/
-  ##  https://github.com/etcd-io/etcd/blob/main/etcd.conf.yml.sample
+  ##  https://github.com/etcd-io/etcd/blob/v3.6.11/etcd.conf.yml.sample
   ##
   configFile:
     ## Member
