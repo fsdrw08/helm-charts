@@ -1,0 +1,5 @@
+{{- if .Values.pd.pod.enabled -}}
+apiVersion: v1
+kind: Pod
+{{ template "pd.podTemplate" . }}
+{{- end }}
