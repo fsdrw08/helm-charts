@@ -366,7 +366,8 @@ etcd:
     ## @param etcd.configFile.auto-compaction-retention Auto compaction retention length. 0 means disable auto compaction.
     ##
     auto-compaction-retention: "1"
-    ## @param etcd.configFile.auto-compaction-mode Interpret 'auto-compaction-retention' one of: periodic|revision. 'periodic' for duration based retention, defaulting to hours if no time unit is provided (e.g. '5m'). 'revision' for revision number based retention.
+    ## @param etcd.configFile.auto-compaction-mode Interpret 'auto-compaction-retention' one of: periodic|revision.
+    ## 'periodic' for duration based retention, defaulting to hours if no time unit is provided (e.g. '5m'). 'revision' for revision number based retention.
     ##
     auto-compaction-mode: periodic
     ## @param etcd.configFile.enable-v2 Accept etcd V2 client requests. Deprecated and to be decommissioned in v3.6.
@@ -498,7 +499,7 @@ etcd:
     logger: zap
     ## @param etcd.configFile.log-outputs Specify 'stdout' or 'stderr' to skip journald logging even when running under systemd, or list of comma separated output targets.
     ##
-    log-outputs: [ stderr ]
+    log-outputs: [stderr]
     ## @param etcd.configFile.log-level Configures log level. Only supports debug, info, warn, error, panic, or fatal.
     ##
     log-level: info
@@ -808,7 +809,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: [ "ALL" ]
+        drop: ["ALL"]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits
