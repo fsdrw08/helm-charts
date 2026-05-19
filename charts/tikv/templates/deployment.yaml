@@ -3,27 +3,27 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if not .Values.%%MAIN_OBJECT_BLOCK%%.pod.enabled -}}
+{{- if not .Values.tikv.pod.enabled -}}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
   name: {{ template "common.names.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-    app.kubernetes.io/component: %%COMPONENT_NAME%%
-  {{- if or .Values.%%MAIN_OBJECT_BLOCK%%.deploymentAnnotations .Values.commonAnnotations }}
-  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.%%MAIN_OBJECT_BLOCK%%.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
+    app.kubernetes.io/component: tikv
+  {{- if or .Values.tikv.deploymentAnnotations .Values.commonAnnotations }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.tikv.deploymentAnnotations .Values.commonAnnotations) "context" .) }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.%%MAIN_OBJECT_BLOCK%%.replicaCount }}
-  {{- if .Values.%%MAIN_OBJECT_BLOCK%%.updateStrategy }}
-  strategy: {{- toYaml .Values.%%MAIN_OBJECT_BLOCK%%.updateStrategy | nindent 4 }}
+  replicas: {{ .Values.tikv.replicaCount }}
+  {{- if .Values.tikv.updateStrategy }}
+  strategy: {{- toYaml .Values.tikv.updateStrategy | nindent 4 }}
   {{- end }}
-  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.%%MAIN_OBJECT_BLOCK%%.podLabels .Values.commonLabels) "context" .) }}
+  {{- $podLabels := include "common.tplvalues.merge" (dict "values" (list .Values.tikv.podLabels .Values.commonLabels) "context" .) }}
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
-      app.kubernetes.io/component: %%COMPONENT_NAME%%
+      app.kubernetes.io/component: tikv
   template:
-    {{- include "%%TEMPLATE_NAME%%.podTemplate" . | nindent 4 }}
+    {{- include "tikv.podTemplate" . | nindent 4 }}
 {{- end }}

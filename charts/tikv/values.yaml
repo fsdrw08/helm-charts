@@ -256,6 +256,18 @@ tikv:
       ## @param tikv.configFile.pd.endpoint PD endpoint
       ##
       endpoints: ["127.0.0.1:2379"]
+    rocksdb:
+      ## @param tikv.configFile.rocksdb.max-background-jobs Maximum number of threads of RocksDB background jobs.
+      ## The background tasks include compaction and flush. For detailed information why RocksDB needs to
+      ## do compaction, see RocksDB-related materials.
+      ## When write traffic (like the importing data size) is big, it is recommended to enable more
+      ## threads. But set the number of the enabled threads smaller than that of CPU cores. For example,
+      ## when importing data, for a machine with a 32-core CPU, set the value to 28.
+      ## The default value is set to 8 or CPU_NUM - 1, whichever is smaller.
+      ## !! this value should set outside of yaml file, e.g. set from helm cli --set command
+      ## !! otherwise, the helm toToml function will render number value to float type in yaml
+      ##
+      # max-background-jobs: 2
     server:
       ## @param tikv.configFile.server.addr Listening address
       ##
@@ -316,7 +328,9 @@ tikv:
   command: []
   ## @param tikv.args Override default container args (useful when using custom images)
   ##
-  args: []
+  args:
+    - "--config"
+    - "/etc/tikv/config.toml"
   ## @param tikv.automountServiceAccountToken Mount Service Account token in tikv pods
   ##
   automountServiceAccountToken: false
@@ -459,7 +473,7 @@ persistence:
   enabled: true
   ## @param persistence.mountPath Path to mount the volume at.
   ##
-  mountPath: /bitnami/tikv/data
+  mountPath: /data
   ## @param persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one PV for multiple services
   ##
   subPath: ""
