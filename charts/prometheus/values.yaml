@@ -88,7 +88,7 @@ prometheus:
   image:
     registry: quay.io
     repository: prometheus/prometheus
-    tag: v3.11.3
+    tag: v3.12.0
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -255,7 +255,7 @@ prometheus:
           scheme: http # defaults to 'http'.
 
           static_configs:
-            - targets: [ "localhost:9090" ]
+            - targets: ["localhost:9090"]
               # The label name is added as a label `label_name=<label_value>` to any timeseries scraped from this config.
               labels:
                 app: "prometheus"
@@ -754,7 +754,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: [ "ALL" ]
+        drop: ["ALL"]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits

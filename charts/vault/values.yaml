@@ -93,7 +93,7 @@ vault:
   image:
     registry: docker.io
     repository: hashicorp/vault
-    tag: 2.0.0
+    tag: 2.0.1
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -162,7 +162,7 @@ vault:
     failureThreshold: 3
     successThreshold: 1
     exec:
-      command: [ "/bin/sh", "-ec", "vault status -tls-skip-verify" ]
+      command: ["/bin/sh", "-ec", "vault status -tls-skip-verify"]
   ## @param vault.startupProbe.enabled Enable startupProbe on vault containers
   ## @param vault.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
   ## @param vault.startupProbe.periodSeconds Period seconds for startupProbe
@@ -214,7 +214,7 @@ vault:
     # fsGroup: 1001
   ## Configure Container Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-  ## ref: https://github.com/hashicorp/vault/blob/v2.0.0/Dockerfile
+  ## ref: https://github.com/hashicorp/vault/blob/v2.0.1/Dockerfile
   ## @param vault.containerSecurityContext.enabled Enabled vault containers' Security Context
   ## @param vault.containerSecurityContext.runAsUser Set vault containers' Security Context runAsUser
   ## @param vault.containerSecurityContext.runAsNonRoot Set vault containers' Security Context runAsNonRoot
@@ -246,7 +246,7 @@ vault:
       disable_mlock: true
       ## @param vault.configFiles.main.listener Configures how Vault is listening for API requests.
       ## https://developer.hashicorp.com/vault/docs/configuration/listener/tcp
-      ## https://github.com/hashicorp/vault/blob/v2.0.0/command/server/test-fixtures/config4.hcl.json#L6
+      ## https://github.com/hashicorp/vault/blob/v2.0.1/command/server/test-fixtures/config4.hcl.json#L6
       ## https://github.com/hashicorp/vault-helm/blob/main/values.yaml#L931
       ##
       listener:
@@ -412,7 +412,7 @@ vault:
   ##     value: "bar"
   ##
   extraEnvVars:
-    # https://github.com/hashicorp/vault/blob/v2.0.0/.release/docker/docker-entrypoint.sh
+    # https://github.com/hashicorp/vault/blob/v2.0.1/.release/docker/docker-entrypoint.sh
     # https://github.com/elihe2011/summary/blob/1603f477212f552a4c64ab8a0729539a52a1bd27/edgex/edgex/edgex_security/ok/02.edgex-vault.yaml#L64
     - name: SKIP_CHOWN
       value: "true"
@@ -514,7 +514,7 @@ vault:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
       capabilities:
-        drop: [ "ALL" ]
+        drop: ["ALL"]
       seccompProfile:
         type: "RuntimeDefault"
     ## @param vault.autoUnseal.env Array with environment variables to add to unseal container
@@ -609,7 +609,7 @@ defaultInitContainers:
     image:
       registry: docker.io
       repository: hashicorp/vault
-      tag: 2.0.0
+      tag: 2.0.1
       digest: ""
       pullPolicy: IfNotPresent
       ## Optionally specify an array of imagePullSecrets.
@@ -642,7 +642,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: [ "ALL" ]
+        drop: ["ALL"]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits

@@ -93,7 +93,7 @@ zot:
   image:
     registry: ghcr.io
     repository: project-zot/zot-linux-amd64
-    tag: v2.1.16
+    tag: v2.1.17
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -512,7 +512,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: [ "ALL" ]
+        drop: ["ALL"]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits
