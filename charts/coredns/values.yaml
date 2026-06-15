@@ -93,7 +93,7 @@ coredns:
   image:
     registry: docker.io
     repository: coredns/coredns
-    tag: 1.14.3
+    tag: 1.14.4
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -549,7 +549,7 @@ defaultInitContainers:
       allowPrivilegeEscalation: false
       capabilities:
         add: []
-        drop: [ "ALL" ]
+        drop: ["ALL"]
       seccompProfile:
         type: "RuntimeDefault"
     ## "volume-permissions" init container resource requests and limits

@@ -88,7 +88,7 @@ etcd:
   image:
     registry: quay.io
     repository: coreos/etcd
-    tag: v3.6.11
+    tag: v3.6.12
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -230,7 +230,7 @@ etcd:
   ## the config file will pass to etcd workload by args --config-file /etc/etcd/etcd.config.yml
   ## ref:
   ##  https://etcd.io/docs/v3.6/op-guide/configuration/
-  ##  https://github.com/etcd-io/etcd/blob/v3.6.11/etcd.conf.yml.sample
+  ##  https://github.com/etcd-io/etcd/blob/v3.6.12/etcd.conf.yml.sample
   ##
   configFile:
     ## Member
