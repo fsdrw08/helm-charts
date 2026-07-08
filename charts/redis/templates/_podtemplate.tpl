@@ -133,6 +133,10 @@ spec:
         - name: secret-tls
           mountPath: {{ .Values.redis.secret.tls.mountPath }}
         {{- end }}
+        {{- if .Values.redis.secret.others.contents }}
+        - name: secret-others
+          mountPath: {{ .Values.redis.secret.others.mountPath }}
+        {{- end }}
         - name: data
           mountPath: {{ .Values.persistence.mountPath }}
           {{- if .Values.persistence.subPath }}
@@ -148,6 +152,16 @@ spec:
     - name: config
       configMap:
         name: {{ template "common.names.fullname" . }}-cm
+    {{- if .Values.redis.secret.tls.contents }}
+    - name: secret-tls
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-tls
+    {{- end }}
+    {{- if .Values.redis.secret.others.contents }}
+    - name: secret-others
+      secret:
+        secretName: {{ template "common.names.fullname" . }}-sec-others
+    {{- end }}
     - name: data
     {{- if .Values.persistence.enabled }}
       persistentVolumeClaim:
