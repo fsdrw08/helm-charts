@@ -269,7 +269,7 @@ exporter:
     collector:
       ## @param exporter.flags.collector.cache_duration Duration (seconds) to retrieve container, size and refresh the cache. (default 3600)
       ##
-      cache_duration: 3600
+      cache-duration: 1h0m0s
       ## @param exporter.flags.collector.enable-all Enable all collectors by default.
       ##
       enable-all: true
